@@ -1,0 +1,27 @@
+{
+  "purpose": "Recursos locals ficticis de demostració per a la tasca #77.",
+  "reference": "Imagen de Codex 24 sept 2026, 14_33_27.png",
+  "method": "Built-in image_gen; fotografies recreades a partir del mockup, exportades com a JPEG i reduïdes per a la UI mòbil.",
+  "assets": [
+    {
+      "path": "assets/images/jazz_al_parc.jpg",
+      "maxEdge": 768,
+      "prompt": "Use case: identity-preserve. Asset type: standalone photographic Flutter demo asset extracted from the provided approved mobile mockup. Input image 1 is the edit target. Extract the photograph on the LEFT of the FIRST event card, Jazz al parc: dark-haired saxophonist, double bassist and drummer performing in a leafy green park, seated audience in foreground. The request is to isolate the existing image, not redesign the UI or invent a new scene. Preserve the pictured subjects, camera viewpoint, lighting, background and composition as faithfully as possible. Output ONLY that photograph, filling the frame edge to edge, with plain rectangular boundaries (square for the portrait), no rounded card corners, no phone UI, no text, no logo, no border, no padding, no collage, no other event photographs. For event photos keep a landscape aspect ratio close to 1.17:1 as in the screenshot. Do not show any part of the original interface."
+    },
+    {
+      "path": "assets/images/mirades_de_catalunya.jpg",
+      "maxEdge": 768,
+      "prompt": "Use case: identity-preserve. Asset type: standalone photographic Flutter demo asset extracted from the provided approved mobile mockup. Input image 1 is the edit target. Extract the photograph on the LEFT of the SECOND event card, Mirades de Catalunya: warmly lit museum gallery, framed portraits on white walls, woman in dark clothes viewed from behind. The request is to isolate the existing image, not redesign the UI or invent a new scene. Preserve the pictured subjects, camera viewpoint, lighting, background and composition as faithfully as possible. Output ONLY that photograph, filling the frame edge to edge, with plain rectangular boundaries (square for the portrait), no rounded card corners, no phone UI, no text, no logo, no border, no padding, no collage, no other event photographs. For event photos keep a landscape aspect ratio close to 1.17:1 as in the screenshot. Do not show any part of the original interface."
+    },
+    {
+      "path": "assets/images/teatre_sota_les_estrelles.jpg",
+      "maxEdge": 768,
+      "prompt": "Use case: identity-preserve. Asset type: standalone photographic Flutter demo asset extracted from the provided approved mobile mockup. Input image 1 is the edit target. Extract the photograph on the LEFT of the THIRD event card, Teatre sota les estrelles: stone outdoor theatre stage in warm amber light, evening blue sky and seated audience. The request is to isolate the existing image, not redesign the UI or invent a new scene. Preserve the pictured subjects, camera viewpoint, lighting, background and composition as faithfully as possible. Output ONLY that photograph, filling the frame edge to edge, with plain rectangular boundaries (square for the portrait), no rounded card corners, no phone UI, no text, no logo, no border, no padding, no collage, no other event photographs. For event photos keep a landscape aspect ratio close to 1.17:1 as in the screenshot. Do not show any part of the original interface."
+    },
+    {
+      "path": "assets/images/laia_soler.jpg",
+      "maxEdge": 256,
+      "prompt": "Use case: identity-preserve. Asset type: standalone photographic Flutter demo asset extracted from the provided approved mobile mockup. Input image 1 is the edit target. Extract ONLY the small circular portrait beside Publicat per Laia Soler in the THIRD card: smiling woman with shoulder-length brown hair and dark shirt on a neutral background. Produce a square headshot of that same fictitious woman, suitable for circular clipping in Flutter. The request is to isolate the existing image, not redesign the UI or invent a new scene. Preserve the pictured subjects, camera viewpoint, lighting, background and composition as faithfully as possible. Output ONLY that photograph, filling the frame edge to edge, with plain rectangular boundaries (square for the portrait), no rounded card corners, no phone UI, no text, no logo, no border, no padding, no collage, no other event photographs. For event photos keep a landscape aspect ratio close to 1.17:1 as in the screenshot. Do not show any part of the original interface."
+    }
+  ]
+}
