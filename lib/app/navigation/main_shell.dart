@@ -3,9 +3,13 @@ import 'package:flutter/material.dart';
 import '../../features/activities/data/demo_activity_repository.dart';
 import '../../features/activities/presentation/screens/activities_screen.dart';
 import '../../features/activities/presentation/view_models/activities_view_model.dart';
+import '../../features/auth/models/app_user.dart';
 
 class MainShell extends StatefulWidget {
-  const MainShell({super.key});
+  const MainShell({super.key, required this.user, required this.onSignOut});
+
+  final AppUser user;
+  final VoidCallback onSignOut;
 
   @override
   State<MainShell> createState() => _MainShellState();
@@ -58,7 +62,7 @@ class _MainShellState extends State<MainShell> {
             const Center(child: Text('Els teus plans culturals')),
             const Center(child: Text('Troba el teu pròxim pla')),
             const Center(child: Text('Els teus avisos')),
-            const Center(child: Text('El teu perfil')),
+            _ProfilePlaceholder(user: widget.user, onSignOut: widget.onSignOut),
           ],
         ),
       ),
@@ -93,6 +97,50 @@ class _MainShellState extends State<MainShell> {
             label: 'Perfil',
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Perfil provisional fins que hi hagi la funcionalitat de perfil: mostra qui
+/// ha iniciat la sessió i permet tancar-la.
+class _ProfilePlaceholder extends StatelessWidget {
+  const _ProfilePlaceholder({required this.user, required this.onSignOut});
+
+  final AppUser user;
+  final VoidCallback onSignOut;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final username = user.username;
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('El teu perfil'),
+            const SizedBox(height: 16),
+            Text(
+              '${user.firstName} ${user.lastName}',
+              style: theme.textTheme.titleLarge,
+              textAlign: TextAlign.center,
+            ),
+            if (username != null)
+              Text(
+                '@$username',
+                style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
+              ),
+            const SizedBox(height: 24),
+            OutlinedButton.icon(
+              onPressed: onSignOut,
+              icon: const Icon(Icons.logout),
+              label: const Text('Tanca la sessió'),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 
-import 'navigation/main_shell.dart';
+import '../features/auth/repositories/auth_repository.dart';
+import 'navigation/auth_gate.dart';
 import 'theme/app_theme.dart';
 
 class APropApp extends StatelessWidget {
-  const APropApp({super.key});
+  const APropApp({super.key, required this.authRepository});
+
+  final AuthRepository authRepository;
 
   @override
   Widget build(BuildContext context) {
@@ -12,7 +15,7 @@ class APropApp extends StatelessWidget {
       title: 'AProp!',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
-      home: const MainShell(), //pantalla inicial de la aplicación, que contiene la navegación principal y las diferentes secciones de la app.
+      home: AuthGate(authRepository: authRepository), //pantalla inicial: AuthGate decide si mostrar el login o la navegación principal de la app según si hay sesión iniciada.
     );
   }
 }

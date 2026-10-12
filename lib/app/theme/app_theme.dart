@@ -37,6 +37,15 @@ class AppTheme {
       backgroundColor: cream,
       indicatorColor: selectedBackground,
     ),
+    inputDecorationTheme: InputDecorationThemeData(
+      filled: true,
+      fillColor: cardBackground,
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: const BorderSide(color: border),
+      ),
+    ),
   );
 }
 
