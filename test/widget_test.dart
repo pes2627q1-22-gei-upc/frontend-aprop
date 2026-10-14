@@ -2,6 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:aprop/app/aprop_app.dart';
+import 'package:aprop/features/auth/data/demo_auth_repository.dart';
+
+Future<APropApp> signedInApp() async {
+  final repository = DemoAuthRepository();
+  await repository.signIn(
+    usernameOrEmail: 'laia@aprop.cat',
+    password: 'Aprop2026!',
+  );
+  return APropApp(authRepository: repository);
+}
 
 void main() {
   testWidgets('Mostra les activitats de demostració', (tester) async {
@@ -9,7 +19,7 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
-    await tester.pumpWidget(const APropApp());
+    await tester.pumpWidget(await signedInApp());
     await tester.pumpAndSettle();
 
     expect(tester.takeException(), isNull);
@@ -33,7 +43,7 @@ void main() {
   });
 
   testWidgets('Permet anar a Agenda i tornar a la llista', (tester) async {
-    await tester.pumpWidget(const APropApp());
+    await tester.pumpWidget(await signedInApp());
     await tester.pumpAndSettle();
 
     await tester.tap(find.widgetWithText(NavigationDestination, 'Agenda'));

@@ -4,7 +4,9 @@ Aplicació mòbil per descobrir i planificar activitats culturals a Catalunya. P
 
 ## Estat actual
 
-Base Flutter amb tema compartit i navegació inferior entre Inici, Agenda, Descobreix, Avisos i Perfil. Inici mostra una capçalera fixa amb el logotip, els controls i la vista «Llista» seleccionada, seguida d'una llista desplaçable d'activitats de demostració. Inclou estats de càrrega, error amb reintent i llista buida. Les altres quatre seccions encara mostren textos provisionals.
+Base Flutter amb tema compartit, accés amb compte i navegació inferior entre Inici, Agenda, Descobreix, Avisos i Perfil. L'aplicació s'obre amb l'inici de sessió, que accepta el nom d'usuari o el correu, i permet crear un compte. Un cop dins, Inici mostra una capçalera fixa amb el logotip, els controls i la vista «Llista» seleccionada, seguida d'una llista desplaçable d'activitats de demostració. Inclou estats de càrrega, error amb reintent i llista buida. Perfil mostra provisionalment qui ha iniciat la sessió i el botó per tancar-la; Agenda, Descobreix i Avisos encara mostren textos provisionals.
+
+L'accés funciona amb comptes de demostració en memòria, que es perden en tancar l'aplicació. Per provar-lo, entra amb `laiasoler` o `laia@aprop.cat` i la contrasenya `Aprop2026!`, o crea un compte nou. Firebase, l'alta de l'usuari al backend i l'accés amb Google estan pendents; el botó de Google es mostra desactivat.
 
 Els controls de localització, dates, categories, mapa i assistent estan desactivats fins que implementem les seves accions; els tooltips indiquen que estaran disponibles properament. La tasca **#77 — Frontend llista d’esdeveniments** encara està en desenvolupament: el detall, les inscripcions i la integració amb el backend continuen pendents.
 
@@ -28,13 +30,17 @@ lib/
         screens/
         view_models/
         widgets/
+    auth/
+      (mateixes capes que activities/)
 assets/
   images/
   branding/
 test/
   widget_test.dart
+  app/
   features/
     activities/
+    auth/
 docs/
   architecture.md
 ```
