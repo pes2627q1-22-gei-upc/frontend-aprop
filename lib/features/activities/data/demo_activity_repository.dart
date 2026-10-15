@@ -11,6 +11,10 @@ class DemoActivityRepository implements ActivityRepository {
       startsAt: DateTime(2026, 9, 26, 19),
       imageAsset: 'assets/images/jazz_al_parc.jpg',
       source: ActivitySource.culturalAgenda,
+      description:
+          'Gaudeix d’una tarda de jazz en directe a l’aire lliure. '
+          'Una proposta per descobrir nous sons i compartir la música '
+          'en un entorn verd de Barcelona.',
     ),
     Activity(
       id: 'demo-exhibition',
@@ -20,6 +24,9 @@ class DemoActivityRepository implements ActivityRepository {
       startsAt: DateTime(2026, 9, 27, 10),
       imageAsset: 'assets/images/mirades_de_catalunya.jpg',
       source: ActivitySource.culturalAgenda,
+      description:
+          'Una proposta expositiva per descobrir perspectives diverses '
+          'sobre la cultura i el territori de Catalunya.',
     ),
     Activity(
       id: 'demo-theatre',
@@ -29,6 +36,10 @@ class DemoActivityRepository implements ActivityRepository {
       startsAt: DateTime(2026, 9, 27, 20),
       imageAsset: 'assets/images/teatre_sota_les_estrelles.jpg',
       source: ActivitySource.community,
+      description:
+          'Una proposta de teatre a l’aire lliure per gaudir d’una nit '
+          'de cultura a Tarragona. Comparteix l’experiència en un '
+          'entorn acollidor sota les estrelles.',
       creator: const ActivityCreator(
         name: 'Laia Soler',
         avatarAsset: 'assets/images/laia_soler.jpg',
@@ -40,5 +51,13 @@ class DemoActivityRepository implements ActivityRepository {
   @override
   Future<List<Activity>> getActivities() async {
     return _activities;
+  }
+
+  @override
+  Future<Activity?> getActivityById(String id) async {
+    for (final activity in _activities) {
+      if (activity.id == id) return activity;
+    }
+    return null;
   }
 }

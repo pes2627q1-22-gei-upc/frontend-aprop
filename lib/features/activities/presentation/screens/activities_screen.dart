@@ -5,9 +5,14 @@ import '../widgets/activities_header.dart';
 import '../widgets/activity_card.dart';
 
 class ActivitiesScreen extends StatelessWidget {
-  const ActivitiesScreen({super.key, required this.viewModel});
+  const ActivitiesScreen({
+    super.key,
+    required this.viewModel,
+    required this.onActivitySelected,
+  });
 
   final ActivitiesViewModel viewModel;
+  final ValueChanged<String> onActivitySelected;
 
   @override
   Widget build(BuildContext context) {
@@ -66,7 +71,11 @@ class ActivitiesScreen extends StatelessWidget {
           itemBuilder: (context, index) {
             final activity = activities[index];
 
-            return ActivityCard(key: ValueKey(activity.id), activity: activity);
+            return ActivityCard(
+              key: ValueKey(activity.id),
+              activity: activity,
+              onTap: () => onActivitySelected(activity.id),
+            );
           },
         );
       },
