@@ -1,0 +1,22 @@
+---
+description: "Convencions en editar codi Dart de l'app (lib/)."
+globs: lib/**/*.dart
+alwaysApply: false
+---
+<!-- GENERAT per scripts/ai/sync-ai-config.py des de .agents/rules/flutter.md. No l'editis: edita la font i torna'l a generar. -->
+
+# Codi Flutter (lib/)
+
+Complementa `AGENTS.md` (arquitectura MVVM i límits) amb el que cal recordar en tocar un fitxer:
+
+- **Tema:** colors, radis i tipografia només des de `AppTheme` / `Theme.of(context)`. Cap `Color(0x…)` fora de
+  `lib/app/theme/`. Si falta un token, afegeix-lo allà.
+- **Accessibilitat (WCAG 2.1 AA):** contrast ≥ 4,5:1 en text normal; àrees tàctils ≥ 48×48; `Semantics` o
+  `tooltip` als botons que només tenen icona; la UI no es pot trencar amb el text ampliat (`textScaler` 2.0).
+- **Estats:** cada pantalla amb dades remotes té càrrega, buit, error amb reintent i contingut.
+- **Cicle de vida:** qui crea un `ChangeNotifier`, `TextEditingController` o `StreamSubscription`, l'allibera a
+  `dispose`. Ignora les respostes que arribin després de `dispose`.
+- **Textos:** en català, to de proximitat i neutralitat. Sense «comprar» ni «reservar». Mentre no hi hagi
+  i18n, centralitza les cadenes repetides en una constant de la funcionalitat (vegeu la skill `i18n-textos`).
+- **Controls pendents:** es mostren desactivats; no simulis cap èxit.
+- Pantalla nova → skill `pantalla-flutter`.

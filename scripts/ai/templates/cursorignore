@@ -1,0 +1,32 @@
+# Fitxers que l'agent, Tab i Inline Edit de Cursor no han de llegir ni indexar.
+# Cursor ja ignora el que hi ha a .gitignore; aquí hi ha el que és versionat però no aporta context.
+# Atenció: no afecta les ordres de terminal (vegeu .cursor/hooks.json).
+# Instal·lació (Cursor no permet que l'agent escrigui aquest fitxer): cp scripts/ai/templates/cursorignore .cursorignore
+
+# Secrets
+**/.env
+**/.env.*
+!**/.env.example
+**/*.pem
+**/*.key
+**/id_rsa*
+**/credentials.json
+**/service-account*.json
+
+# Documents font pesats (el resum és a docs/ai/)
+docs/source/*.pdf
+docs/source/*.txt
+
+# Sortides generades per a una altra eina (Cursor fa servir .cursor/agents/)
+.agents/agents/
+
+# Binaris i recursos generats
+assets/**/*.png
+assets/**/*.jpg
+assets/**/*.jpeg
+android/app/src/main/res/mipmap-*/
+ios/Runner/Assets.xcassets/
+web/icons/
+web/favicon.png
+**/*.iml
+coverage/

@@ -1,0 +1,16 @@
+---
+trigger: glob
+globs: "docs/**/*.md, README.md, AGENTS.md"
+description: "Com escriure i mantenir la documentació del projecte i de la IA."
+---
+
+# Documentació
+
+- En català. Identificadors i noms de fitxer tal com són al codi.
+- **Una sola font:** si una dada ja existeix en un altre fitxer, enllaça-la; no la copiïs.
+  Ordre de veritat: codi > `docs/architecture.md` (client) > `docs/ai/*` > PDFs.
+- Els fitxers de `docs/ai/` comencen amb un bloc «Quan llegir-ho» de 3–5 línies.
+- El que no consti als PDFs ni al codi es marca `TODO(confirmar)`; no t'inventis dades del projecte.
+- `AGENTS.md` ha de tenir menys de 150 línies i és un prefix estable (memòria cau de prompts): edita'l només
+  quan canviï una regla, no per afegir-hi l'estat. L'estat va a `docs/ai/estat.md`.
+- Mida de context: `bash scripts/ai/context-size.sh`.
