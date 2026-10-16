@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:aprop/app/aprop_app.dart';
 import 'package:aprop/features/auth/data/demo_auth_repository.dart';
+import 'package:aprop/features/activities/presentation/widgets/activity_card.dart';
 
 Future<APropApp> signedInApp() async {
   final repository = DemoAuthRepository();
@@ -56,6 +57,54 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Jazz al parc').hitTestable(), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Opening details keeps navigation and restores the list', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(await signedInApp());
+    await tester.pumpAndSettle();
+
+    final list = find.byKey(const PageStorageKey<String>('activities-list'));
+    await tester.drag(list, const Offset(0, -500));
+    await tester.pumpAndSettle();
+    final scrollable = find.descendant(
+      of: list,
+      matching: find.byType(Scrollable),
+    );
+    final offset = tester.state<ScrollableState>(scrollable).position.pixels;
+
+    await tester.tap(
+      find.widgetWithText(ActivityCard, 'Teatre sota les estrelles'),
+    );
+    await tester.pumpAndSettle();
+    expect(find.widgetWithText(AppBar, 'Activitat'), findsOneWidget);
+    expect(find.text('Tarragona'), findsOneWidget);
+    expect(
+      tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex,
+      0,
+    );
+
+    await tester.tap(find.widgetWithText(NavigationDestination, 'Agenda'));
+    await tester.pumpAndSettle();
+    expect(find.widgetWithText(AppBar, 'Agenda'), findsOneWidget);
+    await tester.tap(find.widgetWithText(NavigationDestination, 'Inici'));
+    await tester.pumpAndSettle();
+    expect(find.widgetWithText(AppBar, 'Activitat'), findsOneWidget);
+
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    expect(find.widgetWithText(AppBar, 'Activitat'), findsNothing);
+    expect(tester.state<ScrollableState>(scrollable).position.pixels, offset);
+    expect(
+      find.text('Teatre sota les estrelles').hitTestable(),
+      findsOneWidget,
+    );
     expect(tester.takeException(), isNull);
   });
 }

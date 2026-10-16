@@ -10,6 +10,6 @@
 - Segueix els mockups aprovats i utilitza català en la interfície.
 - No incorporis paquets, endpoints, credencials ni funcionalitats fora de l’abast sense una necessitat concreta.
 - Crea carpetes de funcionalitats quan es comenci el seu desenvolupament. Conserva les carpetes inicials buides amb `.gitkeep` fins que tinguin fitxers reals.
-- La tasca actual de la llista és Taiga #77. No inventis IDs ni marquis una integració pendent com a completada.
+- The current task is Taiga #75, event details; #77 covers the list foundation. Use real task IDs and do not present pending backend integration as complete.
 - Per a canvis de codi Dart, comprova format, `flutter analyze` i les proves pertinents. Per a canvis només de carpetes o documentació, comprova l’estructura i que el codi existent es conserva; no afegeixis proves que no verifiquen comportament.
 - Indica sempre què has modificat i què has pogut verificar. Respecta el flux de branques, revisió i publicació autoritzat per l’usuari.

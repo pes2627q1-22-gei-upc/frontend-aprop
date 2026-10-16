@@ -30,9 +30,11 @@ La qualitat depèn de respectar les responsabilitats i revisar els canvis, no de
 
 `AuthGate` mostra `LoginScreen` si no hi ha sessió i `MainShell` si n'hi ha; el detall és a [Accés i sessió](#accés-i-sessió).
 
-`MainShell` rep l'usuari de la sessió i l'acció de tancar-la. Crea i allibera `ActivitiesViewModel`, li injecta `DemoActivityRepository` i inicia la càrrega. Mostra `ActivitiesScreen` a Inici i, provisionalment, l'usuari i el botó «Tanca la sessió» a Perfil; conserva els textos provisionals a les altres seccions. Manté la navegació inferior i mostra un AppBar només fora d'Inici.
+`MainShell` receives the signed-in user and sign-out action. It creates one `ActivityRepository` shared by the list and detail routes and owns `ActivitiesViewModel`. Each of the five sections has a nested `Navigator` inside the existing `IndexedStack`; the single bottom navigation bar remains outside those navigators. Section roots own their AppBars. `NavigatorPopHandler` sends system back actions only to the active section. Switching sections preserves each history; popping a detail reveals the original list and scroll position.
 
-`ActivitiesScreen` col·loca `ActivitiesHeader` sobre un `Expanded` amb el contingut desplaçable. El `ListenableBuilder` escolta el ViewModel i actualitza els estats de càrrega, error, buit o llista. La capçalera rep la vista seleccionada i callbacks opcionals; no consulta repositoris ni guarda filtres. Un callback nul desactiva l'acció pendent. `ActivitiesView` només identifica les dues vistes visuals; no és un model de negoci.
+`ActivitiesScreen` places `ActivitiesHeader` above the scrollable content. Its `ListenableBuilder` observes the list ViewModel. `ActivityCard` invokes a callback, the screen forwards the activity ID through `onActivitySelected`, and `MainShell` opens `activityDetailsRoute`. Features do not import app navigation. Header callbacks remain disabled until their features are implemented.
+
+`ActivityDetailsScreen` receives an activity ID and repository contract, creates and disposes `ActivityDetailsViewModel`, and renders its loading, error, not-found or loaded state. It reloads if its ID or repository changes. `ActivityRepository.getActivityById` returns null for a missing event and throws on a data-access failure. Detail loading does not depend on a previously loaded catalogue. The same entry point can be wired to Agenda, map, search or notifications through callbacks. See [the integration guide](activity-details.md).
 
 ## Flux de dades
 

@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import '../../features/activities/data/demo_activity_repository.dart';
 import '../../features/activities/presentation/screens/activities_screen.dart';
 import '../../features/activities/presentation/view_models/activities_view_model.dart';
+import '../../features/activities/repositories/activity_repository.dart';
 import '../../features/auth/models/app_user.dart';
+import 'activity_details_route.dart';
 
 class MainShell extends StatefulWidget {
   const MainShell({super.key, required this.user, required this.onSignOut});
@@ -17,6 +19,11 @@ class MainShell extends StatefulWidget {
 
 class _MainShellState extends State<MainShell> {
   int _selectedIndex = 0;
+  final _sectionNavigatorKeys = List.generate(
+    5,
+    (_) => GlobalKey<NavigatorState>(),
+  );
+  late final ActivityRepository _activityRepository;
   late final ActivitiesViewModel _activitiesViewModel;
 
   static const _titles = ['AProp!', 'Agenda', 'Descobreix', 'Avisos', 'Perfil'];
@@ -26,9 +33,8 @@ class _MainShellState extends State<MainShell> {
     //flutter llama porque es la pantalla inicial de la app. Se crea el ViewModel y se carga la lista de actividades.
     super.initState();
 
-    _activitiesViewModel = ActivitiesViewModel(
-      repository: DemoActivityRepository(),
-    );
+    _activityRepository = DemoActivityRepository();
+    _activitiesViewModel = ActivitiesViewModel(repository: _activityRepository);
 
     _activitiesViewModel.load(); //mientras espera ésto flutter dibuja un indicador de carga. Cuando termina, el ViewModel notifica a la pantalla y ésta se redibuja con la lista de actividades.
   }
@@ -47,22 +53,92 @@ class _MainShellState extends State<MainShell> {
     });
   }
 
+  void _openActivityDetails(String activityId) {
+    final navigator = _sectionNavigatorKeys[_selectedIndex].currentState!;
+    // The callback comes from a section root; ignore repeated taps in transit.
+    if (navigator.canPop()) return;
+    navigator.push<void>(
+      activityDetailsRoute(
+        activityId: activityId,
+        repository: _activityRepository,
+      ),
+    );
+  }
+
+  Widget _buildSectionNavigator(int index, WidgetBuilder rootBuilder) {
+    final key = _sectionNavigatorKeys[index];
+    return NavigatorPopHandler<void>(
+      enabled: _selectedIndex == index,
+      onPopWithResult: (_) {
+        if (_selectedIndex == index && (key.currentState?.canPop() ?? false)) {
+          key.currentState!.pop();
+        }
+      },
+      child: Navigator(
+        key: key,
+        onGenerateRoute: (settings) =>
+            MaterialPageRoute<void>(settings: settings, builder: rootBuilder),
+      ),
+    );
+  }
+
+  Widget _sectionRoot(int index, Widget child) {
+    return Scaffold(
+      appBar: index == 0
+          ? null
+          : AppBar(title: Text(_titles[index]), centerTitle: false),
+      body: child,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: _selectedIndex == 0
-          ? null
-          : AppBar(title: Text(_titles[_selectedIndex]), centerTitle: false),
       body: SafeArea(
+        bottom: false,
         child: IndexedStack(
           index: _selectedIndex,
           sizing: StackFit.expand,
           children: [
-            ActivitiesScreen(viewModel: _activitiesViewModel), //índice 0, pantalla de actividades. Se le pasa el ViewModel para que pueda acceder a la lista de actividades y al estado de carga. (asi se dibuja en pantalla la lista de actividades o el indicador de carga o el mensaje de error, esa  logica la lleva la screen)
-            const Center(child: Text('Els teus plans culturals')),
-            const Center(child: Text('Troba el teu pròxim pla')),
-            const Center(child: Text('Els teus avisos')),
-            _ProfilePlaceholder(user: widget.user, onSignOut: widget.onSignOut),
+            _buildSectionNavigator(
+              0,
+              (context) => _sectionRoot(
+                0,
+                ActivitiesScreen(
+                  viewModel: _activitiesViewModel,
+                  onActivitySelected: _openActivityDetails,
+                ),
+              ),
+            ),
+            _buildSectionNavigator(
+              1,
+              (context) => _sectionRoot(
+                1,
+                const Center(child: Text('Els teus plans culturals')),
+              ),
+            ),
+            _buildSectionNavigator(
+              2,
+              (context) => _sectionRoot(
+                2,
+                const Center(child: Text('Troba el teu pròxim pla')),
+              ),
+            ),
+            _buildSectionNavigator(
+              3,
+              (context) =>
+                  _sectionRoot(3, const Center(child: Text('Els teus avisos'))),
+            ),
+            _buildSectionNavigator(
+              4,
+              (context) => _sectionRoot(
+                4,
+                _ProfilePlaceholder(
+                  user: widget.user,
+                  onSignOut: widget.onSignOut,
+                ),
+              ),
+            ),
           ],
         ),
       ),

@@ -8,7 +8,11 @@ Base Flutter amb tema compartit, accés amb compte i navegació inferior entre I
 
 L'accés funciona amb comptes de demostració en memòria, que es perden en tancar l'aplicació. Per provar-lo, entra amb `laiasoler` o `laia@aprop.cat` i la contrasenya `Aprop2026!`, o crea un compte nou. Firebase, l'alta de l'usuari al backend i l'accés amb Google estan pendents; el botó de Google es mostra desactivat.
 
-Els controls de localització, dates, categories, mapa i assistent estan desactivats fins que implementem les seves accions; els tooltips indiquen que estaran disponibles properament. La tasca **#77 — Frontend llista d’esdeveniments** encara està en desenvolupament: el detall, les inscripcions i la integració amb el backend continuen pendents.
+Event details (**Taiga #75**) now open when an event card is tapped. The screen loads the selected event by ID, shows its description and source or creator, and handles loading, missing events and errors with retry. Bottom navigation remains available; each section keeps its navigation history and returning to the list preserves its scroll position.
+
+Location, date, category, map and assistant controls are still disabled. Enrollment, event chat, creator profile and original-source links are displayed as unavailable rather than simulating success. The catalogue and authentication still use demo repositories. Backend integration remains pending.
+
+See [the event details guide](docs/activity-details.md) for the implementation flow and the calendar integration contract.
 
 ## Estructura
 

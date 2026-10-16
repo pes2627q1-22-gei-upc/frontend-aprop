@@ -22,6 +22,7 @@ class Activity {
     required this.imageAsset,
     required this.source,
     this.creator,
+    this.description,
   });
 
   final String id;
@@ -32,4 +33,5 @@ class Activity {
   final String imageAsset;
   final ActivitySource source;
   final ActivityCreator? creator;
+  final String? description;
 }
