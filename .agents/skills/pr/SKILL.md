@@ -7,6 +7,6 @@ metadata:
 ---
 
 Aplica la skill `commit-i-pr`. Primer executa la verificació completa (format, anàlisi i proves) amb
-`bash scripts/ai/run-quiet.sh`, i passa el diff al subagent `vigilant-decisions`. Si alguna cosa falla, atura't i
+les ordres de verificació, i passa el diff al subagent `vigilant-decisions`. Si alguna cosa falla, atura't i
 informa'n. Llista a la descripció de la PR les DP que la PR obre o de què depèn. **No facis commit, push ni PR sense
 confirmació explícita.**

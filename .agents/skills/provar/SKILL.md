@@ -17,8 +17,8 @@ Si l'eina permet subagents, delega-ho al subagent `tester` amb el camí o el dif
 4. Executa:
 
 ```bash
-bash scripts/ai/run-quiet.sh flutter test <camins>
-bash scripts/ai/run-quiet.sh flutter test --coverage   # només si es demana cobertura
+flutter test <camins>
+flutter test --coverage   # només si es demana cobertura
 ```
 
 5. Si una prova falla per un bug del codi (no de la prova), **no canviïs el codi de producció** sense dir-ho:

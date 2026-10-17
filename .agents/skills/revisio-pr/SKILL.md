@@ -38,8 +38,8 @@ subagent `revisor` (o obre una sessió nova). La revisió humana continua sent o
 Executa (o demana els resultats de la CI):
 
 ```bash
-bash scripts/ai/run-quiet.sh flutter analyze
-bash scripts/ai/run-quiet.sh flutter test
+flutter analyze
+flutter test
 ```
 
 ## Sortida (format fix, ≤ 30 línies)

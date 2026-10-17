@@ -7,7 +7,7 @@ labels: bug
 
 **Issue de Taiga:** #<ID> · **Història relacionada:** #<ID>
 **Severitat:** crítica | alta | mitjana | baixa
-<!-- Crítica = afecta producció o la integritat de les dades → hotfix/ des de main -->
+<!-- Crítica = afecta producció o la integritat de les dades → hotfix/ des de master -->
 
 ## Passos per reproduir-lo
 

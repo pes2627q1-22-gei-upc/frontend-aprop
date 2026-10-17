@@ -13,4 +13,3 @@ description: "Com escriure i mantenir la documentació del projecte i de la IA."
 - El que no consti als PDFs ni al codi es marca `TODO(confirmar)`; no t'inventis dades del projecte.
 - `AGENTS.md` ha de tenir menys de 150 línies i és un prefix estable (memòria cau de prompts): edita'l només
   quan canviï una regla, no per afegir-hi l'estat. L'estat va a `docs/ai/estat.md`.
-- Mida de context: `bash scripts/ai/context-size.sh`.

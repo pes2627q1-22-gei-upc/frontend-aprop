@@ -64,7 +64,7 @@ restringides. Cal decidir-ho en un ADR quan s'integrin.
 ## Entorns i desplegament
 
 - Dos entorns, local i producció, tots dos amb Docker. `.env` local ignorat i `.env.example` versionat.
-- Release a `main` → GitHub Actions construeix la imatge → GHCR → desplegament a EC2. CI a cada PR
+- Release a `master` → GitHub Actions construeix la imatge → GHCR → desplegament a EC2. CI a cada PR
   (detall a `60-metodologia-i-qualitat.md`).
 - Reinici automàtic del servidor en cas de caiguda (objectiu de disponibilitat: 99 %).
 

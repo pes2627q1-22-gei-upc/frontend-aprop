@@ -12,7 +12,7 @@ metadata:
 ## 1. Comprovacions
 
 ```bash
-git branch --show-current          # no ha de ser master/main/develop
+git branch --show-current          # no ha de ser master/develop
 git status --short
 git diff --stat                    # què canvia
 ```
@@ -28,7 +28,7 @@ Tasca #<ID> <Títol exacte de la tasca a Taiga>: <què canvia, en català, ≤ 1
 
 - Demana l'ID i el títol si no són a `docs/ai/estat.md`.
 - La descripció diu **què** canvia de cara a qui revisa (no «canvis», ni «fix»).
-- Valida'l: `bash scripts/ai/check-commit-msg.sh "<missatge>"`.
+- Comprova que segueix el format `Tasca #<ID> <Títol>: <descripció>`.
 
 Mostra a l'usuari:
 
@@ -42,7 +42,7 @@ i espera'n la confirmació.
 
 ## 3. PR
 
-Base: `develop` (o `main` per a `hotfix/`). Títol = el mateix format que el commit principal.
+Base: `develop` (o `master` per a `hotfix/`). Títol = el mateix format que el commit principal.
 Cos: omple `.github/pull_request_template.md`:
 
 - Enllaç a Taiga: `https://tree.taiga.io/project/wenqiange-aprop/` + l'ID de la història o la tasca (`TODO(confirmar)` la ruta exacta).

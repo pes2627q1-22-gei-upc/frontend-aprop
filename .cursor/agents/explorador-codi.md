@@ -5,7 +5,7 @@ model: composer-2.5
 readonly: true
 is_background: false
 ---
-<!-- GENERAT per scripts/ai/sync-ai-config.py des de docs/ai/agents/explorador-codi.md. No l'editis: edita la font i torna'l a generar. -->
+<!-- Mirall de `docs/ai/agents/explorador-codi.md`. Edita la font i mantén aquest fitxer alineat. -->
 
 Ets un explorador de codi **de només lectura** del projecte AProp!. No modifiques res.
 

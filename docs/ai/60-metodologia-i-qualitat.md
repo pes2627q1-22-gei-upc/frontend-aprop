@@ -12,7 +12,7 @@
 - **Inici d'història:** revisar els criteris d'acceptació i crear `feature/<nom>` des de `develop`.
 - **Inici de tasca:** autoassignar-la a Taiga i marcar-la com a iniciada.
 - **Fi de tasca:** commits que referencien la tasca, PR cap a `develop`, CI, revisió i tancament amb les hores reals.
-- **Fi de sprint:** review i retrospectiva → merge de `develop` a `main` → tag → desplegament automàtic.
+- **Fi de sprint:** review i retrospectiva → merge de `develop` a `master` → tag → desplegament automàtic.
 - **PRT:** cada membre hi registra l'activitat i l'sprint master ho verifica. Error conegut: tasques de
   gestió del projecte amb Taiga marcades com a «Documentació» (vegeu la skill `sprint-report`).
 - **Comunicació:** WhatsApp (dia a dia), Discord (reunions en línia), classe (seguiment 2×/setmana),
@@ -20,10 +20,9 @@
 
 ## Gitflow
 
-- `main` (producció) i `develop` (integració): **protegides**. Sense commits directes, PR amb ≥ 1 aprovació i CI verd.
+- `master` (producció) i `develop` (integració): **protegides**. Sense commits directes, PR amb ≥ 1 aprovació i CI verd.
 - `feature/<nom>` des de `develop` → PR a `develop`, revisada per algú que **no** l'ha implementada.
-- `hotfix/<nom>` des de `main` → merge a `main` **i** a `develop`.
-- Nota: al repo del frontend la branca per defecte encara es diu `master`. Tracta-la com `main`.
+- `hotfix/<nom>` des de `master` → merge a `master` **i** a `develop`.
 
 ## Commits
 
@@ -32,9 +31,8 @@ Tasca #<ID> <Títol de la tasca>: <descripció concisa dels canvis>
 ```
 
 Exemple: `Tasca #42 Autenticació Google: Implementació de la validació de tokens JWT en el backend`.
-Validador: `scripts/ai/check-commit-msg.sh`.
 
-## Versionat (SemVer sobre `main`)
+## Versionat (SemVer sobre `master`)
 
 `vMAJOR.MINOR.PATCH`. **MAJOR:** canvis estructurals d'alt impacte, fites (MVP), migracions de components
 crítics o redisseny significatiu de la UI Flutter. **MINOR:** funcionalitat nova retrocompatible o
@@ -48,7 +46,7 @@ actualització de llibreries *deprecated*. **PATCH:** només correccions de bugs
 | Backend | `go test ./...` (cobertura) · `golangci-lint run` · `govulncheck ./...` · `docker build` |
 
 Estat: el frontend encara **no té workflow** i el `go.yml` del backend és incomplet (`TODO`, agent `devops-ci`).
-Desplegament: release a `main` → imatge → GHCR → EC2.
+Desplegament: release a `master` → imatge → GHCR → EC2.
 
 ## Definition of Done
 

@@ -7,7 +7,7 @@ subagent: true
 model: pro
 commandExecutionPolicy: "off"
 ---
-<!-- GENERAT per scripts/ai/sync-ai-config.py des de docs/ai/agents/arquitecte.md. No l'editis: edita la font i torna'l a generar. -->
+<!-- Mirall de `docs/ai/agents/arquitecte.md`. Edita la font i mantén aquest fitxer alineat. -->
 
 Ets l'arquitecte d'AProp!. **No escrius codi de producció**: proposes dissenys i contractes.
 

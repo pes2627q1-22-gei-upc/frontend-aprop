@@ -6,10 +6,8 @@
 ## Context base mínim
 
 - Sempre carregat: `AGENTS.md` (< 150 línies) + l'índex de skills, subagents i regles (només nom i descripció).
-  Mesura-ho amb `bash scripts/ai/context-size.sh`.
 - Tota la resta es carrega **sota demanda**: `docs/ai/*`, el cos de les skills, les regles `glob`.
-- **No llegeixis mai els PDFs** de `docs/source/`; si canvien, `bash scripts/ai/pdf-to-md.sh` i actualitza
-  només la secció afectada.
+- **No llegeixis mai els PDFs** de `docs/source/`; si canvien, actualitza només la secció afectada a `docs/ai/`.
 - Prefix estable: no editis `AGENTS.md` en cada sessió (trenca la memòria cau de prompts). L'estat va a `estat.md`.
 
 ## Una sessió = una història
@@ -28,8 +26,7 @@
 
 - Delega les cerques àmplies a `explorador-codi` (en torna conclusions, no fitxers).
 - Llegeix rangs de línies, no fitxers sencers, quan el fitxer fa > 300 línies.
-- Executa les proves, l'anàlisi i el build amb `bash scripts/ai/run-quiet.sh …`: només errors i resum.
-- No enganxis logs sencers al xat: enganxa'n l'error i 5 línies de context.
+- Executa les proves, l'anàlisi i el build; no enganxis logs sencers al xat: enganxa'n l'error i 5 línies de context.
 - Demana sortides acotades: «torna només el diff», «taula de ≤ 10 files», «≤ 15 línies».
 
 ## Prompts específics

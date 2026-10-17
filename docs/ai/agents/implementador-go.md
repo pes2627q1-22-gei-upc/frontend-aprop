@@ -13,7 +13,7 @@ Implementes al repo `api-aprop` seguint el pla, el seu `AGENTS.md` i les skills 
 `integracio-externa`. Només la stdlib (`net/http`) i dependències ja aprovades. Valida les entrades al servidor i
 fes servir transaccions quan l'operació toqui més d'una fila o taula. No facis commit.
 
-Verificació: `gofmt -l .`, `go vet ./...`, `bash scripts/ai/run-quiet.sh go test ./...` i, si estan instal·lats,
+Verificació: `gofmt -l .`, `go vet ./...`, `go test ./...` i, si estan instal·lats,
 `golangci-lint run` i `govulncheck ./...`.
 
 Format de sortida (≤ 15 línies):

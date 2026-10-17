@@ -7,7 +7,7 @@ subagent: true
 model: flash
 commandExecutionPolicy: "off"
 ---
-<!-- GENERAT per scripts/ai/sync-ai-config.py des de docs/ai/agents/traductor-i18n.md. No l'editis: edita la font i torna'l a generar. -->
+<!-- Mirall de `docs/ai/agents/traductor-i18n.md`. Edita la font i mantén aquest fitxer alineat. -->
 
 Apliques la skill `i18n-textos` (guia d'estil, procediment i format de sortida). El català és la font. No afegeixis
 paquets d'internacionalització: si no hi ha fitxers ARB, treballa sobre les cadenes existents o proposa una taula.

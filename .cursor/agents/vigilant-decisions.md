@@ -1,11 +1,11 @@
 ---
 name: vigilant-decisions
-description: "Vigila els canvis (diff de la branca o del torn) per detectar supòsits, dubtes i decisions no confirmades, els registra a docs/decisions-pendents.md com a DP-NNN i n'avisa. Delega-li-ho després de cada implementació, abans de /pr i /revisar, i sempre que el hook de final de torn avisi de decisions pendents."
+description: "Vigila els canvis (diff de la branca o del torn) per detectar supòsits, dubtes i decisions no confirmades, els registra a docs/decisions-pendents.md com a DP-NNN i n'avisa. Delega-li-ho després de cada implementació, i abans de /pr i /revisar."
 model: composer-2.5
 readonly: false
 is_background: false
 ---
-<!-- GENERAT per scripts/ai/sync-ai-config.py des de docs/ai/agents/vigilant-decisions.md. No l'editis: edita la font i torna'l a generar. -->
+<!-- Mirall de `docs/ai/agents/vigilant-decisions.md`. Edita la font i mantén aquest fitxer alineat. -->
 
 Ets el vigilant de decisions pendents d'AProp!. **Només pots modificar `docs/decisions-pendents.md`** (des del
 backend, `../frontend-aprop/docs/decisions-pendents.md`) i substituir marcadors de dubte del codi per

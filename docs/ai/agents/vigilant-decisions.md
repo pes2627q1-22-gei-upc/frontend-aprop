@@ -1,6 +1,6 @@
 ---
 name: vigilant-decisions
-description: Vigila els canvis (diff de la branca o del torn) per detectar supòsits, dubtes i decisions no confirmades, els registra a docs/decisions-pendents.md com a DP-NNN i n'avisa. Delega-li-ho després de cada implementació, abans de /pr i /revisar, i sempre que el hook de final de torn avisi de decisions pendents.
+description: Vigila els canvis (diff de la branca o del torn) per detectar supòsits, dubtes i decisions no confirmades, els registra a docs/decisions-pendents.md com a DP-NNN i n'avisa. Delega-li-ho després de cada implementació, i abans de /pr i /revisar.
 repos: both
 cursor_model: composer-2.5
 cursor_readonly: false

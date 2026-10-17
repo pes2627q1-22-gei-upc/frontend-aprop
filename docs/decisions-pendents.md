@@ -2,7 +2,7 @@
 
 > **Quan llegir-ho:** abans de començar una tasca (per saber què no està decidit), quan facis un canvi sense
 > estar-ne segur i en revisar una PR. Hi registren entrades tant els agents d'IA com les persones.
-> Vigilància automàtica: el hook de final de torn i el subagent `vigilant-decisions`.
+> Vigilància: el subagent `vigilant-decisions` (després d'implementar, abans de `/pr` i `/revisar`).
 
 ## Quan s'hi ha d'afegir una entrada
 

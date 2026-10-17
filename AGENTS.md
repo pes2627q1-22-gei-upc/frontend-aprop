@@ -38,7 +38,6 @@ dart format --output=none --set-exit-if-changed lib test
 flutter analyze
 flutter test                                          # o: flutter test test/features/<x>/<fitxer>_test.dart
 flutter build apk --debug                             # mateixa comprovació que la CI
-bash scripts/ai/run-quiet.sh flutter test             # mateixa ordre amb la sortida retallada (estalvia tokens)
 ```
 
 ## Arquitectura i codi
@@ -66,8 +65,8 @@ bash scripts/ai/run-quiet.sh flutter test             # mateixa ordre amb la sor
 
 ## Git
 
-- Gitflow: `master`/`main` i `develop` estan protegides. Treballa a `feature/<nom>` des de `develop` o a
-  `hotfix/<nom>` des de `main`. PR cap a `develop` amb ≥ 1 revisió d'algú que no l'ha implementada i CI verd.
+- Gitflow: `master` i `develop` estan protegides. Treballa a `feature/<nom>` des de `develop` o a
+  `hotfix/<nom>` des de `master`. PR cap a `develop` amb ≥ 1 revisió d'algú que no l'ha implementada i CI verd.
 - Commit: `Tasca #<ID> <Títol de la tasca>: <descripció concisa>`. Fes servir el número real de Taiga.
 - Prohibit: `push --force`, reescriure l'historial compartit, commits a branques protegides i versionar
   `.env` o claus.
@@ -81,7 +80,7 @@ fusionada a `develop` · documentació actualitzada · Taiga actualitzat (estat 
 
 - Accedir a la BD des de Flutter o posar claus d'API al client.
 - Afegir frameworks al backend Go (només `net/http`).
-- Fer commits directes a `master`, `main` o `develop`, o fer commits sense revisió humana.
+- Fer commits directes a `master` o `develop`, o fer commits sense revisió humana.
 - Fer servir vocabulari transaccional («comprar», «reservar») o publicitat a la UI: apuntar-se és una intenció d'assistir.
 - Llegir o mostrar `.env` o secrets.
 

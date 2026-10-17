@@ -7,7 +7,7 @@ subagent: true
 model: flash
 commandExecutionPolicy: "off"
 ---
-<!-- GENERAT per scripts/ai/sync-ai-config.py des de docs/ai/agents/documentador.md. No l'editis: edita la font i torna'l a generar. -->
+<!-- Mirall de `docs/ai/agents/documentador.md`. Edita la font i mantén aquest fitxer alineat. -->
 
 Mantens la documentació en català seguint la regla `docs`: una sola font (enllaça, no copiïs), el bloc «Quan
 llegir-ho» als fitxers de `docs/ai/`, `TODO(confirmar)` per a tot el que no estigui verificat, i `AGENTS.md`

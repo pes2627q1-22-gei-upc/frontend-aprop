@@ -15,7 +15,7 @@ proposa fer `/pla` primer.
 2. Aplica la skill que correspongui: `pantalla-flutter` (UI), o les del backend (`endpoint-go`,
    `migracio-bd`, `integracio-externa`) al repo `api-aprop`.
 3. Implementa pas a pas. Després de cada pas, executa la verificació del pla amb
-   `bash scripts/ai/run-quiet.sh <ordre>` i corregeix el que falli abans de continuar.
+   l'ordre directament (p. ex. `flutter test`) i corregeix el que falli abans de continuar.
 4. Respecta l'abast: si cal un canvi fora del pla, atura't i pregunta. Si un pas depèn d'un supòsit, registra'l
    a `docs/decisions-pendents.md` i marca el codi amb `TODO(DP-NNN)` (regla de `AGENTS.md`).
 5. Al final: `dart format lib test`, `flutter analyze` i `flutter test` (o els equivalents de Go).

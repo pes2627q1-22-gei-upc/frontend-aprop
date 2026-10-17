@@ -13,5 +13,5 @@ description: "Convencions de proves Flutter (test/)."
   text ampliat. Cerca per text o `Key` semàntica, no per detalls interns.
 - Quan una prova cobreixi una restricció del UML, posa-ho al nom: `'R10: no permet valorar sense assistència'`.
 - Executa el fitxer concret mentre treballes (`flutter test test/features/<f>/<x>_test.dart`) i la suite
-  completa abans de donar la feina per acabada. Per a sortides llargues: `bash scripts/ai/run-quiet.sh flutter test`.
+  completa abans de donar la feina per acabada.
 - No afegeixis proves que no verifiquin comportament (p. ex. que un fitxer existeix).

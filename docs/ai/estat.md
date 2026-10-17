@@ -12,7 +12,7 @@
 
 | Taiga | Història / tasca | Repo | Branca | Responsable | Estat |
 |---|---|---|---|---|---|
-| — | Configuració d'IA per a l'equip | frontend-aprop | `feature/ai-setup` | Wenqiang | pendent de revisió humana |
+| — | Configuració d'IA per a l'equip | frontend-aprop | `feature/ai-setup` | Wenqiang | sense scripts/hooks; pendent PR |
 | — | Configuració d'IA per a l'equip | api-aprop | `feature/ai-setup` | Wenqiang | pendent de revisió humana |
 
 ## Fet recentment (només l'últim sprint)
@@ -28,7 +28,7 @@
 
 ## Propers passos
 
-1. Revisar i fer commit de `feature/ai-setup` (persona, no agent).
+1. Revisar `feature/ai-setup` (ja sense `scripts/ai/` ni hooks) i obrir/actualitzar la PR.
 2. Concretar a Taiga les històries de l'Sprint 1 i omplir la taula «En curs».
 
 ## Traspàs entre eines

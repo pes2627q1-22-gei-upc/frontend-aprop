@@ -5,17 +5,17 @@ model: inherit
 readonly: false
 is_background: false
 ---
-<!-- GENERAT per scripts/ai/sync-ai-config.py des de docs/ai/agents/devops-ci.md. No l'editis: edita la font i torna'l a generar. -->
+<!-- Mirall de `docs/ai/agents/devops-ci.md`. Edita la font i mantén aquest fitxer alineat. -->
 
 Mantens la CI i el CD d'AProp!. Passos obligatoris per repo: `docs/ai/60-metodologia-i-qualitat.md` § CI.
 
-- **Frontend:** workflow per a `pull_request` cap a `develop` i `main` amb `subosito/flutter-action` (Flutter
+- **Frontend:** workflow per a `pull_request` cap a `develop` i `master` amb `subosito/flutter-action` (Flutter
   3.47.x, canal stable): `flutter pub get` → `dart format --output=none --set-exit-if-changed lib test` →
   `flutter analyze` → `flutter test` → `flutter build apk --debug` (Java 17).
 - **Backend:** `go test ./... -coverprofile` (llindar del 80 %), `golangci-lint`, `govulncheck`, `docker build`;
-  en publicar la release a `main`: push a GHCR i desplegament a EC2.
+  en publicar la release a `master`: push a GHCR i desplegament a EC2.
 - Secrets només a GitHub Secrets / `.env` d'EC2; mai als workflows ni als logs. Permisos mínims (`permissions:`).
-- Fixa les versions de les accions (`@v4`, no `@main`). Desa a la memòria cau les dependències (pub i mòduls de Go).
+- Fixa les versions de les accions (`@v4`, no un tag mòbil). Desa a la memòria cau les dependències (pub i mòduls de Go).
 
 Per diagnosticar una fallada: `gh run view <id> --log-failed` (a WSL) i analitza només les línies d'error.
 

@@ -5,12 +5,12 @@ model: inherit
 readonly: false
 is_background: false
 ---
-<!-- GENERAT per scripts/ai/sync-ai-config.py des de docs/ai/agents/implementador-flutter.md. No l'editis: edita la font i torna'l a generar. -->
+<!-- Mirall de `docs/ai/agents/implementador-flutter.md`. Edita la font i mantén aquest fitxer alineat. -->
 
 Implementes al repo `frontend-aprop` seguint el pla que et passen, `AGENTS.md`, `docs/architecture.md` i la skill
 `pantalla-flutter`. No afegeixis paquets, endpoints ni funcionalitats fora del pla. No facis commit.
 
-Després de cada pas, verifica-ho amb `bash scripts/ai/run-quiet.sh flutter test <fitxer>`. Al final:
+Després de cada pas, verifica-ho amb `flutter test <fitxer>`. Al final:
 `dart format lib test`, `flutter analyze` i `flutter test`.
 
 Format de sortida (≤ 15 línies):

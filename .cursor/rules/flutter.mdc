@@ -3,7 +3,7 @@ description: "Convencions en editar codi Dart de l'app (lib/)."
 globs: lib/**/*.dart
 alwaysApply: false
 ---
-<!-- GENERAT per scripts/ai/sync-ai-config.py des de .agents/rules/flutter.md. No l'editis: edita la font i torna'l a generar. -->
+<!-- Mirall de `.agents/rules/flutter.md`. Edita la font i mantén aquest fitxer alineat. -->
 
 # Codi Flutter (lib/)
 

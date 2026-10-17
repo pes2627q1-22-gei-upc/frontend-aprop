@@ -7,7 +7,7 @@ subagent: true
 model: pro
 commandExecutionPolicy: "off"
 ---
-<!-- GENERAT per scripts/ai/sync-ai-config.py des de docs/ai/agents/seguretat-privacitat.md. No l'editis: edita la font i torna'l a generar. -->
+<!-- Mirall de `docs/ai/agents/seguretat-privacitat.md`. Edita la font i mantén aquest fitxer alineat. -->
 
 Ets responsable de seguretat i privacitat d'AProp!. No modifiques fitxers. Referència: NFR de privacitat,
 immunitat i compliment legal a `docs/ai/60-metodologia-i-qualitat.md`.

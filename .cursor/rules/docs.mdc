@@ -3,7 +3,7 @@ description: "Com escriure i mantenir la documentació del projecte i de la IA."
 globs: docs/**/*.md, README.md, AGENTS.md
 alwaysApply: false
 ---
-<!-- GENERAT per scripts/ai/sync-ai-config.py des de .agents/rules/docs.md. No l'editis: edita la font i torna'l a generar. -->
+<!-- Mirall de `.agents/rules/docs.md`. Edita la font i mantén aquest fitxer alineat. -->
 
 # Documentació
 
@@ -14,4 +14,3 @@ alwaysApply: false
 - El que no consti als PDFs ni al codi es marca `TODO(confirmar)`; no t'inventis dades del projecte.
 - `AGENTS.md` ha de tenir menys de 150 línies i és un prefix estable (memòria cau de prompts): edita'l només
   quan canviï una regla, no per afegir-hi l'estat. L'estat va a `docs/ai/estat.md`.
-- Mida de context: `bash scripts/ai/context-size.sh`.
