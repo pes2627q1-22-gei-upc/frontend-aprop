@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 
 import '../../features/auth/models/app_user.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
+import '../../features/auth/presentation/screens/verify_email_screen.dart';
 import '../../features/auth/repositories/auth_repository.dart';
 import 'main_shell.dart';
 
-/// Mostra el login o l'aplicació segons si hi ha una sessió iniciada.
+/// Mostra el login si no hi ha sessió, la verificació del correu si encara no
+/// està verificat i, si tot és correcte, l'aplicació.
 class AuthGate extends StatefulWidget {
   const AuthGate({super.key, required this.authRepository});
 
@@ -35,6 +37,13 @@ class _AuthGateState extends State<AuthGate> {
 
         if (user == null) {
           return LoginScreen(repository: widget.authRepository);
+        }
+
+        if (!user.emailVerified) {
+          return VerifyEmailScreen(
+            repository: widget.authRepository,
+            email: user.email,
+          );
         }
 
         return MainShell(user: user, onSignOut: widget.authRepository.signOut);

@@ -14,7 +14,8 @@ abstract interface class AuthRepository {
     required String password,
   });
 
-  /// Crea el compte, dona d'alta l'usuari al backend i inicia la sessió.
+  /// Crea el compte, dona d'alta l'usuari al backend, inicia la sessió i envia
+  /// el correu de verificació.
   Future<void> register({
     required String firstName,
     required String lastName,
@@ -22,6 +23,14 @@ abstract interface class AuthRepository {
     required String email,
     required String password,
   });
+
+  /// Torna a enviar el correu de verificació a l'usuari de la sessió.
+  Future<void> sendEmailVerification();
+
+  /// Torna a consultar si l'usuari de la sessió ha verificat el correu.
+  /// Retorna `true` si ja l'ha verificat; llavors el canvi també arriba per
+  /// [authStateChanges].
+  Future<bool> checkEmailVerified();
 
   Future<void> signOut();
 }

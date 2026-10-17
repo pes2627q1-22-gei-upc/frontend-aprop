@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../repositories/auth_repository.dart';
 import '../view_models/register_view_model.dart';
+import '../widgets/auth_link_prompt.dart';
+import '../widgets/auth_status_message.dart';
 import '../widgets/auth_submit_button.dart';
 import '../widgets/google_sign_in_button.dart';
 import '../widgets/password_field.dart';
@@ -54,7 +56,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
       passwordConfirmation: _confirmationController.text,
     );
 
-    // AuthGate ja mostra l'app sota aquesta pantalla; la tanquem perquè es vegi.
+    // AuthGate ja mostra la verificació del correu sota aquesta pantalla; la
+    // tanquem perquè es vegi.
     if (success && mounted) Navigator.of(context).pop();
   }
 
@@ -133,6 +136,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           prefixIcon: const Icon(Icons.alternate_email),
                           helperText:
                               'Minúscules, números, punt o guió baix (3-20).',
+                          // Sense límit pràctic: amb la lletra gran no hi
+                          // cap en una línia i no s'ha de tallar.
+                          helperMaxLines: 10,
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -178,10 +184,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                       const SizedBox(height: 24),
                       if (errorMessage != null) ...[
-                        Text(
-                          errorMessage,
-                          style: TextStyle(color: theme.colorScheme.error),
-                        ),
+                        AuthStatusMessage.error(errorMessage),
                         const SizedBox(height: 12),
                       ],
                       AuthSubmitButton(
@@ -192,16 +195,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       const SizedBox(height: 16),
                       const GoogleSignInButton(),
                       const SizedBox(height: 24),
-                      Wrap(
-                        alignment: WrapAlignment.center,
-                        crossAxisAlignment: WrapCrossAlignment.center,
-                        children: [
-                          const Text('Ja tens compte?'),
-                          TextButton(
-                            onPressed: () => Navigator.of(context).pop(),
-                            child: const Text('Inicia sessió'),
-                          ),
-                        ],
+                      AuthLinkPrompt(
+                        question: 'Ja tens compte?',
+                        label: 'Inicia sessió',
+                        onPressed: () => Navigator.of(context).pop(),
                       ),
                     ],
                   );

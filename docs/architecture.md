@@ -24,11 +24,12 @@ La qualitat depèn de respectar les responsabilitats i revisar els canvis, no de
 | `features/auth/` | Inici de sessió, registre i sessió, amb les mateixes capes que `activities/`. |
 | `assets/images/` | Fotografies i imatges de contingut. |
 | `assets/branding/` | Logotip i recursos d’identitat d’AProp!. |
+| `assets/icons/` | Icones de tercers que no ofereix Material, com el logotip de Google. |
 | `test/features/activities/` | Proves del model de presentació i la UI d’activitats. |
 | `test/features/auth/` | Proves dels ViewModels, validacions, repositori de demostració i pantalles d'accés. |
 | `test/app/` | Proves del recorregut complet de l'aplicació, com entrar, registrar-se i tancar la sessió. |
 
-`AuthGate` mostra `LoginScreen` si no hi ha sessió i `MainShell` si n'hi ha; el detall és a [Accés i sessió](#accés-i-sessió).
+`AuthGate` mostra `LoginScreen` si no hi ha sessió, `VerifyEmailScreen` si l'usuari encara no ha verificat el correu i `MainShell` si tot és correcte; el detall és a [Accés i sessió](#accés-i-sessió).
 
 `MainShell` receives the signed-in user and sign-out action. It creates one `ActivityRepository` shared by the list and detail routes and owns `ActivitiesViewModel`. Each of the five sections has a nested `Navigator` inside the existing `IndexedStack`; the single bottom navigation bar remains outside those navigators. Section roots own their AppBars. `NavigatorPopHandler` sends system back actions only to the active section. Switching sections preserves each history; popping a detail reveals the original list and scroll position.
 
@@ -98,25 +99,34 @@ auth/presentation/view_models/login_view_model.dart
 auth/presentation/view_models/register_view_model.dart
 auth/presentation/view_models/auth_validators.dart
 auth/presentation/view_models/auth_failure_message.dart
+auth/presentation/view_models/verify_email_view_model.dart
 auth/presentation/screens/login_screen.dart
 auth/presentation/screens/register_screen.dart
+auth/presentation/screens/verify_email_screen.dart
 auth/presentation/widgets/password_field.dart
 auth/presentation/widgets/auth_submit_button.dart
 auth/presentation/widgets/google_sign_in_button.dart
+auth/presentation/widgets/auth_secondary_action.dart
+auth/presentation/widgets/auth_link_prompt.dart
+auth/presentation/widgets/auth_status_message.dart
 app/navigation/auth_gate.dart
 ```
 
-`AuthRepository.authStateChanges()` és l'única font de la sessió: emet l'usuari actual en subscriure-s'hi i cada canvi posterior. `main.dart` crea el repositori, `APropApp` el passa a `AuthGate` i aquest decideix què es mostra. Per això les pantalles no naveguen en iniciar o tancar la sessió. L'única excepció és `RegisterScreen`, que es tanca després d'un registre correcte perquè quedi visible l'aplicació que `AuthGate` ja mostra a sota.
+`AuthRepository.authStateChanges()` és l'única font de la sessió: emet l'usuari actual en subscriure-s'hi i cada canvi posterior. `main.dart` crea el repositori, `APropApp` el passa a `AuthGate` i aquest decideix què es mostra. Per això les pantalles no naveguen en iniciar o tancar la sessió. L'única excepció és `RegisterScreen`, que es tanca després d'un registre correcte perquè quedi visible la pantalla que `AuthGate` ja mostra a sota.
 
 Les operacions del repositori llancen `AuthFailure` quan l'error es pot explicar a l'usuari. Cada implementació hi tradueix els seus errors, i els ViewModels els converteixen en missatges en català. Els ViewModels també validen els camps abans de cridar el repositori i guarden l'error de cada camp. Quan l'usuari modifica un camp, se n'esborra l'error i també el missatge general; tot es torna a comprovar en enviar el formulari.
 
 Criteris de Taiga aplicats: confirmació de contrasenya en el registre; contrasenya de mínim 8 caràcters amb majúscula, minúscula, número i caràcter especial; nom d'usuari únic; inici de sessió amb nom d'usuari o correu; i rebuig de credencials incorrectes.
+
+L'aplicació queda bloquejada fins que l'usuari verifica el correu. El registre envia el correu de verificació i, mentre `AppUser.emailVerified` és fals, `AuthGate` mostra `VerifyEmailScreen` en lloc de l'app, també en tornar a iniciar la sessió o obrir l'aplicació. La pantalla permet comprovar de nou la verificació, tornar a enviar el correu i tancar la sessió, per si l'usuari s'ha equivocat de correu. Per no reenviar el correu sense parar, el botó d'enviar espera 30 segons en obrir la pantalla i després de cada enviament correcte. `DemoAuthRepository` no envia cap correu: la comprovació simula que l'usuari ha obert l'enllaç.
 
 Cada pantalla crea el seu ViewModel amb el repositori que rep i l'allibera en tancar-se. `LoginScreen` obre `RegisterScreen` amb el mateix repositori. El botó per tancar la sessió és provisionalment a Perfil, fins que existeixi la funcionalitat de perfil.
 
 Integració pendent:
 
 - `FirebaseAuthRepository`, amb accés per correu i amb Google, que substituirà `DemoAuthRepository` a `main.dart`.
+- Verificació amb Firebase: enviar el correu amb `sendEmailVerification`, comprovar-la amb `reload` i escoltar `userChanges` (`authStateChanges` no avisa de la verificació). Després de verificar cal demanar un token nou perquè el backend vegi `email_verified`.
+- El backend ha de rebutjar les peticions d'usuaris sense el correu verificat; el bloqueig del frontend no n'hi ha prou.
 - Alta de l'usuari al backend en registrar-se i consulta del perfil, amb el nom d'usuari, en iniciar la sessió.
 - Un endpoint del backend que obtingui el correu a partir del nom d'usuari, o que faci ell mateix l'inici de sessió.
 - Primer accés amb Google: una pantalla per triar el nom d'usuari. Per això `AppUser.username` pot ser nul.
@@ -126,7 +136,7 @@ La recuperació de contrasenya és una altra història i no forma part de l'Spri
 
 ## Recursos i dependències
 
-Els recursos van a `assets/`, fora de `lib/`. Les fotografies de demostració i l’avatar són a `assets/images/`, declarat a `pubspec.yaml`. S’han preparat amb la vista «Llista» aprovada com a referència; representen contingut fictici, no fotografies verificades d’esdeveniments reals. La procedència i els prompts es documenten a `docs/demo-assets.json`. `assets/branding/aprop_logo.png` és una còpia sense modificacions del logotip aprovat `output/logo/aprop-logo-oficial.png` de la carpeta PES; `assets/branding/` també està declarat a `pubspec.yaml`.
+Els recursos van a `assets/`, fora de `lib/`. Les fotografies de demostració i l’avatar són a `assets/images/`, declarat a `pubspec.yaml`. S’han preparat amb la vista «Llista» aprovada com a referència; representen contingut fictici, no fotografies verificades d’esdeveniments reals. La procedència i els prompts es documenten a `docs/demo-assets.json`. `assets/branding/aprop_logo.png` és una còpia sense modificacions del logotip aprovat `output/logo/aprop-logo-oficial.png` de la carpeta PES; `assets/branding/` també està declarat a `pubspec.yaml`. `assets/icons/google_g.png` és el logotip «G» de Google per al botó d'accés: s'ha retallat de `Theme=Light, Show text=No, Shape=Square` (PNG @4x) del paquet oficial `signin-assets.zip` de Google Identity i se n'ha tret el fons blanc, sense modificar-ne la forma ni els colors.
 
 Afegim paquets només quan hi ha codi que els necessita i revisem també el lockfile. Els endpoints, DTO i credencials es configuraran amb el contracte real del backend; no els inventem per completar el frontend.
 

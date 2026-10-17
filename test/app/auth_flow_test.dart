@@ -94,9 +94,8 @@ void main() {
     expect(find.text('Introdueix la contrasenya.'), findsOneWidget);
   });
 
-  testWidgets("Registra un compte nou i entra a l'app", (tester) async {
-    await pumpApp(tester);
-    await tapButton(tester, "Registra't");
+  Future<void> registerPol(WidgetTester tester) async {
+    await tapButton(tester, 'Crea un compte');
 
     expect(find.widgetWithText(AppBar, 'Crea un compte'), findsOneWidget);
 
@@ -107,8 +106,21 @@ void main() {
     await fill(tester, 'Contrasenya', 'Contrasenya1!');
     await fill(tester, 'Repeteix la contrasenya', 'Contrasenya1!');
     await tapButton(tester, 'Crea el compte');
+  }
+
+  testWidgets("Registra un compte nou, el verifica i entra a l'app", (
+    tester,
+  ) async {
+    await pumpApp(tester);
+    await registerPol(tester);
 
     expect(find.text('Crea un compte'), findsNothing);
+    expect(find.text('Verifica el teu correu'), findsOneWidget);
+    expect(find.textContaining('pol@aprop.cat'), findsOneWidget);
+    expect(find.byType(NavigationBar), findsNothing);
+
+    await tapButton(tester, "Ja l'he verificat");
+
     expect(find.text('Jazz al parc').hitTestable(), findsOneWidget);
 
     await tester.tap(find.widgetWithText(NavigationDestination, 'Perfil'));
@@ -116,6 +128,23 @@ void main() {
 
     expect(find.text('Pol Vidal'), findsOneWidget);
     expect(find.text('@polvidal'), findsOneWidget);
+  });
+
+  testWidgets("Un compte sense verificar no pot entrar a l'app", (
+    tester,
+  ) async {
+    await pumpApp(tester);
+    await registerPol(tester);
+    await tapButton(tester, 'Tanca la sessió');
+
+    expect(find.text('Inicia sessió'), findsOneWidget);
+
+    await fill(tester, "Nom d'usuari o correu", 'polvidal');
+    await fill(tester, 'Contrasenya', 'Contrasenya1!');
+    await tapButton(tester, 'Entra');
+
+    expect(find.text('Verifica el teu correu'), findsOneWidget);
+    expect(find.byType(NavigationBar), findsNothing);
   });
 
   testWidgets('Tanca la sessió des de Perfil', (tester) async {

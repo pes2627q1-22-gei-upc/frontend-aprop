@@ -41,20 +41,26 @@ class _PasswordFieldState extends State<PasswordField> {
       decoration: InputDecoration(
         labelText: widget.label,
         helperText: widget.helperText,
-        helperMaxLines: 2,
+        // Sense límit pràctic: amb la lletra gran els requisits s'han de
+        // llegir sencers.
+        helperMaxLines: 10,
         errorText: widget.errorText,
         errorMaxLines: 3,
         prefixIcon: const Icon(Icons.lock_outline),
-        suffixIcon: IconButton(
-          tooltip: _isObscured
-              ? 'Mostra la contrasenya'
-              : 'Amaga la contrasenya',
-          icon: Icon(
-            _isObscured
-                ? Icons.visibility_outlined
-                : Icons.visibility_off_outlined,
+        // Fora del recorregut del focus: si no, «Següent» al teclat va a parar
+        // a aquest botó i no al camp següent, i el que s'escriu es perd.
+        suffixIcon: ExcludeFocusTraversal(
+          child: IconButton(
+            tooltip: _isObscured
+                ? 'Mostra la contrasenya'
+                : 'Amaga la contrasenya',
+            icon: Icon(
+              _isObscured
+                  ? Icons.visibility_outlined
+                  : Icons.visibility_off_outlined,
+            ),
+            onPressed: () => setState(() => _isObscured = !_isObscured),
           ),
-          onPressed: () => setState(() => _isObscured = !_isObscured),
         ),
       ),
     );

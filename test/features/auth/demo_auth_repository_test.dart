@@ -56,6 +56,28 @@ void main() {
 
     final user = await repository.authStateChanges().first;
     expect(user?.username, 'polvidal');
+    expect(user?.emailVerified, isFalse);
+  });
+
+  test('Simula la verificació del correu dels comptes nous', () async {
+    await repository.register(
+      firstName: 'Pol',
+      lastName: 'Vidal',
+      username: 'polvidal',
+      email: 'pol@aprop.cat',
+      password: 'Contrasenya1!',
+    );
+
+    expect(await repository.checkEmailVerified(), isTrue);
+    expect((await repository.authStateChanges().first)?.emailVerified, isTrue);
+
+    // La verificació es conserva en tornar a entrar.
+    await repository.signOut();
+    await repository.signIn(
+      usernameOrEmail: 'polvidal',
+      password: 'Contrasenya1!',
+    );
+    expect((await repository.authStateChanges().first)?.emailVerified, isTrue);
   });
 
   test("No permet repetir correu ni nom d'usuari", () {

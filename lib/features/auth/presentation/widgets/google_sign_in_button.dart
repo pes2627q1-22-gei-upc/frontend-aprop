@@ -36,7 +36,17 @@ class GoogleSignInButton extends StatelessWidget {
               : 'Continua amb Google',
           child: OutlinedButton.icon(
             onPressed: onPressed,
-            icon: const Icon(Icons.account_circle_outlined),
+            // El logotip té colors propis: quan el botó està desactivat
+            // l'atenuem com la resta del contingut.
+            icon: Opacity(
+              opacity: onPressed == null ? 0.38 : 1,
+              child: Image.asset(
+                'assets/icons/google_g.png',
+                width: 20,
+                height: 20,
+                excludeFromSemantics: true,
+              ),
+            ),
             label: const Text('Continua amb Google'),
             style: OutlinedButton.styleFrom(
               minimumSize: const Size.fromHeight(52),

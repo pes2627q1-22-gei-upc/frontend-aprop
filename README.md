@@ -4,9 +4,9 @@ Aplicació mòbil per descobrir i planificar activitats culturals a Catalunya. P
 
 ## Estat actual
 
-Base Flutter amb tema compartit, accés amb compte i navegació inferior entre Inici, Agenda, Descobreix, Avisos i Perfil. L'aplicació s'obre amb l'inici de sessió, que accepta el nom d'usuari o el correu, i permet crear un compte. Un cop dins, Inici mostra una capçalera fixa amb el logotip, els controls i la vista «Llista» seleccionada, seguida d'una llista desplaçable d'activitats de demostració. Inclou estats de càrrega, error amb reintent i llista buida. Perfil mostra provisionalment qui ha iniciat la sessió i el botó per tancar-la; Agenda, Descobreix i Avisos encara mostren textos provisionals.
+Base Flutter amb tema compartit, accés amb compte i navegació inferior entre Inici, Agenda, Descobreix, Avisos i Perfil. L'aplicació s'obre amb l'inici de sessió, que accepta el nom d'usuari o el correu, i permet crear un compte. Fins que no es verifica el correu, l'aplicació mostra la pantalla de verificació en lloc del contingut. Un cop dins, Inici mostra una capçalera fixa amb el logotip, els controls i la vista «Llista» seleccionada, seguida d'una llista desplaçable d'activitats de demostració. Inclou estats de càrrega, error amb reintent i llista buida. Perfil mostra provisionalment qui ha iniciat la sessió i el botó per tancar-la; Agenda, Descobreix i Avisos encara mostren textos provisionals.
 
-L'accés funciona amb comptes de demostració en memòria, que es perden en tancar l'aplicació. Per provar-lo, entra amb `laiasoler` o `laia@aprop.cat` i la contrasenya `Aprop2026!`, o crea un compte nou. Firebase, l'alta de l'usuari al backend i l'accés amb Google estan pendents; el botó de Google es mostra desactivat.
+L'accés funciona amb comptes de demostració en memòria, que es perden en tancar l'aplicació. Per provar-lo, entra amb `laiasoler` o `laia@aprop.cat` i la contrasenya `Aprop2026!`, o crea un compte nou. Els comptes nous queden pendents de verificar; com que no s'envia cap correu, «Ja l'he verificat» simula que s'ha obert l'enllaç. Firebase, l'alta de l'usuari al backend i l'accés amb Google estan pendents; el botó de Google es mostra desactivat.
 
 Event details (**Taiga #75**) now open when an event card is tapped. The screen loads the selected event by ID, shows its description and source or creator, and handles loading, missing events and errors with retry. Bottom navigation remains available; each section keeps its navigation history and returning to the list preserves its scroll position.
 
@@ -39,6 +39,7 @@ lib/
 assets/
   images/
   branding/
+  icons/
 test/
   widget_test.dart
   app/

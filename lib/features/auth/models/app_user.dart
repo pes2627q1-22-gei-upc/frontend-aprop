@@ -4,6 +4,7 @@ class AppUser {
     required this.email,
     required this.firstName,
     required this.lastName,
+    required this.emailVerified,
     this.username,
   });
 
@@ -11,6 +12,9 @@ class AppUser {
   final String email;
   final String firstName;
   final String lastName;
+
+  /// Fins que no és `true`, l'usuari no pot entrar a l'aplicació.
+  final bool emailVerified;
 
   /// És nul fins que l'usuari tria nom d'usuari (primer accés amb Google).
   final String? username;
