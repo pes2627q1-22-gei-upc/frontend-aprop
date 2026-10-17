@@ -66,6 +66,25 @@ void main() {
     expect(viewModel.fieldError(RegisterField.lastName), isNotNull);
   });
 
+  test(
+    "En modificar la contrasenya s'esborra també l'error de la confirmació",
+    () async {
+      await viewModel.register(
+        firstName: '',
+        lastName: 'Vidal',
+        username: 'polvidal',
+        email: 'pol@aprop.cat',
+        password: 'Contrasenya1!',
+        passwordConfirmation: 'una altra',
+      );
+
+      viewModel.onFieldChanged(RegisterField.password);
+
+      expect(viewModel.fieldError(RegisterField.passwordConfirmation), isNull);
+      expect(viewModel.fieldError(RegisterField.firstName), isNotNull);
+    },
+  );
+
   test('Envia les dades sense espais, excepte la contrasenya', () async {
     final success = await registerPol();
 

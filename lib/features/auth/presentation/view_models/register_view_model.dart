@@ -31,7 +31,13 @@ class RegisterViewModel extends ChangeNotifier {
   /// L'usuari ha modificat un camp: en treu l'error i el missatge general.
   /// Es tornaran a comprovar quan torni a enviar el formulari.
   void onFieldChanged(RegisterField field) {
-    final hadFieldError = _fieldErrors.remove(field) != null;
+    var hadFieldError = _fieldErrors.remove(field) != null;
+    if (field == RegisterField.password) {
+      // La confirmació es compara amb la contrasenya: si aquesta canvia,
+      // l'error de la confirmació pot haver deixat de ser cert.
+      hadFieldError |=
+          _fieldErrors.remove(RegisterField.passwordConfirmation) != null;
+    }
     if (!hadFieldError && _errorMessage == null) return;
 
     _errorMessage = null;

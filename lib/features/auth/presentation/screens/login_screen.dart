@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../repositories/auth_repository.dart';
 import '../view_models/login_view_model.dart';
+import '../widgets/auth_secondary_action.dart';
+import '../widgets/auth_status_message.dart';
 import '../widgets/auth_submit_button.dart';
 import '../widgets/google_sign_in_button.dart';
 import '../widgets/password_field.dart';
@@ -125,10 +127,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       const SizedBox(height: 24),
                       if (errorMessage != null) ...[
-                        Text(
-                          errorMessage,
-                          style: TextStyle(color: theme.colorScheme.error),
-                        ),
+                        AuthStatusMessage.error(errorMessage),
                         const SizedBox(height: 12),
                       ],
                       AuthSubmitButton(
@@ -138,17 +137,12 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       const SizedBox(height: 16),
                       const GoogleSignInButton(),
-                      const SizedBox(height: 24),
-                      Wrap(
-                        alignment: WrapAlignment.center,
-                        crossAxisAlignment: WrapCrossAlignment.center,
-                        children: [
-                          const Text('Encara no tens compte?'),
-                          TextButton(
-                            onPressed: _openRegister,
-                            child: const Text("Registra't"),
-                          ),
-                        ],
+                      const SizedBox(height: 32),
+                      AuthSecondaryAction(
+                        question: 'Encara no tens compte?',
+                        label: 'Crea un compte',
+                        icon: Icons.person_add_alt_1_outlined,
+                        onPressed: _openRegister,
                       ),
                     ],
                   );

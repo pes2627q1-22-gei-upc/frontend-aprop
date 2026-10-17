@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:aprop/features/auth/models/auth_failure.dart';
+import 'package:aprop/features/auth/presentation/view_models/auth_failure_message.dart';
 import 'package:aprop/features/auth/presentation/screens/login_screen.dart';
 import 'package:aprop/features/auth/presentation/screens/register_screen.dart';
+import 'package:aprop/features/auth/presentation/screens/verify_email_screen.dart';
 
 import 'fake_auth_repository.dart';
 
@@ -11,14 +15,69 @@ void main() {
 
   setUp(() => repository = FakeAuthRepository());
 
-  Future<void> pumpScreen(WidgetTester tester, Widget screen) async {
+  Future<void> pumpScreen(
+    WidgetTester tester,
+    Widget screen, {
+    double textScale = 1,
+  }) async {
     tester.view.physicalSize = const Size(390, 844);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
-    await tester.pumpWidget(MaterialApp(home: screen));
+    await tester.pumpWidget(
+      MaterialApp(
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(context)
+              .copyWith(textScaler: TextScaler.linear(textScale)),
+          child: child!,
+        ),
+        home: screen,
+      ),
+    );
   }
+
+  testWidgets("Amb la lletra gran les ajudes del registre no es tallen", (
+    tester,
+  ) async {
+    await pumpScreen(
+      tester,
+      RegisterScreen(repository: repository),
+      textScale: 2,
+    );
+
+    for (final helper in [
+      'Minúscules, números, punt o guió baix (3-20).',
+      'Mínim 8 caràcters, amb majúscula, minúscula, número i caràcter '
+          'especial.',
+    ]) {
+      final paragraph = tester.renderObject<RenderParagraph>(find.text(helper));
+      expect(paragraph.didExceedMaxLines, isFalse, reason: helper);
+    }
+  });
+
+  testWidgets('El lector de pantalla anuncia els errors generals', (
+    tester,
+  ) async {
+    repository.error = AuthFailure.invalidCredentials;
+    await pumpScreen(tester, LoginScreen(repository: repository));
+
+    await tester.enterText(
+      find.widgetWithText(TextField, "Nom d'usuari o correu"),
+      'laia@aprop.cat',
+    );
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Contrasenya'),
+      'incorrecta',
+    );
+    await tester.tap(find.text('Entra'));
+    await tester.pumpAndSettle();
+
+    expect(
+      tester.getSemantics(find.text(AuthFailure.invalidCredentials.message)),
+      isSemantics(isLiveRegion: true),
+    );
+  });
 
   testWidgets('El login no crida el repositori si el formulari no és vàlid', (
     tester,
@@ -60,6 +119,59 @@ void main() {
     expect(find.text('Introdueix el correu.'), findsOneWidget);
     expect(find.text('Les contrasenyes no coincideixen.'), findsOneWidget);
     expect(repository.lastCall, isNull);
+  });
+
+  testWidgets('«Següent» a la contrasenya porta a repetir-la', (tester) async {
+    await pumpScreen(tester, RegisterScreen(repository: repository));
+
+    bool hasFocus(String label) => tester
+        .widget<EditableText>(
+          find.descendant(
+            of: find.widgetWithText(TextField, label),
+            matching: find.byType(EditableText),
+          ),
+        )
+        .focusNode
+        .hasFocus;
+
+    await tester.tap(find.widgetWithText(TextField, 'Contrasenya'));
+    await tester.pump();
+    await tester.testTextInput.receiveAction(TextInputAction.next);
+    await tester.pump();
+
+    expect(hasFocus('Repeteix la contrasenya'), isTrue);
+  });
+
+  testWidgets('Reenviar el correu espera 30 segons cada vegada', (
+    tester,
+  ) async {
+    await pumpScreen(
+      tester,
+      VerifyEmailScreen(repository: repository, email: 'pol@aprop.cat'),
+    );
+
+    ButtonStyleButton resendButton() => tester.widget<ButtonStyleButton>(
+      find.ancestor(
+        of: find.textContaining('Torna a enviar el correu'),
+        matching: find.bySubtype<ButtonStyleButton>(),
+      ),
+    );
+
+    expect(find.text('Torna a enviar el correu (30 s)'), findsOneWidget);
+    expect(resendButton().onPressed, isNull);
+
+    await tester.pump(const Duration(seconds: 29));
+    expect(find.text('Torna a enviar el correu (1 s)'), findsOneWidget);
+
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text('Torna a enviar el correu'), findsOneWidget);
+
+    await tester.tap(find.text('Torna a enviar el correu'));
+    await tester.pump();
+
+    expect(repository.verificationEmailsSent, 1);
+    expect(find.text("T'hem tornat a enviar el correu."), findsOneWidget);
+    expect(find.text('Torna a enviar el correu (30 s)'), findsOneWidget);
   });
 
   testWidgets('El botó de Google està desactivat', (tester) async {

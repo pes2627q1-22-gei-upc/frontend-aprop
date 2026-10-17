@@ -6,6 +6,9 @@ import '../repositories/auth_repository.dart';
 
 /// Comptes en memòria mentre no tenim Firebase ni l'alta al backend.
 /// Es perden en tancar l'aplicació.
+///
+/// No s'envia cap correu de veritat: la comprovació simula que l'usuari ha
+/// obert l'enllaç i dona el correu per verificat si abans se n'ha «enviat» un.
 class DemoAuthRepository implements AuthRepository {
   final Map<String, _DemoAccount> _accounts = {
     'laia@aprop.cat': const _DemoAccount(
@@ -15,10 +18,12 @@ class DemoAuthRepository implements AuthRepository {
         email: 'laia@aprop.cat',
         firstName: 'Laia',
         lastName: 'Soler',
+        emailVerified: true,
         username: 'laiasoler',
       ),
     ),
   };
+  final Set<String> _verificationEmailsSent = {};
   final StreamController<AppUser?> _changes = StreamController.broadcast();
   AppUser? _currentUser;
 
@@ -77,15 +82,50 @@ class DemoAuthRepository implements AuthRepository {
       email: key,
       firstName: firstName,
       lastName: lastName,
+      emailVerified: false,
       username: username,
     );
     _accounts[key] = _DemoAccount(password: password, user: user);
+    _verificationEmailsSent.add(key);
     _setCurrentUser(user);
+  }
+
+  @override
+  Future<void> sendEmailVerification() async {
+    _verificationEmailsSent.add(_requireCurrentUser().email);
+  }
+
+  @override
+  Future<bool> checkEmailVerified() async {
+    final user = _requireCurrentUser();
+
+    if (user.emailVerified) return true;
+    if (!_verificationEmailsSent.contains(user.email)) return false;
+
+    final account = _accounts[user.email]!;
+    final verifiedUser = AppUser(
+      id: user.id,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      emailVerified: true,
+      username: user.username,
+    );
+    _accounts[user.email] = _DemoAccount(
+      password: account.password,
+      user: verifiedUser,
+    );
+    _setCurrentUser(verifiedUser);
+    return true;
   }
 
   @override
   Future<void> signOut() async {
     _setCurrentUser(null);
+  }
+
+  AppUser _requireCurrentUser() {
+    return _currentUser ?? (throw StateError('No hi ha cap sessió iniciada.'));
   }
 
   void _setCurrentUser(AppUser? user) {

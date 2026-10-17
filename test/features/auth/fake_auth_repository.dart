@@ -12,6 +12,11 @@ class FakeAuthRepository implements AuthRepository {
 
   Map<String, String>? lastCall;
 
+  /// Resposta de [checkEmailVerified].
+  bool emailVerified = false;
+
+  int verificationEmailsSent = 0;
+
   @override
   Stream<AppUser?> authStateChanges() => Stream.value(null);
 
@@ -40,6 +45,18 @@ class FakeAuthRepository implements AuthRepository {
       'password': password,
     };
     return _respond();
+  }
+
+  @override
+  Future<void> sendEmailVerification() async {
+    await _respond();
+    verificationEmailsSent++;
+  }
+
+  @override
+  Future<bool> checkEmailVerified() async {
+    await _respond();
+    return emailVerified;
   }
 
   @override
