@@ -1,17 +1,21 @@
 import 'package:flutter/material.dart';
 
 import '../view_models/activities_view_model.dart';
+import '../view_models/enrollment_view_model.dart';
 import '../widgets/activities_header.dart';
 import '../widgets/activity_card.dart';
+import '../widgets/enrollment_action.dart';
 
 class ActivitiesScreen extends StatelessWidget {
   const ActivitiesScreen({
     super.key,
     required this.viewModel,
+    required this.enrollmentViewModel,
     required this.onActivitySelected,
   });
 
   final ActivitiesViewModel viewModel;
+  final EnrollmentViewModel enrollmentViewModel;
   final ValueChanged<String> onActivitySelected;
 
   @override
@@ -75,6 +79,11 @@ class ActivitiesScreen extends StatelessWidget {
               key: ValueKey(activity.id),
               activity: activity,
               onTap: () => onActivitySelected(activity.id),
+              participationAction: EnrollmentAction(
+                viewModel: enrollmentViewModel,
+                activityId: activity.id,
+                activityTitle: activity.title,
+              ),
             );
           },
         );

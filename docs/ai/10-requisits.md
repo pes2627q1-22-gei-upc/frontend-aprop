@@ -51,7 +51,7 @@ Columna «Sprint (entra, acaba)»: format de la memòria §1.4. `TODO(confirmar)
 |---|---|---|
 | Veure un mapa amb els esdeveniments | 5 | |
 | Clicar un esdeveniment per veure els detalls | 6 | #75 (tasca frontend) |
-| Apuntar-se a un esdeveniment | 1 | |
+| Apuntar-se a un esdeveniment | 1 | #82 (tasca frontend) |
 | Llista d'esdeveniments | 4 | #77 (tasca frontend) |
 | Filtrar esdeveniments | 2 | |
 | Xatejar amb persones que s'han apuntat a l'esdeveniment | 6 | |
@@ -108,5 +108,6 @@ Columna «Sprint (entra, acaba)»: format de la memòria §1.4. `TODO(confirmar)
 - **#7 Accés:** vegeu `docs/architecture.md` § «Accés i sessió» (contrasenya ≥ 8 amb majúscula, minúscula,
   número i caràcter especial; confirmació; nom d'usuari únic; accés per nom o correu).
 - **#75 Detall:** vegeu `docs/activity-details.md`.
+- **#82 Inscripció:** llista i detall comparteixen estat; confirmació abans de «Apuntat», prevenció de duplicats, errors amb reintent i aïllament per compte. Implementació de demostració i contracte per a l'agenda a `docs/event-enrollment.md` (DP-010). Aquest comportament prové dels mockups aprovats i de la petició de l'usuari; falta contrastar els criteris complets a Taiga i integrar el backend.
 - **Resta:** `TODO(confirmar)` — consulta Taiga. El comportament dels mockups (`50-ui-mockups.md`) en dona
   pistes, però no substitueix els criteris.

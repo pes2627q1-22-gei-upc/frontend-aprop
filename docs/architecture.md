@@ -6,6 +6,8 @@ Organitzem el projecte per funcionalitats i separem presentació, estat i dades 
 
 La qualitat depèn de respectar les responsabilitats i revisar els canvis, no del nombre de carpetes. No creem implementacions fictícies, dependències o capes que encara no necessitem.
 
+Les tasques #75 i #82 afegeixen el detall i les inscripcions compartides entre llista i detall. Vegeu `docs/activity-details.md` i `docs/event-enrollment.md` per seguir els fluxos i integrar l'agenda.
+
 ## Responsabilitats
 
 | Ubicació | Responsabilitat |
@@ -31,7 +33,7 @@ La qualitat depèn de respectar les responsabilitats i revisar els canvis, no de
 
 `AuthGate` mostra `LoginScreen` si no hi ha sessió, `VerifyEmailScreen` si l'usuari encara no ha verificat el correu i `MainShell` si tot és correcte; el detall és a [Accés i sessió](#accés-i-sessió).
 
-`MainShell` receives the signed-in user and sign-out action. It creates one `ActivityRepository` shared by the list and detail routes and owns `ActivitiesViewModel`. Each of the five sections has a nested `Navigator` inside the existing `IndexedStack`; the single bottom navigation bar remains outside those navigators. Section roots own their AppBars. `NavigatorPopHandler` sends system back actions only to the active section. Switching sections preserves each history; popping a detail reveals the original list and scroll position.
+`MainShell` receives the signed-in user, sign-out action and the shared activity/enrollment repository contracts from `AuthGate`. It owns `ActivitiesViewModel` and the account's shared `EnrollmentViewModel`. Each of the five sections has a nested `Navigator` inside the existing `IndexedStack`; the single bottom navigation bar remains outside those navigators. Section roots own their AppBars. `NavigatorPopHandler` sends system back actions only to the active section. Switching sections preserves each history; popping a detail reveals the original list and scroll position.
 
 `ActivitiesScreen` places `ActivitiesHeader` above the scrollable content. Its `ListenableBuilder` observes the list ViewModel. `ActivityCard` invokes a callback, the screen forwards the activity ID through `onActivitySelected`, and `MainShell` opens `activityDetailsRoute`. Features do not import app navigation. Header callbacks remain disabled until their features are implemented.
 
@@ -63,7 +65,7 @@ La composició a `app/` tria i injecta la implementació del repositori. Així p
 5. `core/` no importa `features/` ni `app/`. Un component específic d’activitats es queda a `activities/presentation/widgets/`.
 6. Les funcionalitats no importen `app/`; la navegació i la composició connecten les funcionalitats des d’`app/`.
 7. Entre funcionalitats es poden compartir models i contractes explícits. No s’importa la pantalla, el ViewModel o el repositori concret d’una altra funcionalitat per reutilitzar el seu estat.
-8. L’estat d’inscripció d’una activitat haurà de tenir una font compartida entre llista, detall i agenda. No mantenim booleans independents en cada pantalla.
+8. `EnrollmentRepository` és la font compartida d'inscripcions per usuari. Llista i detall comparteixen un `EnrollmentViewModel`; l'agenda consumirà el mateix contracte des del seu propi ViewModel. No mantenim booleans independents en cada pantalla.
 
 L’estat visual local, com l’índex del menú actual, pot utilitzar `setState`. La càrrega d’activitats, els errors i les accions del catàleg es coordinaran des del ViewModel. Qui creï un recurs que requereixi alliberament també ha de gestionar-ne el cicle de vida.
 
@@ -133,6 +135,16 @@ Integració pendent:
 - El token de Firebase per a les peticions autenticades de la resta de funcionalitats.
 
 La recuperació de contrasenya és una altra història i no forma part de l'Sprint 1.
+
+## Enrollment — Taiga #82
+
+`EnrollmentRepository` is a pure-Dart contract with `enroll(...)` and `watchEnrolledActivityIds(userId)`. The latter emits an initial immutable snapshot and subsequent confirmed changes. Enrollment is idempotent and expresses an intention to attend; attendance, reminders and unenrollment remain separate operations.
+
+`AuthGate` owns the shared activity and demo enrollment repositories unless callers inject alternatives through `APropApp`. It retains them across sign-outs and disposes only repositories it creates. `MainShell`, keyed by account ID, owns an `EnrollmentViewModel` for the signed-in user, loads it and disposes it when the account changes. The list and detail route receive that same ViewModel.
+
+`EnrollmentAction` renders initial, loading, pending, confirmed and retry states for both surfaces. List cards expose independent image/title navigation and enrollment actions. Confirmed plans are never cleared by a failed refresh, and a write is not displayed as successful before confirmation. Pending responses cannot notify a disposed ViewModel or another account.
+
+Calendar integration must use the same repository instance and user ID through its own ViewModel; it must not import the activity presentation ViewModel. The demo repository is memory-only and validates event IDs against the catalogue. The authenticated backend adapter and calendar wiring are tracked in DP-010; no API endpoints or DTOs have been assumed.
 
 ## Recursos i dependències
 

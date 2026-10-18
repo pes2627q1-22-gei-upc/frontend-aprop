@@ -8,11 +8,13 @@ Base Flutter amb tema compartit, accés amb compte i navegació inferior entre I
 
 L'accés funciona amb comptes de demostració en memòria, que es perden en tancar l'aplicació. Per provar-lo, entra amb `laiasoler` o `laia@aprop.cat` i la contrasenya `Aprop2026!`, o crea un compte nou. Els comptes nous queden pendents de verificar; com que no s'envia cap correu, «Ja l'he verificat» simula que s'ha obert l'enllaç. Firebase, l'alta de l'usuari al backend i l'accés amb Google estan pendents; el botó de Google es mostra desactivat.
 
-Event details (**Taiga #75**) now open when an event card is tapped. The screen loads the selected event by ID, shows its description and source or creator, and handles loading, missing events and errors with retry. Bottom navigation remains available; each section keeps its navigation history and returning to the list preserves its scroll position.
+Event details (**Taiga #75**) open when an event image or title is tapped. The screen loads the selected event by ID, shows its description and source or creator, and handles loading, missing events and errors with retry. Bottom navigation remains available; each section keeps its navigation history and returning to the list preserves its scroll position.
 
-Location, date, category, map and assistant controls are still disabled. Enrollment, event chat, creator profile and original-source links are displayed as unavailable rather than simulating success. The catalogue and authentication still use demo repositories. Backend integration remains pending.
+Enrollment (**Taiga #82**) works from list cards and event details: «M’hi apunto» → «Apuntant…» → «Apuntat ✓». Both views share the same state, duplicate taps are ignored, and failed requests display an error and allow retry. Demo enrollments are isolated by account and survive sign-out/sign-in during the same app run; they are lost when the application restarts. The shared repository exposes confirmed activity IDs for the calendar teammate, whose screen is still pending on this branch.
 
-See [the event details guide](docs/activity-details.md) for the implementation flow and the calendar integration contract.
+Location, date, category, map and assistant controls are still disabled. Unenrollment, event chat, creator profile and original-source links remain unavailable. The catalogue, authentication and enrollment use demo repositories; backend integration remains pending (DP-010 for enrollment).
+
+See [the event details guide](docs/activity-details.md) and [the enrollment walkthrough](docs/event-enrollment.md) for the implementation flow and calendar integration contracts.
 
 ## Estructura
 
