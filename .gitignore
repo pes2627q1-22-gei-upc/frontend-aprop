@@ -46,3 +46,14 @@ app.*.map.json
 
 # Widget Preview related
 .widget_preview/
+
+# Secrets i entorn local
+.env
+.env.*
+!.env.example
+
+# IA: text extret dels PDFs i configuració personal de les eines
+docs/source/*.txt
+.cursor/hooks/logs/
+.agents/*.local.json
+__pycache__/
