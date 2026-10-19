@@ -24,10 +24,14 @@ String formatActivitySchedule(DateTime date, {bool includeDate = false}) {
     'desembre',
   ];
   final weekday = weekdays[date.weekday - 1];
+  final month = months[date.month - 1];
+  // «d’abril», «d’agost», «d’octubre»: la preposició s'apostrofa davant de
+  // vocal.
+  final ofMonth = 'aeiou'.contains(month[0]) ? 'd’$month' : 'de $month';
   final hour = date.hour.toString().padLeft(2, '0');
   final minute = date.minute.toString().padLeft(2, '0');
   final day = includeDate
-      ? '$weekday ${date.day} de ${months[date.month - 1]} de ${date.year}'
+      ? '$weekday ${date.day} $ofMonth de ${date.year}'
       : weekday;
   return '$day · $hour.$minute h';
 }

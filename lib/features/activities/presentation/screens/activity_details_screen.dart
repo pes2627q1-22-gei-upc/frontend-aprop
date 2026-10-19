@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../models/activity.dart';
 import '../../repositories/activity_repository.dart';
 import '../formatters/activity_date_formatter.dart';
+import '../formatters/activity_price_formatter.dart';
 import '../view_models/activity_details_view_model.dart';
 import '../view_models/enrollment_view_model.dart';
 import '../widgets/activity_badges.dart';
@@ -167,6 +168,13 @@ class _ActivityDetailsContent extends StatelessWidget {
           icon: Icons.location_on_outlined,
           text: activity.municipality,
         ),
+        if (activity.price case final price?) ...[
+          const SizedBox(height: 10),
+          ActivityInformationRow(
+            icon: Icons.sell_outlined,
+            text: formatActivityPrice(price),
+          ),
+        ],
         if (activity.source == ActivitySource.community && creator != null) ...[
           const SizedBox(height: 16),
           _CreatorSection(creator: creator),
@@ -250,18 +258,19 @@ class _CreatorSection extends StatelessWidget {
             Row(
               children: [
                 ClipOval(
-                  child: Image.asset(
-                    creator.avatarAsset,
-                    width: 44,
-                    height: 44,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) =>
-                        const SizedBox(
-                          width: 44,
-                          height: 44,
-                          child: Icon(Icons.person_outline),
-                        ),
-                  ),
+                  // Sense foto (qui crea una activitat no en té) es mostra la
+                  // mateixa icona que si la foto no es pot carregar.
+                  child: switch (creator.avatarAsset) {
+                    final avatar? => Image.asset(
+                      avatar,
+                      width: 44,
+                      height: 44,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) =>
+                          const _CreatorAvatarPlaceholder(),
+                    ),
+                    null => const _CreatorAvatarPlaceholder(),
+                  },
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -323,6 +332,19 @@ class _ParticipationAction extends StatelessWidget {
           showHelper: true,
         ),
       ),
+    );
+  }
+}
+
+class _CreatorAvatarPlaceholder extends StatelessWidget {
+  const _CreatorAvatarPlaceholder();
+
+  @override
+  Widget build(BuildContext context) {
+    return const SizedBox(
+      width: 44,
+      height: 44,
+      child: Icon(Icons.person_outline),
     );
   }
 }

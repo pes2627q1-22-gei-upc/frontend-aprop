@@ -6,7 +6,7 @@ Organitzem el projecte per funcionalitats i separem presentació, estat i dades 
 
 La qualitat depèn de respectar les responsabilitats i revisar els canvis, no del nombre de carpetes. No creem implementacions fictícies, dependències o capes que encara no necessitem.
 
-Les tasques #75 i #82 afegeixen el detall i les inscripcions compartides entre llista i detall. Vegeu `docs/activity-details.md` i `docs/event-enrollment.md` per seguir els fluxos i integrar l'agenda.
+Les tasques #75 i #82 afegeixen el detall i les inscripcions compartides entre llista i detall. Vegeu `docs/activity-details.md` i `docs/event-enrollment.md` per seguir els fluxos i integrar l'agenda. La història #31 (tasca #93) permet crear activitats no oficials des d'Inici; vegeu `docs/create-activity.md`.
 
 ## Responsabilitats
 
