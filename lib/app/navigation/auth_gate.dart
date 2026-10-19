@@ -1,5 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
+import '../../features/activities/data/demo_activity_repository.dart';
+import '../../features/activities/data/demo_enrollment_repository.dart';
+import '../../features/activities/repositories/activity_repository.dart';
+import '../../features/activities/repositories/enrollment_repository.dart';
 import '../../features/auth/models/app_user.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/verify_email_screen.dart';
@@ -9,15 +15,47 @@ import 'main_shell.dart';
 /// Mostra el login si no hi ha sessió, la verificació del correu si encara no
 /// està verificat i, si tot és correcte, l'aplicació.
 class AuthGate extends StatefulWidget {
-  const AuthGate({super.key, required this.authRepository});
+  const AuthGate({
+    super.key,
+    required this.authRepository,
+    this.activityRepository,
+    this.enrollmentRepository,
+  });
 
   final AuthRepository authRepository;
+  final ActivityRepository? activityRepository;
+  final EnrollmentRepository? enrollmentRepository;
 
   @override
   State<AuthGate> createState() => _AuthGateState();
 }
 
 class _AuthGateState extends State<AuthGate> {
+  late final ActivityRepository _activityRepository;
+  late final EnrollmentRepository _enrollmentRepository;
+  DemoEnrollmentRepository? _ownedEnrollmentRepository;
+
+  @override
+  void initState() {
+    super.initState();
+    _activityRepository = widget.activityRepository ?? DemoActivityRepository();
+    final suppliedRepository = widget.enrollmentRepository;
+    if (suppliedRepository != null) {
+      _enrollmentRepository = suppliedRepository;
+    } else {
+      _ownedEnrollmentRepository = DemoEnrollmentRepository(
+        activityRepository: _activityRepository,
+      );
+      _enrollmentRepository = _ownedEnrollmentRepository!;
+    }
+  }
+
+  @override
+  void dispose() {
+    unawaited(_ownedEnrollmentRepository?.dispose());
+    super.dispose();
+  }
+
   // Es crea un sol cop: si es creés a build, cada redibuix tornaria a subscriure's.
   late final Stream<AppUser?> _authState = widget.authRepository
       .authStateChanges();
@@ -46,7 +84,13 @@ class _AuthGateState extends State<AuthGate> {
           );
         }
 
-        return MainShell(user: user, onSignOut: widget.authRepository.signOut);
+        return MainShell(
+          key: ValueKey(user.id),
+          user: user,
+          onSignOut: widget.authRepository.signOut,
+          activityRepository: _activityRepository,
+          enrollmentRepository: _enrollmentRepository,
+        );
       },
     );
   }

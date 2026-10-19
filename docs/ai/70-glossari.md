@@ -15,7 +15,7 @@
 | Municipi | Municipio | `municipality` | `TODO` | |
 | Categoria | Categoría | `category` (String) | `TODO` | ≥ 1 per esdeveniment |
 | Data d'inici / fi | Fecha inicio / fin | `startsAt` | `StartDate` / `EndDate` | |
-| Inscripció («M'hi apunto» / «Apuntat») | Inscripción | `TODO` (enrollment) | `TODO` | No és una compra ni una reserva |
+| Inscripció («M'hi apunto» / «Apuntat») | Inscripción | `EnrollmentRepository`, `EnrollmentViewModel`, `enrolledActivityIds` | `TODO` | Intenció d'assistir; no és una compra ni una reserva. Contracte backend pendent (DP-010) |
 | Desapuntar-se | Desapuntarse | `TODO` (unenroll) | `TODO` | |
 | Assistència («Com va anar?») | Asistencia | `TODO` (attendance) | `TODO` | `null` = desconeguda |
 | Agenda / Calendari | Agenda / Calendario | `TODO` (agenda) | `TODO` | Secció «Agenda» |

@@ -4,18 +4,22 @@ import '../../models/activity.dart';
 import '../../repositories/activity_repository.dart';
 import '../formatters/activity_date_formatter.dart';
 import '../view_models/activity_details_view_model.dart';
+import '../view_models/enrollment_view_model.dart';
 import '../widgets/activity_badges.dart';
 import '../widgets/activity_information_row.dart';
+import '../widgets/enrollment_action.dart';
 
 class ActivityDetailsScreen extends StatefulWidget {
   const ActivityDetailsScreen({
     super.key,
     required this.activityId,
     required this.repository,
+    required this.enrollmentViewModel,
   });
 
   final String activityId;
   final ActivityRepository repository;
+  final EnrollmentViewModel enrollmentViewModel;
 
   @override
   State<ActivityDetailsScreen> createState() => _ActivityDetailsScreenState();
@@ -95,7 +99,10 @@ class _ActivityDetailsScreenState extends State<ActivityDetailsScreen> {
             return Column(
               children: [
                 Expanded(child: _ActivityDetailsContent(activity: activity)),
-                const _ParticipationAction(),
+                _ParticipationAction(
+                  activity: activity,
+                  viewModel: widget.enrollmentViewModel,
+                ),
               ],
             );
           },
@@ -293,7 +300,10 @@ class _CreatorSection extends StatelessWidget {
 }
 
 class _ParticipationAction extends StatelessWidget {
-  const _ParticipationAction();
+  const _ParticipationAction({required this.activity, required this.viewModel});
+
+  final Activity activity;
+  final EnrollmentViewModel viewModel;
 
   @override
   Widget build(BuildContext context) {
@@ -305,28 +315,12 @@ class _ParticipationAction extends StatelessWidget {
       ),
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Tooltip(
-              message: 'Inscripcions disponibles properament',
-              child: FilledButton(
-                onPressed: null,
-                style: ButtonStyle(
-                  minimumSize: WidgetStatePropertyAll(Size(0, 48)),
-                ),
-                child: Text('M’hi apunto'),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Les inscripcions estaran disponibles properament.',
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodySmall
-                  ?.copyWith(color: colors.onSurfaceVariant),
-            ),
-          ],
+        child: EnrollmentAction(
+          viewModel: viewModel,
+          activityId: activity.id,
+          activityTitle: activity.title,
+          primary: true,
+          showHelper: true,
         ),
       ),
     );

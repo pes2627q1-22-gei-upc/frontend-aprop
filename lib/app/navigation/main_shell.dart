@@ -1,17 +1,26 @@
 import 'package:flutter/material.dart';
 
-import '../../features/activities/data/demo_activity_repository.dart';
 import '../../features/activities/presentation/screens/activities_screen.dart';
 import '../../features/activities/presentation/view_models/activities_view_model.dart';
+import '../../features/activities/presentation/view_models/enrollment_view_model.dart';
 import '../../features/activities/repositories/activity_repository.dart';
+import '../../features/activities/repositories/enrollment_repository.dart';
 import '../../features/auth/models/app_user.dart';
 import 'activity_details_route.dart';
 
 class MainShell extends StatefulWidget {
-  const MainShell({super.key, required this.user, required this.onSignOut});
+  const MainShell({
+    super.key,
+    required this.user,
+    required this.onSignOut,
+    required this.activityRepository,
+    required this.enrollmentRepository,
+  });
 
   final AppUser user;
   final VoidCallback onSignOut;
+  final ActivityRepository activityRepository;
+  final EnrollmentRepository enrollmentRepository;
 
   @override
   State<MainShell> createState() => _MainShellState();
@@ -25,6 +34,7 @@ class _MainShellState extends State<MainShell> {
   );
   late final ActivityRepository _activityRepository;
   late final ActivitiesViewModel _activitiesViewModel;
+  late final EnrollmentViewModel _enrollmentViewModel;
 
   static const _titles = ['AProp!', 'Agenda', 'Descobreix', 'Avisos', 'Perfil'];
 
@@ -33,8 +43,13 @@ class _MainShellState extends State<MainShell> {
     //flutter llama porque es la pantalla inicial de la app. Se crea el ViewModel y se carga la lista de actividades.
     super.initState();
 
-    _activityRepository = DemoActivityRepository();
+    _activityRepository = widget.activityRepository;
     _activitiesViewModel = ActivitiesViewModel(repository: _activityRepository);
+    _enrollmentViewModel = EnrollmentViewModel(
+      userId: widget.user.id,
+      repository: widget.enrollmentRepository,
+    );
+    _enrollmentViewModel.load();
 
     _activitiesViewModel.load(); //mientras espera ésto flutter dibuja un indicador de carga. Cuando termina, el ViewModel notifica a la pantalla y ésta se redibuja con la lista de actividades.
   }
@@ -42,6 +57,7 @@ class _MainShellState extends State<MainShell> {
   @override
   void dispose() {
     _activitiesViewModel.dispose();
+    _enrollmentViewModel.dispose();
     super.dispose();
   }
 
@@ -61,6 +77,7 @@ class _MainShellState extends State<MainShell> {
       activityDetailsRoute(
         activityId: activityId,
         repository: _activityRepository,
+        enrollmentViewModel: _enrollmentViewModel,
       ),
     );
   }
@@ -106,6 +123,7 @@ class _MainShellState extends State<MainShell> {
                 0,
                 ActivitiesScreen(
                   viewModel: _activitiesViewModel,
+                  enrollmentViewModel: _enrollmentViewModel,
                   onActivitySelected: _openActivityDetails,
                 ),
               ),

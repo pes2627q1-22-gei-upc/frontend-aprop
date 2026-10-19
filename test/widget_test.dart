@@ -3,7 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:aprop/app/aprop_app.dart';
 import 'package:aprop/features/auth/data/demo_auth_repository.dart';
-import 'package:aprop/features/activities/presentation/widgets/activity_card.dart';
 
 Future<APropApp> signedInApp() async {
   final repository = DemoAuthRepository();
@@ -79,9 +78,7 @@ void main() {
     );
     final offset = tester.state<ScrollableState>(scrollable).position.pixels;
 
-    await tester.tap(
-      find.widgetWithText(ActivityCard, 'Teatre sota les estrelles'),
-    );
+    await tester.tap(find.text('Teatre sota les estrelles'));
     await tester.pumpAndSettle();
     expect(find.widgetWithText(AppBar, 'Activitat'), findsOneWidget);
     expect(find.text('Tarragona'), findsOneWidget);

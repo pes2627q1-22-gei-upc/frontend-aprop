@@ -6,11 +6,13 @@ import 'package:aprop/features/activities/data/demo_activity_repository.dart';
 import 'package:aprop/features/activities/models/activity.dart';
 import 'package:aprop/features/activities/presentation/formatters/activity_date_formatter.dart';
 import 'package:aprop/features/activities/presentation/screens/activity_details_screen.dart';
+import 'package:aprop/features/activities/presentation/view_models/enrollment_view_model.dart';
 import 'package:aprop/features/activities/repositories/activity_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'fake_activity_repository.dart';
+import 'fake_enrollment_repository.dart';
 
 void main() {
   Future<void> pumpDetails(
@@ -23,6 +25,16 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
+    final enrollments = FakeEnrollmentRepository();
+    final enrollmentViewModel = EnrollmentViewModel(
+      userId: 'test-user',
+      repository: enrollments,
+    );
+    enrollmentViewModel.load();
+    addTearDown(() async {
+      enrollmentViewModel.dispose();
+      await enrollments.dispose();
+    });
     await tester.pumpWidget(
       MaterialApp(
         theme: AppTheme.light,
@@ -34,6 +46,7 @@ void main() {
         home: ActivityDetailsScreen(
           activityId: id,
           repository: repository ?? DemoActivityRepository(),
+          enrollmentViewModel: enrollmentViewModel,
         ),
       ),
     );
@@ -73,9 +86,7 @@ void main() {
     expect(find.byType(CircularProgressIndicator), findsNothing);
   });
 
-  testWidgets('Shows official data and keeps enrollment unavailable', (
-    tester,
-  ) async {
+  testWidgets('Shows official data and enables enrollment', (tester) async {
     await pumpDetails(tester);
     await tester.pumpAndSettle();
 
@@ -86,7 +97,7 @@ void main() {
     final enroll = tester.widget<FilledButton>(
       find.widgetWithText(FilledButton, 'M’hi apunto'),
     );
-    expect(enroll.onPressed, isNull);
+    expect(enroll.onPressed, isNotNull);
     await tester.scrollUntilVisible(
       find.text('Font: Agenda Cultural · Generalitat'),
       200,
@@ -168,6 +179,16 @@ void main() {
     final repository = FakeActivityRepository()
       ..findActivity = (_) =>
           DemoActivityRepository().getActivityById('demo-theatre');
+    final enrollments = FakeEnrollmentRepository();
+    final enrollmentViewModel = EnrollmentViewModel(
+      userId: 'test-user',
+      repository: enrollments,
+    );
+    enrollmentViewModel.load();
+    addTearDown(() async {
+      enrollmentViewModel.dispose();
+      await enrollments.dispose();
+    });
     await tester.pumpWidget(
       MaterialApp(
         theme: AppTheme.light,
@@ -178,6 +199,7 @@ void main() {
                 activityDetailsRoute(
                   activityId: 'demo-theatre',
                   repository: repository,
+                  enrollmentViewModel: enrollmentViewModel,
                 ),
               ),
               child: const Text('Obrir des de l’agenda'),
