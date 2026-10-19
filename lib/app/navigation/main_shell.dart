@@ -5,6 +5,7 @@ import '../../features/activities/presentation/view_models/activities_view_model
 import '../../features/activities/presentation/view_models/enrollment_view_model.dart';
 import '../../features/activities/repositories/activity_repository.dart';
 import '../../features/activities/repositories/enrollment_repository.dart';
+import '../../features/agenda/presentation/screens/agenda_screen.dart';
 import '../../features/auth/models/app_user.dart';
 import 'activity_details_route.dart';
 
@@ -132,7 +133,12 @@ class _MainShellState extends State<MainShell> {
               1,
               (context) => _sectionRoot(
                 1,
-                const Center(child: Text('Els teus plans culturals')),
+                AgendaScreen(
+                  userId: widget.user.id,
+                  enrollmentRepository: widget.enrollmentRepository,
+                  activityRepository: _activityRepository,
+                  onActivitySelected: _openActivityDetails,
+                ),
               ),
             ),
             _buildSectionNavigator(
