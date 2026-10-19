@@ -11,6 +11,7 @@ class NewActivity {
     required this.municipality,
     required this.imageAsset,
     required this.creator,
+    this.directions,
     this.price,
   });
 
@@ -21,6 +22,9 @@ class NewActivity {
   final String municipality;
   final String imageAsset;
   final ActivityCreator creator;
+
+  /// Indicacions per arribar-hi, com «entrada pel pati, 2n pis».
+  final String? directions;
 
   /// En euros; `0` vol dir gratuïta.
   final double? price;

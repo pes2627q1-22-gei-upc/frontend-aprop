@@ -26,6 +26,7 @@ class Activity {
     required this.source,
     this.creator,
     this.description,
+    this.directions,
     this.price,
   });
 
@@ -38,6 +39,9 @@ class Activity {
   final ActivitySource source;
   final ActivityCreator? creator;
   final String? description;
+
+  /// Indicacions per arribar-hi, com «entrada pel pati, 2n pis».
+  final String? directions;
 
   /// En euros. `0` vol dir gratuïta; nul vol dir que no se sap.
   final double? price;

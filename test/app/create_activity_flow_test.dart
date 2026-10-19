@@ -29,9 +29,7 @@ void main() {
         find.widgetWithText(TextField, 'Descripció'),
         'Una nit de música',
       );
-      await tester.tap(find.text('Tria una categoria'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Música'));
+      await tester.tap(find.bySemanticsLabel('Música'));
       await tester.pumpAndSettle();
       final form = find.byType(Scrollable).first;
       await tester.scrollUntilVisible(
@@ -41,18 +39,10 @@ void main() {
       );
       await tester.tap(find.text('Tria la data i l’hora'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('D’acord'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('D’acord'));
+      await tester.tap(find.text('Fet'));
       await tester.pumpAndSettle();
       await tester.enterText(find.widgetWithText(TextField, 'Municipi'), 'Vic');
-      await tester.scrollUntilVisible(
-        find.bySemanticsLabel('Imatge 1'),
-        200,
-        scrollable: form,
-      );
-      await tester.tap(find.bySemanticsLabel('Imatge 1'));
-      await tester.pumpAndSettle();
+      // La portada per defecte ja és vàlida: no cal triar-ne cap.
       await tester.scrollUntilVisible(
         find.text('Publica'),
         200,

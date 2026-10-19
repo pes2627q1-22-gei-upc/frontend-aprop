@@ -198,6 +198,56 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Qui decideix:** frontend + backend
 - **Resolució:**
 
+### DP-017 · Contracte del backend per crear activitats no oficials
+- **Estat:** oberta
+- **Obert per:** 2026-10-19 · Claude Code (Opus 5.5) · Taiga #93 / #31
+- **Context:** `ActivityRepository.createActivity`, `NewActivity`, `DemoActivityRepository`, `MainShell._showCreatedActivity`.
+- **Dubte:** no hi ha endpoint per publicar un `NoOficial` a `api-aprop`: ruta, JSON, format del preu (s'ha fet servir `double` en euros, `0` = gratuïta) i si el backend apunta automàticament la persona creadora.
+- **Opcions:** A) el backend crea l'activitat i la inscripció de qui la crea en una sola operació · B) el frontend crida després l'endpoint d'inscripció.
+- **Provisionalment:** `createActivity` en Dart pur i implementació en memòria; `MainShell` apunta la creadora amb `EnrollmentViewModel` (`TODO(DP-017)`).
+- **Qui decideix:** frontend + backend
+- **Resolució:**
+
+### DP-018 · Categories de les activitats: llista i nombre per activitat
+- **Estat:** oberta
+- **Obert per:** 2026-10-19 · Claude Code (Opus 5.5) · Taiga #93 / #31
+- **Context:** `activity_options.dart` (`activityCategories`), `CreateActivityViewModel`, formulari «Crea una activitat».
+- **Dubte:** la llista tancada de categories no està definida, i el CA1 diu «categoria (≥ 1)» mentre que el model `Activity` en té una sola.
+- **Opcions:** A) una sola categoria (com ara) · B) diverses categories (cal canviar `Activity.category` i la llista, la fitxa i l'agenda).
+- **Provisionalment:** una sola categoria triada d'una llista provisional (Música, Teatre, Exposicions) (`TODO(DP-018)`). L'usuari ho ha decidit així de moment per no canviar el model.
+- **Qui decideix:** equip
+- **Resolució:**
+
+### DP-019 · Imatge de portada de les activitats creades
+- **Estat:** oberta
+- **Obert per:** 2026-10-19 · Claude Code (Opus 5.5) · Taiga #93 / #94
+- **Context:** `activity_options.dart` (`activityImageTemplates`), portada i panell «Imatge de portada» del formulari.
+- **Dubte:** el CA1 diu que el cartell és opcional i es puja a S3; les plantilles definitives no existeixen i la pujada (#94) necessita un paquet (com `image_picker`) i un endpoint.
+- **Opcions:** A) imatge obligatòria, amb una plantilla per defecte (com ara) · B) imatge opcional amb un marcador quan no n'hi ha.
+- **Provisionalment:** les tres fotografies de demostració fan de plantilla; la primera és la portada per defecte; «Puja una foto» és al panell però desactivat (`TODO(DP-019)`).
+- **Qui decideix:** equip
+- **Resolució:**
+
+### DP-020 · Ubicació exacta de les activitats creades i paquet de mapes
+- **Estat:** oberta
+- **Obert per:** 2026-10-19 · Claude Code (Opus 5.5) · Taiga #93 / #31 / #21
+- **Context:** camp «Municipi» del formulari; història #21 (mapa). Relacionada amb DP-004.
+- **Dubte:** el CA1 i el CA2 demanen espai/coordenades i que l'activitat surti al mapa; no hi ha paquet de mapes ni servei per passar d'adreça a coordenades.
+- **Opcions:** A) `flutter_map` + OpenStreetMap (sense clau) · B) Google Maps (clau d'API, vegeu DP-004); en tots dos casos, centrar el mapa al municipi i deixar ajustar el marcador.
+- **Provisionalment:** només municipi i indicacions en text, sense coordenades (`TODO(DP-020)`).
+- **Qui decideix:** equip
+- **Resolució:**
+
+### DP-021 · Disseny del formulari de creació sense mockup
+- **Estat:** oberta
+- **Obert per:** 2026-10-19 · Claude Code (Opus 5.5) · Taiga #93
+- **Context:** `CreateActivityScreen`, `start_date_time_sheet.dart`, botó flotant «Crear activitat» (`AppTheme.sage`).
+- **Dubte:** el CA1 cita el botó de la fig. 7, però no hi ha mockup del formulari. L'usuari l'ha dissenyat prenent Partiful i Luma com a referència: portada a dalt, categories en fila horitzontal, rodes de data i hora, camp d'indicacions.
+- **Opcions:** A) validar-lo tal com està · B) fer-ne un mockup i ajustar-lo.
+- **Provisionalment:** implementat així (`TODO(DP-021)`).
+- **Qui decideix:** equip
+- **Resolució:**
+
 ## Resoltes
 
 (cap)

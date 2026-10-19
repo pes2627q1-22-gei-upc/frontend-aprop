@@ -69,6 +69,7 @@ class DemoActivityRepository implements ActivityRepository {
     return null;
   }
 
+  // TODO(DP-017): sense contracte del backend; es guarda només en memòria.
   @override
   Future<Activity> createActivity(NewActivity activity) async {
     final created = Activity(
@@ -81,6 +82,7 @@ class DemoActivityRepository implements ActivityRepository {
       imageAsset: activity.imageAsset,
       creator: activity.creator,
       description: activity.description,
+      directions: activity.directions,
       price: activity.price,
     );
     _activities.add(created);

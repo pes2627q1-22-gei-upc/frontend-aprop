@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import '../../models/activity.dart';
+import '../../models/activity_options.dart';
 import '../../models/new_activity.dart';
 import '../../repositories/activity_repository.dart';
 
@@ -11,11 +12,11 @@ enum CreateActivityField {
   startsAt,
   municipality,
   price,
-  image,
 }
 
 const maxActivityTitleLength = 80;
 const maxActivityDescriptionLength = 1000;
+const maxActivityDirectionsLength = 200;
 const createActivityErrorMessage =
     'No hem pogut publicar l’activitat. Torna-ho a provar.';
 
@@ -36,14 +37,16 @@ class CreateActivityViewModel extends ChangeNotifier {
   final Map<CreateActivityField, String> _fieldErrors = {};
   String? _category;
   DateTime? _startsAt;
-  String? _imageAsset;
+
+  /// Sempre n'hi ha una: per defecte, la primera plantilla.
+  String _imageAsset = activityImageTemplates.first;
   bool _isPublishing = false;
   bool _isDisposed = false;
   String? _errorMessage;
 
   String? get category => _category;
   DateTime? get startsAt => _startsAt;
-  String? get imageAsset => _imageAsset;
+  String get imageAsset => _imageAsset;
   bool get isPublishing => _isPublishing;
   String? get errorMessage => _errorMessage;
   String? fieldError(CreateActivityField field) => _fieldErrors[field];
@@ -70,8 +73,6 @@ class CreateActivityViewModel extends ChangeNotifier {
 
   void setImageAsset(String imageAsset) {
     _imageAsset = imageAsset;
-    _fieldErrors.remove(CreateActivityField.image);
-    _errorMessage = null;
     notifyListeners();
   }
 
@@ -92,13 +93,13 @@ class CreateActivityViewModel extends ChangeNotifier {
     required String description,
     required String municipality,
     required String price,
+    String directions = '',
   }) async {
     if (_isPublishing || _isDisposed) return null;
 
     final parsedPrice = parseActivityPrice(price);
     final category = _category;
     final startsAt = _startsAt;
-    final imageAsset = _imageAsset;
     _errorMessage = null;
     _fieldErrors
       ..clear()
@@ -115,9 +116,6 @@ class CreateActivityViewModel extends ChangeNotifier {
             : null),
         CreateActivityField.price: ?(parsedPrice == null
             ? 'Introdueix un preu vàlid, per exemple 12,50.'
-            : null),
-        CreateActivityField.image: ?(imageAsset == null
-            ? 'Tria una imatge.'
             : null),
       });
 
@@ -137,7 +135,9 @@ class CreateActivityViewModel extends ChangeNotifier {
           category: category!,
           startsAt: startsAt!,
           municipality: municipality.trim(),
-          imageAsset: imageAsset!,
+          // Sense indicacions es desa nul, no un text buit.
+          directions: directions.trim().isEmpty ? null : directions.trim(),
+          imageAsset: _imageAsset,
           creator: _creator,
           price: parsedPrice,
         ),

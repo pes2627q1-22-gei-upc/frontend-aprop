@@ -168,6 +168,13 @@ class _ActivityDetailsContent extends StatelessWidget {
           icon: Icons.location_on_outlined,
           text: activity.municipality,
         ),
+        if (activity.directions case final directions?) ...[
+          const SizedBox(height: 10),
+          ActivityInformationRow(
+            icon: Icons.signpost_outlined,
+            text: directions,
+          ),
+        ],
         if (activity.price case final price?) ...[
           const SizedBox(height: 10),
           ActivityInformationRow(

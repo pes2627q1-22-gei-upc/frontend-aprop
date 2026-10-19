@@ -45,6 +45,7 @@ class FakeActivityRepository implements ActivityRepository {
       imageAsset: activity.imageAsset,
       creator: activity.creator,
       description: activity.description,
+      directions: activity.directions,
       price: activity.price,
     );
   }

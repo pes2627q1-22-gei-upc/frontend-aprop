@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:aprop/features/activities/data/demo_activity_repository.dart';
 import 'package:aprop/features/activities/models/activity.dart';
+import 'package:aprop/features/activities/models/activity_options.dart';
 import 'package:aprop/features/activities/models/new_activity.dart';
 import 'package:aprop/features/activities/presentation/formatters/activity_price_formatter.dart';
 import 'package:aprop/features/activities/presentation/view_models/create_activity_view_model.dart';
@@ -74,7 +75,6 @@ void main() {
       CreateActivityField.category,
       CreateActivityField.startsAt,
       CreateActivityField.municipality,
-      CreateActivityField.image,
     ]) {
       expect(viewModel.fieldError(field), isNotNull, reason: '$field');
     }
@@ -99,6 +99,47 @@ void main() {
       'L’inici ha de ser posterior a ara.',
     );
     expect(repository.created, isEmpty);
+  });
+
+  test('Desa les indicacions netes; buides queden nul·les', () async {
+    viewModel
+      ..setCategory('Música')
+      ..setStartsAt(DateTime(2026, 11, 1, 19))
+      ..setImageAsset(jazzImage);
+
+    await viewModel.publish(
+      title: 'Concert',
+      description: 'Una nit',
+      municipality: 'Vic',
+      price: '',
+      directions: '  Entrada pel pati, 2n pis  ',
+    );
+    await viewModel.publish(
+      title: 'Concert',
+      description: 'Una nit',
+      municipality: 'Vic',
+      price: '',
+      directions: '   ',
+    );
+
+    expect(repository.created.first.directions, 'Entrada pel pati, 2n pis');
+    expect(repository.created.last.directions, isNull);
+  });
+
+  test('Per defecte la portada és la primera plantilla', () async {
+    expect(viewModel.imageAsset, activityImageTemplates.first);
+
+    viewModel
+      ..setCategory('Música')
+      ..setStartsAt(DateTime(2026, 11, 1, 19));
+    await viewModel.publish(
+      title: 'Concert',
+      description: 'Una nit',
+      municipality: 'Vic',
+      price: '',
+    );
+
+    expect(repository.created.single.imageAsset, activityImageTemplates.first);
   });
 
   test('Desa el preu indicat', () async {
@@ -129,7 +170,6 @@ void main() {
 
     expect(viewModel.fieldError(CreateActivityField.title), isNull);
     expect(viewModel.fieldError(CreateActivityField.category), isNull);
-    expect(viewModel.fieldError(CreateActivityField.image), isNull);
     expect(viewModel.fieldError(CreateActivityField.description), isNotNull);
   });
 

@@ -6,8 +6,11 @@ import '../../repositories/activity_repository.dart';
 import '../formatters/activity_date_formatter.dart';
 import '../widgets/activity_badges.dart';
 import '../view_models/create_activity_view_model.dart';
+import '../widgets/start_date_time_sheet.dart';
 
 /// Formulari per publicar una activitat no oficial (Taiga #31).
+// TODO(DP-021): disseny sense mockup aprovat, pendent de validar.
+
 class CreateActivityScreen extends StatefulWidget {
   const CreateActivityScreen({
     super.key,
@@ -35,6 +38,7 @@ class _CreateActivityScreenState extends State<CreateActivityScreen> {
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _municipalityController = TextEditingController();
+  final _directionsController = TextEditingController();
   final _priceController = TextEditingController();
   late final CreateActivityViewModel _viewModel;
 
@@ -54,45 +58,24 @@ class _CreateActivityScreenState extends State<CreateActivityScreen> {
     _titleController.dispose();
     _descriptionController.dispose();
     _municipalityController.dispose();
+    _directionsController.dispose();
     _priceController.dispose();
     super.dispose();
   }
 
   Future<void> _pickStartsAt() async {
     FocusScope.of(context).unfocus();
-    final today = _viewModel.today;
-    final current = _viewModel.startsAt;
+    final tomorrow = _viewModel.today.add(const Duration(days: 1));
 
-    final date = await showDatePicker(
-      context: context,
-      initialDate: current ?? today.add(const Duration(days: 1)),
-      firstDate: today,
-      lastDate: today.add(const Duration(days: 365 * 2)),
-      helpText: 'Data d’inici',
-      cancelText: 'Cancel·la',
-      confirmText: 'D’acord',
+    final startsAt = await showStartDateTimeSheet(
+      context,
+      // Per defecte, demà a les 19.00.
+      initial:
+          _viewModel.startsAt ??
+          DateTime(tomorrow.year, tomorrow.month, tomorrow.day, 19),
+      now: widget.now(),
     );
-    if (date == null || !mounted) return;
-
-    final time = await showTimePicker(
-      context: context,
-      initialTime: current == null
-          ? const TimeOfDay(hour: 19, minute: 0)
-          : TimeOfDay.fromDateTime(current),
-      helpText: 'Hora d’inici',
-      cancelText: 'Cancel·la',
-      confirmText: 'D’acord',
-      // En català es fa servir el format de 24 hores, sense AM/PM.
-      builder: (context, child) => MediaQuery(
-        data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
-        child: child!,
-      ),
-    );
-    if (time == null) return;
-
-    _viewModel.setStartsAt(
-      DateTime(date.year, date.month, date.day, time.hour, time.minute),
-    );
+    if (startsAt != null) _viewModel.setStartsAt(startsAt);
   }
 
   Future<void> _publish() async {
@@ -102,6 +85,7 @@ class _CreateActivityScreenState extends State<CreateActivityScreen> {
       title: _titleController.text,
       description: _descriptionController.text,
       municipality: _municipalityController.text,
+      directions: _directionsController.text,
       price: _priceController.text,
     );
     if (activity != null && mounted) widget.onCreated(activity);
@@ -121,11 +105,15 @@ class _CreateActivityScreenState extends State<CreateActivityScreen> {
           builder: (context, child) {
             final errorMessage = _viewModel.errorMessage;
             final startsAt = _viewModel.startsAt;
-            final imageError = _viewModel.fieldError(CreateActivityField.image);
 
             return ListView(
               padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
               children: [
+                _CoverImage(
+                  imageAsset: _viewModel.imageAsset,
+                  onSelected: _viewModel.setImageAsset,
+                ),
+                const SizedBox(height: 24),
                 TextField(
                   controller: _titleController,
                   textCapitalization: TextCapitalization.sentences,
@@ -157,13 +145,22 @@ class _CreateActivityScreenState extends State<CreateActivityScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                _CategoryField(
+                Text('Categoria', style: theme.textTheme.titleMedium),
+                const SizedBox(height: 8),
+                _CategorySelector(
                   selected: _viewModel.category,
-                  errorText: _viewModel.fieldError(
-                    CreateActivityField.category,
-                  ),
                   onSelected: _viewModel.setCategory,
                 ),
+                if (_viewModel.fieldError(CreateActivityField.category)
+                    case final categoryError?) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    categoryError,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: colors.error,
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 24),
                 InkWell(
                   onTap: _pickStartsAt,
@@ -187,6 +184,7 @@ class _CreateActivityScreenState extends State<CreateActivityScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
+                // TODO(DP-020): falta el punt exacte al mapa (coordenades).
                 TextField(
                   controller: _municipalityController,
                   textCapitalization: TextCapitalization.words,
@@ -200,6 +198,20 @@ class _CreateActivityScreenState extends State<CreateActivityScreen> {
                     errorText: _viewModel.fieldError(
                       CreateActivityField.municipality,
                     ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: _directionsController,
+                  textCapitalization: TextCapitalization.sentences,
+                  textInputAction: TextInputAction.next,
+                  minLines: 1,
+                  maxLines: 3,
+                  maxLength: maxActivityDirectionsLength,
+                  decoration: const InputDecoration(
+                    labelText: 'Indicacions (opcional)',
+                    prefixIcon: Icon(Icons.signpost_outlined),
+                    hintText: 'Per exemple: entrada pel pati, 2n pis',
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -219,22 +231,6 @@ class _CreateActivityScreenState extends State<CreateActivityScreen> {
                     errorText: _viewModel.fieldError(CreateActivityField.price),
                   ),
                 ),
-                const SizedBox(height: 24),
-                Text('Imatge', style: theme.textTheme.titleMedium),
-                const SizedBox(height: 8),
-                _ImageTemplatePicker(
-                  selected: _viewModel.imageAsset,
-                  onSelected: _viewModel.setImageAsset,
-                ),
-                if (imageError != null) ...[
-                  const SizedBox(height: 4),
-                  Text(
-                    imageError,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: colors.error,
-                    ),
-                  ),
-                ],
                 const SizedBox(height: 24),
                 if (errorMessage != null) ...[
                   Semantics(
@@ -279,69 +275,176 @@ const _categoryIcons = {
 IconData _categoryIcon(String category) =>
     _categoryIcons[category] ?? Icons.local_activity_outlined;
 
-/// Camp amb l'aspecte dels altres del formulari. Mostra la categoria triada
-/// amb els colors de la seva insígnia i, en prémer-lo, obre la llista en un
-/// panell inferior.
-class _CategoryField extends StatelessWidget {
-  const _CategoryField({
-    required this.selected,
-    required this.errorText,
-    required this.onSelected,
-  });
+/// Fila horitzontal de categories que es pot desplaçar. Cada una té els
+/// colors de la seva insígnia; només se'n pot triar una.
+class _CategorySelector extends StatelessWidget {
+  const _CategorySelector({required this.selected, required this.onSelected});
 
   final String? selected;
-  final String? errorText;
   final ValueChanged<String> onSelected;
-
-  Future<void> _open(BuildContext context) async {
-    FocusScope.of(context).unfocus();
-    final category = await showModalBottomSheet<String>(
-      context: context,
-      showDragHandle: true,
-      builder: (context) => _CategorySheet(selected: selected),
-    );
-    if (category != null) onSelected(category);
-  }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colors = theme.colorScheme;
-    final selected = this.selected;
+    final colors = Theme.of(context).colorScheme;
 
-    return InkWell(
-      onTap: () => _open(context),
-      borderRadius: BorderRadius.circular(14),
-      child: InputDecorator(
-        isEmpty: false,
-        decoration: InputDecoration(
-          labelText: 'Categoria',
-          prefixIcon: Icon(
-            selected == null
-                ? Icons.category_outlined
-                : _categoryIcon(selected),
-          ),
-          suffixIcon: const Icon(Icons.expand_more),
-          errorText: errorText,
-        ),
-        child: selected == null
-            ? Text(
-                'Tria una categoria',
-                style: TextStyle(color: colors.onSurfaceVariant),
-              )
-            : Align(
-                alignment: Alignment.centerLeft,
-                child: ActivityCategoryBadge(category: selected),
-              ),
+    return SizedBox(
+      height: 48,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: activityCategories.length,
+        separatorBuilder: (context, index) => const SizedBox(width: 8),
+        itemBuilder: (context, index) {
+          final category = activityCategories[index];
+          return _CategoryPill(
+            label: category,
+            icon: _categoryIcon(category),
+            colors: ActivityCategoryBadge.colorsFor(category, colors),
+            isSelected: selected == category,
+            onTap: () => onSelected(category),
+          );
+        },
       ),
     );
   }
 }
 
-class _CategorySheet extends StatelessWidget {
-  const _CategorySheet({required this.selected});
+class _CategoryPill extends StatelessWidget {
+  const _CategoryPill({
+    required this.label,
+    required this.icon,
+    required this.colors,
+    required this.isSelected,
+    required this.onTap,
+  });
 
-  final String? selected;
+  final String label;
+  final IconData icon;
+  final ({Color background, Color foreground}) colors;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    // Seleccionada: fons del color fort i text clar; si no, els colors suaus
+    // de la insígnia.
+    final background = isSelected ? colors.foreground : colors.background;
+    final foreground = isSelected
+        ? Theme.of(context).colorScheme.onPrimary
+        : colors.foreground;
+
+    return Semantics(
+      button: true,
+      selected: isSelected,
+      label: label,
+      excludeSemantics: true,
+      child: Material(
+        color: background,
+        shape: StadiumBorder(
+          side: BorderSide(color: colors.foreground, width: isSelected ? 2 : 1),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  isSelected ? Icons.check : icon,
+                  size: 20,
+                  color: foreground,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  label,
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                    color: foreground,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Portada de l'activitat, a dalt del formulari. Sempre n'hi ha una (la
+/// primera plantilla per defecte); el botó del llapis obre el panell per
+/// canviar-la.
+class _CoverImage extends StatelessWidget {
+  const _CoverImage({required this.imageAsset, required this.onSelected});
+
+  final String imageAsset;
+  final ValueChanged<String> onSelected;
+
+  Future<void> _change(BuildContext context) async {
+    FocusScope.of(context).unfocus();
+    final selected = await showModalBottomSheet<String>(
+      context: context,
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder: (context) => _CoverImageSheet(selected: imageAsset),
+    );
+    if (selected != null) onSelected(selected);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+
+    return Semantics(
+      button: true,
+      label: 'Imatge de portada. Canvia la imatge',
+      excludeSemantics: true,
+      child: GestureDetector(
+        onTap: () => _change(context),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: SizedBox(
+            height: 180,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                Image.asset(
+                  imageAsset,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => ColoredBox(
+                    color: colors.surfaceContainerHighest,
+                    child: const Icon(Icons.image_outlined, size: 48),
+                  ),
+                ),
+                Positioned(
+                  right: 12,
+                  bottom: 12,
+                  child: IconButton.filled(
+                    onPressed: () => _change(context),
+                    tooltip: 'Canvia la imatge',
+                    icon: const Icon(Icons.edit_outlined),
+                    style: IconButton.styleFrom(
+                      backgroundColor: colors.surface,
+                      foregroundColor: colors.primary,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Panell per canviar la portada: pujar una foto pròpia (encara no
+/// disponible, Taiga #94) o triar una de les plantilles.
+class _CoverImageSheet extends StatelessWidget {
+  const _CoverImageSheet({required this.selected});
+
+  final String selected;
 
   @override
   Widget build(BuildContext context) {
@@ -349,104 +452,56 @@ class _CategorySheet extends StatelessWidget {
     final colors = theme.colorScheme;
 
     return SafeArea(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
-            child: Text(
-              'Tria una categoria',
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              'Imatge de portada',
               style: theme.textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.w700,
               ),
             ),
-          ),
-          for (final category in activityCategories)
-            _CategoryOption(
-              category: category,
-              colors: ActivityCategoryBadge.colorsFor(category, colors),
-              isSelected: category == selected,
+            const SizedBox(height: 16),
+            // Preparat per a la tasca #94: de moment no es pot pujar.
+            Tooltip(
+              message: 'Pujar fotos estarà disponible properament',
+              child: OutlinedButton.icon(
+                onPressed: null,
+                icon: const Icon(Icons.add_photo_alternate_outlined),
+                // TODO(DP-019): activar amb la tasca #94.
+                label: const Text('Puja una foto (properament)'),
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size.fromHeight(52),
+                ),
+              ),
             ),
-          const SizedBox(height: 16),
-        ],
-      ),
-    );
-  }
-}
-
-class _CategoryOption extends StatelessWidget {
-  const _CategoryOption({
-    required this.category,
-    required this.colors,
-    required this.isSelected,
-  });
-
-  final String category;
-  final ({Color background, Color foreground}) colors;
-  final bool isSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      child: Material(
-        color: isSelected ? colors.background : Colors.transparent,
-        borderRadius: BorderRadius.circular(16),
-        child: ListTile(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          selected: isSelected,
-          onTap: () => Navigator.of(context).pop(category),
-          leading: CircleAvatar(
-            backgroundColor: colors.background,
-            foregroundColor: colors.foreground,
-            child: Icon(_categoryIcon(category)),
-          ),
-          title: Text(
-            category,
-            style: theme.textTheme.titleMedium?.copyWith(
-              color: theme.colorScheme.onSurface,
-              fontWeight: isSelected ? FontWeight.w700 : null,
+            const SizedBox(height: 20),
+            Text(
+              'O tria una de les nostres',
+              style: theme.textTheme.titleMedium?.copyWith(
+                color: colors.onSurfaceVariant,
+              ),
             ),
-          ),
-          trailing: isSelected
-              ? Icon(Icons.check_circle, color: colors.foreground)
-              : null,
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 12,
+              runSpacing: 12,
+              children: [
+                for (final (index, asset) in activityImageTemplates.indexed)
+                  _ImageOption(
+                    label: 'Imatge ${index + 1}',
+                    isSelected: selected == asset,
+                    onTap: () => Navigator.of(context).pop(asset),
+                    child: Image.asset(asset, fit: BoxFit.cover),
+                  ),
+              ],
+            ),
+          ],
         ),
       ),
-    );
-  }
-}
-
-/// Una de les imatges de plantilla. Mentre no es puguin pujar fotos pròpies
-/// (Taiga #94), l'activitat n'ha de tenir una.
-class _ImageTemplatePicker extends StatelessWidget {
-  const _ImageTemplatePicker({
-    required this.selected,
-    required this.onSelected,
-  });
-
-  final String? selected;
-  final ValueChanged<String> onSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    return Wrap(
-      spacing: 12,
-      runSpacing: 12,
-      children: [
-        for (final (index, asset) in activityImageTemplates.indexed)
-          _ImageOption(
-            label: 'Imatge ${index + 1}',
-            isSelected: selected == asset,
-            onTap: () => onSelected(asset),
-            child: Image.asset(asset, fit: BoxFit.cover),
-          ),
-      ],
     );
   }
 }

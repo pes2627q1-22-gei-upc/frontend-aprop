@@ -144,7 +144,7 @@ class _MainShellState extends State<MainShell> {
 
   /// Qui crea una activitat hi queda apuntat. Després es veu la seva fitxa en
   /// lloc del formulari i, en tornar enrere, la llista ja la inclou.
-  // TODO(backend): quan el backend apunti la persona creadora en crear
+  // TODO(DP-017): si el backend apunta la persona creadora en crear
   // l'activitat, aquesta crida a enroll sobrarà.
   void _showCreatedActivity(NavigatorState navigator, Activity activity) {
     _enrollmentViewModel.enroll(activity.id);
