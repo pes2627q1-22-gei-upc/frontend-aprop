@@ -65,7 +65,7 @@ La composició a `app/` tria i injecta la implementació del repositori. Així p
 5. `core/` no importa `features/` ni `app/`. Un component específic d’activitats es queda a `activities/presentation/widgets/`.
 6. Les funcionalitats no importen `app/`; la navegació i la composició connecten les funcionalitats des d’`app/`.
 7. Entre funcionalitats es poden compartir models i contractes explícits. No s’importa la pantalla, el ViewModel o el repositori concret d’una altra funcionalitat per reutilitzar el seu estat.
-8. `EnrollmentRepository` és la font compartida d'inscripcions per usuari. Llista i detall comparteixen un `EnrollmentViewModel`; l'agenda consumirà el mateix contracte des del seu propi ViewModel. No mantenim booleans independents en cada pantalla.
+8. `EnrollmentRepository` és la font compartida d'inscripcions per usuari. Llista i detall comparteixen un `EnrollmentViewModel`; l'agenda consumeix el mateix contracte des del seu propi `AgendaViewModel` (vegeu `docs/calendar.md`). No mantenim booleans independents en cada pantalla.
 
 L’estat visual local, com l’índex del menú actual, pot utilitzar `setState`. La càrrega d’activitats, els errors i les accions del catàleg es coordinaran des del ViewModel. Qui creï un recurs que requereixi alliberament també ha de gestionar-ne el cicle de vida.
 
