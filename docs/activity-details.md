@@ -49,8 +49,12 @@ onTap: () => onActivitySelected(activity.id)
 When the calendar screen exists, wire it in MainShell's section 1 root:
 
 ```dart
-// Wiring example only: AgendaScreen is implemented by the calendar teammate.
-AgendaScreen(onActivitySelected: _openActivityDetails)
+AgendaScreen(
+  userId: widget.user.id,
+  enrollmentRepository: widget.enrollmentRepository,
+  activityRepository: _activityRepository,
+  onActivitySelected: _openActivityDetails,
+)
 ```
 
 Agenda must not import MainShell, the detail screen, the detail ViewModel or the demo repository. App composition supplies the callback. The ID must be a real catalogue ID; do not derive it from the title or date.

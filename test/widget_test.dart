@@ -50,7 +50,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.widgetWithText(AppBar, 'Agenda'), findsOneWidget);
-    expect(find.text('Els teus plans culturals').hitTestable(), findsOneWidget);
+    expect(find.byTooltip('Mes següent').hitTestable(), findsOneWidget);
 
     await tester.tap(find.widgetWithText(NavigationDestination, 'Inici'));
     await tester.pumpAndSettle();
