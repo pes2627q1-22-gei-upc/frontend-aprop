@@ -12,18 +12,23 @@ class ActivitiesScreen extends StatelessWidget {
     required this.viewModel,
     required this.enrollmentViewModel,
     required this.onActivitySelected,
+    this.onAssistantPressed,
   });
 
   final ActivitiesViewModel viewModel;
   final EnrollmentViewModel enrollmentViewModel;
   final ValueChanged<String> onActivitySelected;
+  final VoidCallback? onAssistantPressed;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         // La llista és l'única vista implementada de moment.
-        const ActivitiesHeader(selectedView: ActivitiesView.list),
+        ActivitiesHeader(
+          selectedView: ActivitiesView.list,
+          onAssistantPressed: onAssistantPressed,
+        ),
         Expanded(child: _buildContent()),
       ],
     );

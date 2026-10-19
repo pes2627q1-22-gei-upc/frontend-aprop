@@ -24,10 +24,12 @@ Les tasques #75 i #82 afegeixen el detall i les inscripcions compartides entre l
 | `features/activities/presentation/view_models/` | Estat de la pantalla i coordinació de les accions amb els repositoris. |
 | `features/activities/presentation/widgets/` | Targetes i components propis de les activitats. |
 | `features/auth/` | Inici de sessió, registre i sessió, amb les mateixes capes que `activities/`. |
+| `features/assistant/` | Conversa amb l'assistent cultural («Assistent»), interpretació de consultes i recomanació d'activitats. |
 | `assets/images/` | Fotografies i imatges de contingut. |
 | `assets/branding/` | Logotip i recursos d’identitat d’AProp!. |
 | `assets/icons/` | Icones de tercers que no ofereix Material, com el logotip de Google. |
 | `test/features/activities/` | Proves del model de presentació i la UI d’activitats. |
+| `test/features/assistant/` | Proves del model (R12), repositori de demostració, ViewModel i pantalla de l'assistent. |
 | `test/features/auth/` | Proves dels ViewModels, validacions, repositori de demostració i pantalles d'accés. |
 | `test/app/` | Proves del recorregut complet de l'aplicació, com entrar, registrar-se i tancar la sessió. |
 

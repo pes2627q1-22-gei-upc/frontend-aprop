@@ -14,7 +14,9 @@ Enrollment (**Taiga #82**) works from list cards and event details: «M’hi apu
 
 Agenda (**Taiga #39 / #84**) shows a monthly calendar of the user's own plans: a dot on days with plans, today outlined and the selected day in green. Selecting a day lists its plans immediately, with a specific message for empty days and loading/error states with retry; a plan's image or title opens its details inside Agenda.
 
-Location, date, category, map and assistant controls are still disabled. Unenrollment, event chat, creator profile and original-source links remain unavailable. The catalogue, authentication and enrollment use demo repositories; backend integration remains pending (DP-010 for enrollment).
+Location, date, category and map controls are still disabled, as is voice input inside the assistant. Unenrollment, event chat, creator profile and original-source links remain unavailable. The catalogue, authentication, enrollment and assistant use demo repositories; backend integration remains pending (DP-010 for enrollment, DP-016 for the assistant).
+
+The cultural assistant («Assistent», Fig. 10) opens from the Inici header, displays differentiated user/assistant bubbles, interprets activity type, municipality and date intervals, and renders matching recommendations with the standard `ActivityCard` synchronized with `EnrollmentViewModel`. Returning from an activity detail preserves the conversation.
 
 See [the event details guide](docs/activity-details.md), [the enrollment walkthrough](docs/event-enrollment.md) and [the calendar guide](docs/calendar.md) for the implementation flows.
 
@@ -38,6 +40,8 @@ lib/
         screens/
         view_models/
         widgets/
+    assistant/
+      (mateixes capes que activities/)
     auth/
       (mateixes capes que activities/)
 assets/
@@ -49,6 +53,7 @@ test/
   app/
   features/
     activities/
+    assistant/
     auth/
 docs/
   architecture.md
