@@ -30,7 +30,7 @@
 | Avís / Notificació | Aviso / Notificación | `TODO` (notification) | `TODO` | Secció «Avisos» |
 | Denúncia | Denuncia | `TODO` (report) | `TODO` | Usuari / Esdeveniment |
 | Administrador | Administrador | — | `TODO` (admin) | Web d'administració |
-| Xatbot / Assistent | Chatbot / Asistente | `TODO` (assistant) | `TODO` (gemini_client) | La UI diu «Assistent» |
+| Xatbot / Assistent | Chatbot / Asistente | `AssistantRepository`, `AssistantViewModel`, `AssistantMessage`, `AssistantScreen` | `TODO` (gemini_client) | La UI diu «Assistent». Contracte backend pendent (DP-016) |
 | Xat de l'activitat | Chat del evento | `TODO` (eventChat) | `TODO` | Cal inscripció |
 | Test d'interessos | Test de intereses | `TODO` (interestTest) | `TODO` | 25 esdeveniments |
 | Interès | Interés | `TODO` | `TODO` | /pes derivat |

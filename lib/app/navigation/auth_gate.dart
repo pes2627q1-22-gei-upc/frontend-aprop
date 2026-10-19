@@ -6,6 +6,8 @@ import '../../features/activities/data/demo_activity_repository.dart';
 import '../../features/activities/data/demo_enrollment_repository.dart';
 import '../../features/activities/repositories/activity_repository.dart';
 import '../../features/activities/repositories/enrollment_repository.dart';
+import '../../features/assistant/data/demo_assistant_repository.dart';
+import '../../features/assistant/repositories/assistant_repository.dart';
 import '../../features/auth/models/app_user.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/verify_email_screen.dart';
@@ -20,11 +22,13 @@ class AuthGate extends StatefulWidget {
     required this.authRepository,
     this.activityRepository,
     this.enrollmentRepository,
+    this.assistantRepository,
   });
 
   final AuthRepository authRepository;
   final ActivityRepository? activityRepository;
   final EnrollmentRepository? enrollmentRepository;
+  final AssistantRepository? assistantRepository;
 
   @override
   State<AuthGate> createState() => _AuthGateState();
@@ -33,6 +37,7 @@ class AuthGate extends StatefulWidget {
 class _AuthGateState extends State<AuthGate> {
   late final ActivityRepository _activityRepository;
   late final EnrollmentRepository _enrollmentRepository;
+  late final AssistantRepository _assistantRepository;
   DemoEnrollmentRepository? _ownedEnrollmentRepository;
 
   @override
@@ -48,6 +53,9 @@ class _AuthGateState extends State<AuthGate> {
       );
       _enrollmentRepository = _ownedEnrollmentRepository!;
     }
+    _assistantRepository =
+        widget.assistantRepository ??
+        DemoAssistantRepository(activityRepository: _activityRepository);
   }
 
   @override
@@ -90,6 +98,7 @@ class _AuthGateState extends State<AuthGate> {
           onSignOut: widget.authRepository.signOut,
           activityRepository: _activityRepository,
           enrollmentRepository: _enrollmentRepository,
+          assistantRepository: _assistantRepository,
         );
       },
     );

@@ -3,8 +3,12 @@ import 'package:flutter/material.dart';
 import '../../features/activities/presentation/screens/activities_screen.dart';
 import '../../features/activities/presentation/view_models/activities_view_model.dart';
 import '../../features/activities/presentation/view_models/enrollment_view_model.dart';
+import '../../features/activities/presentation/widgets/enrollment_action.dart';
 import '../../features/activities/repositories/activity_repository.dart';
 import '../../features/activities/repositories/enrollment_repository.dart';
+import '../../features/assistant/presentation/screens/assistant_screen.dart';
+import '../../features/assistant/presentation/view_models/assistant_view_model.dart';
+import '../../features/assistant/repositories/assistant_repository.dart';
 import '../../features/auth/models/app_user.dart';
 import 'activity_details_route.dart';
 
@@ -15,12 +19,14 @@ class MainShell extends StatefulWidget {
     required this.onSignOut,
     required this.activityRepository,
     required this.enrollmentRepository,
+    required this.assistantRepository,
   });
 
   final AppUser user;
   final VoidCallback onSignOut;
   final ActivityRepository activityRepository;
   final EnrollmentRepository enrollmentRepository;
+  final AssistantRepository assistantRepository;
 
   @override
   State<MainShell> createState() => _MainShellState();
@@ -35,6 +41,7 @@ class _MainShellState extends State<MainShell> {
   late final ActivityRepository _activityRepository;
   late final ActivitiesViewModel _activitiesViewModel;
   late final EnrollmentViewModel _enrollmentViewModel;
+  late final AssistantViewModel _assistantViewModel;
 
   static const _titles = ['AProp!', 'Agenda', 'Descobreix', 'Avisos', 'Perfil'];
 
@@ -49,6 +56,9 @@ class _MainShellState extends State<MainShell> {
       userId: widget.user.id,
       repository: widget.enrollmentRepository,
     );
+    _assistantViewModel = AssistantViewModel(
+      repository: widget.assistantRepository,
+    );
     _enrollmentViewModel.load();
 
     _activitiesViewModel.load(); //mientras espera ésto flutter dibuja un indicador de carga. Cuando termina, el ViewModel notifica a la pantalla y ésta se redibuja con la lista de actividades.
@@ -58,6 +68,7 @@ class _MainShellState extends State<MainShell> {
   void dispose() {
     _activitiesViewModel.dispose();
     _enrollmentViewModel.dispose();
+    _assistantViewModel.dispose();
     super.dispose();
   }
 
@@ -78,6 +89,34 @@ class _MainShellState extends State<MainShell> {
         activityId: activityId,
         repository: _activityRepository,
         enrollmentViewModel: _enrollmentViewModel,
+      ),
+    );
+  }
+
+  void _openAssistant() {
+    final navigator = _sectionNavigatorKeys[0].currentState!;
+    if (navigator.canPop()) return;
+    navigator.push<void>(
+      MaterialPageRoute<void>(
+        settings: const RouteSettings(name: '/assistant'),
+        builder: (context) => AssistantScreen(
+          viewModel: _assistantViewModel,
+          onActivitySelected: (activityId) {
+            if (!(ModalRoute.of(context)?.isCurrent ?? true)) return;
+            Navigator.of(context).push<void>(
+              activityDetailsRoute(
+                activityId: activityId,
+                repository: _activityRepository,
+                enrollmentViewModel: _enrollmentViewModel,
+              ),
+            );
+          },
+          participationActionBuilder: (activity) => EnrollmentAction(
+            viewModel: _enrollmentViewModel,
+            activityId: activity.id,
+            activityTitle: activity.title,
+          ),
+        ),
       ),
     );
   }
@@ -125,6 +164,7 @@ class _MainShellState extends State<MainShell> {
                   viewModel: _activitiesViewModel,
                   enrollmentViewModel: _enrollmentViewModel,
                   onActivitySelected: _openActivityDetails,
+                  onAssistantPressed: _openAssistant,
                 ),
               ),
             ),

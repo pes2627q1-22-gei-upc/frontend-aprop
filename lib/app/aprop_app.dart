@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../features/auth/repositories/auth_repository.dart';
 import '../features/activities/repositories/activity_repository.dart';
 import '../features/activities/repositories/enrollment_repository.dart';
+import '../features/assistant/repositories/assistant_repository.dart';
 import 'navigation/auth_gate.dart';
 import 'theme/app_theme.dart';
 
@@ -12,11 +13,13 @@ class APropApp extends StatelessWidget {
     required this.authRepository,
     this.activityRepository,
     this.enrollmentRepository,
+    this.assistantRepository,
   });
 
   final AuthRepository authRepository;
   final ActivityRepository? activityRepository;
   final EnrollmentRepository? enrollmentRepository;
+  final AssistantRepository? assistantRepository;
 
   @override
   Widget build(BuildContext context) {
@@ -29,10 +32,12 @@ class APropApp extends StatelessWidget {
           authRepository,
           activityRepository,
           enrollmentRepository,
+          assistantRepository,
         )),
         authRepository: authRepository,
         activityRepository: activityRepository,
         enrollmentRepository: enrollmentRepository,
+        assistantRepository: assistantRepository,
       ),
     );
   }

@@ -12,7 +12,9 @@ Event details (**Taiga #75**) open when an event image or title is tapped. The s
 
 Enrollment (**Taiga #82**) works from list cards and event details: «M’hi apunto» → «Apuntant…» → «Apuntat ✓». Both views share the same state, duplicate taps are ignored, and failed requests display an error and allow retry. Demo enrollments are isolated by account and survive sign-out/sign-in during the same app run; they are lost when the application restarts. The shared repository exposes confirmed activity IDs for the calendar teammate, whose screen is still pending on this branch.
 
-Location, date, category, map and assistant controls are still disabled. Unenrollment, event chat, creator profile and original-source links remain unavailable. The catalogue, authentication and enrollment use demo repositories; backend integration remains pending (DP-010 for enrollment).
+Location, date, category and map controls are still disabled, as is voice input inside the assistant. Unenrollment, event chat, creator profile and original-source links remain unavailable. The catalogue, authentication, enrollment and assistant use demo repositories; backend integration remains pending (DP-010 for enrollment, DP-016 for the assistant).
+
+The cultural assistant («Assistent», Fig. 10) opens from the Inici header, displays differentiated user/assistant bubbles, interprets activity type, municipality and date intervals, and renders matching recommendations with the standard `ActivityCard` synchronized with `EnrollmentViewModel`. Returning from an activity detail preserves the conversation.
 
 See [the event details guide](docs/activity-details.md) and [the enrollment walkthrough](docs/event-enrollment.md) for the implementation flow and calendar integration contracts.
 
@@ -36,6 +38,8 @@ lib/
         screens/
         view_models/
         widgets/
+    assistant/
+      (mateixes capes que activities/)
     auth/
       (mateixes capes que activities/)
 assets/
@@ -47,6 +51,7 @@ test/
   app/
   features/
     activities/
+    assistant/
     auth/
 docs/
   architecture.md
