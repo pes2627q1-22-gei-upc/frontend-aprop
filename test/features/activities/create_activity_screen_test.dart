@@ -1,8 +1,11 @@
 import 'package:aprop/app/theme/app_theme.dart';
+import 'package:aprop/features/activities/data/demo_location_repository.dart';
 import 'package:aprop/features/activities/models/activity.dart';
+import 'package:aprop/features/activities/models/geo_point.dart';
 import 'package:aprop/features/activities/presentation/screens/create_activity_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import 'fake_activity_repository.dart';
 
@@ -22,6 +25,7 @@ void main() {
         theme: AppTheme.light,
         home: CreateActivityScreen(
           repository: repository,
+          locationRepository: const DemoLocationRepository(),
           creator: const ActivityCreator(name: 'Laia Soler', isFriend: false),
           onCreated: published.add,
           now: () => DateTime(2026, 10, 19, 12),
@@ -30,8 +34,15 @@ void main() {
     );
   }
 
-  Future<void> fill(WidgetTester tester, String label, String text) {
-    return tester.enterText(find.widgetWithText(TextField, label), text);
+  Future<void> fill(WidgetTester tester, String label, String text) async {
+    final field = find.widgetWithText(TextField, label);
+    // Els camps de sota no es construeixen fins que no s'hi arriba.
+    await tester.scrollUntilVisible(
+      field,
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.enterText(field, text);
   }
 
   Future<void> tapVisible(WidgetTester tester, Finder finder) async {
@@ -76,7 +87,42 @@ void main() {
     expect(sent.price, 5);
     expect(sent.imageAsset, 'assets/images/teatre_sota_les_estrelles.jpg');
     expect(sent.directions, 'Entrada pel pati');
+    // En escriure «Vic», el marcador s'ha posat al centre del municipi.
+    expect(sent.location, const GeoPoint(latitude: 41.9301, longitude: 2.2549));
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('El mapa mostra el marcador i tocar-lo l’ajusta', (tester) async {
+    await pumpForm(tester);
+    GoogleMap map() => tester.widget<GoogleMap>(find.byType(GoogleMap));
+    // Fins al text d'ajuda, que és just a sota del mapa.
+    await tester.scrollUntilVisible(
+      find.textContaining('toca el mapa'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+
+    expect(map().markers, isEmpty);
+    expect(
+      find.text('Escriu el municipi o toca el mapa per marcar el lloc.'),
+      findsOneWidget,
+    );
+
+    await fill(tester, 'Municipi', 'Vic');
+    await tester.pump();
+    expect(map().markers.single.position, const LatLng(41.9301, 2.2549));
+    expect(
+      find.text('Marcador al centre del municipi: toca el lloc exacte.'),
+      findsOneWidget,
+    );
+
+    map().onTap!(const LatLng(41.9300, 2.2545));
+    await tester.pump();
+    expect(map().markers.single.position, const LatLng(41.9300, 2.2545));
+    expect(
+      find.text('Lloc marcat. Pots tornar a tocar el mapa per canviar-lo.'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('El panell de la portada té les plantilles i la pujada', (

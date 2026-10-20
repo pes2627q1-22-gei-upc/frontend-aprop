@@ -2,8 +2,10 @@ import 'package:flutter/foundation.dart';
 
 import '../../models/activity.dart';
 import '../../models/activity_options.dart';
+import '../../models/geo_point.dart';
 import '../../models/new_activity.dart';
 import '../../repositories/activity_repository.dart';
+import '../../repositories/location_repository.dart';
 
 enum CreateActivityField {
   title,
@@ -26,11 +28,13 @@ const createActivityErrorMessage =
 class CreateActivityViewModel extends ChangeNotifier {
   CreateActivityViewModel({
     required this._repository,
+    required this._locationRepository,
     required this._creator,
     this._now = DateTime.now,
   });
 
   final ActivityRepository _repository;
+  final LocationRepository _locationRepository;
   final ActivityCreator _creator;
   final DateTime Function() _now;
 
@@ -40,6 +44,13 @@ class CreateActivityViewModel extends ChangeNotifier {
 
   /// Sempre n'hi ha una: per defecte, la primera plantilla.
   String _imageAsset = activityImageTemplates.first;
+
+  /// Punt del marcador al mapa. Es posa al centre del municipi quan se'l
+  /// troba, i l'usuari el pot ajustar.
+  GeoPoint? _location;
+  GeoPoint? _municipalityCenter;
+  bool _locationAdjusted = false;
+  int _lookupRequest = 0;
   bool _isPublishing = false;
   bool _isDisposed = false;
   String? _errorMessage;
@@ -47,6 +58,12 @@ class CreateActivityViewModel extends ChangeNotifier {
   String? get category => _category;
   DateTime? get startsAt => _startsAt;
   String get imageAsset => _imageAsset;
+  GeoPoint? get location => _location;
+
+  /// `true` si el marcador és al centre del municipi trobat i encara no
+  /// s'ha ajustat.
+  bool get isLocationApproximate =>
+      _location != null && _location == _municipalityCenter;
   bool get isPublishing => _isPublishing;
   String? get errorMessage => _errorMessage;
   String? fieldError(CreateActivityField field) => _fieldErrors[field];
@@ -73,6 +90,37 @@ class CreateActivityViewModel extends ChangeNotifier {
 
   void setImageAsset(String imageAsset) {
     _imageAsset = imageAsset;
+    notifyListeners();
+  }
+
+  /// Busca el municipi escrit per centrar-hi el mapa. Si el troba i és un
+  /// municipi nou, hi mou el marcador; si no el troba, el marcador es queda on
+  /// l'usuari l'hagi posat.
+  Future<void> locateMunicipality(String name) async {
+    // Si arriben respostes desordenades, només val la de l'última petició.
+    final request = ++_lookupRequest;
+    final center = name.trim().isEmpty
+        ? null
+        : await _locationRepository.findMunicipality(name);
+    if (_isDisposed || request != _lookupRequest) return;
+
+    if (center == null) {
+      _municipalityCenter = null;
+      if (!_locationAdjusted) _location = null;
+    } else if (center != _municipalityCenter) {
+      _municipalityCenter = center;
+      _location = center;
+      _locationAdjusted = false;
+    } else {
+      return;
+    }
+    notifyListeners();
+  }
+
+  /// L'usuari ha tocat el mapa o ha arrossegat el marcador.
+  void setLocation(GeoPoint location) {
+    _location = location;
+    _locationAdjusted = true;
     notifyListeners();
   }
 
@@ -138,6 +186,7 @@ class CreateActivityViewModel extends ChangeNotifier {
           // Sense indicacions es desa nul, no un text buit.
           directions: directions.trim().isEmpty ? null : directions.trim(),
           imageAsset: _imageAsset,
+          location: _location,
           creator: _creator,
           price: parsedPrice,
         ),

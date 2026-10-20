@@ -79,6 +79,8 @@ Substitueix `ID_DEL_DISPOSITIU` per l’identificador del teu Android. Per revis
 flutter run -d chrome
 ```
 
+El mapa del formulari de creació necessita una clau de Google Maps a `android/local.properties`; sense clau surt en gris. Vegeu [Google Maps](docs/google-maps.md).
+
 Android i iOS són els objectius mòbils. La web és una eina de desenvolupament i no substitueix la comprovació en mòbil.
 
 Abans de publicar una PR:

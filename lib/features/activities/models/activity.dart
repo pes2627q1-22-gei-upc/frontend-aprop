@@ -1,3 +1,5 @@
+import 'geo_point.dart';
+
 enum ActivitySource { culturalAgenda, community }
 
 class ActivityCreator {
@@ -27,6 +29,7 @@ class Activity {
     this.creator,
     this.description,
     this.directions,
+    this.location,
     this.price,
   });
 
@@ -42,6 +45,9 @@ class Activity {
 
   /// Indicacions per arribar-hi, com «entrada pel pati, 2n pis».
   final String? directions;
+
+  /// Punt exacte al mapa, si se sap.
+  final GeoPoint? location;
 
   /// En euros. `0` vol dir gratuïta; nul vol dir que no se sap.
   final double? price;

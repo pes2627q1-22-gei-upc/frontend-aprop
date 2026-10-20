@@ -83,6 +83,7 @@ class DemoActivityRepository implements ActivityRepository {
       creator: activity.creator,
       description: activity.description,
       directions: activity.directions,
+      location: activity.location,
       price: activity.price,
     );
     _activities.add(created);

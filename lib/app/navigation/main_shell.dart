@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../features/activities/data/demo_location_repository.dart';
 import '../../features/activities/models/activity.dart';
 import '../../features/activities/presentation/screens/activities_screen.dart';
 import '../../features/activities/presentation/screens/create_activity_screen.dart';
@@ -132,6 +133,7 @@ class _MainShellState extends State<MainShell> {
         settings: const RouteSettings(name: '/activities/new'),
         builder: (context) => CreateActivityScreen(
           repository: _activityRepository,
+          locationRepository: const DemoLocationRepository(),
           creator: ActivityCreator(
             name: '${widget.user.firstName} ${widget.user.lastName}',
             isFriend: false,
