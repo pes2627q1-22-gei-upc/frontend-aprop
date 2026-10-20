@@ -41,19 +41,19 @@ class ActivityCard extends StatelessWidget {
               Row(
                 children: [
                   ClipOval(
-                    child: Image.asset(
-                      creator.avatarAsset,
-                      width: 32,
-                      height: 32,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return const SizedBox(
-                          width: 32,
-                          height: 32,
-                          child: Icon(Icons.person_outline),
-                        );
-                      },
-                    ),
+                    // Sense foto (qui crea una activitat no en té) es mostra
+                    // la mateixa icona que si la foto no es pot carregar.
+                    child: switch (creator.avatarAsset) {
+                      final avatar? => Image.asset(
+                        avatar,
+                        width: 32,
+                        height: 32,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) =>
+                            const _AvatarPlaceholder(),
+                      ),
+                      null => const _AvatarPlaceholder(),
+                    },
                   ),
                   const SizedBox(width: 8),
                   Expanded(
@@ -158,5 +158,19 @@ class ActivityCard extends StatelessWidget {
     );
   }
 }
+
+class _AvatarPlaceholder extends StatelessWidget {
+  const _AvatarPlaceholder();
+
+  @override
+  Widget build(BuildContext context) {
+    return const SizedBox(
+      width: 32,
+      height: 32,
+      child: Icon(Icons.person_outline),
+    );
+  }
+}
+
 //recibe un objeto Activity y construye su representación visual, la dibuja
 //La mayor parte del código especifica cómo se colocan esos elementos, no operaciones de negocio.

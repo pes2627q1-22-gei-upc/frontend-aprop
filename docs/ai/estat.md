@@ -13,6 +13,7 @@
 | Taiga | Història / tasca | Repo | Branca | Responsable | Estat |
 |---|---|---|---|---|---|
 | #91 / #14 | Frontend xat (Demanar recomanacions al xatbot) | frontend-aprop | `feature/assistant` | Wenqiang | PR oberta cap a `develop` |
+| #93 / #31 | Frontend pantalla creació (Crear esdeveniment no oficial) | frontend-aprop | `feature/crear-esdeveniment` | Sukhjeet | pendent de PR (DP-017 a DP-021) |
 | #84 / #39 | Frontend pantalla calendari (Agenda) | frontend-aprop | `feature/calendar` | — | PR oberta [#7](https://github.com/pes2627q1-22-gei-upc/frontend-aprop/pull/7) |
 | — | Configuració d'IA per a l'equip | frontend-aprop | `feature/ai-setup` | Wenqiang | sense scripts/hooks; pendent PR |
 | — | Configuració d'IA per a l'equip | api-aprop | `feature/ai-setup` | Wenqiang | pendent de revisió humana |

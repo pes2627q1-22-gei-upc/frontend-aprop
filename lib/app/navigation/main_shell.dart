@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../features/activities/models/activity.dart';
 import '../../features/activities/presentation/screens/activities_screen.dart';
+import '../../features/activities/presentation/screens/create_activity_screen.dart';
 import '../../features/activities/presentation/view_models/activities_view_model.dart';
 import '../../features/activities/presentation/view_models/enrollment_view_model.dart';
 import '../../features/activities/presentation/widgets/enrollment_action.dart';
@@ -122,6 +124,40 @@ class _MainShellState extends State<MainShell> {
     );
   }
 
+  void _openCreateActivity() {
+    final navigator = _sectionNavigatorKeys[0].currentState!;
+    if (navigator.canPop()) return;
+    navigator.push<void>(
+      MaterialPageRoute<void>(
+        settings: const RouteSettings(name: '/activities/new'),
+        builder: (context) => CreateActivityScreen(
+          repository: _activityRepository,
+          creator: ActivityCreator(
+            name: '${widget.user.firstName} ${widget.user.lastName}',
+            isFriend: false,
+          ),
+          onCreated: (activity) => _showCreatedActivity(navigator, activity),
+        ),
+      ),
+    );
+  }
+
+  /// Qui crea una activitat hi queda apuntat. Després es veu la seva fitxa en
+  /// lloc del formulari i, en tornar enrere, la llista ja la inclou.
+  // TODO(DP-017): si el backend apunta la persona creadora en crear
+  // l'activitat, aquesta crida a enroll sobrarà.
+  void _showCreatedActivity(NavigatorState navigator, Activity activity) {
+    _enrollmentViewModel.enroll(activity.id);
+    _activitiesViewModel.load();
+    navigator.pushReplacement<void, void>(
+      activityDetailsRoute(
+        activityId: activity.id,
+        repository: _activityRepository,
+        enrollmentViewModel: _enrollmentViewModel,
+      ),
+    );
+  }
+
   Widget _buildSectionNavigator(int index, WidgetBuilder rootBuilder) {
     final key = _sectionNavigatorKeys[index];
     return NavigatorPopHandler<void>(
@@ -145,6 +181,13 @@ class _MainShellState extends State<MainShell> {
           ? null
           : AppBar(title: Text(_titles[index]), centerTitle: false),
       body: child,
+      floatingActionButton: index == 0
+          ? FloatingActionButton.extended(
+              onPressed: _openCreateActivity,
+              icon: const Icon(Icons.add, size: 20),
+              label: const Text('Crear activitat'),
+            )
+          : null,
     );
   }
 

@@ -18,6 +18,8 @@ Location, date, category and map controls are still disabled, as is voice input 
 
 The cultural assistant («Assistent», Fig. 10) opens from the Inici header, displays differentiated user/assistant bubbles, interprets activity type, municipality and date intervals, and renders matching recommendations with the standard `ActivityCard` synchronized with `EnrollmentViewModel`. Returning from an activity detail preserves the conversation.
 
+Crear activitat (**Taiga #31**): el botó «Crear activitat» d'Inici obre un formulari per publicar una activitat no oficial amb títol, descripció, una categoria, data i hora d'inici, municipi, indicacions i preu opcionals, i una imatge de portada (una plantilla per defecte que es pot canviar). En publicar s'obre la fitxa, la persona creadora hi queda apuntada i l'activitat surt a la llista amb «Publicat per». Funciona amb dades de demostració; consulta [la guia](docs/create-activity.md).
+
 See [the event details guide](docs/activity-details.md), [the enrollment walkthrough](docs/event-enrollment.md) and [the calendar guide](docs/calendar.md) for the implementation flows.
 
 ## Estructura

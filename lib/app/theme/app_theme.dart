@@ -13,6 +13,10 @@ class AppTheme {
   static const border = Color(0xFFE3DED5);
   static const selectedBackground = Color(0xFFE6EEE7);
 
+  /// Crema verdós, una mica més fosc que el fons, per a l'acció destacada
+  /// d'Inici («Crear activitat»).
+  static const sage = Color(0xFFD6DCBC);
+
   static final light = ThemeData(
     useMaterial3: true,
     scaffoldBackgroundColor: cream,
@@ -32,6 +36,16 @@ class AppTheme {
       foregroundColor: forest,
       elevation: 0,
       scrolledUnderElevation: 0,
+    ),
+    floatingActionButtonTheme: const FloatingActionButtonThemeData(
+      backgroundColor: sage,
+      foregroundColor: forest,
+      // Més petit que el per defecte (56) perquè no tapi tant les targetes.
+      // L'àrea tàctil continua sent de 48 com a mínim.
+      extendedSizeConstraints: BoxConstraints.tightFor(height: 44),
+      extendedPadding: EdgeInsets.symmetric(horizontal: 16),
+      extendedIconLabelSpacing: 8,
+      extendedTextStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
     ),
     navigationBarTheme: const NavigationBarThemeData(
       backgroundColor: cream,

@@ -3,13 +3,16 @@ enum ActivitySource { culturalAgenda, community }
 class ActivityCreator {
   const ActivityCreator({
     required this.name,
-    required this.avatarAsset,
     required this.isFriend,
+    this.avatarAsset,
   });
 
   final String name;
-  final String avatarAsset;
   final bool isFriend;
+
+  /// Nul si la persona no té foto (per exemple, qui crea una activitat des de
+  /// l'app): es mostra una icona.
+  final String? avatarAsset;
 }
 
 class Activity {
@@ -23,6 +26,8 @@ class Activity {
     required this.source,
     this.creator,
     this.description,
+    this.directions,
+    this.price,
   });
 
   final String id;
@@ -34,4 +39,10 @@ class Activity {
   final ActivitySource source;
   final ActivityCreator? creator;
   final String? description;
+
+  /// Indicacions per arribar-hi, com «entrada pel pati, 2n pis».
+  final String? directions;
+
+  /// En euros. `0` vol dir gratuïta; nul vol dir que no se sap.
+  final double? price;
 }

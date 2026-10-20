@@ -72,7 +72,9 @@ class ActivitiesScreen extends StatelessWidget {
 
         return ListView.separated(
           key: const PageStorageKey<String>('activities-list'),
-          padding: const EdgeInsets.all(16),
+          // Marge inferior perquè el botó «Crear activitat» no tapi l'última
+          // targeta.
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
           itemCount: activities.length,
           separatorBuilder: (context, index) {
             return const SizedBox(height: 12);

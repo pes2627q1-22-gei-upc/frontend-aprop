@@ -67,6 +67,14 @@ void main() {
       formatActivitySchedule(date, includeDate: true),
       'Dissabte 26 de setembre de 2026 · 09.05 h',
     );
+    expect(
+      formatActivitySchedule(DateTime(2026, 10, 20, 19), includeDate: true),
+      'Dimarts 20 d’octubre de 2026 · 19.00 h',
+    );
+    expect(
+      formatActivitySchedule(DateTime(2026, 4, 1, 19), includeDate: true),
+      'Dimecres 1 d’abril de 2026 · 19.00 h',
+    );
   });
 
   testWidgets('Shows loading until the detail request completes', (

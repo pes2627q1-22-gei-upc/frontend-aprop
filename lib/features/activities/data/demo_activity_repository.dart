@@ -1,8 +1,11 @@
 import '../models/activity.dart';
+import '../models/new_activity.dart';
 import '../repositories/activity_repository.dart';
 
+/// Catàleg en memòria. Les activitats que creen els usuaris s'hi afegeixen i
+/// es perden en tancar l'aplicació.
 class DemoActivityRepository implements ActivityRepository {
-  static final List<Activity> _activities = List.unmodifiable([
+  static final List<Activity> _catalogue = List.unmodifiable([
     Activity(
       id: 'demo-jazz',
       title: 'Jazz al parc',
@@ -48,9 +51,14 @@ class DemoActivityRepository implements ActivityRepository {
     ),
   ]);
 
+  final List<Activity> _activities = [..._catalogue];
+  int _createdCount = 0;
+
   @override
   Future<List<Activity>> getActivities() async {
-    return _activities;
+    final sorted = [..._activities]
+      ..sort((a, b) => a.startsAt.compareTo(b.startsAt));
+    return List.unmodifiable(sorted);
   }
 
   @override
@@ -59,5 +67,25 @@ class DemoActivityRepository implements ActivityRepository {
       if (activity.id == id) return activity;
     }
     return null;
+  }
+
+  // TODO(DP-017): sense contracte del backend; es guarda només en memòria.
+  @override
+  Future<Activity> createActivity(NewActivity activity) async {
+    final created = Activity(
+      id: 'demo-created-${++_createdCount}',
+      title: activity.title,
+      category: activity.category,
+      municipality: activity.municipality,
+      startsAt: activity.startsAt,
+      source: ActivitySource.community,
+      imageAsset: activity.imageAsset,
+      creator: activity.creator,
+      description: activity.description,
+      directions: activity.directions,
+      price: activity.price,
+    );
+    _activities.add(created);
+    return created;
   }
 }
