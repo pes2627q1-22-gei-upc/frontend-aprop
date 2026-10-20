@@ -1,8 +1,10 @@
 import 'dart:async';
 
 import 'package:aprop/features/activities/data/demo_activity_repository.dart';
+import 'package:aprop/features/activities/data/demo_location_repository.dart';
 import 'package:aprop/features/activities/models/activity.dart';
 import 'package:aprop/features/activities/models/activity_options.dart';
+import 'package:aprop/features/activities/models/geo_point.dart';
 import 'package:aprop/features/activities/models/new_activity.dart';
 import 'package:aprop/features/activities/presentation/formatters/activity_price_formatter.dart';
 import 'package:aprop/features/activities/presentation/view_models/create_activity_view_model.dart';
@@ -13,6 +15,9 @@ import 'fake_activity_repository.dart';
 final now = DateTime(2026, 10, 19, 12);
 const creator = ActivityCreator(name: 'Laia Soler', isFriend: false);
 const jazzImage = 'assets/images/jazz_al_parc.jpg';
+const vic = GeoPoint(latitude: 41.9301, longitude: 2.2549);
+const girona = GeoPoint(latitude: 41.9794, longitude: 2.8214);
+const mainSquare = GeoPoint(latitude: 41.9300, longitude: 2.2545);
 
 void main() {
   late FakeActivityRepository repository;
@@ -22,6 +27,7 @@ void main() {
     repository = FakeActivityRepository();
     viewModel = CreateActivityViewModel(
       repository: repository,
+      locationRepository: const DemoLocationRepository(),
       creator: creator,
       now: () => now,
     );
@@ -140,6 +146,63 @@ void main() {
     );
 
     expect(repository.created.single.imageAsset, activityImageTemplates.first);
+  });
+
+  group('Ubicació al mapa', () {
+    test('En trobar el municipi hi posa el marcador', () async {
+      expect(viewModel.location, isNull);
+
+      await viewModel.locateMunicipality(' Vic ');
+
+      expect(viewModel.location, vic);
+      expect(viewModel.isLocationApproximate, isTrue);
+    });
+
+    test('Es pot ajustar el marcador i es desa en publicar', () async {
+      await viewModel.locateMunicipality('Vic');
+      viewModel.setLocation(mainSquare);
+
+      expect(viewModel.isLocationApproximate, isFalse);
+      await publishValid();
+      expect(repository.created.single.location, mainSquare);
+    });
+
+    test('Mentre s’escriu, el marcador ajustat no es perd', () async {
+      await viewModel.locateMunicipality('Vic');
+      viewModel.setLocation(mainSquare);
+
+      // «Vic» → «Vic,» no és cap municipi conegut; tornar a «Vic» tampoc no
+      // ha de moure el marcador ajustat.
+      await viewModel.locateMunicipality('Vic,');
+      expect(viewModel.location, mainSquare);
+    });
+
+    test('Un municipi nou mou el marcador', () async {
+      await viewModel.locateMunicipality('Vic');
+      viewModel.setLocation(mainSquare);
+
+      await viewModel.locateMunicipality('Girona');
+
+      expect(viewModel.location, girona);
+    });
+
+    test('Si el municipi no es coneix, no inventa cap punt', () async {
+      await viewModel.locateMunicipality('Poble inventat');
+
+      expect(viewModel.location, isNull);
+      await publishValid();
+      expect(repository.created.single.location, isNull);
+    });
+
+    test('Troba els municipis sense accents ni majúscules', () async {
+      const locations = DemoLocationRepository();
+
+      expect(
+        await locations.findMunicipality('MATARO'),
+        await locations.findMunicipality('Mataró'),
+      );
+      expect(await locations.findMunicipality('Mataró'), isNotNull);
+    });
   });
 
   test('Desa el preu indicat', () async {

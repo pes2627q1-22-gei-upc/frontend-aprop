@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import '../../models/activity.dart';
 import '../../models/activity_options.dart';
 import '../../repositories/activity_repository.dart';
+import '../../repositories/location_repository.dart';
 import '../formatters/activity_date_formatter.dart';
 import '../widgets/activity_badges.dart';
+import '../widgets/location_picker_map.dart';
 import '../view_models/create_activity_view_model.dart';
 import '../widgets/start_date_time_sheet.dart';
 
@@ -15,12 +17,14 @@ class CreateActivityScreen extends StatefulWidget {
   const CreateActivityScreen({
     super.key,
     required this.repository,
+    required this.locationRepository,
     required this.creator,
     required this.onCreated,
     this.now = DateTime.now,
   });
 
   final ActivityRepository repository;
+  final LocationRepository locationRepository;
   final ActivityCreator creator;
 
   /// Rep l'activitat publicada. Qui obre la pantalla decideix què es mostra
@@ -47,6 +51,7 @@ class _CreateActivityScreenState extends State<CreateActivityScreen> {
     super.initState();
     _viewModel = CreateActivityViewModel(
       repository: widget.repository,
+      locationRepository: widget.locationRepository,
       creator: widget.creator,
       now: widget.now,
     );
@@ -76,6 +81,16 @@ class _CreateActivityScreenState extends State<CreateActivityScreen> {
       now: widget.now(),
     );
     if (startsAt != null) _viewModel.setStartsAt(startsAt);
+  }
+
+  String _locationCaption() {
+    if (_viewModel.location == null) {
+      return 'Escriu el municipi o toca el mapa per marcar el lloc.';
+    }
+    if (_viewModel.isLocationApproximate) {
+      return 'Marcador al centre del municipi: toca el lloc exacte.';
+    }
+    return 'Lloc marcat. Pots tornar a tocar el mapa per canviar-lo.';
   }
 
   Future<void> _publish() async {
@@ -184,14 +199,14 @@ class _CreateActivityScreenState extends State<CreateActivityScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                // TODO(DP-020): falta el punt exacte al mapa (coordenades).
                 TextField(
                   controller: _municipalityController,
                   textCapitalization: TextCapitalization.words,
                   textInputAction: TextInputAction.next,
-                  onChanged: (_) => _viewModel.onFieldChanged(
-                    CreateActivityField.municipality,
-                  ),
+                  onChanged: (text) {
+                    _viewModel.onFieldChanged(CreateActivityField.municipality);
+                    _viewModel.locateMunicipality(text);
+                  },
                   decoration: InputDecoration(
                     labelText: 'Municipi',
                     prefixIcon: const Icon(Icons.location_on_outlined),
@@ -212,6 +227,20 @@ class _CreateActivityScreenState extends State<CreateActivityScreen> {
                     labelText: 'Indicacions (opcional)',
                     prefixIcon: Icon(Icons.signpost_outlined),
                     hintText: 'Per exemple: entrada pel pati, 2n pis',
+                  ),
+                ),
+                const SizedBox(height: 8),
+                // TODO(DP-020): Google Maps triat per l'usuari; pendent que
+                // l'equip ho confirmi i de la clau compartida (DP-004).
+                LocationPickerMap(
+                  location: _viewModel.location,
+                  onChanged: _viewModel.setLocation,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  _locationCaption(),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: colors.onSurfaceVariant,
                   ),
                 ),
                 const SizedBox(height: 16),
