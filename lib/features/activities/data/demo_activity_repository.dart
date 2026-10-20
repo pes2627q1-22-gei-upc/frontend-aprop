@@ -1,4 +1,5 @@
 import '../models/activity.dart';
+import '../models/geo_point.dart';
 import '../models/new_activity.dart';
 import '../repositories/activity_repository.dart';
 
@@ -11,6 +12,8 @@ class DemoActivityRepository implements ActivityRepository {
       title: 'Jazz al parc',
       category: 'Música',
       municipality: 'Barcelona',
+      // Parc de la Ciutadella.
+      location: const GeoPoint(latitude: 41.3881, longitude: 2.1874),
       startsAt: DateTime(2026, 9, 26, 19),
       imageAsset: 'assets/images/jazz_al_parc.jpg',
       source: ActivitySource.culturalAgenda,
@@ -24,6 +27,7 @@ class DemoActivityRepository implements ActivityRepository {
       title: 'Mirades de Catalunya',
       category: 'Exposicions',
       municipality: 'Girona',
+      location: const GeoPoint(latitude: 41.9858, longitude: 2.8249),
       startsAt: DateTime(2026, 9, 27, 10),
       imageAsset: 'assets/images/mirades_de_catalunya.jpg',
       source: ActivitySource.culturalAgenda,
@@ -36,6 +40,8 @@ class DemoActivityRepository implements ActivityRepository {
       title: 'Teatre sota les estrelles',
       category: 'Teatre',
       municipality: 'Tarragona',
+      // Amfiteatre.
+      location: const GeoPoint(latitude: 41.1146, longitude: 1.2593),
       startsAt: DateTime(2026, 9, 27, 20),
       imageAsset: 'assets/images/teatre_sota_les_estrelles.jpg',
       source: ActivitySource.community,

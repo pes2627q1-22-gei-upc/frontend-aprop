@@ -42,6 +42,32 @@ MAPS_API_KEY=la_clau_de_l_equip
 Després atura l'app i torna a fer `flutter run`: amb *hot reload* no n'hi ha prou, perquè la clau entra en
 compilar l'app.
 
+## Web (Chrome)
+
+La web carrega *Maps JavaScript API* amb una **altra clau**: cada clau només admet un tipus de restricció
+d'aplicació, i la de la web es restringeix per adreça.
+
+1. A Google Cloud, activa **Maps JavaScript API** i crea una clau nova.
+2. Restriccions d'aplicació: **Llocs web**, amb `http://localhost:5000/*`. Restriccions d'API: només
+   *Maps JavaScript API*.
+3. Copia `web/maps_key.example.js` com a `web/maps_key.js` (no es versiona; és a `.gitignore`) i posa-hi la
+   clau:
+
+   ```js
+   window.APROP_MAPS_WEB_KEY = 'la_clau_web';
+   ```
+
+4. Executa sempre amb el mateix port, perquè coincideixi amb la restricció:
+
+   ```bash
+   flutter run -d chrome --web-port 5000
+   ```
+
+`web/index.html` també carrega la llibreria `@googlemaps/markerclusterer` 2.5.3 (la versió que demana `google_maps_flutter_web`) per agrupar els marcadors; sense ella el mapa d'Inici falla amb `MarkerClusterer`.
+
+Sense `web/maps_key.js` la web funciona igual, però el mapa no es pot dibuixar. Una clau de web sempre
+acaba visible al navegador: per això la restricció d'adreça és imprescindible.
+
 ## Pendent
 
 - **iOS** encara no està configurat: caldrà activar *Maps SDK for iOS* i donar la clau a `AppDelegate`

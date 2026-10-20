@@ -9,6 +9,9 @@ class FakeActivityRepository implements ActivityRepository {
   final requestedIds = <String>[];
   int listRequests = 0;
 
+  /// Resposta de [getActivities].
+  List<Activity> activities = const [];
+
   /// Activitats rebudes per [createActivity].
   final created = <NewActivity>[];
 
@@ -21,7 +24,7 @@ class FakeActivityRepository implements ActivityRepository {
   @override
   Future<List<Activity>> getActivities() async {
     listRequests++;
-    return const [];
+    return activities;
   }
 
   @override
