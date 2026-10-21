@@ -12,31 +12,30 @@
 
 | Taiga | Història / tasca | Repo | Branca | Responsable | Estat |
 |---|---|---|---|---|---|
-| #91 / #14 | Frontend xat (Demanar recomanacions al xatbot) | frontend-aprop | `feature/assistant` | Wenqiang | PR oberta cap a `develop` |
-| #84 / #39 | Frontend pantalla calendari (Agenda) | frontend-aprop | `feature/calendar` | — | PR oberta [#7](https://github.com/pes2627q1-22-gei-upc/frontend-aprop/pull/7) |
+| #86 | Frontend pantalla notificacions | frontend-aprop | `feature/notifications` | Adam | demo local verificada; pendent revisió humana i PR |
 | — | Configuració d'IA per a l'equip | frontend-aprop | `feature/ai-setup` | Wenqiang | sense scripts/hooks; pendent PR |
 | — | Configuració d'IA per a l'equip | api-aprop | `feature/ai-setup` | Wenqiang | pendent de revisió humana |
 
 ## Fet recentment (només l'últim sprint)
 
-- #7 Login/Register/Logout amb comptes de demostració (frontend, PR #2).
-- #75 Pantalla de detall d'esdeveniment (frontend, PR #3).
-- Verificació de correu abans d'entrar a l'app (frontend, PR #5).
+- #7 Accés demo (PR #2) i verificació de correu (PR #5).
 - Backend: estructura handler/service/repository i `gencat_client` (PR #6).
-- #82 Frontend apuntar-se a un esdeveniment (frontend, PR #6).
+- #75 Detall d'activitat (PR #3) i #82 inscripció (PR #6).
+- #84 / #39 Agenda (PR #7) i #91 / #14 Assistent (PR #8), fusionades.
 
 ## Bloquejos
 
 - Contractes amb Talaia i Mobilicat sense concretar (`40-api-i-serveis.md`).
 - El frontend no té workflow de CI.
-- Inscripcions: API autenticada i connexió de l'agenda pendents (DP-010).
+- Inscripcions: API autenticada pendent; agenda demo connectada (DP-010).
 - Assistent (xatbot): contracte d'API amb el backend i Gemini pendent (DP-016).
+- Avisos: API, amistats reals, perfils i enviament pendents (DP-017).
 
 ## Propers passos
 
-1. Revisar `feature/assistant` i `feature/calendar`, i concretar a Taiga l'ID de la tasca de l'assistent.
-2. Acordar el contracte d'API del xatbot amb el backend (DP-016).
+1. Revisar #86, validar criteris de Taiga i preparar PR quan Adam ho autoritzi.
+2. Acordar els contractes d'API pendents (DP-010, DP-016 i DP-017).
 
 ## Traspàs entre eines
 
-Última eina: Antigravity (2026-10-19) · Context mínim: aquest fitxer + `lib/features/assistant/` + DP-016. Branca `feature/assistant` creada des de `develop` sense commit; pendent de revisió humana.
+Última eina: Codex (2026-10-19) · Context mínim: aquest fitxer + `docs/notifications.md` + DP-017. #86 sense commit ni push; implementació autoritzada, publicació pendent.

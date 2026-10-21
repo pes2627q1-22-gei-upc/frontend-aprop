@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../features/notifications/presentation/widgets/notification_badge_theme.dart';
+
 class AppTheme {
   AppTheme._();
 
@@ -16,6 +18,15 @@ class AppTheme {
   static final light = ThemeData(
     useMaterial3: true,
     scaffoldBackgroundColor: cream,
+    extensions: const [
+      NotificationBadgeTheme(
+        socialBackground: Color(0xFFFFF1CC),
+        socialForeground: Color(0xFF785400),
+        reminderBackground: Color(0xFFE1EFF8),
+        reminderForeground: Color(0xFF205B83),
+        unreadBackground: selectedBackground,
+      ),
+    ],
     colorScheme: ColorScheme.fromSeed(
       seedColor: forest,
       primary: forest,

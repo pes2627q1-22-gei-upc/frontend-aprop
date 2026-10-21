@@ -11,6 +11,8 @@ import '../../features/assistant/presentation/screens/assistant_screen.dart';
 import '../../features/assistant/presentation/view_models/assistant_view_model.dart';
 import '../../features/assistant/repositories/assistant_repository.dart';
 import '../../features/auth/models/app_user.dart';
+import '../../features/notifications/presentation/screens/notifications_screen.dart';
+import '../../features/notifications/repositories/notification_repository.dart';
 import 'activity_details_route.dart';
 
 class MainShell extends StatefulWidget {
@@ -21,6 +23,7 @@ class MainShell extends StatefulWidget {
     required this.activityRepository,
     required this.enrollmentRepository,
     required this.assistantRepository,
+    required this.notificationRepository,
   });
 
   final AppUser user;
@@ -28,6 +31,7 @@ class MainShell extends StatefulWidget {
   final ActivityRepository activityRepository;
   final EnrollmentRepository enrollmentRepository;
   final AssistantRepository assistantRepository;
+  final NotificationRepository notificationRepository;
 
   @override
   State<MainShell> createState() => _MainShellState();
@@ -124,17 +128,21 @@ class _MainShellState extends State<MainShell> {
 
   Widget _buildSectionNavigator(int index, WidgetBuilder rootBuilder) {
     final key = _sectionNavigatorKeys[index];
-    return NavigatorPopHandler<void>(
+    return TickerMode(
       enabled: _selectedIndex == index,
-      onPopWithResult: (_) {
-        if (_selectedIndex == index && (key.currentState?.canPop() ?? false)) {
-          key.currentState!.pop();
-        }
-      },
-      child: Navigator(
-        key: key,
-        onGenerateRoute: (settings) =>
-            MaterialPageRoute<void>(settings: settings, builder: rootBuilder),
+      child: NavigatorPopHandler<void>(
+        enabled: _selectedIndex == index,
+        onPopWithResult: (_) {
+          if (_selectedIndex == index &&
+              (key.currentState?.canPop() ?? false)) {
+            key.currentState!.pop();
+          }
+        },
+        child: Navigator(
+          key: key,
+          onGenerateRoute: (settings) =>
+              MaterialPageRoute<void>(settings: settings, builder: rootBuilder),
+        ),
       ),
     );
   }
@@ -190,8 +198,17 @@ class _MainShellState extends State<MainShell> {
             ),
             _buildSectionNavigator(
               3,
-              (context) =>
-                  _sectionRoot(3, const Center(child: Text('Els teus avisos'))),
+              (context) => _sectionRoot(
+                3,
+                NotificationsScreen(
+                  userId: widget.user.id,
+                  repository: widget.notificationRepository,
+                  onActivitySelected: (id) {
+                    // A late read confirmation must not open another tab's route.
+                    if (_selectedIndex == 3) _openActivityDetails(id);
+                  },
+                ),
+              ),
             ),
             _buildSectionNavigator(
               4,

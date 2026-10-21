@@ -4,7 +4,7 @@ Aplicació mòbil per descobrir i planificar activitats culturals a Catalunya. P
 
 ## Estat actual
 
-Base Flutter amb tema compartit, accés amb compte i navegació inferior entre Inici, Agenda, Descobreix, Avisos i Perfil. L'aplicació s'obre amb l'inici de sessió, que accepta el nom d'usuari o el correu, i permet crear un compte. Fins que no es verifica el correu, l'aplicació mostra la pantalla de verificació en lloc del contingut. Un cop dins, Inici mostra una capçalera fixa amb el logotip, els controls i la vista «Llista» seleccionada, seguida d'una llista desplaçable d'activitats de demostració. Inclou estats de càrrega, error amb reintent i llista buida. Perfil mostra provisionalment qui ha iniciat la sessió i el botó per tancar-la; Descobreix i Avisos encara mostren textos provisionals.
+Base Flutter amb tema compartit, accés amb compte i navegació inferior entre Inici, Agenda, Descobreix, Avisos i Perfil. L'aplicació s'obre amb l'inici de sessió, que accepta el nom d'usuari o el correu, i permet crear un compte. Fins que no es verifica el correu, l'aplicació mostra la pantalla de verificació en lloc del contingut. Un cop dins, Inici mostra una capçalera fixa amb el logotip, els controls i la vista «Llista» seleccionada, seguida d'una llista desplaçable d'activitats de demostració. Inclou estats de càrrega, error amb reintent i llista buida. Perfil mostra provisionalment qui ha iniciat la sessió i el botó per tancar-la; Descobreix encara mostra un text provisional.
 
 L'accés funciona amb comptes de demostració en memòria, que es perden en tancar l'aplicació. Per provar-lo, entra amb `laiasoler` o `laia@aprop.cat` i la contrasenya `Aprop2026!`, o crea un compte nou. Els comptes nous queden pendents de verificar; com que no s'envia cap correu, «Ja l'he verificat» simula que s'ha obert l'enllaç. Firebase, l'alta de l'usuari al backend i l'accés amb Google estan pendents; el botó de Google es mostra desactivat.
 
@@ -14,11 +14,15 @@ Enrollment (**Taiga #82**) works from list cards and event details: «M’hi apu
 
 Agenda (**Taiga #39 / #84**) shows a monthly calendar of the user's own plans: a dot on days with plans, today outlined and the selected day in green. Selecting a day lists its plans immediately, with a specific message for empty days and loading/error states with retry; a plan's image or title opens its details inside Agenda.
 
+Avisos (**Taiga #86**) mostra la bústia rebuda amb filtres «Tots», «Social», «Recordatoris» i «Recomanacions», ordre cronològic i agrupació per data. Obrir un avís el marca com a llegit després de confirmar-ho; els avisos d'activitats obren el detall compartit sense apuntar-hi l'usuari. Les sol·licituds permeten simular «Acceptar» o «Rebutjar», amb error i reintent. Els estats es conserven per compte durant la mateixa execució. Inclou càrrega, buit global/per filtre, error i actualització arrossegant la llista. Els perfils, l'API, les amistats reals, l'enviament push i la programació de recordatoris continuen pendents (DP-017). Els exemples són avisos històrics dels mockups, no recordatoris generats pels plans de l'usuari.
+
 Location, date, category and map controls are still disabled, as is voice input inside the assistant. Unenrollment, event chat, creator profile and original-source links remain unavailable. The catalogue, authentication, enrollment and assistant use demo repositories; backend integration remains pending (DP-010 for enrollment, DP-016 for the assistant).
 
 The cultural assistant («Assistent», Fig. 10) opens from the Inici header, displays differentiated user/assistant bubbles, interprets activity type, municipality and date intervals, and renders matching recommendations with the standard `ActivityCard` synchronized with `EnrollmentViewModel`. Returning from an activity detail preserves the conversation.
 
 See [the event details guide](docs/activity-details.md), [the enrollment walkthrough](docs/event-enrollment.md) and [the calendar guide](docs/calendar.md) for the implementation flows.
+
+Vegeu també la [guia d'Avisos](docs/notifications.md), amb el flux del codi, les proves i els límits de la demostració.
 
 ## Estructura
 
@@ -44,6 +48,8 @@ lib/
       (mateixes capes que activities/)
     auth/
       (mateixes capes que activities/)
+    notifications/
+      (mateixes capes que activities/)
 assets/
   images/
   branding/
@@ -55,6 +61,7 @@ test/
     activities/
     assistant/
     auth/
+    notifications/
 docs/
   architecture.md
 ```

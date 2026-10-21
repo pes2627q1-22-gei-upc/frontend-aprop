@@ -109,5 +109,6 @@ Columna «Sprint (entra, acaba)»: format de la memòria §1.4. `TODO(confirmar)
   número i caràcter especial; confirmació; nom d'usuari únic; accés per nom o correu).
 - **#75 Detall:** vegeu `docs/activity-details.md`.
 - **#82 Inscripció:** llista i detall comparteixen estat; confirmació abans de «Apuntat», prevenció de duplicats, errors amb reintent i aïllament per compte. Implementació de demostració i contracte per a l'agenda a `docs/event-enrollment.md` (DP-010). Aquest comportament prové dels mockups aprovats i de la petició de l'usuari; falta contrastar els criteris complets a Taiga i integrar el backend.
+- **#86 Pantalla de notificacions:** bústia, filtres, lectura i resposta a sol·licituds segons la figura 17 i els mockups aprovats; vegeu `docs/notifications.md`. La tasca frontend no implica completar les històries d'enviament, recordatoris, perfils o amistats reals. Criteris complets de Taiga i contracte backend pendents (DP-017).
 - **Resta:** `TODO(confirmar)` — consulta Taiga. El comportament dels mockups (`50-ui-mockups.md`) en dona
   pistes, però no substitueix els criteris.
