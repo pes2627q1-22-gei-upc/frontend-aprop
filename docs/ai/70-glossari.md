@@ -24,11 +24,11 @@
 | Fiabilitat (organitzador) | Fiabilidad | `TODO` (reliability) | `TODO` | Derivada |
 | Usuari | Usuario | `AppUser` | `TODO` | `username` pot ser nul (primer accés amb Google) |
 | Nom d'usuari | Nombre de usuario | `username` | `TODO` | Únic |
-| Sol·licitud d'amistat | Solicitud de amistad | `FriendRequestStatus` a la projecció d'Avisos | `TODO` | Resposta demo: `pending` / `accepted` / `rejected`; contracte i graf real pendents (DP-017) |
+| Sol·licitud d'amistat | Solicitud de amistad | `FriendRequestStatus` a la projecció d'Avisos | `TODO` | Resposta demo: `pending` / `accepted` / `rejected`; contracte i graf real pendents (DP-023) |
 | Amic / Amiga | Amigo / Amiga | `isFriend` | `TODO` | Derivat |
 | Bloquejar | Bloquear | `TODO` (block) | `TODO` | |
-| Avís / Notificació | Aviso / Notificación | `AppNotification`, `NotificationType`, `NotificationCategory`, `NotificationRepository`, `NotificationsViewModel` | `TODO` | Projecció de la bústia d'Avisos; no són enums del backend (DP-017) |
-| Persona d'un avís | Persona de un aviso | `NotificationPerson` | `TODO` | Context visual; perfil i identitat de servidor pendents (DP-017) |
+| Avís / Notificació | Aviso / Notificación | `AppNotification`, `NotificationType`, `NotificationCategory`, `NotificationRepository`, `NotificationsViewModel` | `TODO` | Projecció de la bústia d'Avisos; no són enums del backend (DP-023) |
+| Persona d'un avís | Persona de un aviso | `NotificationPerson` | `TODO` | Context visual; perfil i identitat de servidor pendents (DP-023) |
 | Denúncia | Denuncia | `TODO` (report) | `TODO` | Usuari / Esdeveniment |
 | Administrador | Administrador | — | `TODO` (admin) | Web d'administració |
 | Xatbot / Assistent | Chatbot / Asistente | `AssistantRepository`, `AssistantViewModel`, `AssistantMessage`, `AssistantScreen` | `TODO` (gemini_client) | La UI diu «Assistent». Contracte backend pendent (DP-016) |

@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '../../features/activities/data/demo_location_repository.dart';
+import '../../features/activities/models/activity.dart';
 import '../../features/activities/presentation/screens/activities_screen.dart';
+import '../../features/activities/presentation/screens/create_activity_screen.dart';
+import '../../features/activities/presentation/widgets/activities_map.dart';
 import '../../features/activities/presentation/view_models/activities_view_model.dart';
 import '../../features/activities/presentation/view_models/enrollment_view_model.dart';
 import '../../features/activities/presentation/widgets/enrollment_action.dart';
@@ -39,6 +43,9 @@ class MainShell extends StatefulWidget {
 
 class _MainShellState extends State<MainShell> {
   int _selectedIndex = 0;
+
+  /// Quant ha de pujar «Crear activitat» perquè no el tapi la targeta del mapa.
+  final _createButtonLift = ValueNotifier<double>(0);
   final _sectionNavigatorKeys = List.generate(
     5,
     (_) => GlobalKey<NavigatorState>(),
@@ -71,6 +78,7 @@ class _MainShellState extends State<MainShell> {
 
   @override
   void dispose() {
+    _createButtonLift.dispose();
     _activitiesViewModel.dispose();
     _enrollmentViewModel.dispose();
     _assistantViewModel.dispose();
@@ -126,6 +134,41 @@ class _MainShellState extends State<MainShell> {
     );
   }
 
+  void _openCreateActivity() {
+    final navigator = _sectionNavigatorKeys[0].currentState!;
+    if (navigator.canPop()) return;
+    navigator.push<void>(
+      MaterialPageRoute<void>(
+        settings: const RouteSettings(name: '/activities/new'),
+        builder: (context) => CreateActivityScreen(
+          repository: _activityRepository,
+          locationRepository: const DemoLocationRepository(),
+          creator: ActivityCreator(
+            name: '${widget.user.firstName} ${widget.user.lastName}',
+            isFriend: false,
+          ),
+          onCreated: (activity) => _showCreatedActivity(navigator, activity),
+        ),
+      ),
+    );
+  }
+
+  /// Qui crea una activitat hi queda apuntat. Després es veu la seva fitxa en
+  /// lloc del formulari i, en tornar enrere, la llista ja la inclou.
+  // TODO(DP-017): si el backend apunta la persona creadora en crear
+  // l'activitat, aquesta crida a enroll sobrarà.
+  void _showCreatedActivity(NavigatorState navigator, Activity activity) {
+    _enrollmentViewModel.enroll(activity.id);
+    _activitiesViewModel.load();
+    navigator.pushReplacement<void, void>(
+      activityDetailsRoute(
+        activityId: activity.id,
+        repository: _activityRepository,
+        enrollmentViewModel: _enrollmentViewModel,
+      ),
+    );
+  }
+
   Widget _buildSectionNavigator(int index, WidgetBuilder rootBuilder) {
     final key = _sectionNavigatorKeys[index];
     return TickerMode(
@@ -153,6 +196,23 @@ class _MainShellState extends State<MainShell> {
           ? null
           : AppBar(title: Text(_titles[index]), centerTitle: false),
       body: child,
+      floatingActionButton: index == 0
+          ? ValueListenableBuilder<double>(
+              valueListenable: _createButtonLift,
+              // Puja suaument fins a sobre de la targeta, en lloc de saltar.
+              builder: (context, lift, child) => AnimatedPadding(
+                duration: mapOverlayAnimationDuration,
+                curve: Curves.easeOutCubic,
+                padding: EdgeInsets.only(bottom: lift),
+                child: child,
+              ),
+              child: FloatingActionButton.extended(
+                onPressed: _openCreateActivity,
+                icon: const Icon(Icons.add, size: 20),
+                label: const Text('Crear activitat'),
+              ),
+            )
+          : null,
     );
   }
 
@@ -174,6 +234,10 @@ class _MainShellState extends State<MainShell> {
                   enrollmentViewModel: _enrollmentViewModel,
                   onActivitySelected: _openActivityDetails,
                   onAssistantPressed: _openAssistant,
+                  // El botó ja té 16 de marge: amb 12 menys queda a 12 de la
+                  // targeta, com la llegenda.
+                  onMapOverlayChanged: (overlay) =>
+                      _createButtonLift.value = overlay == 0 ? 0 : overlay - 4,
                 ),
               ),
             ),

@@ -20,7 +20,7 @@ class NotificationsScreen extends StatefulWidget {
   final String userId;
   final NotificationRepository repository;
   final ValueChanged<String> onActivitySelected;
-  // TODO(DP-017): App composition supplies this when real profiles exist.
+  // TODO(DP-023): App composition supplies this when real profiles exist.
   final ValueChanged<String>? onPersonSelected;
   final DateTime Function()? now;
 

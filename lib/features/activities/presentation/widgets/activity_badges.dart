@@ -17,14 +17,26 @@ class ActivityCategoryBadge extends StatelessWidget {
     'Teatre': Color(0xFF4934A3),
   };
 
+  /// Colors de la categoria, perquè altres controls (com el selector del
+  /// formulari de creació) facin servir els mateixos que la insígnia.
+  static ({Color background, Color foreground}) colorsFor(
+    String category,
+    ColorScheme colors,
+  ) {
+    return (
+      background: _backgrounds[category] ?? colors.primaryContainer,
+      foreground: _foregrounds[category] ?? colors.onPrimaryContainer,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
+    final categoryColors = colorsFor(category, Theme.of(context).colorScheme);
 
     return _ActivityBadge(
       label: category,
-      background: _backgrounds[category] ?? colors.primaryContainer,
-      foreground: _foregrounds[category] ?? colors.onPrimaryContainer,
+      background: categoryColors.background,
+      foreground: categoryColors.foreground,
     );
   }
 }

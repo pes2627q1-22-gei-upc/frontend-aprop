@@ -1,3 +1,12 @@
+import java.util.Properties
+
+// La clau de Google Maps es llegeix de android/local.properties (MAPS_API_KEY),
+// que no es versiona. Sense clau l'app compila igual, però el mapa surt en gris.
+val localProperties = Properties().apply {
+    val file = rootProject.file("local.properties")
+    if (file.exists()) file.inputStream().use { load(it) }
+}
+
 plugins {
     id("com.android.application")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
@@ -27,6 +36,7 @@ android {
         // flag during build.
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        manifestPlaceholders["mapsApiKey"] = localProperties.getProperty("MAPS_API_KEY", "")
     }
 
     buildTypes {

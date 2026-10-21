@@ -3,7 +3,7 @@ import '../models/app_notification.dart';
 import '../repositories/notification_repository.dart';
 
 /// Historical mockup fixtures, isolated per demo account and lost on restart.
-/// TODO(DP-017): Replace with authenticated inbox/friendship API adapters.
+/// TODO(DP-023): Replace with authenticated inbox/friendship API adapters.
 class DemoNotificationRepository implements NotificationRepository {
   DemoNotificationRepository({
     required this.activityRepository,

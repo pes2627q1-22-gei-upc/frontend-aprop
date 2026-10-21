@@ -4,7 +4,7 @@
 
 Comportament contrastat amb la Incepció 2, figura 17 i text de les pàgines 29–30 (pàgines 30–31 del PDF), les restriccions del model conceptual i els prompts aprovats d'`output/mockup/aprop-avisos-*` de la carpeta PES. La capçalera conté només «Avisos»: el logotip i l'accés a l'assistent pertanyen a Inici.
 
-La tasca implementa la bústia frontend. No configura ni envia notificacions del sistema operatiu, no programa recordatoris i no integra Firebase, l'API d'amistats ni perfils que encara no existeixen. Els criteris detallats de Taiga no són al repositori: cal confirmar-los en la revisió humana. DP-017 registra els contractes i les adaptacions provisionals.
+La tasca implementa la bústia frontend. No configura ni envia notificacions del sistema operatiu, no programa recordatoris i no integra Firebase, l'API d'amistats ni perfils que encara no existeixen. Els criteris detallats de Taiga no són al repositori: cal confirmar-los en la revisió humana. DP-023 registra els contractes i les adaptacions provisionals.
 
 ## Comportament implementat
 
@@ -77,4 +77,8 @@ flutter build apk --debug
 
 Prova manual: iniciar sessió amb el compte demo del README, obrir Avisos, canviar els filtres, consultar una recomanació i tornar. Comprovar que no ha apuntat l'usuari, i que l'avís continua visible com a llegit. A Social, llegir la sol·licitud i després acceptar-la o rebutjar-la; els botons han de quedar substituïts pel resultat. Tancar/tornar a iniciar sessió conserva el resultat dins de la mateixa execució. La prova en dispositiu físic, la revisió humana i la integració amb backend són pendents.
 
-Validació local final: format correcte, `flutter analyze` sense problemes, les 163 proves del repositori superades (42 noves d'Avisos) i APK Android debug compilat. Captures de Tots, Social, resposta acceptada i Recordatoris renderitzades amb la composició real de l'app. La revisió del diff no ha detectat bloquejos ni decisions noves fora de DP-017. La branca és `feature/notifications`, sense commit ni push.
+Validació inicial de #86: format correcte, `flutter analyze` sense problemes, les 163 proves del repositori superades (42 noves d'Avisos) i APK Android debug compilat. Captures de Tots, Social, resposta acceptada i Recordatoris renderitzades amb la composició real de l'app. La revisió del diff no ha detectat bloquejos ni decisions noves fora de DP-023.
+
+El commit `c84a138` de `feature/notifications` ha estat publicat per Adam. El 2026-10-21 s'integra localment `origin/develop` (`740db0a`) per resoldre els conflictes de la PR, conservant el mapa i la creació d'activitats. La decisió d'Avisos passa de DP-017 a DP-023 per evitar la col·lisió amb la decisió de creació. El commit de fusió i el push queden pendents de revisió d'Adam.
+
+Validació de la integració: format correcte (111 fitxers, cap canvi), anàlisi sense problemes, 196 proves superades i APK Android debug compilat. Revisió de decisions sense bloquejos; es conserven les DP-017 a DP-022 de `develop`. No s'ha verificat el mapa real en un dispositiu físic.

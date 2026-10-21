@@ -31,6 +31,24 @@
 
   <title>aprop</title>
   <link rel="manifest" href="manifest.json">
+
+  <!--
+    Google Maps per a la web. La clau és a web/maps_key.js, que no es versiona
+    (vegeu docs/google-maps.md). Si el fitxer no hi és, l'app funciona igual
+    però el mapa no es pot dibuixar.
+  -->
+  <!-- Agrupació de marcadors a la web; versió indicada per google_maps_flutter_web. -->
+  <script src="https://cdn.jsdelivr.net/npm/@googlemaps/markerclusterer@2.5.3/dist/index.umd.min.js"></script>
+  <script src="maps_key.js"></script>
+  <script>
+    if (window.APROP_MAPS_WEB_KEY) {
+      document.write(
+        '<script src="https://maps.googleapis.com/maps/api/js?key=' +
+          encodeURIComponent(window.APROP_MAPS_WEB_KEY) +
+          '"><\/script>'
+      );
+    }
+  </script>
 </head>
 <body>
   <!--

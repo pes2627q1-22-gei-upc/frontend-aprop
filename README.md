@@ -14,11 +14,15 @@ Enrollment (**Taiga #82**) works from list cards and event details: «M’hi apu
 
 Agenda (**Taiga #39 / #84**) shows a monthly calendar of the user's own plans: a dot on days with plans, today outlined and the selected day in green. Selecting a day lists its plans immediately, with a specific message for empty days and loading/error states with retry; a plan's image or title opens its details inside Agenda.
 
-Avisos (**Taiga #86**) mostra la bústia rebuda amb filtres «Tots», «Social», «Recordatoris» i «Recomanacions», ordre cronològic i agrupació per data. Obrir un avís el marca com a llegit després de confirmar-ho; els avisos d'activitats obren el detall compartit sense apuntar-hi l'usuari. Les sol·licituds permeten simular «Acceptar» o «Rebutjar», amb error i reintent. Els estats es conserven per compte durant la mateixa execució. Inclou càrrega, buit global/per filtre, error i actualització arrossegant la llista. Els perfils, l'API, les amistats reals, l'enviament push i la programació de recordatoris continuen pendents (DP-017). Els exemples són avisos històrics dels mockups, no recordatoris generats pels plans de l'usuari.
+Avisos (**Taiga #86**) mostra la bústia rebuda amb filtres «Tots», «Social», «Recordatoris» i «Recomanacions», ordre cronològic i agrupació per data. Obrir un avís el marca com a llegit després de confirmar-ho; els avisos d'activitats obren el detall compartit sense apuntar-hi l'usuari. Les sol·licituds permeten simular «Acceptar» o «Rebutjar», amb error i reintent. Els estats es conserven per compte durant la mateixa execució. Inclou càrrega, buit global/per filtre, error i actualització arrossegant la llista. Els perfils, l'API, les amistats reals, l'enviament push i la programació de recordatoris continuen pendents (DP-023). Els exemples són avisos històrics dels mockups, no recordatoris generats pels plans de l'usuari.
 
-Location, date, category and map controls are still disabled, as is voice input inside the assistant. Unenrollment, event chat, creator profile and original-source links remain unavailable. The catalogue, authentication, enrollment and assistant use demo repositories; backend integration remains pending (DP-010 for enrollment, DP-016 for the assistant).
+Location, date and category filters are still disabled, as is voice input inside the assistant. The map/list selector is available. Unenrollment, event chat, creator profile and original-source links remain unavailable. The catalogue, authentication, enrollment and assistant use demo repositories; backend integration remains pending (DP-010 for enrollment, DP-016 for the assistant).
 
 The cultural assistant («Assistent», Fig. 10) opens from the Inici header, displays differentiated user/assistant bubbles, interprets activity type, municipality and date intervals, and renders matching recommendations with the standard `ActivityCard` synchronized with `EnrollmentViewModel`. Returning from an activity detail preserves the conversation.
+
+Crear activitat (**Taiga #31**): el botó «Crear activitat» d'Inici obre un formulari per publicar una activitat no oficial amb títol, descripció, una categoria, data i hora d'inici, municipi, indicacions i preu opcionals, i una imatge de portada (una plantilla per defecte que es pot canviar). En publicar s'obre la fitxa, la persona creadora hi queda apuntada i l'activitat surt a la llista amb «Publicat per». Funciona amb dades de demostració; consulta [la guia](docs/create-activity.md).
+
+Mapa d'Inici (**Taiga #21**): el selector «Mapa / Llista» mostra les activitats en un mapa de Google amb marcadors diferents per a les oficials, les d'usuaris i les d'amistats, agrupats amb un número quan són a prop. Tocar-ne un mostra una targeta amb «Veure activitat». Sense clau de Google Maps el mapa surt en gris; consulta [la guia](docs/inici-map.md).
 
 See [the event details guide](docs/activity-details.md), [the enrollment walkthrough](docs/event-enrollment.md) and [the calendar guide](docs/calendar.md) for the implementation flows.
 
@@ -83,6 +87,8 @@ Substitueix `ID_DEL_DISPOSITIU` per l’identificador del teu Android. Per revis
 ```bash
 flutter run -d chrome
 ```
+
+Els mapes necessiten una clau de Google Maps: a Android, a `android/local.properties`; a la web, a `web/maps_key.js` (executa amb `--web-port 5000`). Sense clau el mapa no es veu. Vegeu [Google Maps](docs/google-maps.md).
 
 Android i iOS són els objectius mòbils. La web és una eina de desenvolupament i no substitueix la comprovació en mòbil.
 

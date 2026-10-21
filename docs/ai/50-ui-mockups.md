@@ -47,7 +47,7 @@ Accés amb Google; en el primer accés es completa el perfil i es fa el test d'i
 
 ## Estat actual vs mockups
 
-Taiga #86 implementa Avisos amb repositori de demostració: filtres, ordre/agrupació per data, lectura confirmada, respostes a sol·licituds i ruta al detall. El perfil es mostra com a pendent fins que s'injecti un callback real. Les inicials substitueixen avatars no disponibles. En pantalles estretes o amb text ampliat, els quatre filtres es desplacen horitzontalment sense truncar. Lliurament de notificacions, recordatoris programats i amistats reals no estan integrats (DP-017); detalls a `docs/notifications.md`.
+Taiga #86 implementa Avisos amb repositori de demostració: filtres, ordre/agrupació per data, lectura confirmada, respostes a sol·licituds i ruta al detall. El perfil es mostra com a pendent fins que s'injecti un callback real. Les inicials substitueixen avatars no disponibles. En pantalles estretes o amb text ampliat, els quatre filtres es desplacen horitzontalment sense truncar. Lliurament de notificacions, recordatoris programats i amistats reals no estan integrats (DP-023); detalls a `docs/notifications.md`.
 
 Implementat amb dades de demostració: accés (usuari o correu + contrasenya; Google desactivat), llista
 d'Inici amb capçalera, i fitxa (#75). Els controls pendents es mostren desactivats. Detall a `README.md`.

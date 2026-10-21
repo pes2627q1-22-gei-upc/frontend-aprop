@@ -6,7 +6,7 @@ Organitzem el projecte per funcionalitats i separem presentació, estat i dades 
 
 La qualitat depèn de respectar les responsabilitats i revisar els canvis, no del nombre de carpetes. No creem implementacions fictícies, dependències o capes que encara no necessitem.
 
-Les tasques #75 i #82 afegeixen el detall i les inscripcions compartides entre llista i detall. Vegeu `docs/activity-details.md` i `docs/event-enrollment.md` per seguir els fluxos i integrar l'agenda.
+Les tasques #75 i #82 afegeixen el detall i les inscripcions compartides entre llista i detall. Vegeu `docs/activity-details.md` i `docs/event-enrollment.md` per seguir els fluxos i integrar l'agenda. La història #31 (tasca #93) permet crear activitats no oficials des d'Inici; vegeu `docs/create-activity.md`.
 
 ## Responsabilitats
 
@@ -151,7 +151,7 @@ Calendar integration must use the same repository instance and user ID through i
 
 ## Avisos — Taiga #86
 
-`NotificationRepository` és el contracte en Dart pur per consultar els avisos rebuts, confirmar-ne la lectura i respondre una sol·licitud. `DemoNotificationRepository` conserva les bústies separades per compte durant la mateixa execució; els exemples reutilitzen activitats del catàleg, sense modificar inscripcions. L'adaptador del backend, l'autorització i la sincronització d'amistats són pendents (DP-017).
+`NotificationRepository` és el contracte en Dart pur per consultar els avisos rebuts, confirmar-ne la lectura i respondre una sol·licitud. `DemoNotificationRepository` conserva les bústies separades per compte durant la mateixa execució; els exemples reutilitzen activitats del catàleg, sense modificar inscripcions. L'adaptador del backend, l'autorització i la sincronització d'amistats són pendents (DP-023).
 
 `AuthGate` crea o rep el repositori compartit, i `MainShell` l'injecta a `NotificationsScreen`. La pantalla crea i allibera el seu `NotificationsViewModel`. Els widgets no fan peticions ni contenen avisos de demostració. El ViewModel ordena i filtra, controla les operacions pendents i només confirma lectura/resposta després de l'èxit del repositori. Un error de recàrrega conserva els avisos ja carregats.
 
