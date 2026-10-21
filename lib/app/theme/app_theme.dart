@@ -62,6 +62,21 @@ class AppTheme {
       backgroundColor: cream,
       indicatorColor: selectedBackground,
     ),
+    segmentedButtonTheme: SegmentedButtonThemeData(
+      style: ButtonStyle(
+        backgroundColor: WidgetStateProperty.resolveWith((states) {
+          return states.contains(WidgetState.selected)
+              ? forest
+              : cardBackground;
+        }),
+        foregroundColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.disabled)) {
+            return ink.withValues(alpha: 0.38);
+          }
+          return states.contains(WidgetState.selected) ? cream : ink;
+        }),
+      ),
+    ),
     inputDecorationTheme: InputDecorationThemeData(
       filled: true,
       fillColor: cardBackground,
