@@ -57,3 +57,6 @@ docs/source/*.txt
 .cursor/hooks/logs/
 .agents/*.local.json
 __pycache__/
+
+# Clau de Google Maps per a la web (vegeu docs/google-maps.md).
+/web/maps_key.js
