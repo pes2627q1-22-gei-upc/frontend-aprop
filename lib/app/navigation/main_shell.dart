@@ -3,12 +3,15 @@ import 'package:flutter/material.dart';
 import '../../features/activities/data/demo_location_repository.dart';
 import '../../features/activities/models/activity.dart';
 import '../../features/activities/presentation/screens/activities_screen.dart';
+import '../../features/activities/presentation/screens/activity_search_screen.dart';
 import '../../features/activities/presentation/screens/create_activity_screen.dart';
+import '../../features/activities/presentation/screens/discover_screen.dart';
 import '../../features/activities/presentation/widgets/activities_map.dart';
 import '../../features/activities/presentation/view_models/activities_view_model.dart';
 import '../../features/activities/presentation/view_models/enrollment_view_model.dart';
 import '../../features/activities/presentation/widgets/enrollment_action.dart';
 import '../../features/activities/repositories/activity_repository.dart';
+import '../../features/activities/repositories/discovery_repository.dart';
 import '../../features/activities/repositories/enrollment_repository.dart';
 import '../../features/agenda/presentation/screens/agenda_screen.dart';
 import '../../features/assistant/presentation/screens/assistant_screen.dart';
@@ -28,6 +31,7 @@ class MainShell extends StatefulWidget {
     required this.enrollmentRepository,
     required this.assistantRepository,
     required this.notificationRepository,
+    required this.discoveryRepository,
   });
 
   final AppUser user;
@@ -36,6 +40,7 @@ class MainShell extends StatefulWidget {
   final EnrollmentRepository enrollmentRepository;
   final AssistantRepository assistantRepository;
   final NotificationRepository notificationRepository;
+  final DiscoveryRepository discoveryRepository;
 
   @override
   State<MainShell> createState() => _MainShellState();
@@ -129,6 +134,34 @@ class _MainShellState extends State<MainShell> {
             activityId: activity.id,
             activityTitle: activity.title,
           ),
+        ),
+      ),
+    );
+  }
+
+  void _openDiscoverySearch() {
+    final navigator = _sectionNavigatorKeys[2].currentState!;
+    if (_selectedIndex != 2 || navigator.canPop()) return;
+    navigator.push<void>(
+      MaterialPageRoute<void>(
+        settings: const RouteSettings(name: '/discover/search'),
+        builder: (context) => ActivitySearchScreen(
+          repository: widget.discoveryRepository,
+          enrollmentViewModel: _enrollmentViewModel,
+          onBack: () => Navigator.of(context).pop(),
+          onActivitySelected: (activityId) {
+            if (_selectedIndex != 2 ||
+                !(ModalRoute.of(context)?.isCurrent ?? false)) {
+              return;
+            }
+            Navigator.of(context).push<void>(
+              activityDetailsRoute(
+                activityId: activityId,
+                repository: _activityRepository,
+                enrollmentViewModel: _enrollmentViewModel,
+              ),
+            );
+          },
         ),
       ),
     );
@@ -257,7 +290,13 @@ class _MainShellState extends State<MainShell> {
               2,
               (context) => _sectionRoot(
                 2,
-                const Center(child: Text('Troba el teu pròxim pla')),
+                DiscoverScreen(
+                  userId: widget.user.id,
+                  repository: widget.discoveryRepository,
+                  enrollmentViewModel: _enrollmentViewModel,
+                  onSearchPressed: _openDiscoverySearch,
+                  onActivitySelected: _openActivityDetails,
+                ),
               ),
             ),
             _buildSectionNavigator(

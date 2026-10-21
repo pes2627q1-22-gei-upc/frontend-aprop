@@ -3,8 +3,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../features/activities/data/demo_activity_repository.dart';
+import '../../features/activities/data/demo_discovery_repository.dart';
 import '../../features/activities/data/demo_enrollment_repository.dart';
 import '../../features/activities/repositories/activity_repository.dart';
+import '../../features/activities/repositories/discovery_repository.dart';
 import '../../features/activities/repositories/enrollment_repository.dart';
 import '../../features/assistant/data/demo_assistant_repository.dart';
 import '../../features/assistant/repositories/assistant_repository.dart';
@@ -26,6 +28,7 @@ class AuthGate extends StatefulWidget {
     this.enrollmentRepository,
     this.assistantRepository,
     this.notificationRepository,
+    this.discoveryRepository,
   });
 
   final AuthRepository authRepository;
@@ -33,6 +36,7 @@ class AuthGate extends StatefulWidget {
   final EnrollmentRepository? enrollmentRepository;
   final AssistantRepository? assistantRepository;
   final NotificationRepository? notificationRepository;
+  final DiscoveryRepository? discoveryRepository;
 
   @override
   State<AuthGate> createState() => _AuthGateState();
@@ -43,6 +47,7 @@ class _AuthGateState extends State<AuthGate> {
   late final EnrollmentRepository _enrollmentRepository;
   late final AssistantRepository _assistantRepository;
   late final NotificationRepository _notificationRepository;
+  late final DiscoveryRepository _discoveryRepository;
   DemoEnrollmentRepository? _ownedEnrollmentRepository;
 
   @override
@@ -64,6 +69,9 @@ class _AuthGateState extends State<AuthGate> {
     _notificationRepository =
         widget.notificationRepository ??
         DemoNotificationRepository(activityRepository: _activityRepository);
+    _discoveryRepository =
+        widget.discoveryRepository ??
+        DemoDiscoveryRepository(activityRepository: _activityRepository);
   }
 
   @override
@@ -108,6 +116,7 @@ class _AuthGateState extends State<AuthGate> {
           enrollmentRepository: _enrollmentRepository,
           assistantRepository: _assistantRepository,
           notificationRepository: _notificationRepository,
+          discoveryRepository: _discoveryRepository,
         );
       },
     );

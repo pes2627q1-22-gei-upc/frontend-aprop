@@ -12,7 +12,7 @@
 
 | Taiga | Història / tasca | Repo | Branca | Responsable | Estat |
 |---|---|---|---|---|---|
-| #86 | Frontend pantalla notificacions | frontend-aprop | `feature/notifications` | Adam | commit `c84a138` publicat i PR oberta; integració local de `develop` verificada (196 proves i APK debug), sense commit de fusió |
+| #96 | Frontend de cerca (Descobreix i cerca d'activitats) | frontend-aprop | `feature/discover` | Adam | demo verificada: 228 proves, anàlisi i APK debug; pendent revisió humana; sense commit ni push |
 | — | Configuració d'IA per a l'equip | frontend-aprop | `feature/ai-setup` | Wenqiang | sense scripts/hooks; pendent PR |
 | — | Configuració d'IA per a l'equip | api-aprop | `feature/ai-setup` | Wenqiang | pendent de revisió humana |
 
@@ -23,6 +23,7 @@
 - #75 Detall d'activitat (PR #3) i #82 inscripció (PR #6).
 - #84 / #39 Agenda (PR #7) i #91 / #14 Assistent (PR #8), fusionades.
 - #93 / #31 Creació d'activitats (PR #9 i #10) i #79 / #21 Mapa d'Inici (PR #14), fusionades a `develop`.
+- #86 Avisos fusionats a `develop` (PR #15); conflictes resolts preservant les DP anteriors.
 
 ## Bloquejos
 
@@ -32,12 +33,13 @@
 - Assistent (xatbot): contracte d'API amb el backend i Gemini pendent (DP-016).
 - Creació i mapa: contracte backend i decisions provisionals pendents (DP-017 a DP-022).
 - Avisos: API, amistats reals, perfils i enviament pendents (DP-023; abans DP-017 a la branca).
+- Descobreix/cerca: API, interessos i cerca de persones/perfils pendents (DP-024).
 
 ## Propers passos
 
-1. Adam revisa la resolució preparada, fa el commit de fusió i actualitza la mateixa PR de #86.
-2. Revisió humana de la PR de la tasca #86 i acord dels contractes d'API pendents.
+1. Adam prova/revisa #96 i contrasta els criteris detallats de Taiga abans de preparar la PR.
+2. Revisió humana abans de commit/PR i acord dels contractes d'API pendents.
 
 ## Traspàs entre eines
 
-Última eina: Codex (2026-10-21) · Context mínim: aquest fitxer + `docs/notifications.md` + DP-023. Fusió local en curs; cap commit de fusió ni push fet per l'assistent.
+Última eina: Codex (2026-10-21) · Context mínim: aquest fitxer + `docs/discovery.md` + DP-024. Branca creada des de `origin/develop` (`45fe346`); #96 sense commit ni push.

@@ -269,6 +269,16 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Qui decideix:** frontend + backend + responsables de perfils/amistats
 - **Resolució:**
 
+### DP-024 · Descobreix i cerca: contractes, seleccions i abast social
+- **Estat:** oberta
+- **Obert per:** 2026-10-21 · Codex · Taiga #96 Frontend de cerca
+- **Context:** figures 14–16, `DiscoveryRepository`, `DemoDiscoveryRepository`, `DiscoverScreen` i `ActivitySearchScreen`. L'usuari autoritza Descobreix i la cerca d'activitats del Sprint 1; confirma el número/títol de Taiga, però els criteris detallats no estan disponibles localment.
+- **Dubte:** falten el contracte de cerca/recomanacions, els criteris de coincidència/ordenació, els interessos persistits i les funcionalitats de persones/perfil.
+- **Opcions:** A) integrar el contracte autenticat quan estigui acordat · B) validar primer el recorregut amb el catàleg compartit i un adaptador de demostració.
+- **Provisionalment:** B, sense endpoints ni paquets nous. La selecció demo reutilitza els IDs d'exposició i teatre dels mockups, sense fingir personalització: el subtítol és «Una selecció per començar» fins que `isPersonalized` sigui cert. Es conserven les dates històriques del catàleg compartit; no són propostes actualitzades de producció. La cerca local ignora majúscules/accents/espais repetits i exigeix totes les paraules entre títol, categoria, municipi i descripció. Espera de 350 ms i enviament immediat amb el teclat. «Persones» es mostra desactivat amb explicació i l'accés inicial diu «Cerca activitats»; no es creen perfils ni amistats. La capçalera i la navegació segueixen el patró actual; missatges nous de buit/error provisionals en català. `TODO(DP-024)` marca aquestes adaptacions.
+- **Qui decideix:** frontend + backend + responsables d'interessos/perfils
+- **Resolució:**
+
 ## Resoltes
 
 (cap)

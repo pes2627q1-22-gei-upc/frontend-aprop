@@ -159,6 +159,14 @@ La navegació surt per `onActivitySelected` i `onPersonSelected`; la feature no 
 
 Els colors addicionals de les etiquetes s'injecten des d'`AppTheme` amb `NotificationBadgeTheme`. La fila de filtres es pot desplaçar en pantalles estretes o amb text ampliat. Vegeu `docs/notifications.md` per seguir els fitxers i les proves.
 
+## Descobreix i cerca — Taiga #96
+
+La descoberta i la cerca viuen dins de `features/activities/`, perquè consulten el mateix catàleg i reutilitzen `ActivityCard` i `EnrollmentAction`. `DiscoveryFeed` és un snapshot immutable; `DiscoveryRepository` és una interfície en Dart pur amb operacions de feed i cerca. `DemoDiscoveryRepository` rep el `ActivityRepository` compartit: no duplica activitats ni inscripcions i no inventa endpoints. La personalització real, els criteris de cerca i l'abast social són pendents (DP-024).
+
+`DiscoverScreen` i `ActivitySearchScreen` creen/alliberen els seus ViewModels. El primer coordina càrrega i recàrrega; el segon espera 350 ms mentre s'escriu, permet enviar immediatament amb el teclat i invalida respostes antigues en canviar/esborrar la consulta o sortir. Els ViewModels no naveguen ni reben `BuildContext`. El tema central configura el selector segmentat.
+
+`AuthGate` injecta el repositori a `MainShell`, que compon Descobreix, `/discover/search` i les rutes de detall dins del mateix navegador de secció. La cerca manté l'estat sota el detall i en canviar de pestanya. Les dues pantalles reben el `EnrollmentViewModel` existent: la inscripció és compartida amb Inici, fitxa i Agenda. El pas cap a perfils/cerca de persones continua pendent. Vegeu `docs/discovery.md` per seguir el flux.
+
 ## Recursos i dependències
 
 Els recursos van a `assets/`, fora de `lib/`. Les fotografies de demostració i l’avatar són a `assets/images/`, declarat a `pubspec.yaml`. S’han preparat amb la vista «Llista» aprovada com a referència; representen contingut fictici, no fotografies verificades d’esdeveniments reals. La procedència i els prompts es documenten a `docs/demo-assets.json`. `assets/branding/aprop_logo.png` és una còpia sense modificacions del logotip aprovat `output/logo/aprop-logo-oficial.png` de la carpeta PES; `assets/branding/` també està declarat a `pubspec.yaml`. `assets/icons/google_g.png` és el logotip «G» de Google per al botó d'accés: s'ha retallat de `Theme=Light, Show text=No, Shape=Square` (PNG @4x) del paquet oficial `signin-assets.zip` de Google Identity i se n'ha tret el fons blanc, sense modificar-ne la forma ni els colors.

@@ -47,6 +47,8 @@ Accés amb Google; en el primer accés es completa el perfil i es fa el test d'i
 
 ## Estat actual vs mockups
 
+Taiga #96 implementa Descobreix i la cerca d'activitats amb les targetes/inscripcions existents, el navegador de la secció i estats complets. La selecció demo no és personalitzada: subtítol «Una selecció per començar» i accés «Cerca activitats». «Persones» continua desactivat amb una explicació fins a tenir-ne l'abast/contracte. No s'inventen perfils ni recomanacions de producció (DP-024); detalls a `docs/discovery.md`.
+
 Taiga #86 implementa Avisos amb repositori de demostració: filtres, ordre/agrupació per data, lectura confirmada, respostes a sol·licituds i ruta al detall. El perfil es mostra com a pendent fins que s'injecti un callback real. Les inicials substitueixen avatars no disponibles. En pantalles estretes o amb text ampliat, els quatre filtres es desplacen horitzontalment sense truncar. Lliurament de notificacions, recordatoris programats i amistats reals no estan integrats (DP-023); detalls a `docs/notifications.md`.
 
 Implementat amb dades de demostració: accés (usuari o correu + contrasenya; Google desactivat), llista

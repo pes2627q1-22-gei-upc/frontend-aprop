@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../features/auth/repositories/auth_repository.dart';
 import '../features/activities/repositories/activity_repository.dart';
+import '../features/activities/repositories/discovery_repository.dart';
 import '../features/activities/repositories/enrollment_repository.dart';
 import '../features/assistant/repositories/assistant_repository.dart';
 import '../features/notifications/repositories/notification_repository.dart';
@@ -16,6 +17,7 @@ class APropApp extends StatelessWidget {
     this.enrollmentRepository,
     this.assistantRepository,
     this.notificationRepository,
+    this.discoveryRepository,
   });
 
   final AuthRepository authRepository;
@@ -23,6 +25,7 @@ class APropApp extends StatelessWidget {
   final EnrollmentRepository? enrollmentRepository;
   final AssistantRepository? assistantRepository;
   final NotificationRepository? notificationRepository;
+  final DiscoveryRepository? discoveryRepository;
 
   @override
   Widget build(BuildContext context) {
@@ -37,12 +40,14 @@ class APropApp extends StatelessWidget {
           enrollmentRepository,
           assistantRepository,
           notificationRepository,
+          discoveryRepository,
         )),
         authRepository: authRepository,
         activityRepository: activityRepository,
         enrollmentRepository: enrollmentRepository,
         assistantRepository: assistantRepository,
         notificationRepository: notificationRepository,
+        discoveryRepository: discoveryRepository,
       ),
     );
   }
