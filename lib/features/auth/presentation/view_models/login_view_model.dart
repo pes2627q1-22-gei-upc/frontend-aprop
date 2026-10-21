@@ -14,10 +14,13 @@ class LoginViewModel extends ChangeNotifier {
 
   final Map<LoginField, String> _fieldErrors = {};
   bool _isLoading = false;
+  bool _isGoogleLoading = false;
   bool _isDisposed = false;
   String? _errorMessage;
 
   bool get isLoading => _isLoading;
+  bool get isGoogleLoading => _isGoogleLoading;
+  bool get isBusy => _isLoading || _isGoogleLoading;
   String? get errorMessage => _errorMessage;
   String? fieldError(LoginField field) => _fieldErrors[field];
 
@@ -37,7 +40,7 @@ class LoginViewModel extends ChangeNotifier {
     required String usernameOrEmail,
     required String password,
   }) async {
-    if (_isLoading || _isDisposed) return false;
+    if (isBusy || _isDisposed) return false;
 
     _errorMessage = null;
     _fieldErrors
@@ -77,6 +80,33 @@ class LoginViewModel extends ChangeNotifier {
     } finally {
       if (!_isDisposed) {
         _isLoading = false;
+        notifyListeners();
+      }
+    }
+  }
+
+  /// Retorna `true` si s'ha iniciat la sessió, i `false` si ha fallat o si
+  /// l'usuari ha tancat el selector de Google sense triar cap compte.
+  Future<bool> signInWithGoogle() async {
+    if (isBusy || _isDisposed) return false;
+
+    // Els errors del formulari no tenen res a veure amb l'accés amb Google.
+    _errorMessage = null;
+    _fieldErrors.clear();
+    _isGoogleLoading = true;
+    notifyListeners();
+
+    try {
+      return await _repository.signInWithGoogle();
+    } on AuthFailure catch (failure) {
+      _errorMessage = failure.message;
+      return false;
+    } catch (_) {
+      _errorMessage = unexpectedAuthErrorMessage;
+      return false;
+    } finally {
+      if (!_isDisposed) {
+        _isGoogleLoading = false;
         notifyListeners();
       }
     }

@@ -61,6 +61,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
     if (success && mounted) Navigator.of(context).pop();
   }
 
+  Future<void> _signInWithGoogle() async {
+    FocusScope.of(context).unfocus();
+
+    final success = await _viewModel.signInWithGoogle();
+
+    // Igual que en crear el compte: AuthGate ja mostra el pas següent a sota.
+    if (success && mounted) Navigator.of(context).pop();
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -190,10 +199,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       AuthSubmitButton(
                         label: 'Crea el compte',
                         isLoading: _viewModel.isLoading,
-                        onPressed: _submit,
+                        onPressed: _viewModel.isGoogleLoading ? null : _submit,
                       ),
                       const SizedBox(height: 16),
-                      const GoogleSignInButton(),
+                      GoogleSignInButton(
+                        isLoading: _viewModel.isGoogleLoading,
+                        onPressed: _viewModel.isLoading
+                            ? null
+                            : _signInWithGoogle,
+                      ),
                       const SizedBox(height: 24),
                       AuthLinkPrompt(
                         question: 'Ja tens compte?',

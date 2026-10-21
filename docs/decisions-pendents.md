@@ -267,7 +267,6 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Opcions:** A) acordar contractes i integrar perfils/amistats · B) validar primer la pantalla i les interaccions amb dades demo aïllades.
 - **Provisionalment:** projecció de bústia en Dart pur, dades demo per compte, lectura/resposta confirmades i callbacks de destinació. El perfil s'indica com a pendent fins que hi hagi un callback real. La resposta d'amistat simula només el resultat a la bústia: no implementa un graf d'amistats, push, programació de recordatoris, tipus UML nous ni rutes d'API. Els recordatoris històrics no creen inscripcions. Filtres desplaçables amb pantalla estreta/text ampliat, paletes centrals al tema i inicials si no hi ha avatar. `TODO(DP-023)` marca els límits demo/integració. Textos nous de càrrega/error/buit provisionals en català.
 - **Qui decideix:** frontend + backend + responsables de perfils/amistats
-- **Resolució:**
 
 ### DP-024 · Descobreix i cerca: contractes, seleccions i abast social
 - **Estat:** oberta
@@ -277,6 +276,16 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Opcions:** A) integrar el contracte autenticat quan estigui acordat · B) validar primer el recorregut amb el catàleg compartit i un adaptador de demostració.
 - **Provisionalment:** B, sense endpoints ni paquets nous. La selecció demo reutilitza els IDs d'exposició i teatre dels mockups, sense fingir personalització: el subtítol és «Una selecció per començar» fins que `isPersonalized` sigui cert. Es conserven les dates històriques del catàleg compartit; no són propostes actualitzades de producció. La cerca local ignora majúscules/accents/espais repetits i exigeix totes les paraules entre títol, categoria, municipi i descripció. Espera de 350 ms i enviament immediat amb el teclat. «Persones» es mostra desactivat amb explicació i l'accés inicial diu «Cerca activitats»; no es creen perfils ni amistats. La capçalera i la navegació segueixen el patró actual; missatges nous de buit/error provisionals en català. `TODO(DP-024)` marca aquestes adaptacions.
 - **Qui decideix:** frontend + backend + responsables d'interessos/perfils
+- **Resolució:**
+
+### DP-025 · Primer accés amb Google: nom d'usuari i contracte amb el backend
+- **Estat:** oberta
+- **Obert per:** 2026-10-21 · Claude Code (Opus 5.5) amb confirmació de l'usuari · Taiga #7
+- **Context:** `AuthRepository.signInWithGoogle` i `chooseUsername`, `ChooseUsernameScreen`, `AuthGate`, `DemoAuthRepository`.
+- **Dubte:** el mockup diu que en el primer accés amb Google «es completa el perfil», però no hi ha disseny d'aquesta pantalla ni contracte del backend per desar el nom d'usuari i saber si encara falta.
+- **Opcions:** A) pantalla pròpia que només demana el nom d'usuari (nom i cognoms de Google) · B) formulari de perfil complet. En tots dos casos, cal un endpoint per desar-lo i un per consultar l'usuari actual.
+- **Provisionalment:** A amb dades de demostració: el selector de Google se simula amb un compte fix (Jordi Puig) que el primer cop no té nom d'usuari; textos de la pantalla sense mockup (`TODO(DP-025)`). El test d'interessos del primer accés queda fora d'aquesta tasca.
+- **Qui decideix:** equip (pantalla) · backend (contracte)
 - **Resolució:**
 
 ## Resoltes

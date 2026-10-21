@@ -17,6 +17,12 @@ class FakeAuthRepository implements AuthRepository {
 
   int verificationEmailsSent = 0;
 
+  /// Resposta de [signInWithGoogle]: `false` simula que l'usuari tanca el
+  /// selector de comptes.
+  bool googleAccountChosen = true;
+
+  int googleSignIns = 0;
+
   @override
   Stream<AppUser?> authStateChanges() => Stream.value(null);
 
@@ -44,6 +50,19 @@ class FakeAuthRepository implements AuthRepository {
       'email': email,
       'password': password,
     };
+    return _respond();
+  }
+
+  @override
+  Future<bool> signInWithGoogle() async {
+    googleSignIns++;
+    await _respond();
+    return googleAccountChosen;
+  }
+
+  @override
+  Future<void> chooseUsername(String username) {
+    lastCall = {'username': username};
     return _respond();
   }
 
