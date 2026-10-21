@@ -25,6 +25,7 @@ Les tasques #75 i #82 afegeixen el detall i les inscripcions compartides entre l
 | `features/activities/presentation/widgets/` | Targetes i components propis de les activitats. |
 | `features/auth/` | Inici de sessió, registre i sessió, amb les mateixes capes que `activities/`. |
 | `features/assistant/` | Conversa amb l'assistent cultural («Assistent»), interpretació de consultes i recomanació d'activitats. |
+| `features/notifications/` | Bústia d'Avisos, filtres, lectura i resposta a sol·licituds de demostració, separats de l'enviament de notificacions. |
 | `assets/images/` | Fotografies i imatges de contingut. |
 | `assets/branding/` | Logotip i recursos d’identitat d’AProp!. |
 | `assets/icons/` | Icones de tercers que no ofereix Material, com el logotip de Google. |
@@ -147,6 +148,16 @@ La recuperació de contrasenya és una altra història i no forma part de l'Spri
 `EnrollmentAction` renders initial, loading, pending, confirmed and retry states for both surfaces. List cards expose independent image/title navigation and enrollment actions. Confirmed plans are never cleared by a failed refresh, and a write is not displayed as successful before confirmation. Pending responses cannot notify a disposed ViewModel or another account.
 
 Calendar integration must use the same repository instance and user ID through its own ViewModel; it must not import the activity presentation ViewModel. The demo repository is memory-only and validates event IDs against the catalogue. The authenticated backend adapter and calendar wiring are tracked in DP-010; no API endpoints or DTOs have been assumed.
+
+## Avisos — Taiga #86
+
+`NotificationRepository` és el contracte en Dart pur per consultar els avisos rebuts, confirmar-ne la lectura i respondre una sol·licitud. `DemoNotificationRepository` conserva les bústies separades per compte durant la mateixa execució; els exemples reutilitzen activitats del catàleg, sense modificar inscripcions. L'adaptador del backend, l'autorització i la sincronització d'amistats són pendents (DP-023).
+
+`AuthGate` crea o rep el repositori compartit, i `MainShell` l'injecta a `NotificationsScreen`. La pantalla crea i allibera el seu `NotificationsViewModel`. Els widgets no fan peticions ni contenen avisos de demostració. El ViewModel ordena i filtra, controla les operacions pendents i només confirma lectura/resposta després de l'èxit del repositori. Un error de recàrrega conserva els avisos ja carregats.
+
+La navegació surt per `onActivitySelected` i `onPersonSelected`; la feature no importa cap pantalla ni ViewModel d'una altra feature. La fitxa s'obre amb la ruta i les inscripcions compartides. El callback de perfil queda absent fins que la funcionalitat existeixi, amb una indicació explícita a la UI. Cada filtre conserva el desplaçament i tornar d'una fitxa conserva l'estat. `TickerMode` atura les animacions de les seccions no visibles sense destruir-ne els navegadors.
+
+Els colors addicionals de les etiquetes s'injecten des d'`AppTheme` amb `NotificationBadgeTheme`. La fila de filtres es pot desplaçar en pantalles estretes o amb text ampliat. Vegeu `docs/notifications.md` per seguir els fitxers i les proves.
 
 ## Recursos i dependències
 

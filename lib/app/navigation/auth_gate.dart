@@ -12,6 +12,8 @@ import '../../features/auth/models/app_user.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/verify_email_screen.dart';
 import '../../features/auth/repositories/auth_repository.dart';
+import '../../features/notifications/data/demo_notification_repository.dart';
+import '../../features/notifications/repositories/notification_repository.dart';
 import 'main_shell.dart';
 
 /// Mostra el login si no hi ha sessió, la verificació del correu si encara no
@@ -23,12 +25,14 @@ class AuthGate extends StatefulWidget {
     this.activityRepository,
     this.enrollmentRepository,
     this.assistantRepository,
+    this.notificationRepository,
   });
 
   final AuthRepository authRepository;
   final ActivityRepository? activityRepository;
   final EnrollmentRepository? enrollmentRepository;
   final AssistantRepository? assistantRepository;
+  final NotificationRepository? notificationRepository;
 
   @override
   State<AuthGate> createState() => _AuthGateState();
@@ -38,6 +42,7 @@ class _AuthGateState extends State<AuthGate> {
   late final ActivityRepository _activityRepository;
   late final EnrollmentRepository _enrollmentRepository;
   late final AssistantRepository _assistantRepository;
+  late final NotificationRepository _notificationRepository;
   DemoEnrollmentRepository? _ownedEnrollmentRepository;
 
   @override
@@ -56,6 +61,9 @@ class _AuthGateState extends State<AuthGate> {
     _assistantRepository =
         widget.assistantRepository ??
         DemoAssistantRepository(activityRepository: _activityRepository);
+    _notificationRepository =
+        widget.notificationRepository ??
+        DemoNotificationRepository(activityRepository: _activityRepository);
   }
 
   @override
@@ -99,6 +107,7 @@ class _AuthGateState extends State<AuthGate> {
           activityRepository: _activityRepository,
           enrollmentRepository: _enrollmentRepository,
           assistantRepository: _assistantRepository,
+          notificationRepository: _notificationRepository,
         );
       },
     );
