@@ -145,7 +145,7 @@ void main() {
     expect(hasFocus('Repeteix la contrasenya'), isTrue);
   });
 
-  testWidgets('Reenviar el correu espera 30 segons cada vegada', (
+  testWidgets('Reenviar el correu espera 60 segons cada vegada', (
     tester,
   ) async {
     await pumpScreen(
@@ -160,10 +160,10 @@ void main() {
       ),
     );
 
-    expect(find.text('Torna a enviar el correu (30 s)'), findsOneWidget);
+    expect(find.text('Torna a enviar el correu (60 s)'), findsOneWidget);
     expect(resendButton().onPressed, isNull);
 
-    await tester.pump(const Duration(seconds: 29));
+    await tester.pump(const Duration(seconds: 59));
     expect(find.text('Torna a enviar el correu (1 s)'), findsOneWidget);
 
     await tester.pump(const Duration(seconds: 1));
@@ -174,7 +174,7 @@ void main() {
 
     expect(repository.verificationEmailsSent, 1);
     expect(find.text("T'hem tornat a enviar el correu."), findsOneWidget);
-    expect(find.text('Torna a enviar el correu (30 s)'), findsOneWidget);
+    expect(find.text('Torna a enviar el correu (60 s)'), findsOneWidget);
   });
 
   testWidgets("Mentre s'entra amb Google no es pot enviar el formulari", (
@@ -220,5 +220,15 @@ void main() {
       find.text('Minúscules, números, punt o guió baix (3-20).'),
     );
     expect(paragraph.didExceedMaxLines, isFalse);
+  });
+
+  testWidgets('Saluda sense nom si el compte no en té', (tester) async {
+    await pumpScreen(
+      tester,
+      ChooseUsernameScreen(repository: repository, firstName: ' '),
+    );
+
+    expect(find.textContaining('Hola!'), findsOneWidget);
+    expect(find.textContaining('Hola, '), findsNothing);
   });
 }

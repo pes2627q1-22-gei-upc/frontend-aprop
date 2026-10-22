@@ -74,7 +74,7 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Context:** `docs/ai/30-arquitectura.md`, ADR-0003
 - **Dubte:** els PDFs diuen que totes les claus van al backend, però el login de Firebase i el SDK de Maps normalment s'executen al client amb claus restringides.
 - **Opcions:** A) SDK al client amb claus restringides per app · B) tot via backend (proxy)
-- **Provisionalment:** res integrat.
+- **Provisionalment:** 2026-10-22: per al login s'ha seguit A amb Firebase Auth (vegeu DP-026). `flutterfire configure` genera `lib/firebase_options.dart` i `android/app/google-services.json` (projecte `aprop-919ec`), que **es versionen** perquè sense ells l'app no compila (ni la CI) i el repo és privat (comprovat el 2026-10-22). Pendent: que l'equip ho confirmi i **restringir les claus** a Google Cloud (clau d'Android: paquet `cat.fiveguys.aprop` + SHA-1; clau de navegador: `http://localhost:5000/*`) abans de fer públic el repo o de distribuir l'APK; si es fa públic, cal rotar-les perquè queden a l'historial.
 - **Qui decideix:** equip (cal un ADR)
 - **Resolució:**
 
@@ -286,6 +286,16 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Opcions:** A) pantalla pròpia que només demana el nom d'usuari (nom i cognoms de Google) · B) formulari de perfil complet. En tots dos casos, cal un endpoint per desar-lo i un per consultar l'usuari actual.
 - **Provisionalment:** A amb dades de demostració: el selector de Google se simula amb un compte fix (Jordi Puig) que el primer cop no té nom d'usuari; textos de la pantalla sense mockup (`TODO(DP-025)`). El test d'interessos del primer accés queda fora d'aquesta tasca.
 - **Qui decideix:** equip (pantalla) · backend (contracte)
+- **Resolució:**
+
+### DP-026 · Firebase Auth al client: paquets i dades provisionals fins a `POST /auth/sync`
+- **Estat:** oberta
+- **Obert per:** 2026-10-22 · Claude Code (Opus 5.5) amb confirmació de l'usuari · Taiga #73
+- **Context:** `FirebaseAuthRepository`, `firebase_auth_failure.dart`, `main.dart`, `pubspec.yaml`; backend `api-aprop` branca `feature/auth` (`POST /auth/sync`, sense fusionar).
+- **Dubte:** el backend encara no desa el perfil, no comprova que el nom d'usuari sigui únic, no guarda nom i cognoms i no permet entrar amb el nom d'usuari (Firebase només accepta correu).
+- **Opcions:** entrar amb nom d'usuari: A) només correu · B) endpoint públic usuari → correu · C) login fet pel backend. Nom i cognoms: A) columnes al backend · B) treure'ls del registre.
+- **Provisionalment:** paquets nous `firebase_core` 5, `firebase_auth` 7, `google_sign_in` 7 i `shared_preferences` 2. Nom i cognoms al `displayName` de Firebase (separats pel primer espai); nom d'usuari desat al dispositiu; si s'escriu un nom d'usuari en lloc del correu, l'app demana el correu (`AuthFailure.emailRequired`). Android i web (Google amb `signInWithPopup` de Firebase a la web); a iOS es continuen fent servir els comptes de demostració. `TODO(DP-026)` al repositori i a `main.dart`.
+- **Qui decideix:** equip + backend (contracte) · PO (criteri «usuari o correu» de #7)
 - **Resolució:**
 
 ## Resoltes

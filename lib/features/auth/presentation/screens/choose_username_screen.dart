@@ -6,7 +6,7 @@ import '../widgets/auth_link_prompt.dart';
 import '../widgets/auth_status_message.dart';
 import '../widgets/auth_submit_button.dart';
 
-/// Primer accés amb Google: el compte encara no té nom d'usuari i no es pot
+/// El compte encara no té nom d'usuari (primer accés amb Google) i no es pot
 /// entrar a l'app fins que en triï un.
 class ChooseUsernameScreen extends StatefulWidget {
   const ChooseUsernameScreen({
@@ -37,6 +37,12 @@ class _ChooseUsernameScreenState extends State<ChooseUsernameScreen> {
     _viewModel.dispose();
     _usernameController.dispose();
     super.dispose();
+  }
+
+  /// Un compte de Google pot no tenir nom.
+  String _greeting() {
+    final firstName = widget.firstName.trim();
+    return firstName.isEmpty ? 'Hola!' : 'Hola, $firstName!';
   }
 
   Future<void> _submit() async {
@@ -79,11 +85,12 @@ class _ChooseUsernameScreenState extends State<ChooseUsernameScreen> {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      // TODO(DP-025): text sense mockup.
+                      // TODO(DP-025): text sense mockup. No parla de Google:
+                      // provisionalment també hi arriba qui entra amb correu
+                      // en un altre dispositiu (DP-026).
                       Text(
-                        'Hola, ${widget.firstName}! És el primer cop que '
-                        'entres amb Google. Tria el nom amb què et trobaran '
-                        'a AProp!.',
+                        '${_greeting()} Tria el nom amb què et trobaran a '
+                        "l'app.",
                         style: TextStyle(
                           color: theme.colorScheme.onSurfaceVariant,
                         ),

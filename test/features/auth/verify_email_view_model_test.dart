@@ -27,7 +27,7 @@ void main() {
     final waitingViewModel = VerifyEmailViewModel(repository: repository);
     addTearDown(waitingViewModel.dispose);
 
-    expect(waitingViewModel.cooldownSecondsLeft, 30);
+    expect(waitingViewModel.cooldownSecondsLeft, 60);
     expect(waitingViewModel.canResend, isFalse);
 
     await waitingViewModel.resendEmail();

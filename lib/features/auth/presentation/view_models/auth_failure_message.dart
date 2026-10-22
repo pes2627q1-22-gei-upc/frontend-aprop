@@ -12,5 +12,12 @@ extension AuthFailureMessage on AuthFailure {
       "Aquest nom d'usuari ja està agafat. Prova'n un altre.",
     AuthFailure.network =>
       'No hi ha connexió. Comprova la xarxa i torna-ho a provar.',
+    AuthFailure.tooManyRequests =>
+      'Massa intents seguits. Espera una mica i torna-ho a provar.',
+    AuthFailure.emailRequired =>
+      'De moment només pots entrar amb el correu electrònic.',
+    AuthFailure.popupBlocked =>
+      "El navegador ha bloquejat la finestra de Google. Permet les finestres "
+          'emergents i torna-ho a provar.',
   };
 }
