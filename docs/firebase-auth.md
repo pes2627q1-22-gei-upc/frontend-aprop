@@ -19,8 +19,9 @@ El codi és a `lib/features/auth/data/firebase_auth_repository.dart` i es tria a
 - `lib/firebase_options.dart`
 - `android/app/google-services.json`
 
-Es versionen perquè el repo és privat (DP-004): amb un `git pull` n'hi ha prou. Només cal tornar-los a
-generar si canvia la configuració de Firebase (una plataforma nova, una app nova...):
+Contenen la clau d'API de Firebase, així que **no es versionen** (són al `.gitignore`, DP-004). Cada persona
+els ha de generar al seu ordinador la primera vegada (i si canvia la configuració de Firebase o es renova
+la clau). `firebase.json` sí que es versiona: no té cap clau i indica a `flutterfire` on generar-los.
 
 1. Demana accés al projecte de Firebase (rol Editor).
 2. Instal·la [Node.js LTS](https://nodejs.org) i després `npm install -g firebase-tools`.

@@ -60,3 +60,8 @@ __pycache__/
 
 # Clau de Google Maps per a la web (vegeu docs/google-maps.md).
 /web/maps_key.js
+
+# Configuració de Firebase amb la clau d'API: cada persona la genera amb
+# `flutterfire configure` (vegeu docs/firebase-auth.md i DP-004).
+/lib/firebase_options.dart
+/android/app/google-services.json
