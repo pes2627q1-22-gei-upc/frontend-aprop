@@ -294,8 +294,18 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Context:** `FirebaseAuthRepository`, `firebase_auth_failure.dart`, `main.dart`, `pubspec.yaml`; backend `api-aprop` branca `feature/auth` (`POST /auth/sync`, sense fusionar).
 - **Dubte:** el backend encara no desa el perfil, no comprova que el nom d'usuari sigui únic, no guarda nom i cognoms i no permet entrar amb el nom d'usuari (Firebase només accepta correu).
 - **Opcions:** entrar amb nom d'usuari: A) només correu · B) endpoint públic usuari → correu · C) login fet pel backend. Nom i cognoms: A) columnes al backend · B) treure'ls del registre.
-- **Provisionalment:** paquets nous `firebase_core` 5, `firebase_auth` 7, `google_sign_in` 7 i `shared_preferences` 2. Nom i cognoms al `displayName` de Firebase (separats pel primer espai); nom d'usuari desat al dispositiu; si s'escriu un nom d'usuari en lloc del correu, l'app demana el correu (`AuthFailure.emailRequired`). Android i web (Google amb `signInWithPopup` de Firebase a la web); a iOS es continuen fent servir els comptes de demostració. `TODO(DP-026)` al repositori i a `main.dart`.
+- **Provisionalment:** paquets nous `firebase_core` 5, `firebase_auth` 7, `google_sign_in` 7 i `shared_preferences` 2. Nom i cognoms al `displayName` de Firebase (separats pel primer espai); nom d'usuari amb `POST /auth/sync` (DP-028; sense servidor, al dispositiu); si s'escriu un nom d'usuari en lloc del correu, l'app demana el correu (`AuthFailure.emailRequired`). Android i web (Google amb `signInWithPopup` de Firebase a la web); a iOS es continuen fent servir els comptes de demostració. `TODO(DP-026)` al repositori i a `main.dart`.
 - **Qui decideix:** equip + backend (contracte) · PO (criteri «usuari o correu» de #7)
+- **Resolució:**
+
+### DP-028 · Connexió amb el backend: `POST /auth/sync` i adreça del servidor
+- **Estat:** oberta
+- **Obert per:** 2026-10-23 · Claude Code (Opus 5.5) amb confirmació de l'usuari · Taiga #73
+- **Context:** `UserSyncRepository`, `HttpUserSyncRepository`, `DemoUserSyncRepository`, `FirebaseAuthRepository`, `lib/core/config/api_config.dart`, `main.dart`, `android/app/src/debug/AndroidManifest.xml`. El número DP-027 és a `feature/apuntar-esdeveniment`, encara sense fusionar.
+- **Dubte:** el contracte de `POST /auth/sync` s'ha llegit de la branca `feature/auth` d'api-aprop, que encara no està fusionada; no hi ha servidor desplegat (ni URL), i el backend respon 422 tant si l'usuari encara no existeix com si el nom no és vàlid.
+- **Opcions:** resposta per a «cal triar nom»: A) 422 (com ara) · B) un codi propi (p. ex. 404 o `username required`). URL: A) `--dart-define=API_BASE_URL` en executar i compilar (com ara) · B) un fitxer de configuració per entorn.
+- **Provisionalment:** paquet nou `http`; la URL es passa amb `--dart-define=API_BASE_URL=…` i, si no n'hi ha, el nom d'usuari es desa al dispositiu (`DemoUserSyncRepository`, que reserva `laiasoler` per provar el nom repetit). Amb URL, s'envia el token de Firebase a `Authorization: Bearer` i es tracten 200/201, 409 i 422 (sense nom → cal triar-ne un). Si el backend no respon, es fa servir l'últim nom conegut desat al dispositiu. Si el nom ja és d'algú altre en registrar-se, el compte es crea igualment i l'usuari en tria un altre després de verificar el correu. HTTP sense xifrar només a la versió de depuració. `TODO(DP-028)` al codi.
+- **Qui decideix:** backend + frontend
 - **Resolució:**
 
 ## Resoltes

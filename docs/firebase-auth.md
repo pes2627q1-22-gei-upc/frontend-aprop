@@ -57,10 +57,20 @@ registrada a l'app Android de Firebase. Si no hi és, el selector de comptes fal
 3. Torna a executar `flutterfire configure`: `google-services.json` ha d'incloure els clients OAuth que es
    creen en afegir la SHA-1.
 
-## Què és provisional (DP-026)
+## Backend: nom d'usuari (`POST /auth/sync`)
 
-El backend té `POST /auth/sync` en una branca encara no fusionada. Fins que no s'hi connecti l'app:
+Després d'entrar a Firebase, l'app demana al backend l'usuari de la base de dades (`HttpUserSyncRepository`). El
+primer cop el crea amb el nom d'usuari triat. L'adreça es passa en executar l'app:
 
-- el nom i els cognoms es desen al `displayName` de Firebase;
-- el nom d'usuari es desa només al dispositiu, i encara no se'n comprova la unicitat;
-- només es pot entrar amb el correu: si s'escriu un nom d'usuari, l'app demana el correu.
+```bash
+flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8080
+```
+
+**Sense `API_BASE_URL`** (fins que hi hagi servidor), el nom d'usuari es desa al dispositiu
+(`DemoUserSyncRepository`). El nom `laiasoler` hi està reservat per poder provar l'error de nom repetit.
+
+## Què és provisional (DP-026, DP-028)
+
+- El nom i els cognoms es desen al `displayName` de Firebase, fins que el backend els desi.
+- Només es pot entrar amb el correu: si s'escriu un nom d'usuari, l'app demana el correu.
+- El contracte de `POST /auth/sync` és d'una branca del backend encara no fusionada.

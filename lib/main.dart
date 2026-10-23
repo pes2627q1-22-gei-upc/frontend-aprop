@@ -1,11 +1,16 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'app/aprop_app.dart';
+import 'core/config/api_config.dart';
 import 'features/auth/data/demo_auth_repository.dart';
+import 'features/auth/data/demo_user_sync_repository.dart';
 import 'features/auth/data/firebase_auth_repository.dart';
+import 'features/auth/data/http_user_sync_repository.dart';
 import 'features/auth/repositories/auth_repository.dart';
+import 'features/auth/repositories/user_sync_repository.dart';
 import 'firebase_options.dart';
 
 Future<void> main() async {
@@ -23,5 +28,18 @@ Future<AuthRepository> _createAuthRepository() async {
   }
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  return FirebaseAuthRepository();
+  final auth = FirebaseAuth.instance;
+
+  // Sense URL del backend, el nom d'usuari es desa al dispositiu (DP-028).
+  final UserSyncRepository userSync = ApiConfig.isConfigured
+      ? HttpUserSyncRepository(
+          baseUrl: Uri.parse(ApiConfig.baseUrl),
+          idToken: () async => auth.currentUser?.getIdToken(),
+        )
+      : DemoUserSyncRepository(
+          currentUid: () => auth.currentUser?.uid,
+          currentEmail: () => auth.currentUser?.email,
+        );
+
+  return FirebaseAuthRepository(auth: auth, userSync: userSync);
 }
