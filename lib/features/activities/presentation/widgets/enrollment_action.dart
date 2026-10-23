@@ -122,8 +122,10 @@ class EnrollmentAction extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Tooltip(
-                message: enrolled
+              // Només per al lector de pantalla: un globus visible en passar
+              // per sobre del botó molestava.
+              Semantics(
+                tooltip: enrolled
                     ? 'Desapuntar-me de $activityTitle'
                     : readFailed
                     ? 'Tornar a consultar els teus plans'
