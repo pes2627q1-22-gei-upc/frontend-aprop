@@ -2,9 +2,12 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../../core/config/api_config.dart';
 import '../../features/activities/data/demo_activity_repository.dart';
 import '../../features/activities/data/demo_discovery_repository.dart';
 import '../../features/activities/data/demo_enrollment_repository.dart';
+import '../../features/activities/data/http_activity_map_repository.dart';
+import '../../features/activities/repositories/activity_map_repository.dart';
 import '../../features/activities/repositories/activity_repository.dart';
 import '../../features/activities/repositories/discovery_repository.dart';
 import '../../features/activities/repositories/enrollment_repository.dart';
@@ -29,6 +32,7 @@ class AuthGate extends StatefulWidget {
     this.assistantRepository,
     this.notificationRepository,
     this.discoveryRepository,
+    this.activityMapRepository,
   });
 
   final AuthRepository authRepository;
@@ -37,6 +41,10 @@ class AuthGate extends StatefulWidget {
   final AssistantRepository? assistantRepository;
   final NotificationRepository? notificationRepository;
   final DiscoveryRepository? discoveryRepository;
+
+  /// Per defecte, el backend si s'ha passat `API_BASE_URL`. Sense backend, el
+  /// mapa mostra les activitats de demostració de la llista.
+  final ActivityMapRepository? activityMapRepository;
 
   @override
   State<AuthGate> createState() => _AuthGateState();
@@ -48,6 +56,7 @@ class _AuthGateState extends State<AuthGate> {
   late final AssistantRepository _assistantRepository;
   late final NotificationRepository _notificationRepository;
   late final DiscoveryRepository _discoveryRepository;
+  late final ActivityMapRepository? _activityMapRepository;
   DemoEnrollmentRepository? _ownedEnrollmentRepository;
 
   @override
@@ -72,6 +81,11 @@ class _AuthGateState extends State<AuthGate> {
     _discoveryRepository =
         widget.discoveryRepository ??
         DemoDiscoveryRepository(activityRepository: _activityRepository);
+    _activityMapRepository =
+        widget.activityMapRepository ??
+        (ApiConfig.isConfigured
+            ? HttpActivityMapRepository(baseUrl: Uri.parse(ApiConfig.baseUrl))
+            : null);
   }
 
   @override
@@ -117,6 +131,7 @@ class _AuthGateState extends State<AuthGate> {
           assistantRepository: _assistantRepository,
           notificationRepository: _notificationRepository,
           discoveryRepository: _discoveryRepository,
+          activityMapRepository: _activityMapRepository,
         );
       },
     );

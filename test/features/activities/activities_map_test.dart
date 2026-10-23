@@ -1,8 +1,10 @@
 import 'package:aprop/app/theme/app_theme.dart';
 import 'package:aprop/features/activities/data/demo_activity_repository.dart';
 import 'package:aprop/features/activities/models/activity.dart';
+import 'package:aprop/features/activities/models/geo_bounds.dart';
 import 'package:aprop/features/activities/models/geo_point.dart';
 import 'package:aprop/features/activities/presentation/screens/activities_screen.dart';
+import 'package:aprop/features/activities/presentation/view_models/activities_map_view_model.dart';
 import 'package:aprop/features/activities/presentation/view_models/activities_view_model.dart';
 import 'package:aprop/features/activities/presentation/view_models/enrollment_view_model.dart';
 import 'package:aprop/features/activities/presentation/widgets/activities_map.dart';
@@ -10,22 +12,26 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
+import 'fake_activity_map_repository.dart';
 import 'fake_activity_repository.dart';
 import 'fake_enrollment_repository.dart';
 
 void main() {
   late List<String> opened;
+  late List<String> openedFromMap;
   late List<double> overlays;
 
   Future<void> pumpInici(
     WidgetTester tester, {
     List<Activity>? activities,
+    ActivitiesMapViewModel? mapViewModel,
   }) async {
     tester.view.physicalSize = const Size(390, 844);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
     opened = [];
+    openedFromMap = [];
     overlays = [];
 
     final repository = activities == null
@@ -48,6 +54,8 @@ void main() {
             enrollmentViewModel: enrollments,
             onActivitySelected: opened.add,
             onMapOverlayChanged: overlays.add,
+            mapViewModel: mapViewModel,
+            onMapActivitySelected: openedFromMap.add,
           ),
         ),
       ),
@@ -181,6 +189,79 @@ void main() {
       find.text('1 activitat no té ubicació i només surt a la llista.'),
       findsOneWidget,
     );
+  });
+
+  group('Amb el backend', () {
+    const area = GeoBounds(
+      southWest: GeoPoint(latitude: 41.3, longitude: 2.0),
+      northEast: GeoPoint(latitude: 41.5, longitude: 2.2),
+    );
+    final concert = Activity(
+      id: '1282',
+      title: 'Música a la plaça',
+      category: 'Activitat',
+      municipality: 'Barcelona',
+      startsAt: DateTime(2026, 11, 7),
+      imageAsset: '',
+      source: ActivitySource.culturalAgenda,
+      location: const GeoPoint(latitude: 41.39, longitude: 2.17),
+    );
+
+    late FakeActivityMapRepository repository;
+
+    Future<ActivitiesMapViewModel> pumpWithBackend(WidgetTester tester) async {
+      repository = FakeActivityMapRepository()..activities = [concert];
+      final mapViewModel = ActivitiesMapViewModel(repository: repository);
+      addTearDown(mapViewModel.dispose);
+      await pumpInici(tester, mapViewModel: mapViewModel);
+      await openMap(tester);
+      return mapViewModel;
+    }
+
+    testWidgets('El mapa mostra les activitats de la zona i obre la fitxa', (
+      tester,
+    ) async {
+      final mapViewModel = await pumpWithBackend(tester);
+      // Ho fa el mapa en obrir-se i en moure'l; a les proves no hi ha mapa.
+      await mapViewModel.loadArea(area);
+      await tester.pumpAndSettle();
+
+      // Les de la zona, no les de demostració de la llista.
+      expect(map(tester).markers.map((m) => m.markerId.value), ['1282']);
+
+      marker(tester, '1282').onTap!();
+      await tester.pumpAndSettle();
+      expect(find.text('Font: Agenda Cultural · Generalitat'), findsOneWidget);
+
+      await tester.tap(find.text('Veure activitat'));
+      expect(openedFromMap, ['1282']);
+      expect(opened, isEmpty);
+    });
+
+    testWidgets('Si la zona no es pot carregar, es pot tornar a provar', (
+      tester,
+    ) async {
+      final mapViewModel = await pumpWithBackend(tester);
+      repository.loadArea = (_) => Future.error(Exception('sense xarxa'));
+      await mapViewModel.loadArea(area);
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text(
+          'No hem pogut carregar les activitats d’aquesta zona. '
+          'Torna-ho a provar.',
+        ),
+        findsOneWidget,
+      );
+      expect(map(tester).markers, isEmpty);
+
+      repository.loadArea = null;
+      await tester.tap(find.text('Tornar-ho a provar'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Tornar-ho a provar'), findsNothing);
+      expect(map(tester).markers.map((m) => m.markerId.value), ['1282']);
+    });
   });
 
   test('El tipus de marcador depèn de la font i de l’amistat', () {

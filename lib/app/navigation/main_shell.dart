@@ -7,9 +7,12 @@ import '../../features/activities/presentation/screens/activity_search_screen.da
 import '../../features/activities/presentation/screens/create_activity_screen.dart';
 import '../../features/activities/presentation/screens/discover_screen.dart';
 import '../../features/activities/presentation/widgets/activities_map.dart';
+import '../../features/activities/presentation/view_models/activities_map_view_model.dart';
 import '../../features/activities/presentation/view_models/activities_view_model.dart';
 import '../../features/activities/presentation/view_models/enrollment_view_model.dart';
 import '../../features/activities/presentation/widgets/enrollment_action.dart';
+import '../../features/activities/repositories/activity_details_repository.dart';
+import '../../features/activities/repositories/activity_map_repository.dart';
 import '../../features/activities/repositories/activity_repository.dart';
 import '../../features/activities/repositories/discovery_repository.dart';
 import '../../features/activities/repositories/enrollment_repository.dart';
@@ -32,6 +35,7 @@ class MainShell extends StatefulWidget {
     required this.assistantRepository,
     required this.notificationRepository,
     required this.discoveryRepository,
+    this.activityMapRepository,
   });
 
   final AppUser user;
@@ -41,6 +45,10 @@ class MainShell extends StatefulWidget {
   final AssistantRepository assistantRepository;
   final NotificationRepository notificationRepository;
   final DiscoveryRepository discoveryRepository;
+
+  /// Si hi és, el mapa d'Inici carrega per zona des d'aquí. Si no, mostra les
+  /// activitats de la llista.
+  final ActivityMapRepository? activityMapRepository;
 
   @override
   State<MainShell> createState() => _MainShellState();
@@ -57,6 +65,7 @@ class _MainShellState extends State<MainShell> {
   );
   late final ActivityRepository _activityRepository;
   late final ActivitiesViewModel _activitiesViewModel;
+  ActivitiesMapViewModel? _activitiesMapViewModel;
   late final EnrollmentViewModel _enrollmentViewModel;
   late final AssistantViewModel _assistantViewModel;
 
@@ -69,6 +78,11 @@ class _MainShellState extends State<MainShell> {
 
     _activityRepository = widget.activityRepository;
     _activitiesViewModel = ActivitiesViewModel(repository: _activityRepository);
+    if (widget.activityMapRepository case final mapRepository?) {
+      _activitiesMapViewModel = ActivitiesMapViewModel(
+        repository: mapRepository,
+      );
+    }
     _enrollmentViewModel = EnrollmentViewModel(
       userId: widget.user.id,
       repository: widget.enrollmentRepository,
@@ -85,6 +99,7 @@ class _MainShellState extends State<MainShell> {
   void dispose() {
     _createButtonLift.dispose();
     _activitiesViewModel.dispose();
+    _activitiesMapViewModel?.dispose();
     _enrollmentViewModel.dispose();
     _assistantViewModel.dispose();
     super.dispose();
@@ -98,14 +113,18 @@ class _MainShellState extends State<MainShell> {
     });
   }
 
-  void _openActivityDetails(String activityId) {
+  /// [repository] és la font de l'activitat si no és el catàleg (el mapa).
+  void _openActivityDetails(
+    String activityId, {
+    ActivityDetailsRepository? repository,
+  }) {
     final navigator = _sectionNavigatorKeys[_selectedIndex].currentState!;
     // The callback comes from a section root; ignore repeated taps in transit.
     if (navigator.canPop()) return;
     navigator.push<void>(
       activityDetailsRoute(
         activityId: activityId,
-        repository: _activityRepository,
+        repository: repository ?? _activityRepository,
         enrollmentViewModel: _enrollmentViewModel,
       ),
     );
@@ -266,6 +285,11 @@ class _MainShellState extends State<MainShell> {
                   viewModel: _activitiesViewModel,
                   enrollmentViewModel: _enrollmentViewModel,
                   onActivitySelected: _openActivityDetails,
+                  mapViewModel: _activitiesMapViewModel,
+                  onMapActivitySelected: (activityId) => _openActivityDetails(
+                    activityId,
+                    repository: widget.activityMapRepository,
+                  ),
                   onAssistantPressed: _openAssistant,
                   // El botó ja té 16 de marge: amb 12 menys queda a 12 de la
                   // targeta, com la llegenda.

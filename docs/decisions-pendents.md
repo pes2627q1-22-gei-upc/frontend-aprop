@@ -279,6 +279,32 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Qui decideix:** frontend + backend + responsables d'interessos/perfils
 - **Resolució:**
 
+### DP-029 · Mapa d'Inici amb el backend: endpoint sense fusionar i adaptació de les dades
+- **Estat:** oberta
+- **Obert per:** 2026-10-23 · Claude Code (Opus 5.5) · Taiga #21
+- **Identificador:** DP-025 a DP-028 ja són a altres branques sense fusionar; es fa servir DP-029 per no col·lidir-hi.
+- **Context:** `HttpActivityMapRepository`, `ActivitiesMapViewModel`, `ActivitiesScreen` (vista Mapa), `AuthGate`, `MainShell`. L'usuari demana connectar només el mapa (no la llista) i que la fitxa oberta des del mapa també vingui del backend.
+- **Dubte:**
+  - `GET /events/map` (zona visible, `is-official`, `has-friends`) només és a la branca `feature/events-map` d'api-aprop (US #21), sense fusionar; aquesta branca no té les categories de `develop`.
+  - Mapa i llista mostren conjunts diferents (backend / demostració), contra el mockup.
+  - Les dades arriben en brut:
+    - municipi i categoria són etiquetes sense accents («Tarrega», «Musica»);
+    - no hi ha imatge amb URL completa ni el nom de qui crea l'activitat;
+    - la data no té hora (sempre «00.00 h»);
+    - `has-friends` diu si hi va alguna amistat, no si l'ha publicada.
+  - La resposta per a tot Catalunya fa ~3,5 MB (1.631 activitats amb la descripció sencera).
+- **Opcions:** A) fusionar `feature/events-map` i que el backend doni nom de municipi, categoria, URL d'imatge i hora · B) adaptar-ho al client (com ara).
+- **Provisionalment:** B.
+  - El mapa carrega la zona visible amb un 50 % de marge i no torna a demanar una zona ja carregada. Una resposta antiga no substitueix la de la zona actual.
+  - Si falla, es conserven els marcadors i surt un avís amb «Tornar-ho a provar».
+  - Municipi a partir de l'etiqueta (o el lloc, si no n'hi ha), primera categoria o «Activitat», imatge per defecte i creador «un usuari» sense distintiu d'amistat.
+  - Lloc i adreça com a indicacions, i preu 0 si és gratuïta.
+  - Sense `API_BASE_URL`, tot continua amb les dades de demostració.
+  - Apuntar-se des d'una fitxa del backend falla, perquè la inscripció de demostració no troba l'activitat (DP-010).
+  - `TODO(DP-029)` marca aquestes adaptacions.
+- **Qui decideix:** frontend + backend
+- **Resolució:**
+
 ## Resoltes
 
 (cap)

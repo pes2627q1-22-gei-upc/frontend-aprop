@@ -3,6 +3,7 @@ import 'package:flutter/rendering.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import '../../models/activity.dart';
+import '../../models/geo_bounds.dart';
 import '../../models/geo_point.dart';
 import '../formatters/activity_date_formatter.dart';
 import 'activity_badges.dart';
@@ -43,6 +44,7 @@ class ActivitiesMap extends StatefulWidget {
     required this.activities,
     required this.onActivitySelected,
     this.onOverlayHeightChanged,
+    this.onVisibleAreaChanged,
   });
 
   final List<Activity> activities;
@@ -51,6 +53,10 @@ class ActivitiesMap extends StatefulWidget {
   /// Espai que ocupa la targeta del marcador des de baix (0 si no n'hi ha),
   /// perquè qui conté el mapa pugui apartar-hi els seus botons.
   final ValueChanged<double>? onOverlayHeightChanged;
+
+  /// Zona visible en obrir el mapa i cada cop que s'acaba de moure, per
+  /// carregar-ne les activitats.
+  final ValueChanged<GeoBounds>? onVisibleAreaChanged;
 
   @override
   State<ActivitiesMap> createState() => _ActivitiesMapState();
@@ -105,6 +111,20 @@ class _ActivitiesMapState extends State<ActivitiesMap> {
     _reportOverlay();
   }
 
+  Future<void> _reportVisibleArea() async {
+    final controller = _controller;
+    if (widget.onVisibleAreaChanged == null || controller == null) return;
+    final region = await controller.getVisibleRegion();
+    // Abans que el mapa tingui mida, la zona visible és un sol punt.
+    if (!mounted || region.southwest == region.northeast) return;
+    widget.onVisibleAreaChanged?.call(
+      GeoBounds(
+        southWest: _toGeoPoint(region.southwest),
+        northEast: _toGeoPoint(region.northeast),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final located = [
@@ -125,7 +145,11 @@ class _ActivitiesMapState extends State<ActivitiesMap> {
                 target: _toLatLng(cataloniaCenter),
                 zoom: _initialZoom,
               ),
-              onMapCreated: (controller) => _controller = controller,
+              onMapCreated: (controller) {
+                _controller = controller;
+                _reportVisibleArea();
+              },
+              onCameraIdle: _reportVisibleArea,
               onTap: (_) => _clearSelection(),
               clusterManagers: {
                 const ClusterManager(clusterManagerId: _clusterManagerId),
@@ -199,6 +223,9 @@ class _ActivitiesMapState extends State<ActivitiesMap> {
 
   static LatLng _toLatLng(GeoPoint point) =>
       LatLng(point.latitude, point.longitude);
+
+  static GeoPoint _toGeoPoint(LatLng point) =>
+      GeoPoint(latitude: point.latitude, longitude: point.longitude);
 }
 
 class _LegendChip extends StatelessWidget {

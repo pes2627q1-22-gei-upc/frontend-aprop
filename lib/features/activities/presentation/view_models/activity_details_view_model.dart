@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import '../../models/activity.dart';
-import '../../repositories/activity_repository.dart';
+import '../../repositories/activity_details_repository.dart';
 
 class ActivityDetailsViewModel extends ChangeNotifier {
   ActivityDetailsViewModel({
@@ -10,7 +10,7 @@ class ActivityDetailsViewModel extends ChangeNotifier {
   });
 
   final String activityId;
-  final ActivityRepository _repository;
+  final ActivityDetailsRepository _repository;
 
   Activity? _activity;
   bool _isLoading = false;
