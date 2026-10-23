@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import '../view_models/enrollment_view_model.dart';
 
 /// The same enrollment states for compact cards and the detail's primary action.
+///
+/// Tapping «Apuntat» asks for confirmation before unenrolling, so an
+/// accidental tap does not remove the plan.
 class EnrollmentAction extends StatelessWidget {
   const EnrollmentAction({
     super.key,
@@ -28,14 +31,17 @@ class EnrollmentAction extends StatelessWidget {
       builder: (context, child) {
         final enrolled = viewModel.isEnrolled(activityId);
         final saving = viewModel.isEnrolling(activityId);
+        final leaving = viewModel.isUnenrolling(activityId);
         final loading =
             viewModel.isLoading ||
             (!viewModel.hasLoaded && viewModel.loadError == null);
         final readFailed = viewModel.loadError != null;
-        final error = enrolled
-            ? null
-            : viewModel.errorFor(activityId) ?? viewModel.loadError;
-        final label = enrolled
+        final error =
+            viewModel.errorFor(activityId) ??
+            (enrolled ? null : viewModel.loadError);
+        final label = leaving
+            ? 'Desapuntant…'
+            : enrolled
             ? 'Apuntat'
             : saving
             ? 'Apuntant…'
@@ -45,22 +51,28 @@ class EnrollmentAction extends StatelessWidget {
             ? 'Tornar-ho a provar'
             : 'M’hi apunto';
 
-        final VoidCallback? onPressed = enrolled || saving || loading
+        final VoidCallback? onPressed = saving || leaving || loading
             ? null
+            : enrolled
+            // Unenrolling needs the current plans: after a read failure the
+            // confirmed state stays visible but cannot be changed.
+            ? (readFailed ? null : () => _confirmUnenroll(context))
             : readFailed
             ? viewModel.load
             : () => viewModel.enroll(activityId);
         final content = Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (!enrolled && (saving || loading)) ...[
+            if (leaving || (!enrolled && (saving || loading))) ...[
               SizedBox(
                 width: 18,
                 height: 18,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
                   color: colors.primary,
-                  semanticsLabel: saving
+                  semanticsLabel: leaving
+                      ? 'Desapuntant-te de l’activitat'
+                      : saving
                       ? 'Apuntant-te a l’activitat'
                       : 'Consultant els teus plans',
                 ),
@@ -112,7 +124,7 @@ class EnrollmentAction extends StatelessWidget {
             children: [
               Tooltip(
                 message: enrolled
-                    ? 'Ja t’has apuntat a $activityTitle'
+                    ? 'Desapuntar-me de $activityTitle'
                     : readFailed
                     ? 'Tornar a consultar els teus plans'
                     : 'Apuntar-me a $activityTitle',
@@ -133,7 +145,8 @@ class EnrollmentAction extends StatelessWidget {
                 const SizedBox(height: 8),
                 Text(
                   enrolled
-                      ? 'Aquest pla ja és a la teva agenda.'
+                      ? 'Aquest pla ja és a la teva agenda. Toca «Apuntat» '
+                            'si vols desapuntar-te.'
                       : 'Afegeix aquest pla a la teva agenda.',
                   textAlign: TextAlign.center,
                   style: theme.textTheme.bodySmall?.copyWith(
@@ -146,5 +159,30 @@ class EnrollmentAction extends StatelessWidget {
         );
       },
     );
+  }
+
+  Future<void> _confirmUnenroll(BuildContext context) async {
+    // TODO(DP-027): text i disseny del diàleg sense mockup.
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Vols desapuntar-te?'),
+        content: Text(
+          'Treurem «$activityTitle» de la teva agenda. Hi podràs tornar a '
+          'apuntar quan vulguis.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Mantén el pla'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Desapunta’m'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed ?? false) await viewModel.unenroll(activityId);
   }
 }

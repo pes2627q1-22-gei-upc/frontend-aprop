@@ -279,6 +279,16 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Qui decideix:** frontend + backend + responsables d'interessos/perfils
 - **Resolució:**
 
+### DP-027 · Desapuntar-se: endpoint del backend i diàleg de confirmació
+- **Estat:** oberta
+- **Obert per:** 2026-10-23 · Claude Code (Opus 5.5) amb confirmació de l'usuari · HU «Desapuntar-se d'un esdeveniment»
+- **Context:** `EnrollmentRepository.unenroll`, `DemoEnrollmentRepository`, `EnrollmentViewModel.unenroll`, `EnrollmentAction` (llista, fitxa i Agenda a través de la fitxa). Els números DP-025 i DP-026 són a `feature/autenticacio`, encara sense fusionar.
+- **Dubte:** el backend no té cap endpoint per desapuntar-se (només `POST /events/{id}/signup`) i no hi ha mockup de com es desapunta ni del diàleg de confirmació.
+- **Opcions:** endpoint: A) `DELETE /events/{id}/signup` (simètric al d'apuntar-se) · B) un altre que acordi el backend. Interfície: A) tocar «Apuntat» obre una confirmació (com ara) · B) un botó «Desapunta'm» separat a la fitxa.
+- **Provisionalment:** contracte `unenroll` idempotent amb el repositori de demostració; a la interfície, tocar «Apuntat» obre el diàleg «Vols desapuntar-te?» amb «Mantén el pla» i «Desapunta’m», perquè un toc sense voler no tregui el pla. Textos sense mockup (`TODO(DP-027)` al repositori i al diàleg).
+- **Qui decideix:** equip (interfície) · backend (endpoint)
+- **Resolució:**
+
 ## Resoltes
 
 (cap)

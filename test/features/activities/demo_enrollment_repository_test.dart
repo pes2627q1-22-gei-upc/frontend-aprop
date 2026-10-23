@@ -58,4 +58,28 @@ void main() {
     );
     expect(await repository.watchEnrolledActivityIds('user-a').first, isEmpty);
   });
+
+  test('Unenrolling removes only that plan and notifies subscribers', () async {
+    await repository.enroll(userId: 'user-a', activityId: 'demo-jazz');
+    await repository.enroll(userId: 'user-b', activityId: 'demo-jazz');
+    final snapshots = <Set<String>>[];
+    final subscription = repository
+        .watchEnrolledActivityIds('user-a')
+        .listen(snapshots.add);
+    await Future<void>.delayed(Duration.zero);
+
+    await repository.unenroll(userId: 'user-a', activityId: 'demo-jazz');
+    // Repetir-ho no torna a avisar: no hi ha res a treure.
+    await repository.unenroll(userId: 'user-a', activityId: 'demo-jazz');
+    await Future<void>.delayed(Duration.zero);
+
+    expect(snapshots, [
+      {'demo-jazz'},
+      <String>{},
+    ]);
+    expect(await repository.watchEnrolledActivityIds('user-b').first, {
+      'demo-jazz',
+    });
+    await subscription.cancel();
+  });
 }

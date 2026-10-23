@@ -16,7 +16,7 @@
 | Categoria | Categoría | `category` (String) | `TODO` | ≥ 1 per esdeveniment |
 | Data d'inici / fi | Fecha inicio / fin | `startsAt` | `StartDate` / `EndDate` | |
 | Inscripció («M'hi apunto» / «Apuntat») | Inscripción | `EnrollmentRepository`, `EnrollmentViewModel`, `enrolledActivityIds` | `TODO` | Intenció d'assistir; no és una compra ni una reserva. Contracte backend pendent (DP-010) |
-| Desapuntar-se | Desapuntarse | `TODO` (unenroll) | `TODO` | |
+| Desapuntar-se | Desapuntarse | `unenroll` | `TODO` | Demana confirmació abans (DP-027) |
 | Assistència («Com va anar?») | Asistencia | `TODO` (attendance) | `TODO` | `null` = desconeguda |
 | Agenda / Calendari | Agenda / Calendario | `TODO` (agenda) | `TODO` | Secció «Agenda» |
 | Recordatori | Recordatorio | `TODO` (reminder) | `TODO` | Sense / 30 min / 1 h / 1 dia |

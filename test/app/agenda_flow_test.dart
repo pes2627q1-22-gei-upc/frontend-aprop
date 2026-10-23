@@ -55,4 +55,51 @@ void main() {
     expect(find.text('Jazz al parc').hitTestable(), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('Unenrolling from details removes the plan from Agenda', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final auth = DemoAuthRepository();
+    await auth.signIn(usernameOrEmail: 'laiasoler', password: 'Aprop2026!');
+    await tester.pumpWidget(APropApp(authRepository: auth));
+    await tester.pumpAndSettle();
+
+    final jazzCard = find.byKey(const ValueKey('demo-jazz'));
+    await tester.tap(
+      find.descendant(of: jazzCard, matching: find.text('M’hi apunto')),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.widgetWithText(NavigationDestination, 'Agenda'));
+    await tester.pumpAndSettle();
+    final now = DateTime.now();
+    final monthOffset = (now.year - 2026) * 12 + now.month - 9;
+    final button = monthOffset > 0 ? 'Mes anterior' : 'Mes següent';
+    for (var i = 0; i < monthOffset.abs(); i++) {
+      await tester.tap(find.byTooltip(button));
+      await tester.pump();
+    }
+    await tester.tap(find.byKey(const ValueKey('agenda-day-2026-9-26')));
+    await tester.pump();
+    await tester.tap(find.text('Jazz al parc'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Apuntat'));
+    await tester.pumpAndSettle();
+    expect(find.text('Vols desapuntar-te?'), findsOneWidget);
+    await tester.tap(find.text('Desapunta’m'));
+    await tester.pumpAndSettle();
+    expect(find.text('M’hi apunto'), findsOneWidget);
+
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    expect(find.widgetWithText(AppBar, 'Agenda'), findsOneWidget);
+    expect(find.text('Jazz al parc'), findsNothing);
+    expect(find.text('No tens cap pla per a aquest dia.'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
 }

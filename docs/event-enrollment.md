@@ -9,11 +9,13 @@ The signed-in user can express an intention to attend from a list card or the ev
 | Reading plans | Carregant… | Disabled until the initial snapshot arrives |
 | Not enrolled | M’hi apunto | Outlined in the list, filled in details |
 | Waiting for confirmation | Apuntant… | Spinner; repeated taps ignored |
-| Confirmed | Apuntat + check icon | Soft green outlined status in both places |
+| Confirmed | Apuntat + check icon | Soft green outlined status in both places; tapping it asks to unenroll |
+| Unenrolling | Desapuntant… | Spinner after confirming «Desapunta’m»; repeated taps ignored |
+| Unenroll failure | Apuntat + inline error | The plan stays; retry from the same button |
 | Write failure | M’hi apunto + inline error | Retry without leaving the screen |
 | Read failure | Tornar-ho a provar + inline error | Reload plans before allowing a new write |
 
-Confirmed status does not cancel enrollment when tapped. Unenrollment is a separate story. Attendance remains unknown; this operation is neither a purchase nor a reservation. Chat, reminders and the calendar screen are not implemented by #82.
+Tapping the confirmed status opens a confirmation dialog («Vols desapuntar-te?», with «Mantén el pla» and «Desapunta’m») so an accidental tap never removes a plan. After confirming, `EnrollmentViewModel.unenroll` calls `EnrollmentRepository.unenroll`; the plan disappears from the list, the detail and Agenda because they share the same source. Unenrolling needs a successful read of the current plans. The backend has no unenroll endpoint yet (DP-027). Attendance remains unknown; this operation is neither a purchase nor a reservation. Chat, reminders and the calendar screen are not implemented by #82.
 
 The demo repository stores IDs per account in memory. Plans survive tab changes, detail navigation and sign-out/sign-in during the same run. They do not survive restarting the application. There is no invented HTTP request, backend DTO or production persistence. DP-010 tracks the API and Calendar integration agreement.
 
@@ -27,6 +29,7 @@ The demo repository stores IDs per account in memory. Plans survive tab changes,
 abstract interface class EnrollmentRepository {
   Stream<Set<String>> watchEnrolledActivityIds(String userId);
   Future<void> enroll({required String userId, required String activityId});
+  Future<void> unenroll({required String userId, required String activityId});
 }
 ```
 
