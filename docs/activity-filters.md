@@ -76,7 +76,7 @@ i passen a una columna. La capçalera d'Inici es pot desplaçar en espais petits
 resultats. Colors del tema compartit i textos catalans.
 Els missatges superposats al mapa també admeten desplaçament si el text ampliat supera l'espai disponible.
 
-## Backend i límits (DP-034)
+## Backend i límits (DP-035)
 
 Filtratge local sobre dades carregades, sense inventar consultes HTTP. La petició de mapa per zona i
 el seu marge no canvien; una resposta nova es filtra amb la selecció actual sense repetir la consulta.
@@ -107,7 +107,8 @@ Resultat del 25 d'octubre de 2026:
 
 - Format i `git diff --check`: correctes.
 - Anàlisi de `lib/app`, `lib/core`, `lib/features` i `test`: sense incidències.
-- Bateria completa: **361 proves superades**, incloses 25 regressions de filtratge i una de canvi d'hora.
+- Bateria completa després d'integrar la PR #22 del mapa: **366 proves superades**, incloses 26 regressions
+  de filtratge i una de canvi d'hora. El panell dels grups respecta les categories confirmades.
 - `flutter analyze --no-pub`: només dos errors previs de `main.dart`, per l'absència de
   `firebase_options.dart` i, en conseqüència, `DefaultFirebaseOptions`. Compilació de producció pendent
   de generar la configuració real; no s'ha substituït per una configuració fictícia.
@@ -123,5 +124,7 @@ flutter test --no-pub
 flutter analyze --no-pub
 ```
 
-Branca `feature/activity-filters`, des de `develop` (`42b1bf5`). Sense commit ni push; revisió humana,
-criteris detallats de Taiga i comprovació amb el backend pendents.
+Branca `feature/activity-filters`, iniciada des de `develop` (`42b1bf5`); implementació publicada a
+`e7d7343`. Integració de `origin/develop` (`c0815d9`, PR #22) resolta i verificada, pendent del commit
+de merge i push. La decisió dels filtres passa de DP-034 a DP-035 per conservar la del mapa.
+Revisió humana, criteris detallats de Taiga i comprovació amb el backend pendents.

@@ -55,7 +55,7 @@ ActivityDateRange activityDatePresetRange(
   };
 }
 
-// TODO(DP-034): These are the approved filter labels, pending category IDs and
+// TODO(DP-035): These are the approved filter labels, pending category IDs and
 // a filtering contract shared with the backend (see also DP-018 and DP-029).
 const activityFilterCategories = [
   'Música',

@@ -378,13 +378,24 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Qui decideix:** frontend + backend + responsables d'Auth/notificacions/Calendar
 - **Resolució:**
 
-### DP-034 · Filtres de dates i categories: dades disponibles i contracte pendent
+### DP-034 · Mapa d'Inici: què fa tocar un grup de marcadors
+- **Estat:** oberta
+- **Obert per:** 2026-10-25 · Claude Code (Opus 5.5) amb confirmació de l'usuari · Taiga #79 / #21
+- **Context:** `ActivitiesMap` (`_onClusterTap`, `isSamePlace`, `_SamePlaceSheet`), llegenda del mapa. En provar-ho a l'emulador, tocar un grup no feia res.
+- **Dubte:** no hi ha mockup de què passa en tocar un grup. A més, moltes activitats de l'Agenda Cultural comparteixen el mateix punt exacte (a la BD local, 2.019 de 2.335 activitats amb ubicació, en 603 llocs i fins a 32 en un de sol): apropar-s'hi no les separaria mai.
+- **Opcions:** A) només apropar-s'hi · B) apropar-s'hi i, si són al mateix lloc, mostrar-ne la llista · C) mostrar sempre la llista.
+- **Provisionalment:** B, triada per l'usuari («que t'augmenti la pantalla»). El mapa s'apropa fins que hi caben tots els marcadors del grup, amb 64 px de marge. Si les activitats són a menys de 0,0003° (uns 30 m) entre elles, surt un full inferior «N activitats en aquest lloc» amb el municipi, les activitats ordenades per data amb la data completa, i en tocar-ne una s'obre la fitxa. Molt a prop, Google deixa d'agrupar i els marcadors d'un mateix lloc queden apilats (provat a Girona: 4 activitats a l'Auditori i només se'n podia obrir una); per això tocar un marcador que en té d'altres al mateix lloc també mostra aquesta llista en lloc de la targeta. El llindar i el disseny del full són provisionals (`TODO(DP-034)`).
+- **Qui decideix:** equip
+- **Resolució:**
+
+### DP-035 · Filtres de dates i categories: dades disponibles i contracte pendent
 - **Estat:** oberta
 - **Obert per:** 2026-10-25 · frontend · Taiga #87 Frontend filtrar esdeveniments
+- **Identificador:** renumerat de DP-034 a DP-035 en integrar la PR #22 de `develop`, per conservar la decisió publicada del mapa amb DP-034.
 - **Context:** `ActivityFilters`, `ActivitiesViewModel`, panells Dates/Categories i mapa per zona. Mockups aprovats; ID i títol de Taiga confirmats, criteris detallats demanats a l'usuari.
 - **Dubte:** falta contracte de consulta amb filtres i IDs canònics de categories. El mapa pot no retornar categoria (DP-029), Mapa/Llista tenen fonts diferents i `Activity` només conté inici i una categoria. Zona/municipi no té abast ni disseny confirmats.
 - **Opcions:** A) backend amb filtres, metadades i catàleg compartit · B) filtratge local sobre dades disponibles, amb límits explícits.
-- **Provisionalment:** B per a Dates/Categories. Un únic valor immutable a `ActivitiesViewModel` s'aplica al catàleg i a la zona carregada; sense endpoints/paràmetres nous. Interval inclusiu de dies civils basat en l'inici; categories OR i dates AND; vuit etiquetes dels mockups, coincidència tolerant a accents i sense equivalències deduïdes. Cap categoria = sense restricció. Categories no informades excloses quan se'n tria una, amb recompte visible. Cap de setmana = dissabte/diumenge actual si ja és cap de setmana, o el següent en dies laborables. Esborrany local, Aplicar confirma, tancar descarta; filtres per sessió i només d'Inici. Zona/municipi pendent. `TODO(DP-034)` al model; detalls a `docs/activity-filters.md`.
+- **Provisionalment:** B per a Dates/Categories. Un únic valor immutable a `ActivitiesViewModel` s'aplica al catàleg i a la zona carregada; sense endpoints/paràmetres nous. Interval inclusiu de dies civils basat en l'inici; categories OR i dates AND; vuit etiquetes dels mockups, coincidència tolerant a accents i sense equivalències deduïdes. Cap categoria = sense restricció. Categories no informades excloses quan se'n tria una, amb recompte visible. Cap de setmana = dissabte/diumenge actual si ja és cap de setmana, o el següent en dies laborables. Esborrany local, Aplicar confirma, tancar descarta; filtres per sessió i només d'Inici. Zona/municipi pendent. `TODO(DP-035)` al model; detalls a `docs/activity-filters.md`.
 - **Qui decideix:** frontend + backend + equip (criteris i categories)
 - **Resolució:**
 

@@ -191,7 +191,7 @@ inferior i es retira quan desapareix el compte propietari. Widgets i ViewModel r
 existents; no s’afegeixen paquets, repositoris ni consultes HTTP de filtratge.
 
 Les fonts diferents i metadades incompletes del mapa continuen a DP-029; l’abast provisional del
-filtratge i el contracte pendent es registren a DP-034. Vegeu `docs/activity-filters.md`.
+filtratge i el contracte pendent es registren a DP-035. Vegeu `docs/activity-filters.md`.
 
 ## Recursos i dependències
 

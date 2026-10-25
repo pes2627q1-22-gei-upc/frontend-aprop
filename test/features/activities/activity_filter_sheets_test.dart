@@ -301,6 +301,43 @@ void main() {
   );
 
   testWidgets(
+    'Cluster sheets contain only activities kept by the confirmed filters',
+    (tester) async {
+      await pumpScreen(tester);
+      await open(tester, 'categories');
+      await tester.tap(category('Música'));
+      await tester.tap(category('Teatre'));
+      await apply(tester);
+      await tester.tap(find.text('Mapa'));
+      await tester.pumpAndSettle();
+
+      final filteredMap = map(tester);
+      filteredMap.clusterManagers.single.onClusterTap!(
+        Cluster(
+          filteredMap.clusterManagers.single.clusterManagerId,
+          filteredMap.markers.map((marker) => marker.markerId).toList(),
+          position: const LatLng(41.38812, 2.18742),
+          bounds: LatLngBounds(
+            southwest: const LatLng(41.38810, 2.18740),
+            northeast: const LatLng(41.38812, 2.18742),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('2 activitats en aquest lloc'), findsOneWidget);
+      expect(find.text('Jazz al parc'), findsOneWidget);
+      expect(find.text('Teatre sota les estrelles'), findsOneWidget);
+      expect(find.text('Mirades de Catalunya'), findsNothing);
+      await tester.tap(find.text('Teatre sota les estrelles'));
+      await tester.pumpAndSettle();
+      expect(find.text('2 activitats en aquest lloc'), findsNothing);
+      expect(model.filters.categories, {'Música', 'Teatre'});
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
     'Filtering out a selected marker closes its card and resets the overlay',
     (tester) async {
       await pumpScreen(tester);

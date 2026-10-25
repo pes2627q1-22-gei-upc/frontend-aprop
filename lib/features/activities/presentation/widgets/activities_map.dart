@@ -17,6 +17,25 @@ const _overlayCurve = Curves.easeOutCubic;
 const _cardMargin = 12.0;
 const _initialZoom = 7.0;
 
+/// Marge, en píxels lògics, que queda al voltant d'un grup en apropar-s'hi.
+const _clusterPadding = 64.0;
+
+/// Diferència de latitud o longitud (uns 30 m) per sota de la qual les
+/// activitats d'un grup es consideren al mateix lloc.
+const _samePlaceDegrees = 0.0003;
+
+/// Si totes les activitats d'un grup són pràcticament al mateix punt (com un
+/// mateix teatre), apropar-s'hi no les separaria mai.
+// TODO(DP-034): llindar triat a ull; cal validar-lo amb l'equip.
+bool isSamePlace(LatLngBounds bounds) => _isSamePlace(
+  bounds.northeast.latitude - bounds.southwest.latitude,
+  bounds.northeast.longitude - bounds.southwest.longitude,
+);
+
+bool _isSamePlace(double latitudeDelta, double longitudeDelta) =>
+    latitudeDelta.abs() < _samePlaceDegrees &&
+    longitudeDelta.abs() < _samePlaceDegrees;
+
 /// Tipus de marcador: oficial (Agenda Cultural), d'un usuari o d'una amistat.
 enum ActivityMarkerKind { official, community, friend }
 
@@ -125,6 +144,60 @@ class _ActivitiesMapState extends State<ActivitiesMap> {
     _reportOverlay();
   }
 
+  /// Tocar un grup hi apropa el mapa fins que hi caben tots els marcadors, que
+  /// així es van separant. Si són tots al mateix lloc, se'n mostra la llista.
+  void _onClusterTap(Cluster cluster) {
+    _clearSelection();
+    if (isSamePlace(cluster.bounds)) {
+      final ids = {for (final id in cluster.markerIds) id.value};
+      _showSamePlace([
+        for (final activity in widget.activities)
+          if (ids.contains(activity.id)) activity,
+      ]);
+      return;
+    }
+    _controller?.animateCamera(
+      CameraUpdate.newLatLngBounds(cluster.bounds, _clusterPadding),
+    );
+  }
+
+  /// Molt a prop, Google deixa d'agrupar i els marcadors d'un mateix lloc
+  /// queden l'un sobre l'altre: només se'n podria tocar el de dalt.
+  void _onMarkerTap(Activity activity, List<Activity> located) {
+    final point = activity.location!;
+    final samePlace = [
+      for (final other in located)
+        if (_isSamePlace(
+          other.location!.latitude - point.latitude,
+          other.location!.longitude - point.longitude,
+        ))
+          other,
+    ];
+    if (samePlace.length > 1) {
+      _clearSelection();
+      _showSamePlace(samePlace);
+    } else {
+      _select(activity);
+    }
+  }
+
+  void _showSamePlace(List<Activity> activities) {
+    if (activities.isEmpty) return;
+    activities.sort((a, b) => a.startsAt.compareTo(b.startsAt));
+    showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder: (context) => _SamePlaceSheet(
+        activities: activities,
+        onSelected: (id) {
+          Navigator.of(context).pop();
+          widget.onActivitySelected(id);
+        },
+      ),
+    );
+  }
+
   Future<void> _reportVisibleArea() async {
     final controller = _controller;
     if (widget.onVisibleAreaChanged == null || controller == null) return;
@@ -166,7 +239,10 @@ class _ActivitiesMapState extends State<ActivitiesMap> {
               onCameraIdle: _reportVisibleArea,
               onTap: (_) => _clearSelection(),
               clusterManagers: {
-                const ClusterManager(clusterManagerId: _clusterManagerId),
+                ClusterManager(
+                  clusterManagerId: _clusterManagerId,
+                  onClusterTap: _onClusterTap,
+                ),
               },
               markers: {
                 for (final activity in located)
@@ -179,7 +255,7 @@ class _ActivitiesMapState extends State<ActivitiesMap> {
                       activityMarkerAssets[activityMarkerKind(activity)]!,
                       width: 36,
                     ),
-                    onTap: () => _select(activity),
+                    onTap: () => _onMarkerTap(activity, located),
                   ),
               },
               myLocationButtonEnabled: false,
@@ -308,7 +384,7 @@ class _LegendSheet extends StatelessWidget {
               foregroundColor: theme.colorScheme.onPrimary,
               child: const Text('3', style: TextStyle(fontSize: 12)),
             ),
-            title: const Text('Diverses activitats a prop: amplia el mapa'),
+            title: const Text('Diverses activitats a prop: toca per veure-les'),
           ),
           if (withoutLocation > 0)
             Padding(
@@ -325,6 +401,79 @@ class _LegendSheet extends StatelessWidget {
             ),
           const SizedBox(height: 16),
         ],
+      ),
+    );
+  }
+}
+
+/// Activitats d'un grup que són totes al mateix lloc, per triar-ne una.
+// TODO(DP-034): disseny sense mockup.
+class _SamePlaceSheet extends StatelessWidget {
+  const _SamePlaceSheet({required this.activities, required this.onSelected});
+
+  final List<Activity> activities;
+  final ValueChanged<String> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return SafeArea(
+      child: ConstrainedBox(
+        // Amb moltes activitats, la llista es desplaça i deixa veure el mapa.
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.sizeOf(context).height * 0.7,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 0, 24, 4),
+              child: Text(
+                '${activities.length} activitats en aquest lloc',
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
+              child: Text(
+                activities.first.municipality,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+            Flexible(
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: activities.length,
+                itemBuilder: (context, index) {
+                  final activity = activities[index];
+                  return ListTile(
+                    leading: Image.asset(
+                      activityMarkerAssets[activityMarkerKind(activity)]!,
+                      width: 28,
+                      excludeFromSemantics: true,
+                    ),
+                    title: Text(activity.title),
+                    subtitle: Text(
+                      formatActivitySchedule(
+                        activity.startsAt,
+                        includeDate: true,
+                      ),
+                    ),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => onSelected(activity.id),
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
       ),
     );
   }

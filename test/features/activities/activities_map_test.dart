@@ -161,6 +161,132 @@ void main() {
     expect(find.text('Veure activitat'), findsNothing);
   });
 
+  group('Tocar un grup', () {
+    const clusterId = ClusterManagerId('activities');
+
+    Cluster cluster(List<String> ids, LatLngBounds bounds) => Cluster(
+      clusterId,
+      [for (final id in ids) MarkerId(id)],
+      position: bounds.northeast,
+      bounds: bounds,
+    );
+
+    void tapCluster(WidgetTester tester, Cluster tapped) =>
+        map(tester).clusterManagers.single.onClusterTap!(tapped);
+
+    testWidgets(
+      'Si són al mateix lloc, en mostra la llista per data i obre la fitxa',
+      (tester) async {
+        await pumpInici(tester);
+        await openMap(tester);
+
+        // Teatre sota les estrelles (diumenge) i Jazz al parc (dissabte).
+        tapCluster(
+          tester,
+          cluster(
+            ['demo-theatre', 'demo-jazz'],
+            LatLngBounds(
+              southwest: const LatLng(41.38810, 2.18740),
+              northeast: const LatLng(41.38812, 2.18742),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.text('2 activitats en aquest lloc'), findsOneWidget);
+        expect(
+          tester.getTopLeft(find.text('Jazz al parc').last).dy,
+          lessThan(
+            tester.getTopLeft(find.text('Teatre sota les estrelles')).dy,
+          ),
+        );
+
+        await tester.tap(find.text('Teatre sota les estrelles'));
+        await tester.pumpAndSettle();
+        expect(opened, ['demo-theatre']);
+        expect(find.text('2 activitats en aquest lloc'), findsNothing);
+      },
+    );
+
+    testWidgets('Si són escampats, no obre cap llista i tanca la targeta', (
+      tester,
+    ) async {
+      await pumpInici(tester);
+      await openMap(tester);
+      marker(tester, 'demo-jazz').onTap!();
+      await tester.pumpAndSettle();
+      expect(find.text('Veure activitat'), findsOneWidget);
+
+      // Barcelona i Tarragona: s'hi apropa el mapa (a les proves no n'hi ha).
+      tapCluster(
+        tester,
+        cluster(
+          ['demo-jazz', 'demo-theatre'],
+          LatLngBounds(
+            southwest: const LatLng(41.1146, 1.2593),
+            northeast: const LatLng(41.3881, 2.1874),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('activitats en aquest lloc'), findsNothing);
+      expect(find.text('Veure activitat'), findsNothing);
+    });
+  });
+
+  testWidgets(
+    'Un marcador amb altres al mateix lloc mostra la llista, no la targeta',
+    (tester) async {
+      Activity at(String id, String title, GeoPoint location, int day) =>
+          Activity(
+            id: id,
+            title: title,
+            category: 'Música',
+            municipality: 'Girona',
+            startsAt: DateTime(2026, 11, day, 19),
+            imageAsset: '',
+            source: ActivitySource.culturalAgenda,
+            location: location,
+          );
+      const auditori = GeoPoint(latitude: 41.98, longitude: 2.81);
+      await pumpInici(
+        tester,
+        activities: [
+          at('cor', 'Cor Maragall', auditori, 8),
+          at('orgue', 'Concert d’orgue', auditori, 7),
+          at('lluny', 'Lluny d’aquí', cataloniaCenter, 9),
+        ],
+      );
+      await openMap(tester);
+
+      // Molt a prop, Google no els agrupa: només es pot tocar el de dalt.
+      marker(tester, 'cor').onTap!();
+      await tester.pumpAndSettle();
+      expect(find.text('2 activitats en aquest lloc'), findsOneWidget);
+      expect(find.text('Veure activitat'), findsNothing);
+      await tester.tap(find.text('Concert d’orgue'));
+      await tester.pumpAndSettle();
+      expect(opened, ['orgue']);
+
+      // Un marcador sol continua mostrant la seva targeta.
+      marker(tester, 'lluny').onTap!();
+      await tester.pumpAndSettle();
+      expect(find.text('Veure activitat'), findsOneWidget);
+    },
+  );
+
+  test('Uns metres de diferència són el mateix lloc; uns carrers, no', () {
+    LatLngBounds around(double degrees) => LatLngBounds(
+      southwest: const LatLng(41.3881, 2.1874),
+      northeast: LatLng(41.3881 + degrees, 2.1874 + degrees),
+    );
+
+    expect(isSamePlace(around(0)), isTrue);
+    expect(isSamePlace(around(0.0001)), isTrue);
+    expect(isSamePlace(around(0.001)), isFalse);
+  });
+
   testWidgets('Les activitats sense ubicació no surten i la llegenda ho diu', (
     tester,
   ) async {
