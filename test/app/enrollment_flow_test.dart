@@ -58,15 +58,27 @@ void main() {
     expect(cardLabel('demo-jazz', 'Apuntat'), findsOneWidget);
     expect(cardLabel('demo-jazz', 'M’hi apunto'), findsNothing);
 
+    // Un toc sense voler a «Apuntat» només pregunta: el pla es manté.
     await tester.tap(cardLabel('demo-jazz', 'Apuntat'));
     await tester.pumpAndSettle();
+    expect(find.text('Vols desapuntar-te?'), findsOneWidget);
+    await tester.tap(find.text('Mantén el pla'));
+    await tester.pumpAndSettle();
     expect(find.widgetWithText(AppBar, 'Activitat'), findsNothing);
+    expect(cardLabel('demo-jazz', 'Apuntat'), findsOneWidget);
     expect(enrollments.enrolledRequests, hasLength(1));
+    expect(enrollments.unenrolledRequests, isEmpty);
     await tester.tap(find.text('Jazz al parc'));
     await tester.pumpAndSettle();
     expect(find.widgetWithText(AppBar, 'Activitat'), findsOneWidget);
     expect(find.text('Apuntat'), findsOneWidget);
-    expect(find.text('Aquest pla ja és a la teva agenda.'), findsOneWidget);
+    expect(
+      find.text(
+        'Aquest pla ja és a la teva agenda. Toca «Apuntat» si vols '
+        'desapuntar-te.',
+      ),
+      findsOneWidget,
+    );
   });
 
   testWidgets('Detail enrollment is reflected in the list when returning', (
