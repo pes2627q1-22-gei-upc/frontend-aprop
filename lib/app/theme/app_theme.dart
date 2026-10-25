@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../features/notifications/presentation/widgets/notification_badge_theme.dart';
+import '../../features/profile/presentation/widgets/profile_palette.dart';
 
 class AppTheme {
   AppTheme._();
@@ -23,6 +24,13 @@ class AppTheme {
     useMaterial3: true,
     scaffoldBackgroundColor: cream,
     extensions: const [
+      ProfilePalette(
+        gold: Color(0xFFE4B63D),
+        goldSoft: Color(0xFFFAEFCD),
+        goldInk: Color(0xFF805E09),
+        lockedBackground: Color(0xFFE9E4D5),
+        lockedInk: Color(0xFF62695F),
+      ),
       NotificationBadgeTheme(
         socialBackground: Color(0xFFFFF1CC),
         socialForeground: Color(0xFF785400),

@@ -25,6 +25,7 @@ Les tasques #75 i #82 afegeixen el detall i les inscripcions compartides entre l
 | `features/activities/presentation/widgets/` | Targetes i components propis de les activitats. |
 | `features/auth/` | Inici de sessió, registre i sessió, amb les mateixes capes que `activities/`. |
 | `features/assistant/` | Conversa amb l'assistent cultural («Assistent»), interpretació de consultes i recomanació d'activitats. |
+| `features/profile/` | Perfil propi, edició de detalls i preferències de Configuració, amb les mateixes capes i repositoris per compte. |
 | `features/notifications/` | Bústia d'Avisos, filtres, lectura i resposta a sol·licituds de demostració, separats de l'enviament de notificacions. |
 | `assets/images/` | Fotografies i imatges de contingut. |
 | `assets/branding/` | Logotip i recursos d’identitat d’AProp!. |
@@ -125,7 +126,7 @@ Criteris de Taiga aplicats: confirmació de contrasenya en el registre; contrase
 
 L'aplicació queda bloquejada fins que l'usuari verifica el correu. El registre envia el correu de verificació i, mentre `AppUser.emailVerified` és fals, `AuthGate` mostra `VerifyEmailScreen` en lloc de l'app, també en tornar a iniciar la sessió o obrir l'aplicació. La pantalla permet comprovar de nou la verificació, tornar a enviar el correu i tancar la sessió, per si l'usuari s'ha equivocat de correu. Per no reenviar el correu sense parar, el botó d'enviar espera 30 segons en obrir la pantalla i després de cada enviament correcte. `DemoAuthRepository` no envia cap correu: la comprovació simula que l'usuari ha obert l'enllaç.
 
-Cada pantalla crea el seu ViewModel amb el repositori que rep i l'allibera en tancar-se. `LoginScreen` obre `RegisterScreen` amb el mateix repositori. El botó per tancar la sessió és provisionalment a Perfil, fins que existeixi la funcionalitat de perfil.
+Cada pantalla crea el seu ViewModel amb el repositori que rep i l'allibera en tancar-se. `LoginScreen` obre `RegisterScreen` amb el mateix repositori. El tancament de sessió és a Perfil → Configuració; el ViewModel espera la confirmació d'Auth i presenta un error si falla.
 
 Integració pendent:
 
@@ -167,6 +168,16 @@ La descoberta i la cerca viuen dins de `features/activities/`, perquè consulten
 
 `AuthGate` injecta el repositori a `MainShell`, que compon Descobreix, `/discover/search` i les rutes de detall dins del mateix navegador de secció. La cerca manté l'estat sota el detall i en canviar de pestanya. Les dues pantalles reben el `EnrollmentViewModel` existent: la inscripció és compartida amb Inici, fitxa i Agenda. El pas cap a perfils/cerca de persones continua pendent. Vegeu `docs/discovery.md` per seguir el flux.
 
+## Perfil propi i Configuració
+
+`features/profile/` té models i contractes en Dart pur, adaptadors de demostració, ViewModels i presentació. Comparteix només `AppUser`, `Activity` i `ActivityRepository` amb altres funcionalitats; no importa els seus widgets ni ViewModels. `ProfileRepository` retorna una projecció amb assistències confirmades, autoria i estadístiques; les inscripcions no s’interpreten com assistència. `ProfileSettingsRepository` modifica una preferència per operació i retorna la confirmació.
+
+`AuthGate` crea/injecta els dos repositoris i els conserva durant l’execució. `MainShell`, identificat pel compte, crea i allibera `ProfileViewModel`, com ja fa amb el catàleg i les inscripcions; el refresca en entrar a Perfil perquè reflecteixi activitats creades des d’Inici. `ProfileScreen` conserva només la pestanya local i observa aquest ViewModel. El panell d’edició comparteix el mateix estat; cap perfil no es duplica dins d’un widget.
+
+`ProfileSettingsScreen` crea/allibera el seu `ProfileSettingsViewModel`; les escriptures se serialitzen per evitar sobreescriure snapshots concurrents. Idioma, tema i serveis no disponibles es mostren explícitament pendents. El callback de tancament de sessió ara retorna `Future<void>` i es confirma/gestiona sense navegar des del ViewModel. `MainShell` compon la ruta `/profile/settings`, les fitxes i el diàleg de copiar el nom d’usuari al navegador de Perfil.
+
+L’autoria usa `ActivityCreator.userId` opcional, completat en crear activitats. La funcionalitat no dedueix identitats per nom ni canvia contractes HTTP. Colors de nivell centralitzats a `AppTheme` mitjançant `ProfilePalette`. Decisions DP-025/DP-026 i explicació dels fitxers/flux a `docs/profile.md`.
+
 ## Recursos i dependències
 
 Els recursos van a `assets/`, fora de `lib/`. Les fotografies de demostració i l’avatar són a `assets/images/`, declarat a `pubspec.yaml`. S’han preparat amb la vista «Llista» aprovada com a referència; representen contingut fictici, no fotografies verificades d’esdeveniments reals. La procedència i els prompts es documenten a `docs/demo-assets.json`. `assets/branding/aprop_logo.png` és una còpia sense modificacions del logotip aprovat `output/logo/aprop-logo-oficial.png` de la carpeta PES; `assets/branding/` també està declarat a `pubspec.yaml`. `assets/icons/google_g.png` és el logotip «G» de Google per al botó d'accés: s'ha retallat de `Theme=Light, Show text=No, Shape=Square` (PNG @4x) del paquet oficial `signin-assets.zip` de Google Identity i se n'ha tret el fons blanc, sense modificar-ne la forma ni els colors.
@@ -175,6 +186,6 @@ Afegim paquets només quan hi ha codi que els necessita i revisem també el lock
 
 ## Ampliació i revisió
 
-Les futures funcionalitats tindran carpetes pròpies sota `features/`, per exemple `agenda/` o `profile/`, quan comencem a implementar-les. Seguim el mateix patró i compartim només el que té sentit. Si apareix lògica de negoci complexa o repetida entre ViewModels, podem afegir casos d’ús després de revisar la necessitat.
+Les futures funcionalitats tindran carpetes pròpies sota `features/` quan comencem a implementar-les, com ja fan `agenda/` i `profile/`. Seguim el mateix patró i compartim només el que té sentit. Si apareix lògica de negoci complexa o repetida entre ViewModels, podem afegir casos d’ús després de revisar la necessitat.
 
 La interfície de l’aplicació és en català. Revisem els mockups, la llegibilitat, els estats de càrrega/buit/error i les interaccions abans de marcar una tasca com a completada. Les proves comproven comportaments; una PR amb dades de demostració ha d’indicar explícitament la integració pendent.

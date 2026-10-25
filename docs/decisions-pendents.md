@@ -279,6 +279,26 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Qui decideix:** frontend + backend + responsables d'interessos/perfils
 - **Resolució:**
 
+### DP-025 · Perfil propi, edició, autoria i gamificació de demostració
+- **Estat:** oberta
+- **Obert per:** 2026-10-21 · Codex · tasca pendent de crear per l'usuari
+- **Context:** mockup `perfil_1_principal.png`, figura 18 i `features/profile/`. L'usuari autoritza el frontend; aportarà l'ID i els criteris de Taiga més endavant.
+- **Dubte:** contractes autenticats de perfil/edició/assistència, amistats, valoració rebuda i nivells/llindars inexistents; l'autoria anterior només tenia un nom no únic. No hi ha enllaç públic de perfil ni flux d'edició detallat.
+- **Opcions:** A) integrar els contractes quan estiguin acordats · B) validar el perfil propi amb una projecció demo per compte i l'autoria per ID.
+- **Provisionalment:** B. La identitat sempre ve de la sessió, no es força la Núria del mockup. Només `demo-laiasoler` té la foto existent, 14 amics, valoració rebuda 4,7 i 340/500 XP d'exemple; mostra els tres plans històrics disponibles amb valoracions 5/4/5. Els nous comptes comencen sense plans fets/amics/valoració i amb 0 XP; no s'inventen llindars. Apuntar-se no confirma assistència ni dona XP. `ActivityCreator.userId` és opcional; es completa al crear activitats i al fixture de Laia, i «Creats per mi» filtra només per ID. L'edició desa biografia (≤200) i municipi (≤80) opcionals en memòria per compte; no modifica la identitat d'Auth. Compartir ofereix copiar `@username`, sense URL fictícia. Cerca d'amics i perfils aliens continuen pendents. Els mòduls, textos nous i adaptacions responsives són provisionals. `TODO(DP-025)` marca les integracions.
+- **Qui decideix:** frontend + backend + responsables de perfils/gamificació
+- **Resolució:**
+
+### DP-026 · Preferències de Configuració i integracions pendents
+- **Estat:** oberta
+- **Obert per:** 2026-10-21 · Codex · tasca pendent de crear per l'usuari
+- **Context:** mockup `perfil_2_configuracio.png`, figura 19, `ProfileSettingsRepository` i pantalla Configuració.
+- **Dubte:** falten contractes de preferències/privacitat, enviament de notificacions, bloquejos, Calendar, eliminació de compte, traduccions globals i tema fosc. No es pot afirmar que Calendar estigui connectat ni mostrar un proveïdor Google a l'accés demo.
+- **Opcions:** A) completar cada integració dins de la seva història · B) habilitar canvis de preferències demo i mantenir explícitament pendents les accions sense servei.
+- **Provisionalment:** B. Privacitat i quatre tipus d'avís s'editen amb confirmació del repositori i s'aïllen per compte durant l'execució; per defecte els plans no es comparteixen. No alteren la bústia rebuda ni despleguen permisos/push o un graf d'amistats. Català/Clar reflecteixen l'app actual; canviar idioma/tema, bloquejos, repetir test i eliminar compte estan desactivats amb explicació. Calendar mostra «No connectat». «Tancar sessió» utilitza l'Auth existent, espera confirmació i gestiona errors. No s'afegeixen paquets ni endpoints; el mode fosc i la internacionalització globals es faran en les seves històries. La UI informa que les preferències duren aquesta sessió de l'app. `TODO(DP-026)` marca els límits.
+- **Qui decideix:** frontend + backend + responsables d'Auth/notificacions/Calendar
+- **Resolució:**
+
 ## Resoltes
 
 (cap)

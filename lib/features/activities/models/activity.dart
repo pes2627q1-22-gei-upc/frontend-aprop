@@ -7,10 +7,14 @@ class ActivityCreator {
     required this.name,
     required this.isFriend,
     this.avatarAsset,
+    this.userId,
   });
 
   final String name;
   final bool isFriend;
+
+  /// Stable ownership identity when supplied; a display name is not unique.
+  final String? userId;
 
   /// Nul si la persona no té foto (per exemple, qui crea una activitat des de
   /// l'app): es mostra una icona.
