@@ -16,7 +16,7 @@ class VerifyEmailViewModel extends ChangeNotifier {
   /// compte sense verificar), així que el compte enrere comença de seguida.
   VerifyEmailViewModel({
     required this._repository,
-    this.resendCooldown = const Duration(seconds: 30),
+    this.resendCooldown = const Duration(seconds: 60),
   }) {
     _startCooldown();
   }
@@ -24,7 +24,8 @@ class VerifyEmailViewModel extends ChangeNotifier {
   final AuthRepository _repository;
 
   /// Temps d'espera entre enviaments, perquè no es reenviï el correu sense
-  /// parar.
+  /// parar. Firebase rebutja els reenviaments a la mateixa adreça si no ha
+  /// passat aproximadament un minut (comprovat el 2026-10-22).
   final Duration resendCooldown;
 
   Timer? _cooldownTimer;

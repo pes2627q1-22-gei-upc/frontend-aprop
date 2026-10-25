@@ -7,4 +7,13 @@ enum AuthFailure implements Exception {
   emailAlreadyInUse,
   usernameAlreadyInUse,
   network,
+
+  /// S'han fet massa intents seguits i el servei bloqueja l'operació una estona.
+  tooManyRequests,
+
+  /// El servei només deixa entrar amb el correu, no amb el nom d'usuari.
+  emailRequired,
+
+  /// El navegador ha bloquejat la finestra emergent de Google (només web).
+  popupBlocked,
 }

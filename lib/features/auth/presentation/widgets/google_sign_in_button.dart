@@ -2,16 +2,22 @@ import 'package:flutter/material.dart';
 
 /// Separador «o» seguit del botó per entrar amb Google.
 ///
-/// Un [onPressed] nul desactiva el botó: l'accés amb Google depèn de Firebase,
-/// que encara no està configurat.
+/// Un [onPressed] nul desactiva el botó, per exemple mentre s'envia el
+/// formulari. Mentre carrega, el logotip es substitueix per un indicador.
 class GoogleSignInButton extends StatelessWidget {
-  const GoogleSignInButton({super.key, this.onPressed});
+  const GoogleSignInButton({
+    super.key,
+    required this.onPressed,
+    this.isLoading = false,
+  });
 
   final VoidCallback? onPressed;
+  final bool isLoading;
 
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
+    final enabled = onPressed != null && !isLoading;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -30,27 +36,31 @@ class GoogleSignInButton extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 16),
-        Tooltip(
-          message: onPressed == null
-              ? 'Accés amb Google disponible properament'
-              : 'Continua amb Google',
-          child: OutlinedButton.icon(
-            onPressed: onPressed,
-            // El logotip té colors propis: quan el botó està desactivat
-            // l'atenuem com la resta del contingut.
-            icon: Opacity(
-              opacity: onPressed == null ? 0.38 : 1,
-              child: Image.asset(
-                'assets/icons/google_g.png',
-                width: 20,
-                height: 20,
-                excludeFromSemantics: true,
-              ),
-            ),
-            label: const Text('Continua amb Google'),
-            style: OutlinedButton.styleFrom(
-              minimumSize: const Size.fromHeight(52),
-            ),
+        OutlinedButton.icon(
+          onPressed: enabled ? onPressed : null,
+          icon: isLoading
+              ? SizedBox.square(
+                  dimension: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.5,
+                    semanticsLabel: 'Carregant',
+                    color: colors.onSurfaceVariant,
+                  ),
+                )
+              // El logotip té colors propis: quan el botó està desactivat
+              // l'atenuem com la resta del contingut.
+              : Opacity(
+                  opacity: enabled ? 1 : 0.38,
+                  child: Image.asset(
+                    'assets/icons/google_g.png',
+                    width: 20,
+                    height: 20,
+                    excludeFromSemantics: true,
+                  ),
+                ),
+          label: const Text('Continua amb Google'),
+          style: OutlinedButton.styleFrom(
+            minimumSize: const Size.fromHeight(52),
           ),
         ),
       ],

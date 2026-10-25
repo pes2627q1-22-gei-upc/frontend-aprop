@@ -9,7 +9,19 @@ import '../repositories/auth_repository.dart';
 ///
 /// No s'envia cap correu de veritat: la comprovació simula que l'usuari ha
 /// obert l'enllaç i dona el correu per verificat si abans se n'ha «enviat» un.
+///
+/// Tampoc no s'obre el selector de Google: sempre «es tria» el mateix compte,
+/// que el primer cop no té nom d'usuari.
 class DemoAuthRepository implements AuthRepository {
+  static const _googleUser = AppUser(
+    id: 'demo-google-jordipuig',
+    email: 'jordi.puig@gmail.com',
+    firstName: 'Jordi',
+    lastName: 'Puig',
+    // Google ja ha verificat el correu del compte.
+    emailVerified: true,
+  );
+
   final Map<String, _DemoAccount> _accounts = {
     'laia@aprop.cat': const _DemoAccount(
       password: 'Aprop2026!',
@@ -91,6 +103,28 @@ class DemoAuthRepository implements AuthRepository {
   }
 
   @override
+  Future<bool> signInWithGoogle() async {
+    final account = _accounts.putIfAbsent(
+      _googleUser.email,
+      () => const _DemoAccount(user: _googleUser),
+    );
+    _setCurrentUser(account.user);
+    return true;
+  }
+
+  // TODO(DP-025): el nom d'usuari s'haurà de desar al backend.
+  @override
+  Future<void> chooseUsername(String username) async {
+    final user = _requireCurrentUser();
+
+    if (_accounts.values.any((account) => account.user.username == username)) {
+      throw AuthFailure.usernameAlreadyInUse;
+    }
+
+    _updateCurrentUser(user.copyWith(username: username));
+  }
+
+  @override
   Future<void> sendEmailVerification() async {
     _verificationEmailsSent.add(_requireCurrentUser().email);
   }
@@ -102,20 +136,7 @@ class DemoAuthRepository implements AuthRepository {
     if (user.emailVerified) return true;
     if (!_verificationEmailsSent.contains(user.email)) return false;
 
-    final account = _accounts[user.email]!;
-    final verifiedUser = AppUser(
-      id: user.id,
-      email: user.email,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      emailVerified: true,
-      username: user.username,
-    );
-    _accounts[user.email] = _DemoAccount(
-      password: account.password,
-      user: verifiedUser,
-    );
-    _setCurrentUser(verifiedUser);
+    _updateCurrentUser(user.copyWith(emailVerified: true));
     return true;
   }
 
@@ -128,6 +149,16 @@ class DemoAuthRepository implements AuthRepository {
     return _currentUser ?? (throw StateError('No hi ha cap sessió iniciada.'));
   }
 
+  /// Desa els canvis al compte perquè es conservin en tornar a entrar.
+  void _updateCurrentUser(AppUser user) {
+    final account = _accounts[user.email]!;
+    _accounts[user.email] = _DemoAccount(
+      password: account.password,
+      user: user,
+    );
+    _setCurrentUser(user);
+  }
+
   void _setCurrentUser(AppUser? user) {
     _currentUser = user;
     _changes.add(user);
@@ -135,8 +166,9 @@ class DemoAuthRepository implements AuthRepository {
 }
 
 class _DemoAccount {
-  const _DemoAccount({required this.password, required this.user});
+  const _DemoAccount({this.password, required this.user});
 
-  final String password;
+  /// És nul als comptes de Google: només s'hi pot entrar amb Google.
+  final String? password;
   final AppUser user;
 }

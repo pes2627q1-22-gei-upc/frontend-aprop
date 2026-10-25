@@ -18,4 +18,19 @@ class AppUser {
 
   /// És nul fins que l'usuari tria nom d'usuari (primer accés amb Google).
   final String? username;
+
+  /// Nom i cognoms sense espais sobrants: un compte de Google pot no tenir
+  /// cognoms.
+  String get fullName => '$firstName $lastName'.trim();
+
+  AppUser copyWith({bool? emailVerified, String? username}) {
+    return AppUser(
+      id: id,
+      email: email,
+      firstName: firstName,
+      lastName: lastName,
+      emailVerified: emailVerified ?? this.emailVerified,
+      username: username ?? this.username,
+    );
+  }
 }

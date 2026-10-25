@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
 /// Botó principal dels formularis. Mentre carrega es desactiva i mostra un
-/// indicador en lloc del text.
+/// indicador en lloc del text. Un [onPressed] nul el desactiva sense
+/// l'indicador, per exemple mentre s'entra amb Google.
 class AuthSubmitButton extends StatelessWidget {
   const AuthSubmitButton({
     super.key,
@@ -12,7 +13,7 @@ class AuthSubmitButton extends StatelessWidget {
 
   final String label;
   final bool isLoading;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
 
   @override
   Widget build(BuildContext context) {

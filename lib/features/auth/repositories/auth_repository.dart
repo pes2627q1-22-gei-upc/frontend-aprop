@@ -24,6 +24,16 @@ abstract interface class AuthRepository {
     required String password,
   });
 
+  /// Obre el selector de comptes de Google i inicia la sessió amb el compte
+  /// triat. Retorna `false` si l'usuari el tanca sense triar-ne cap.
+  ///
+  /// El primer cop, l'usuari encara no té nom d'usuari ([AppUser.username] és
+  /// nul) i l'ha de triar amb [chooseUsername].
+  Future<bool> signInWithGoogle();
+
+  /// Desa el nom d'usuari de l'usuari de la sessió (primer accés amb Google).
+  Future<void> chooseUsername(String username);
+
   /// Torna a enviar el correu de verificació a l'usuari de la sessió.
   Future<void> sendEmailVerification();
 

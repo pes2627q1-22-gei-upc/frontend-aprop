@@ -74,7 +74,7 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Context:** `docs/ai/30-arquitectura.md`, ADR-0003
 - **Dubte:** els PDFs diuen que totes les claus van al backend, però el login de Firebase i el SDK de Maps normalment s'executen al client amb claus restringides.
 - **Opcions:** A) SDK al client amb claus restringides per app · B) tot via backend (proxy)
-- **Provisionalment:** res integrat.
+- **Provisionalment:** 2026-10-22: per al login s'ha seguit A amb Firebase Auth (vegeu DP-026). `flutterfire configure` genera `lib/firebase_options.dart` i `android/app/google-services.json` (projecte `aprop-919ec`). Es van versionar en un primer moment (repo privat), però el 2026-10-22 l'equip va decidir **no versionar-los**: són al `.gitignore`, la clau s'ha renovat (l'antiga queda a l'historial de la branca `feature/autenticacio`, però ja no és vàlida) i cada persona els genera amb `flutterfire configure` (`docs/firebase-auth.md`). Sense aquests fitxers l'app no compila. Pendent: restringir les claus noves (Android: paquet + SHA-1; navegador: `localhost:5000` i `aprop-919ec.firebaseapp.com`) i, si s'afegeix CI, generar-los des de secrets de GitHub.
 - **Qui decideix:** equip (cal un ADR)
 - **Resolució:**
 
@@ -267,7 +267,6 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Opcions:** A) acordar contractes i integrar perfils/amistats · B) validar primer la pantalla i les interaccions amb dades demo aïllades.
 - **Provisionalment:** projecció de bústia en Dart pur, dades demo per compte, lectura/resposta confirmades i callbacks de destinació. El perfil s'indica com a pendent fins que hi hagi un callback real. La resposta d'amistat simula només el resultat a la bústia: no implementa un graf d'amistats, push, programació de recordatoris, tipus UML nous ni rutes d'API. Els recordatoris històrics no creen inscripcions. Filtres desplaçables amb pantalla estreta/text ampliat, paletes centrals al tema i inicials si no hi ha avatar. `TODO(DP-023)` marca els límits demo/integració. Textos nous de càrrega/error/buit provisionals en català.
 - **Qui decideix:** frontend + backend + responsables de perfils/amistats
-- **Resolució:**
 
 ### DP-024 · Descobreix i cerca: contractes, seleccions i abast social
 - **Estat:** oberta
@@ -277,6 +276,26 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Opcions:** A) integrar el contracte autenticat quan estigui acordat · B) validar primer el recorregut amb el catàleg compartit i un adaptador de demostració.
 - **Provisionalment:** B, sense endpoints ni paquets nous. La selecció demo reutilitza els IDs d'exposició i teatre dels mockups, sense fingir personalització: el subtítol és «Una selecció per començar» fins que `isPersonalized` sigui cert. Es conserven les dates històriques del catàleg compartit; no són propostes actualitzades de producció. La cerca local ignora majúscules/accents/espais repetits i exigeix totes les paraules entre títol, categoria, municipi i descripció. Espera de 350 ms i enviament immediat amb el teclat. «Persones» es mostra desactivat amb explicació i l'accés inicial diu «Cerca activitats»; no es creen perfils ni amistats. La capçalera i la navegació segueixen el patró actual; missatges nous de buit/error provisionals en català. `TODO(DP-024)` marca aquestes adaptacions.
 - **Qui decideix:** frontend + backend + responsables d'interessos/perfils
+- **Resolució:**
+
+### DP-025 · Primer accés amb Google: nom d'usuari i contracte amb el backend
+- **Estat:** oberta
+- **Obert per:** 2026-10-21 · Claude Code (Opus 5.5) amb confirmació de l'usuari · Taiga #7
+- **Context:** `AuthRepository.signInWithGoogle` i `chooseUsername`, `ChooseUsernameScreen`, `AuthGate`, `DemoAuthRepository`.
+- **Dubte:** el mockup diu que en el primer accés amb Google «es completa el perfil», però no hi ha disseny d'aquesta pantalla ni contracte del backend per desar el nom d'usuari i saber si encara falta.
+- **Opcions:** A) pantalla pròpia que només demana el nom d'usuari (nom i cognoms de Google) · B) formulari de perfil complet. En tots dos casos, cal un endpoint per desar-lo i un per consultar l'usuari actual.
+- **Provisionalment:** A amb dades de demostració: el selector de Google se simula amb un compte fix (Jordi Puig) que el primer cop no té nom d'usuari; textos de la pantalla sense mockup (`TODO(DP-025)`). El test d'interessos del primer accés queda fora d'aquesta tasca.
+- **Qui decideix:** equip (pantalla) · backend (contracte)
+- **Resolució:**
+
+### DP-026 · Firebase Auth al client: paquets i dades provisionals fins a `POST /auth/sync`
+- **Estat:** oberta
+- **Obert per:** 2026-10-22 · Claude Code (Opus 5.5) amb confirmació de l'usuari · Taiga #73
+- **Context:** `FirebaseAuthRepository`, `firebase_auth_failure.dart`, `main.dart`, `pubspec.yaml`; backend `api-aprop` branca `feature/auth` (`POST /auth/sync`, sense fusionar).
+- **Dubte:** el backend encara no desa el perfil, no comprova que el nom d'usuari sigui únic, no guarda nom i cognoms i no permet entrar amb el nom d'usuari (Firebase només accepta correu).
+- **Opcions:** entrar amb nom d'usuari: A) només correu · B) endpoint públic usuari → correu · C) login fet pel backend. Nom i cognoms: A) columnes al backend · B) treure'ls del registre.
+- **Provisionalment:** paquets nous `firebase_core` 5, `firebase_auth` 7, `google_sign_in` 7 i `shared_preferences` 2. Nom i cognoms al `displayName` de Firebase (separats pel primer espai); nom d'usuari desat al dispositiu; si s'escriu un nom d'usuari en lloc del correu, l'app demana el correu (`AuthFailure.emailRequired`). Android i web (Google amb `signInWithPopup` de Firebase a la web); a iOS es continuen fent servir els comptes de demostració. `TODO(DP-026)` al repositori i a `main.dart`.
+- **Qui decideix:** equip + backend (contracte) · PO (criteri «usuari o correu» de #7)
 - **Resolució:**
 
 ## Resoltes

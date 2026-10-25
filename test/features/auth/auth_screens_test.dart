@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:aprop/features/auth/models/auth_failure.dart';
 import 'package:aprop/features/auth/presentation/view_models/auth_failure_message.dart';
+import 'package:aprop/features/auth/presentation/screens/choose_username_screen.dart';
 import 'package:aprop/features/auth/presentation/screens/login_screen.dart';
 import 'package:aprop/features/auth/presentation/screens/register_screen.dart';
 import 'package:aprop/features/auth/presentation/screens/verify_email_screen.dart';
@@ -142,7 +145,7 @@ void main() {
     expect(hasFocus('Repeteix la contrasenya'), isTrue);
   });
 
-  testWidgets('Reenviar el correu espera 30 segons cada vegada', (
+  testWidgets('Reenviar el correu espera 60 segons cada vegada', (
     tester,
   ) async {
     await pumpScreen(
@@ -157,10 +160,10 @@ void main() {
       ),
     );
 
-    expect(find.text('Torna a enviar el correu (30 s)'), findsOneWidget);
+    expect(find.text('Torna a enviar el correu (60 s)'), findsOneWidget);
     expect(resendButton().onPressed, isNull);
 
-    await tester.pump(const Duration(seconds: 29));
+    await tester.pump(const Duration(seconds: 59));
     expect(find.text('Torna a enviar el correu (1 s)'), findsOneWidget);
 
     await tester.pump(const Duration(seconds: 1));
@@ -171,19 +174,61 @@ void main() {
 
     expect(repository.verificationEmailsSent, 1);
     expect(find.text("T'hem tornat a enviar el correu."), findsOneWidget);
-    expect(find.text('Torna a enviar el correu (30 s)'), findsOneWidget);
+    expect(find.text('Torna a enviar el correu (60 s)'), findsOneWidget);
   });
 
-  testWidgets('El botó de Google està desactivat', (tester) async {
+  testWidgets("Mentre s'entra amb Google no es pot enviar el formulari", (
+    tester,
+  ) async {
+    repository.pending = Completer<void>();
     await pumpScreen(tester, LoginScreen(repository: repository));
 
-    final button = tester.widget<ButtonStyleButton>(
-      find.ancestor(
-        of: find.text('Continua amb Google'),
-        matching: find.bySubtype<ButtonStyleButton>(),
-      ),
+    ButtonStyleButton buttonWith(String text) =>
+        tester.widget<ButtonStyleButton>(
+          find.ancestor(
+            of: find.text(text),
+            matching: find.bySubtype<ButtonStyleButton>(),
+          ),
+        );
+
+    await tester.tap(find.text('Continua amb Google'));
+    await tester.pump();
+
+    expect(repository.googleSignIns, 1);
+    expect(buttonWith('Entra').onPressed, isNull);
+    expect(buttonWith('Continua amb Google').onPressed, isNull);
+    // Només carrega Google: el botó «Entra» no mostra l'indicador.
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+
+    repository.pending!.complete();
+    await tester.pumpAndSettle();
+
+    expect(buttonWith('Entra').onPressed, isNotNull);
+    expect(buttonWith('Continua amb Google').onPressed, isNotNull);
+  });
+
+  testWidgets("Amb la lletra gran l'ajuda del nom d'usuari no es talla", (
+    tester,
+  ) async {
+    await pumpScreen(
+      tester,
+      ChooseUsernameScreen(repository: repository, firstName: 'Jordi'),
+      textScale: 2,
     );
 
-    expect(button.onPressed, isNull);
+    final paragraph = tester.renderObject<RenderParagraph>(
+      find.text('Minúscules, números, punt o guió baix (3-20).'),
+    );
+    expect(paragraph.didExceedMaxLines, isFalse);
+  });
+
+  testWidgets('Saluda sense nom si el compte no en té', (tester) async {
+    await pumpScreen(
+      tester,
+      ChooseUsernameScreen(repository: repository, firstName: ' '),
+    );
+
+    expect(find.textContaining('Hola!'), findsOneWidget);
+    expect(find.textContaining('Hola, '), findsNothing);
   });
 }

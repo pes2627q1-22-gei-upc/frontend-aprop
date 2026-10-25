@@ -47,6 +47,13 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
+  Future<void> _signInWithGoogle() async {
+    FocusScope.of(context).unfocus();
+
+    // Com amb el formulari: si va bé, AuthGate mostra el que toqui.
+    await _viewModel.signInWithGoogle();
+  }
+
   void _openRegister() {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
@@ -133,10 +140,15 @@ class _LoginScreenState extends State<LoginScreen> {
                       AuthSubmitButton(
                         label: 'Entra',
                         isLoading: _viewModel.isLoading,
-                        onPressed: _submit,
+                        onPressed: _viewModel.isGoogleLoading ? null : _submit,
                       ),
                       const SizedBox(height: 16),
-                      const GoogleSignInButton(),
+                      GoogleSignInButton(
+                        isLoading: _viewModel.isGoogleLoading,
+                        onPressed: _viewModel.isLoading
+                            ? null
+                            : _signInWithGoogle,
+                      ),
                       const SizedBox(height: 32),
                       AuthSecondaryAction(
                         question: 'Encara no tens compte?',
