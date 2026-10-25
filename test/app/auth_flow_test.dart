@@ -127,7 +127,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Pol Vidal'), findsOneWidget);
-    expect(find.text('@polvidal'), findsOneWidget);
+    expect(find.text('polvidal'), findsOneWidget);
   });
 
   testWidgets("Es pot verificar enganxant l'enllaç del correu", (tester) async {
@@ -193,7 +193,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Jordi Puig'), findsOneWidget);
-    expect(find.text('@jordipuig'), findsOneWidget);
+    expect(find.text('jordipuig'), findsOneWidget);
   });
 
   testWidgets('Google des del registre tanca el formulari', (tester) async {
@@ -213,7 +213,9 @@ void main() {
     expect(find.text('Inicia sessió'), findsOneWidget);
   });
 
-  testWidgets('Tanca la sessió des de Perfil', (tester) async {
+  testWidgets('Tanca la sessió des de la configuració de Perfil', (
+    tester,
+  ) async {
     await repository.signIn(
       usernameOrEmail: 'laia@aprop.cat',
       password: 'Aprop2026!',
@@ -224,7 +226,21 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Laia Soler'), findsOneWidget);
 
-    await tapButton(tester, 'Tanca la sessió');
+    await tester.tap(find.byTooltip('Configuració'));
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.byKey(const ValueKey('profile-sign-out')),
+      300,
+      scrollable: find.descendant(
+        of: find.byKey(const PageStorageKey('profile-settings-scroll')),
+        matching: find.byType(Scrollable),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.byKey(const ValueKey('profile-sign-out')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('profile-sign-out')));
+    await tester.pumpAndSettle();
 
     expect(find.text('Inicia sessió'), findsOneWidget);
     expect(find.byType(NavigationBar), findsNothing);

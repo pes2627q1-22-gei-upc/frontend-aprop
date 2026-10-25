@@ -51,6 +51,7 @@ class DemoActivityRepository implements ActivityRepository {
           'entorn acollidor sota les estrelles.',
       creator: const ActivityCreator(
         name: 'Laia Soler',
+        userId: 'demo-laiasoler',
         avatarAsset: 'assets/images/laia_soler.jpg',
         isFriend: true,
       ),

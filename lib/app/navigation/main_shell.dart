@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../features/activities/data/demo_location_repository.dart';
 import '../../features/activities/models/activity.dart';
@@ -20,6 +21,11 @@ import '../../features/assistant/repositories/assistant_repository.dart';
 import '../../features/auth/models/app_user.dart';
 import '../../features/notifications/presentation/screens/notifications_screen.dart';
 import '../../features/notifications/repositories/notification_repository.dart';
+import '../../features/profile/presentation/screens/profile_screen.dart';
+import '../../features/profile/presentation/screens/profile_settings_screen.dart';
+import '../../features/profile/presentation/view_models/profile_view_model.dart';
+import '../../features/profile/repositories/profile_repository.dart';
+import '../../features/profile/repositories/profile_settings_repository.dart';
 import 'activity_details_route.dart';
 
 class MainShell extends StatefulWidget {
@@ -32,15 +38,19 @@ class MainShell extends StatefulWidget {
     required this.assistantRepository,
     required this.notificationRepository,
     required this.discoveryRepository,
+    required this.profileRepository,
+    required this.profileSettingsRepository,
   });
 
   final AppUser user;
-  final VoidCallback onSignOut;
+  final Future<void> Function() onSignOut;
   final ActivityRepository activityRepository;
   final EnrollmentRepository enrollmentRepository;
   final AssistantRepository assistantRepository;
   final NotificationRepository notificationRepository;
   final DiscoveryRepository discoveryRepository;
+  final ProfileRepository profileRepository;
+  final ProfileSettingsRepository profileSettingsRepository;
 
   @override
   State<MainShell> createState() => _MainShellState();
@@ -59,6 +69,7 @@ class _MainShellState extends State<MainShell> {
   late final ActivitiesViewModel _activitiesViewModel;
   late final EnrollmentViewModel _enrollmentViewModel;
   late final AssistantViewModel _assistantViewModel;
+  late final ProfileViewModel _profileViewModel;
 
   static const _titles = ['AProp!', 'Agenda', 'Descobreix', 'Avisos', 'Perfil'];
 
@@ -76,6 +87,10 @@ class _MainShellState extends State<MainShell> {
     _assistantViewModel = AssistantViewModel(
       repository: widget.assistantRepository,
     );
+    _profileViewModel = ProfileViewModel(
+      user: widget.user,
+      repository: widget.profileRepository,
+    )..load();
     _enrollmentViewModel.load();
 
     _activitiesViewModel.load(); //mientras espera ésto flutter dibuja un indicador de carga. Cuando termina, el ViewModel notifica a la pantalla y ésta se redibuja con la lista de actividades.
@@ -87,11 +102,14 @@ class _MainShellState extends State<MainShell> {
     _activitiesViewModel.dispose();
     _enrollmentViewModel.dispose();
     _assistantViewModel.dispose();
+    _profileViewModel.dispose();
     super.dispose();
   }
 
   void _selectDestination(int index) {
     if (index == _selectedIndex) return;
+    // Refresh ownership/history after changes made in another section.
+    if (index == 4) _profileViewModel.load();
 
     setState(() {
       _selectedIndex = index;
@@ -176,8 +194,97 @@ class _MainShellState extends State<MainShell> {
         builder: (context) => CreateActivityScreen(
           repository: _activityRepository,
           locationRepository: const DemoLocationRepository(),
-          creator: ActivityCreator(name: widget.user.fullName, isFriend: false),
+          creator: ActivityCreator(
+            name: widget.user.fullName,
+            userId: widget.user.id,
+            isFriend: false,
+          ),
           onCreated: (activity) => _showCreatedActivity(navigator, activity),
+        ),
+      ),
+    );
+  }
+
+  void _openProfileSettings() {
+    final navigator = _sectionNavigatorKeys[4].currentState!;
+    if (_selectedIndex != 4 || navigator.canPop()) return;
+    navigator.push<void>(
+      MaterialPageRoute<void>(
+        settings: const RouteSettings(name: '/profile/settings'),
+        builder: (context) => ProfileSettingsScreen(
+          user: widget.user,
+          repository: widget.profileSettingsRepository,
+          onSignOut: widget.onSignOut,
+          onBack: () => Navigator.of(context).pop(),
+        ),
+      ),
+    );
+  }
+
+  // TODO(DP-032): Share a real public link when a profile route is agreed.
+  void _shareOwnProfile() {
+    final username = widget.user.username;
+    if (username == null || username.isEmpty) return;
+    var copying = false;
+    showDialog<void>(
+      context: _sectionNavigatorKeys[4].currentState!.overlay!.context,
+      useRootNavigator: false,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: const Text('Compartir perfil'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('@$username'),
+              const SizedBox(height: 8),
+              const Text('Comparteix el teu nom d’usuari d’AProp!'),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: copying
+                  ? null
+                  : () => Navigator.of(dialogContext).pop(),
+              child: const Text('Cancel·lar'),
+            ),
+            FilledButton(
+              onPressed: copying
+                  ? null
+                  : () async {
+                      setDialogState(() => copying = true);
+                      try {
+                        await Clipboard.setData(
+                          ClipboardData(text: '@$username'),
+                        );
+                        if (dialogContext.mounted) {
+                          Navigator.of(dialogContext).pop();
+                        }
+                        if (mounted) {
+                          ScaffoldMessenger.of(this.context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Nom d’usuari copiat'),
+                            ),
+                          );
+                        }
+                      } catch (_) {
+                        if (dialogContext.mounted) {
+                          setDialogState(() => copying = false);
+                        }
+                        if (mounted) {
+                          ScaffoldMessenger.of(this.context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'No hem pogut copiar el nom d’usuari.',
+                              ),
+                            ),
+                          );
+                        }
+                      }
+                    },
+              child: Text(copying ? 'Copiant…' : 'Copiar nom d’usuari'),
+            ),
+          ],
         ),
       ),
     );
@@ -312,12 +419,13 @@ class _MainShellState extends State<MainShell> {
             ),
             _buildSectionNavigator(
               4,
-              (context) => _sectionRoot(
-                4,
-                _ProfilePlaceholder(
-                  user: widget.user,
-                  onSignOut: widget.onSignOut,
-                ),
+              (context) => ProfileScreen(
+                viewModel: _profileViewModel,
+                onSettingsPressed: _openProfileSettings,
+                onSharePressed: widget.user.username?.isNotEmpty == true
+                    ? _shareOwnProfile
+                    : null,
+                onActivitySelected: _openActivityDetails,
               ),
             ),
           ],
@@ -354,50 +462,6 @@ class _MainShellState extends State<MainShell> {
             label: 'Perfil',
           ),
         ],
-      ),
-    );
-  }
-}
-
-/// Perfil provisional fins que hi hagi la funcionalitat de perfil: mostra qui
-/// ha iniciat la sessió i permet tancar-la.
-class _ProfilePlaceholder extends StatelessWidget {
-  const _ProfilePlaceholder({required this.user, required this.onSignOut});
-
-  final AppUser user;
-  final VoidCallback onSignOut;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final username = user.username;
-
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text('El teu perfil'),
-            const SizedBox(height: 16),
-            Text(
-              user.fullName,
-              style: theme.textTheme.titleLarge,
-              textAlign: TextAlign.center,
-            ),
-            if (username != null)
-              Text(
-                '@$username',
-                style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
-              ),
-            const SizedBox(height: 24),
-            OutlinedButton.icon(
-              onPressed: onSignOut,
-              icon: const Icon(Icons.logout),
-              label: const Text('Tanca la sessió'),
-            ),
-          ],
-        ),
       ),
     );
   }

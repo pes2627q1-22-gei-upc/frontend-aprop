@@ -6,6 +6,8 @@ import '../features/activities/repositories/discovery_repository.dart';
 import '../features/activities/repositories/enrollment_repository.dart';
 import '../features/assistant/repositories/assistant_repository.dart';
 import '../features/notifications/repositories/notification_repository.dart';
+import '../features/profile/repositories/profile_repository.dart';
+import '../features/profile/repositories/profile_settings_repository.dart';
 import 'navigation/auth_gate.dart';
 import 'theme/app_theme.dart';
 
@@ -18,6 +20,8 @@ class APropApp extends StatelessWidget {
     this.assistantRepository,
     this.notificationRepository,
     this.discoveryRepository,
+    this.profileRepository,
+    this.profileSettingsRepository,
   });
 
   final AuthRepository authRepository;
@@ -26,6 +30,8 @@ class APropApp extends StatelessWidget {
   final AssistantRepository? assistantRepository;
   final NotificationRepository? notificationRepository;
   final DiscoveryRepository? discoveryRepository;
+  final ProfileRepository? profileRepository;
+  final ProfileSettingsRepository? profileSettingsRepository;
 
   @override
   Widget build(BuildContext context) {
@@ -41,6 +47,8 @@ class APropApp extends StatelessWidget {
           assistantRepository,
           notificationRepository,
           discoveryRepository,
+          profileRepository,
+          profileSettingsRepository,
         )),
         authRepository: authRepository,
         activityRepository: activityRepository,
@@ -48,6 +56,8 @@ class APropApp extends StatelessWidget {
         assistantRepository: assistantRepository,
         notificationRepository: notificationRepository,
         discoveryRepository: discoveryRepository,
+        profileRepository: profileRepository,
+        profileSettingsRepository: profileSettingsRepository,
       ),
     );
   }
