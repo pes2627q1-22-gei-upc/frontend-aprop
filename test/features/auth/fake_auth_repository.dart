@@ -62,6 +62,12 @@ class FakeAuthRepository implements AuthRepository {
   @override
   Future<void> signOut() => _respond();
 
+  /// Resposta de [currentIdToken].
+  String? idToken;
+
+  @override
+  Future<String?> currentIdToken() async => idToken;
+
   Future<void> _respond() async {
     await pending?.future;
     if (error case final error?) throw error;

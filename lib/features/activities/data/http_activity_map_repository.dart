@@ -14,11 +14,17 @@ import '../repositories/activity_map_repository.dart';
 class HttpActivityMapRepository implements ActivityMapRepository {
   HttpActivityMapRepository({
     required this.baseUrl,
+    this._idToken,
     http.Client? client,
     this.timeout = const Duration(seconds: 15),
   }) : _client = client ?? http.Client();
 
   final Uri baseUrl;
+
+  /// Token de la sessió per a `Authorization: Bearer`: el backend el demana a
+  /// totes les rutes. Sense token (dades de demostració) no s'envia.
+  final Future<String?> Function()? _idToken;
+
   final http.Client _client;
   final Duration timeout;
 
@@ -51,10 +57,16 @@ class HttpActivityMapRepository implements ActivityMapRepository {
   }
 
   /// Accepta la URL base amb barra final o sense.
-  Future<http.Response> _get(String path, [Map<String, String>? query]) {
+  Future<http.Response> _get(String path, [Map<String, String>? query]) async {
     final base = baseUrl.toString().replaceAll(RegExp(r'/+$'), '');
     final uri = Uri.parse('$base/$path').replace(queryParameters: query);
-    return _client.get(uri).timeout(timeout);
+    final token = await _idToken?.call();
+    return _client
+        .get(
+          uri,
+          headers: {if (token != null) 'Authorization': 'Bearer $token'},
+        )
+        .timeout(timeout);
   }
 
   /// El backend no indica el joc de caràcters i `response.body` llegiria els

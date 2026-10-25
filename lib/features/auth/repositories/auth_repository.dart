@@ -33,4 +33,9 @@ abstract interface class AuthRepository {
   Future<bool> checkEmailVerified();
 
   Future<void> signOut();
+
+  /// Token de la sessió per identificar l'usuari davant del backend
+  /// (`Authorization: Bearer`). És nul si no hi ha sessió o si les dades són
+  /// de demostració.
+  Future<String?> currentIdToken();
 }

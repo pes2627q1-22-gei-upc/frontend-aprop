@@ -302,6 +302,8 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
   - Sense `API_BASE_URL`, tot continua amb les dades de demostració.
   - Apuntar-se des d'una fitxa del backend falla, perquè la inscripció de demostració no troba l'activitat (DP-010).
   - `TODO(DP-029)` marca aquestes adaptacions.
+- **Token (2026-10-25):** el backend ja exigeix `Authorization: Bearer` a totes les rutes (`feature/auth` fusionada). `HttpActivityMapRepository` l'envia si `AuthRepository.currentIdToken()` en retorna un; amb els comptes de demostració és nul i no s'envia. En ajuntar-ho amb el login de Firebase (`feature/autenticacio`), `FirebaseAuthRepository` haurà d'implementar `currentIdToken()` (`_auth.currentUser?.getIdToken()`).
+- **Apuntar-se des del mapa (2026-10-25):** la inscripció i l'Agenda buscaven l'activitat només al catàleg de demostració i fallaven amb les del backend. Amb `API_BASE_URL`, `CombinedActivityRepository` busca al backend els ID numèrics i al catàleg els `demo-…`.
 - **Qui decideix:** frontend + backend
 - **Resolució:**
 

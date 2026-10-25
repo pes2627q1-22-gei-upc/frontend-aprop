@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../core/config/api_config.dart';
+import '../../features/activities/data/combined_activity_repository.dart';
 import '../../features/activities/data/demo_activity_repository.dart';
 import '../../features/activities/data/demo_discovery_repository.dart';
 import '../../features/activities/data/demo_enrollment_repository.dart';
@@ -62,7 +63,24 @@ class _AuthGateState extends State<AuthGate> {
   @override
   void initState() {
     super.initState();
-    _activityRepository = widget.activityRepository ?? DemoActivityRepository();
+    _activityMapRepository =
+        widget.activityMapRepository ??
+        (ApiConfig.isConfigured
+            ? HttpActivityMapRepository(
+                baseUrl: Uri.parse(ApiConfig.baseUrl),
+                idToken: widget.authRepository.currentIdToken,
+              )
+            : null);
+
+    final catalogue = widget.activityRepository ?? DemoActivityRepository();
+    // Amb backend, les activitats obertes des del mapa també s'han de trobar
+    // en apuntar-s'hi i a l'Agenda.
+    _activityRepository = switch (_activityMapRepository) {
+      final backend? when widget.activityRepository == null =>
+        CombinedActivityRepository(catalogue: catalogue, backend: backend),
+      _ => catalogue,
+    };
+
     final suppliedRepository = widget.enrollmentRepository;
     if (suppliedRepository != null) {
       _enrollmentRepository = suppliedRepository;
@@ -81,11 +99,6 @@ class _AuthGateState extends State<AuthGate> {
     _discoveryRepository =
         widget.discoveryRepository ??
         DemoDiscoveryRepository(activityRepository: _activityRepository);
-    _activityMapRepository =
-        widget.activityMapRepository ??
-        (ApiConfig.isConfigured
-            ? HttpActivityMapRepository(baseUrl: Uri.parse(ApiConfig.baseUrl))
-            : null);
   }
 
   @override

@@ -162,4 +162,40 @@ void main() {
       expect(requests, hasLength(1));
     });
   });
+
+  group('Token de la sessió', () {
+    late List<http.Request> sent;
+
+    HttpActivityMapRepository withToken(String? token) {
+      sent = [];
+      return HttpActivityMapRepository(
+        baseUrl: Uri.parse('http://10.0.2.2:8080'),
+        idToken: () async => token,
+        client: MockClient((request) async {
+          sent.add(request);
+          // El mapa rep una llista; la fitxa, un sol esdeveniment.
+          final body = request.url.path.endsWith('/map') ? [event()] : event();
+          return http.Response.bytes(utf8.encode(jsonEncode(body)), 200);
+        }),
+      );
+    }
+
+    test("L'envia a cada petició quan n'hi ha", () async {
+      final repository = withToken('firebase-token');
+
+      await repository.getActivitiesInArea(area);
+      await repository.getActivityById('1282');
+
+      expect(
+        sent.map((request) => request.headers['Authorization']),
+        everyElement('Bearer firebase-token'),
+      );
+    });
+
+    test('Sense sessió (demostració) no envia cap capçalera', () async {
+      await withToken(null).getActivitiesInArea(area);
+
+      expect(sent.single.headers.containsKey('Authorization'), isFalse);
+    });
+  });
 }
