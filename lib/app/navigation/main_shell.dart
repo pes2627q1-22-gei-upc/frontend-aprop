@@ -195,10 +195,7 @@ class _MainShellState extends State<MainShell> {
         builder: (context) => CreateActivityScreen(
           repository: _activityRepository,
           locationRepository: const DemoLocationRepository(),
-          creator: ActivityCreator(
-            name: '${widget.user.firstName} ${widget.user.lastName}',
-            isFriend: false,
-          ),
+          creator: ActivityCreator(name: widget.user.fullName, isFriend: false),
           onCreated: (activity) => _showCreatedActivity(navigator, activity),
         ),
       ),
@@ -408,7 +405,7 @@ class _ProfilePlaceholder extends StatelessWidget {
             const Text('El teu perfil'),
             const SizedBox(height: 16),
             Text(
-              '${user.firstName} ${user.lastName}',
+              user.fullName,
               style: theme.textTheme.titleLarge,
               textAlign: TextAlign.center,
             ),

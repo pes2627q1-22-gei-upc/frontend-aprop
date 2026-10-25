@@ -6,8 +6,10 @@ class FakeEnrollmentRepository implements EnrollmentRepository {
   final Map<String, Set<String>> _idsByUser = {};
   final Map<String, StreamController<Set<String>>> _changes = {};
   final List<String> enrolledRequests = [];
+  final List<String> unenrolledRequests = [];
   final List<String> watchedUsers = [];
   Future<void> Function(String userId, String activityId)? onEnroll;
+  Future<void> Function(String userId, String activityId)? onUnenroll;
   bool failReads = false;
 
   StreamController<Set<String>> _controller(String userId) => _changes
@@ -52,6 +54,16 @@ class FakeEnrollmentRepository implements EnrollmentRepository {
     enrolledRequests.add('$userId/$activityId');
     await onEnroll?.call(userId, activityId);
     emit(userId, {...?_idsByUser[userId], activityId});
+  }
+
+  @override
+  Future<void> unenroll({
+    required String userId,
+    required String activityId,
+  }) async {
+    unenrolledRequests.add('$userId/$activityId');
+    await onUnenroll?.call(userId, activityId);
+    emit(userId, {...?_idsByUser[userId]}..remove(activityId));
   }
 
   Future<void> dispose() async {

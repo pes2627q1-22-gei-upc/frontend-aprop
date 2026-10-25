@@ -117,4 +117,27 @@ void main() {
     expect(success, isFalse);
     expect(viewModel.errorMessage, unexpectedAuthErrorMessage);
   });
+
+  test('Entra amb Google sense validar el formulari', () async {
+    await viewModel.register(
+      firstName: '',
+      lastName: '',
+      username: '',
+      email: '',
+      password: '',
+      passwordConfirmation: '',
+    );
+    expect(viewModel.fieldError(RegisterField.firstName), isNotNull);
+
+    expect(await viewModel.signInWithGoogle(), isTrue);
+    expect(repository.googleSignIns, 1);
+    expect(viewModel.fieldError(RegisterField.firstName), isNull);
+  });
+
+  test('Si es tanca el selector de Google no mostra cap error', () async {
+    repository.googleAccountChosen = false;
+
+    expect(await viewModel.signInWithGoogle(), isFalse);
+    expect(viewModel.errorMessage, isNull);
+  });
 }

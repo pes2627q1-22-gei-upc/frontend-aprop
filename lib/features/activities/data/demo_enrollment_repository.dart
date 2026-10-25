@@ -5,6 +5,7 @@ import '../repositories/enrollment_repository.dart';
 
 /// In-memory enrollment data, retained across sign-outs until app shutdown.
 // TODO(DP-010): Replace with a backend adapter once its contract is agreed.
+// TODO(DP-027): the backend has no endpoint to unenroll yet.
 class DemoEnrollmentRepository implements EnrollmentRepository {
   DemoEnrollmentRepository({required this.activityRepository});
 
@@ -54,6 +55,18 @@ class DemoEnrollmentRepository implements EnrollmentRepository {
 
     final ids = _enrolledByUser.putIfAbsent(userId, () => <String>{});
     if (ids.add(activityId)) _changes.add(userId);
+  }
+
+  @override
+  Future<void> unenroll({
+    required String userId,
+    required String activityId,
+  }) async {
+    if (_isDisposed) throw StateError('Enrollment repository is closed.');
+    if (userId.isEmpty) throw ArgumentError.value(userId, 'userId');
+
+    final removed = _enrolledByUser[userId]?.remove(activityId) ?? false;
+    if (removed) _changes.add(userId);
   }
 
   Future<void> dispose() async {

@@ -51,7 +51,7 @@ Taiga #96 implementa Descobreix i la cerca d'activitats amb les targetes/inscrip
 
 Taiga #86 implementa Avisos amb repositori de demostració: filtres, ordre/agrupació per data, lectura confirmada, respostes a sol·licituds i ruta al detall. El perfil es mostra com a pendent fins que s'injecti un callback real. Les inicials substitueixen avatars no disponibles. En pantalles estretes o amb text ampliat, els quatre filtres es desplacen horitzontalment sense truncar. Lliurament de notificacions, recordatoris programats i amistats reals no estan integrats (DP-023); detalls a `docs/notifications.md`.
 
-Implementat amb dades de demostració: accés (usuari o correu + contrasenya; Google desactivat), llista
+Accés real amb Firebase a Android i web (correu + contrasenya i Google, amb tria del nom d'usuari al primer accés; DP-025, DP-026; `docs/firebase-auth.md`). Implementat amb dades de demostració: llista
 d'Inici amb capçalera, i fitxa (#75). Els controls pendents es mostren desactivats. Detall a `README.md`.
-`TODO(confirmar)`: els mockups preveuen l'accés amb Google i el codi actual implementa usuari i contrasenya
-(criteris de Taiga #7). Comprova a Taiga quin és l'abast vigent.
+`TODO(confirmar)`: els criteris de Taiga #7 diuen «usuari o correu», però amb Firebase de moment només es pot
+entrar amb el correu (DP-026).

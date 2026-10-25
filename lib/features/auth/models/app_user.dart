@@ -6,6 +6,7 @@ class AppUser {
     required this.lastName,
     required this.emailVerified,
     this.username,
+    this.rejectedUsername,
   });
 
   final String id;
@@ -18,4 +19,23 @@ class AppUser {
 
   /// És nul fins que l'usuari tria nom d'usuari (primer accés amb Google).
   final String? username;
+
+  /// Nom d'usuari que es va demanar en registrar-se i que ja era d'una altra
+  /// persona. Mentre [username] és nul, explica per què se'n demana un altre.
+  final String? rejectedUsername;
+
+  /// Nom i cognoms sense espais sobrants: un compte de Google pot no tenir
+  /// cognoms.
+  String get fullName => '$firstName $lastName'.trim();
+
+  AppUser copyWith({bool? emailVerified, String? username}) {
+    return AppUser(
+      id: id,
+      email: email,
+      firstName: firstName,
+      lastName: lastName,
+      emailVerified: emailVerified ?? this.emailVerified,
+      username: username ?? this.username,
+    );
+  }
 }

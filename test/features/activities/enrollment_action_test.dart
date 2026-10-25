@@ -64,4 +64,86 @@ void main() {
       },
     );
   }
+
+  testWidgets('A failed unenrollment keeps «Apuntat» and shows the error', (
+    tester,
+  ) async {
+    final repository = FakeEnrollmentRepository()
+      ..emit('user-a', {'demo-jazz'})
+      ..onUnenroll = (_, _) async => throw StateError('Offline');
+    final viewModel = EnrollmentViewModel(
+      userId: 'user-a',
+      repository: repository,
+    );
+    viewModel.load();
+    addTearDown(() async {
+      viewModel.dispose();
+      await repository.dispose();
+    });
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.light,
+        home: Scaffold(
+          body: EnrollmentAction(
+            viewModel: viewModel,
+            activityId: 'demo-jazz',
+            activityTitle: 'Jazz al parc',
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Apuntat'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Treurem «Jazz al parc»'), findsOneWidget);
+    await tester.tap(find.text('Desapunta’m'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Apuntat'), findsOneWidget);
+    expect(
+      find.text('No t’hem pogut desapuntar. Torna-ho a provar.'),
+      findsOneWidget,
+    );
+    expect(repository.unenrolledRequests, ['user-a/demo-jazz']);
+  });
+
+  testWidgets('No visible tooltip; the screen reader still gets the hint', (
+    tester,
+  ) async {
+    final repository = FakeEnrollmentRepository()
+      ..emit('user-a', {'demo-jazz'});
+    final viewModel = EnrollmentViewModel(
+      userId: 'user-a',
+      repository: repository,
+    );
+    viewModel.load();
+    addTearDown(() async {
+      viewModel.dispose();
+      await repository.dispose();
+    });
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.light,
+        home: Scaffold(
+          body: EnrollmentAction(
+            viewModel: viewModel,
+            activityId: 'demo-jazz',
+            activityTitle: 'Jazz al parc',
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(Tooltip), findsNothing);
+    expect(
+      find.byWidgetPredicate(
+        (widget) =>
+            widget is Semantics &&
+            widget.properties.tooltip == 'Desapuntar-me de Jazz al parc',
+      ),
+      findsOneWidget,
+    );
+  });
 }

@@ -121,4 +121,42 @@ void main() {
       expect(notified, isTrue);
     },
   );
+
+  test('Entra amb Google', () async {
+    final result = viewModel.signInWithGoogle();
+    expect(viewModel.isGoogleLoading, isTrue);
+
+    expect(await result, isTrue);
+    expect(repository.googleSignIns, 1);
+    expect(viewModel.isGoogleLoading, isFalse);
+    expect(viewModel.errorMessage, isNull);
+  });
+
+  test('Si es tanca el selector de Google no mostra cap error', () async {
+    repository.googleAccountChosen = false;
+
+    expect(await viewModel.signInWithGoogle(), isFalse);
+    expect(viewModel.errorMessage, isNull);
+  });
+
+  test("Mostra l'error si no es pot entrar amb Google", () async {
+    repository.error = AuthFailure.network;
+
+    expect(await viewModel.signInWithGoogle(), isFalse);
+    expect(viewModel.errorMessage, AuthFailure.network.message);
+  });
+
+  test("No entra amb Google mentre s'envia el formulari", () async {
+    repository.pending = Completer<void>();
+    final signIn = viewModel.signIn(
+      usernameOrEmail: 'a@b.cat',
+      password: '12345678',
+    );
+
+    expect(await viewModel.signInWithGoogle(), isFalse);
+    expect(repository.googleSignIns, 0);
+
+    repository.pending!.complete();
+    await signIn;
+  });
 }

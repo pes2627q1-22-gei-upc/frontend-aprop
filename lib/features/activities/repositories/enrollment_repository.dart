@@ -7,4 +7,8 @@ abstract interface class EnrollmentRepository {
   /// Completes only after enrollment is confirmed; throws on failure.
   /// Repeating an enrollment must not create a duplicate.
   Future<void> enroll({required String userId, required String activityId});
+
+  /// Completes only after the enrollment is removed; throws on failure.
+  /// Unenrolling from an activity without an enrollment changes nothing.
+  Future<void> unenroll({required String userId, required String activityId});
 }
