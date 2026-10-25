@@ -2,12 +2,10 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import '../../core/config/api_config.dart';
 import '../../features/activities/data/combined_activity_repository.dart';
 import '../../features/activities/data/demo_activity_repository.dart';
 import '../../features/activities/data/demo_discovery_repository.dart';
 import '../../features/activities/data/demo_enrollment_repository.dart';
-import '../../features/activities/data/http_activity_map_repository.dart';
 import '../../features/activities/repositories/activity_map_repository.dart';
 import '../../features/activities/repositories/activity_repository.dart';
 import '../../features/activities/repositories/discovery_repository.dart';
@@ -53,8 +51,8 @@ class AuthGate extends StatefulWidget {
   final ProfileRepository? profileRepository;
   final ProfileSettingsRepository? profileSettingsRepository;
 
-  /// Per defecte, el backend si s'ha passat `API_BASE_URL`. Sense backend, el
-  /// mapa mostra les activitats de demostració de la llista.
+  /// Repositori opcional per al mapa d'Inici. Si és nul, el mapa mostra les
+  /// activitats del catàleg d'`activityRepository`.
   final ActivityMapRepository? activityMapRepository;
 
   @override
@@ -75,14 +73,7 @@ class _AuthGateState extends State<AuthGate> {
   @override
   void initState() {
     super.initState();
-    _activityMapRepository =
-        widget.activityMapRepository ??
-        (ApiConfig.isConfigured
-            ? HttpActivityMapRepository(
-                baseUrl: Uri.parse(ApiConfig.baseUrl),
-                idToken: widget.authRepository.currentIdToken,
-              )
-            : null);
+    _activityMapRepository = widget.activityMapRepository;
 
     final catalogue = widget.activityRepository ?? DemoActivityRepository();
     // Amb backend, les activitats obertes des del mapa també s'han de trobar

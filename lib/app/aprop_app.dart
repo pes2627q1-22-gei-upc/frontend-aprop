@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 
-import '../features/auth/repositories/auth_repository.dart';
+import '../features/activities/repositories/activity_map_repository.dart';
 import '../features/activities/repositories/activity_repository.dart';
 import '../features/activities/repositories/discovery_repository.dart';
 import '../features/activities/repositories/enrollment_repository.dart';
 import '../features/assistant/repositories/assistant_repository.dart';
+import '../features/auth/repositories/auth_repository.dart';
 import '../features/notifications/repositories/notification_repository.dart';
 import '../features/profile/repositories/profile_repository.dart';
 import '../features/profile/repositories/profile_settings_repository.dart';
@@ -16,6 +17,7 @@ class APropApp extends StatelessWidget {
     super.key,
     required this.authRepository,
     this.activityRepository,
+    this.activityMapRepository,
     this.enrollmentRepository,
     this.assistantRepository,
     this.notificationRepository,
@@ -26,6 +28,7 @@ class APropApp extends StatelessWidget {
 
   final AuthRepository authRepository;
   final ActivityRepository? activityRepository;
+  final ActivityMapRepository? activityMapRepository;
   final EnrollmentRepository? enrollmentRepository;
   final AssistantRepository? assistantRepository;
   final NotificationRepository? notificationRepository;
@@ -43,6 +46,7 @@ class APropApp extends StatelessWidget {
         key: ValueKey((
           authRepository,
           activityRepository,
+          activityMapRepository,
           enrollmentRepository,
           assistantRepository,
           notificationRepository,
@@ -52,6 +56,7 @@ class APropApp extends StatelessWidget {
         )),
         authRepository: authRepository,
         activityRepository: activityRepository,
+        activityMapRepository: activityMapRepository,
         enrollmentRepository: enrollmentRepository,
         assistantRepository: assistantRepository,
         notificationRepository: notificationRepository,

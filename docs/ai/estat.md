@@ -12,6 +12,7 @@
 
 | Taiga | Història / tasca | Repo | Branca | Responsable | Estat |
 |---|---|---|---|---|---|
+| #231 | Client HTTP i integració de la API de Render | frontend-aprop | `feature/api-client` | Wenqiang | Implementat (`ApiConfig`, `ApiClient`, repositoris HTTP i injecció a `main.dart`) i verificat amb tests; PR oberta; conflictes amb `develop` (`f6c07d9`, PR #22 i #24) resolts; pendent de revisió |
 | #87 | Frontend filtrar esdeveniments | frontend-aprop | `feature/activity-filters` | Adam | 366 proves; conflicte amb PR #22 resolt; commit de merge/push i revisió humana pendents |
 | — | Configuració d'IA per a l'equip | frontend-aprop | `feature/ai-setup` | Wenqiang | sense scripts/hooks; pendent PR |
 | — | Configuració d'IA per a l'equip | api-aprop | `feature/ai-setup` | Wenqiang | pendent de revisió humana |

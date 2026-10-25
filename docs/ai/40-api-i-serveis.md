@@ -50,12 +50,19 @@ documentació del contracte (OpenAPI a `api-aprop/api/`?).
 
 ## Frontend
 
-Client HTTP: paquet `http`. L'adreça del backend es passa en executar o compilar:
-`flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8080` (des de l'emulador, `10.0.2.2` és el `localhost` de
-l'ordinador). Sense `API_BASE_URL`, l'app fa servir els repositoris `Demo*`. No inventis endpoints ni DTO (regla de
-`AGENTS.md`).
+Client HTTP centralitzat: [`ApiClient`](../../lib/core/network/api_client.dart) sobre `package:http` i configurat a [`ApiConfig`](../../lib/core/config/api_config.dart).
+- **URL Base per defecte (Render):** `https://api-aprop.onrender.com` (es pot sobreescriure amb `--dart-define=API_BASE_URL=http://10.0.2.2:8080`).
+- **Cold Start (Render Free):** `connectTimeout = Duration(seconds: 60)`.
+- **Capçaleres comunes:** `Accept: application/json`, `Content-Type: application/json`, `Authorization: Bearer <firebase_id_token>` i `X-User-ID: <firebase_uid>`.
+- **Format JSON i d'errors:** Claus en `kebab-case` traduïdes a `camelCase` als repositoris HTTP; errors `{"error": "..."}` descodificats en `ApiException`.
 
 | Endpoint | Ús al frontend | Estat |
 |---|---|---|
-| `POST /auth/sync` | `HttpUserSyncRepository`: token de Firebase a `Authorization: Bearer`; cos `{"username"}` només el primer cop. 200/201 → `{"user": {...}, "created"}`; 409 nom repetit; 422 sense nom → cal triar-ne un | branca `feature/auth` del backend, sense fusionar (DP-028) |
-| `PATCH /users/me` | `HttpUserSyncRepository.updateName`: token de Firebase; cos `{"name"}` (nom i cognoms, màx. 100). 200 → perfil (`id`, `username`, `name`, `email`…) | `develop` del backend (DP-026) |
+| `POST /auth/sync` | `HttpUserSyncRepository`: token de Firebase + `X-User-ID`; cos `{"username"}` opcional | Connectat a Render (`develop`) |
+| `GET /users/me`, `PATCH /users/me`, `GET /users/me/created-events` | `HttpProfileRepository`, `HttpProfileSettingsRepository`, `HttpUserSyncRepository` | Connectat a Render (`develop`) |
+| `GET /events`, `GET /events/{id}`, `POST /events`, `GET /categories` | `HttpActivityRepository` | Connectat a Render (`develop`) |
+| `GET /events/map` | `HttpActivityMapRepository` | Connectat a Render (`develop`) |
+| `GET /events/search` | `HttpDiscoveryRepository` | Connectat a Render (`develop`) |
+| `POST /events/{id}/signup`, `DELETE /events/{id}/signup`, `GET /users/{userId}/events` | `HttpEnrollmentRepository` | Connectat a Render (`develop`) |
+| `POST /assistant/messages`, `GET /assistant/conversation` | `HttpAssistantRepository` | Connectat a Render (`develop`) |
+| `GET /notifications/user/{id}`, `POST /notifications/{id}/read` | `HttpNotificationRepository` | Connectat a Render (`develop`) |

@@ -1,0 +1,343 @@
+import 'dart:convert';
+
+import 'package:aprop/core/network/api_client.dart';
+import 'package:aprop/features/activities/data/http_activity_repository.dart';
+import 'package:aprop/features/activities/data/http_discovery_repository.dart';
+import 'package:aprop/features/activities/data/http_enrollment_repository.dart';
+import 'package:aprop/features/activities/models/activity.dart';
+import 'package:aprop/features/activities/models/geo_point.dart';
+import 'package:aprop/features/activities/models/new_activity.dart';
+import 'package:aprop/features/assistant/data/http_assistant_repository.dart';
+import 'package:aprop/features/assistant/models/assistant_message.dart';
+import 'package:aprop/features/auth/models/app_user.dart';
+import 'package:aprop/features/notifications/data/http_notification_repository.dart';
+import 'package:aprop/features/profile/data/http_profile_repository.dart';
+import 'package:aprop/features/profile/data/http_profile_settings_repository.dart';
+import 'package:aprop/features/profile/models/profile_settings.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
+
+void main() {
+  http.Response jsonResponse(Object? body, [int status = 200]) =>
+      http.Response.bytes(
+        utf8.encode(jsonEncode(body)),
+        status,
+        headers: {'content-type': 'application/json'},
+      );
+
+  Map<String, Object?> sampleEventJson({
+    int id = 101,
+    String title = 'Concert de Jazz a Girona',
+    bool isOfficial = true,
+  }) => {
+    'id': id,
+    'code': isOfficial ? 2026101 : 0,
+    'is-official': isOfficial,
+    'title': title,
+    'description': 'Concert en directe a l’Auditori.',
+    'free': true,
+    'place': 'Auditori de Girona',
+    'address': 'Pg. de la Devesa, 35',
+    'latitude': 41.9831,
+    'longitude': 2.8169,
+    'municipality': 'agenda:ubicacions/girona/girones/girona',
+    'start-date': '2026-11-14T19:30:00Z',
+    'categories': ['agenda:categories/musica'],
+  };
+
+  group('HttpActivityRepository', () {
+    test('Llista, consulta detall i crea esdeveniments no oficials', () async {
+      final requests = <http.Request>[];
+      final apiClient = ApiClient(
+        idToken: () async => 'token-1',
+        userId: () => 'uid-1',
+        client: MockClient((request) async {
+          requests.add(request);
+          if (request.method == 'GET' && request.url.path == '/events') {
+            return jsonResponse([sampleEventJson()]);
+          }
+          if (request.method == 'GET' && request.url.path == '/events/101') {
+            return jsonResponse(sampleEventJson());
+          }
+          if (request.method == 'POST' && request.url.path == '/events') {
+            final payload = jsonDecode(request.body) as Map<String, Object?>;
+            return jsonResponse({
+              ...sampleEventJson(
+                id: 505,
+                title: payload['title'] as String,
+                isOfficial: false,
+              ),
+            }, 201);
+          }
+          return jsonResponse({'error': 'not found'}, 404);
+        }),
+      );
+
+      final repo = HttpActivityRepository(apiClient: apiClient);
+
+      final list = await repo.getActivities();
+      expect(list, hasLength(1));
+      expect(list.single.id, '101');
+      expect(list.single.title, 'Concert de Jazz a Girona');
+      expect(list.single.category, 'Musica');
+      expect(list.single.municipality, 'Girona');
+
+      final detail = await repo.getActivityById('101');
+      expect(detail?.id, '101');
+      expect(await repo.getActivityById('999'), isNull);
+
+      final created = await repo.createActivity(
+        NewActivity(
+          title: 'Trobada acústica',
+          description: 'Jam session oberta.',
+          category: 'Música',
+          startsAt: DateTime(2026, 11, 20, 18),
+          municipality: 'Barcelona',
+          imageAsset: 'assets/images/jazz_al_parc.jpg',
+          creator: const ActivityCreator(
+            name: 'Laia Soler',
+            userId: 'uid-1',
+            isFriend: false,
+          ),
+          location: const GeoPoint(latitude: 41.38, longitude: 2.17),
+          price: 0,
+        ),
+      );
+
+      expect(created.id, '505');
+      expect(created.title, 'Trobada acústica');
+      expect(created.source, ActivitySource.community);
+      expect(created.creator?.userId, 'uid-1');
+    });
+  });
+
+  group('HttpEnrollmentRepository', () {
+    test('Sincronitza inscripcions, inscriu i cancel·la inscripció', () async {
+      final apiClient = ApiClient(
+        userId: () => 'uid-1',
+        client: MockClient((request) async {
+          if (request.method == 'GET' &&
+              request.url.path == '/users/uid-1/events') {
+            return jsonResponse([sampleEventJson(id: 101)]);
+          }
+          if (request.method == 'POST' &&
+              request.url.path == '/events/202/signup') {
+            return jsonResponse({
+              'user-id': 'uid-1',
+              'event-id': 202,
+              'created': true,
+            }, 201);
+          }
+          if (request.method == 'DELETE' &&
+              request.url.path == '/events/101/signup') {
+            return jsonResponse({
+              'user-id': 'uid-1',
+              'event-id': 101,
+              'enrolled': false,
+              'deleted': true,
+            }, 200);
+          }
+          if (request.method == 'GET' &&
+              request.url.path == '/events/202/signup') {
+            return jsonResponse({
+              'event-id': 202,
+              'is-enrolled': true,
+              'enrolled-count': 15,
+            }, 200);
+          }
+          return jsonResponse({'error': 'unexpected'}, 400);
+        }),
+      );
+
+      final repo = HttpEnrollmentRepository(apiClient: apiClient);
+      addTearDown(repo.dispose);
+
+      final emitted = <Set<String>>[];
+      final sub = repo.watchEnrolledActivityIds('uid-1').listen(emitted.add);
+      addTearDown(sub.cancel);
+
+      await Future<void>.delayed(Duration.zero);
+      expect(emitted.last, {'101'});
+
+      await repo.enroll(userId: 'uid-1', activityId: '202');
+      await Future<void>.delayed(Duration.zero);
+      expect(emitted.last, {'101', '202'});
+
+      await repo.unenroll(userId: 'uid-1', activityId: '101');
+      await Future<void>.delayed(Duration.zero);
+      expect(emitted.last, {'202'});
+
+      final status = await repo.getEnrollmentStatus('202');
+      expect(status.isEnrolled, isTrue);
+      expect(status.enrolledCount, 15);
+    });
+  });
+
+  group('HttpDiscoveryRepository & HttpAssistantRepository', () {
+    test('Cerca esdeveniments i envia consultes al xatbot', () async {
+      final apiClient = ApiClient(
+        userId: () => 'uid-1',
+        client: MockClient((request) async {
+          if (request.url.path == '/events/search') {
+            return jsonResponse({
+              'query': request.url.queryParameters['q'],
+              'total': 1,
+              'page-num': 1,
+              'page-size': 20,
+              'events': [sampleEventJson(id: 101)],
+            });
+          }
+          if (request.url.path == '/assistant/messages') {
+            return jsonResponse({
+              'conversation-started-at': '2026-10-25T18:00:00Z',
+              'user-message': {
+                'sent-at': '2026-10-25T18:00:00Z',
+                'sender': 'user',
+                'text': 'Concerts a Girona',
+                'by-voice': false,
+              },
+              'assistant-message': {
+                'sent-at': '2026-10-25T18:00:02Z',
+                'sender': 'assistant',
+                'text': 'Et recomano aquest concert a Girona:',
+                'by-voice': false,
+                'interpretation': {
+                  'category': 'Música',
+                  'municipality': 'Girona',
+                  'date-range': 'del 14/11/2026 al 15/11/2026',
+                },
+                'recommended-events': [sampleEventJson(id: 101)],
+              },
+            }, 201);
+          }
+          return jsonResponse([]);
+        }),
+      );
+
+      final discovery = HttpDiscoveryRepository(apiClient: apiClient);
+      final searchResults = await discovery.searchActivities('Girona');
+      expect(searchResults, hasLength(1));
+      expect(searchResults.single.id, '101');
+
+      final assistant = HttpAssistantRepository(apiClient: apiClient);
+      final reply = await assistant.sendMessage('Concerts a Girona');
+      expect(reply.sender, AssistantMessageSender.assistant);
+      expect(reply.text, 'Et recomano aquest concert a Girona:');
+      expect(reply.interpretation?.municipality, 'Girona');
+      expect(reply.recommendedActivities, hasLength(1));
+      expect(reply.recommendedActivities.single.id, '101');
+    });
+  });
+
+  group('HttpProfileRepository, Settings & Notifications', () {
+    test('Consulta i edita el perfil, preferències i avisos', () async {
+      final apiClient = ApiClient(
+        userId: () => 'uid-1',
+        client: MockClient((request) async {
+          if (request.method == 'GET' && request.url.path == '/users/me') {
+            return jsonResponse({
+              'id': 7,
+              'username': 'laiasoler',
+              'name': 'Laia Soler',
+              'biography': 'Amant del teatre.',
+              'experience': 340,
+              'level': 2,
+              'rating': 4.8,
+              'friends-count': 12,
+              'show-plans': true,
+            });
+          }
+          if (request.method == 'PATCH' && request.url.path == '/users/me') {
+            final body = jsonDecode(request.body) as Map<String, Object?>;
+            return jsonResponse({
+              'id': 7,
+              'username': 'laiasoler',
+              'name': 'Laia Soler',
+              'biography': body['biography'] ?? 'Amant del teatre.',
+              'experience': 340,
+              'level': 2,
+              'rating': 4.8,
+              'friends-count': 12,
+              'show-plans': body['show-plans'] ?? true,
+            });
+          }
+          if (request.url.path == '/users/me/created-events') {
+            return jsonResponse([
+              sampleEventJson(
+                id: 303,
+                title: 'Ruta literària',
+                isOfficial: false,
+              ),
+            ]);
+          }
+          if (request.url.path == '/notifications/user/7') {
+            return jsonResponse([
+              {
+                'id': 9,
+                'user-id': 7,
+                'notification-date': '2026-10-25T10:00:00Z',
+                'event': 101,
+                'type': 1,
+                'read': false,
+              },
+            ]);
+          }
+          if (request.url.path == '/events/101') {
+            return jsonResponse(sampleEventJson(id: 101));
+          }
+          if (request.url.path == '/notifications/9/read') {
+            return jsonResponse({'message': 'notification 9 read'});
+          }
+          return jsonResponse({'error': 'not found'}, 404);
+        }),
+      );
+
+      const user = AppUser(
+        id: 'uid-1',
+        email: 'laia@aprop.cat',
+        firstName: 'Laia',
+        lastName: 'Soler',
+        emailVerified: true,
+        username: 'laiasoler',
+      );
+
+      final profileRepo = HttpProfileRepository(apiClient: apiClient);
+      final profile = await profileRepo.getProfile(user);
+      expect(profile.displayName, 'Laia Soler');
+      expect(profile.biography, 'Amant del teatre.');
+      expect(profile.friendCount, 12);
+      expect(profile.createdActivities, hasLength(1));
+      expect(profile.createdActivities.single.title, 'Ruta literària');
+
+      final updated = await profileRepo.updateDetails(
+        user: user,
+        biography: 'Teatre i música.',
+        municipality: 'Girona',
+      );
+      expect(updated.biography, 'Teatre i música.');
+      expect(updated.municipality, 'Girona');
+
+      final settingsRepo = HttpProfileSettingsRepository(apiClient: apiClient);
+      final settings = await settingsRepo.getSettings('uid-1');
+      expect(settings.showMyPlans, isTrue);
+      final updatedSettings = await settingsRepo.updatePreference(
+        userId: 'uid-1',
+        preference: ProfilePreference.showMyPlans,
+        enabled: false,
+      );
+      expect(updatedSettings.showMyPlans, isFalse);
+
+      final activityRepo = HttpActivityRepository(apiClient: apiClient);
+      final notifRepo = HttpNotificationRepository(
+        apiClient: apiClient,
+        activityRepository: activityRepo,
+      );
+      final notifs = await notifRepo.getNotifications('uid-1');
+      expect(notifs, hasLength(1));
+      expect(notifs.single.id, '9');
+      expect(notifs.single.activity?.id, '101');
+      await notifRepo.markAsRead(userId: 'uid-1', notificationId: '9');
+    });
+  });
+}
