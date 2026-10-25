@@ -12,7 +12,7 @@
 
 | Taiga | Història / tasca | Repo | Branca | Responsable | Estat |
 |---|---|---|---|---|---|
-| pendent | Frontend Perfil propi i Configuració | frontend-aprop | `feature/profile` | Adam | implementat; analyze i 258 proves correctes; APK debug compilat; revisió humana/ID pendents; sense commit ni push |
+| #230 | Frontend perfil i Configuració | frontend-aprop | `feature/profile` | Adam | commit `aff43e6` pujat; conflictes amb `develop` (`f1d1066`) resolts; 318 proves i anàlisi de capes correctes; configuració Firebase absent; resolució sense commit/push |
 | — | Configuració d'IA per a l'equip | frontend-aprop | `feature/ai-setup` | Wenqiang | sense scripts/hooks; pendent PR |
 | — | Configuració d'IA per a l'equip | api-aprop | `feature/ai-setup` | Wenqiang | pendent de revisió humana |
 
@@ -35,13 +35,13 @@
 - Creació i mapa: contracte backend i decisions provisionals pendents (DP-017 a DP-022).
 - Avisos: API, amistats reals, perfils i enviament pendents (DP-023; abans DP-017 a la branca).
 - Descobreix/cerca: API, interessos i cerca de persones/perfils pendents (DP-024).
-- Perfil/Configuració: contractes i integracions pendents (DP-025/DP-026); només perfil propi demo.
+- Perfil/Configuració: contractes i integracions pendents (DP-032/DP-033); només perfil propi demo.
 
 ## Propers passos
 
-1. Revisar Perfil/Configuració amb Adam en Android i incorporar l'ID/criteris de Taiga quan es creï la tasca.
+1. Generar la configuració local de Firebase segons `docs/firebase-auth.md`, contrastar els criteris de #230 i revisar Perfil en Android.
 2. Revisió humana abans de commit/PR i acord dels contractes d'API pendents.
 
 ## Traspàs entre eines
 
-Última eina: Codex (2026-10-22) · Context mínim: aquest fitxer + `docs/profile.md` + DP-025/DP-026. Branca creada des de `origin/develop` (`3808c1d`); Perfil sense commit ni push.
+Última eina: Codex (2026-10-25) · Context mínim: aquest fitxer + `docs/profile.md` + DP-032/DP-033. Branca creada des de `origin/develop` (`3808c1d`); integració de `f1d1066` en curs, sense commit ni push de la resolució.

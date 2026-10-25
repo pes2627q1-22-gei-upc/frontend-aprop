@@ -2,9 +2,9 @@
 
 ## Abast i referències
 
-L'usuari aporta `perfil_1_principal.png` i `perfil_2_configuracio.png` i autoritza implementar-ne el frontend. Les còpies originals de referència són a `PES/output/mockup/aprop-perfil-principal-v2.png` i `aprop-perfil-configuracio-v2.png`. El contingut coincideix amb les figures 18–19 de la Incepció 2. L'ID i els criteris detallats de Taiga estan pendents: no s'inventa cap tasca.
+L'usuari aporta `perfil_1_principal.png` i `perfil_2_configuracio.png` i autoritza implementar-ne el frontend. Les còpies originals de referència són a `PES/output/mockup/aprop-perfil-principal-v2.png` i `aprop-perfil-configuracio-v2.png`. El contingut coincideix amb les figures 18–19 de la Incepció 2. L'usuari confirma la tasca **#230 Frontend perfil**; els criteris detallats de Taiga continuen pendents de contrastar.
 
-S'implementen el perfil propi, les dues pestanyes, l'accés a fitxes, el panell d'edició de biografia/municipi, copiar el nom d'usuari, Configuració, preferències en memòria i tancament de sessió. DP-025 i DP-026 registren els contractes i les adaptacions provisionals. Els perfils públics d'altres persones i el sistema social complet continuen pendents.
+S'implementen el perfil propi, les dues pestanyes, l'accés a fitxes, el panell d'edició de biografia/municipi, copiar el nom d'usuari, Configuració, preferències en memòria i tancament de sessió. DP-032 i DP-033 registren els contractes i les adaptacions provisionals. Els perfils públics d'altres persones i el sistema social complet continuen pendents.
 
 ## Identitat, dades demo i fidelitat
 
@@ -35,7 +35,7 @@ Les cinc insígnies diferencien assolit, actual i pendent amb icones, contorn i 
 ## Flux principal, en ordre
 
 1. `APropApp` pot rebre els dos contractes. `AuthGate` fa servir els rebuts o crea els adaptadors demo amb el catàleg compartit. Aquestes instàncies duren la mateixa execució i conserven les preferències quan l'usuari tanca i torna a iniciar sessió.
-2. Quan la sessió està verificada, `MainShell` crea `ProfileViewModel(user: ..., repository: ...)`, crida `load()` i n'és el propietari. En canviar de compte es destrueix aquell `MainShell` i s'allibera el ViewModel. L'`IndexedStack` construeix totes les arrels: el perfil pot carregar-se abans de tocar Perfil.
+2. Quan la sessió està verificada i ja té nom d'usuari, `MainShell` crea `ProfileViewModel(user: ..., repository: ...)`, crida `load()` i n'és el propietari. En canviar de compte es destrueix aquell `MainShell` i s'allibera el ViewModel. L'`IndexedStack` construeix totes les arrels: el perfil pot carregar-se abans de tocar Perfil.
 3. El ViewModel consulta `getProfile(user)`. `DemoProfileRepository` llegeix el catàleg i selecciona les activitats amb `activity.creator.userId == user.id`. Dues persones amb el mateix nom no comparteixen autoria. Les noves activitats reben l'ID de la sessió a `MainShell` en obrir el formulari de creació.
 4. `notifyListeners()` fa que Flutter executi de nou el `builder` de `ProfileScreen`. La pantalla no consulta l'API. Canviar de pestanya només modifica l'estat visual local; no crea ni duplica activitats.
 5. Prémer una miniatura emet l'ID a `MainShell`, que obre `activityDetailsRoute` dins del navegador de Perfil amb les inscripcions compartides. Tornar recupera la pestanya i el desplaçament. Entrar de nou a Perfil refresca les dades per recollir activitats creades des d'Inici.
@@ -71,4 +71,12 @@ flutter build apk --debug
 
 Prova manual: entrar amb Laia, obrir Perfil, consultar una activitat i tornar; canviar a «Creats per mi», editar biografia i municipi, copiar el nom d'usuari, obrir Configuració i canviar una preferència. Tancar i tornar a iniciar sessió conserva aquella preferència durant la mateixa execució. Un altre compte ha de mostrar dades i preferències pròpies. Crear una activitat a Inici i comprovar-la a «Creats per mi».
 
-Branca `feature/profile`, creada des de `origin/develop` (`3808c1d`, amb #96 integrada per PR #16). Sense commit ni push; tasca de Taiga pendent de crear segons l'usuari. Revisió humana i prova en Android físic pendents.
+Branca `feature/profile`, creada des de `origin/develop` (`3808c1d`, amb #96 integrada per PR #16). La tasca #230 està publicada al commit `aff43e6`. El 2026-10-25 s'integra `origin/develop` (`f1d1066`) per resoldre els conflictes; el commit de la resolució i el seu push queden per a l'usuari. Revisió humana i prova en Android físic pendents.
+
+## Integració de `develop` (2026-10-25)
+
+Es conserven Firebase, la tria del nom d'usuari, la verificació enganxant l'enllaç i l'opció de desapuntar-se. El perfil nou substitueix el placeholder anterior i el tancament passa per Configuració. `ActivityCreator` combina `AppUser.fullName` amb l'ID estable del compte. Les proves d'Auth de les dues branques es conserven i els noms d'usuari s'ajusten a la capçalera nova. Les decisions de Perfil es renumeren a DP-032/DP-033 perquè DP-025/DP-026 ja corresponen a Auth; no es canvia l'abast de cap decisió.
+
+Aquesta còpia no té `lib/firebase_options.dart` ni `android/app/google-services.json`. Són configuracions locals ignorades que necessita la nova entrada de Firebase; no s'inventen ni es versionen. La generació i l'accés al projecte s'expliquen a `docs/firebase-auth.md`. Per això l'anàlisi completa i l'APK anteriors (2026-10-22) no es poden atribuir a aquesta integració fins que es generi aquella configuració.
+
+Verificació després de la integració: `flutter pub get --enforce-lockfile` correcte sense canviar el lockfile de `develop`; format de 162 fitxers sense canvis; **318 proves superades** amb `flutter test --no-pub`; `dart analyze lib/app lib/core lib/features test` sense incidències. `flutter analyze --no-pub` només informa dels dos errors de `main.dart` causats per la configuració local de Firebase absent. No es reintenta l'APK mentre faltin els dos fitxers de configuració. La revisió de la resolució no detecta bloquejos; sense marcadors de conflicte ni entrades sense fusionar. No s'ha creat cap commit ni s'ha pujat aquesta resolució.

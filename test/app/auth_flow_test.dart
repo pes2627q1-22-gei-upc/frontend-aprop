@@ -130,6 +130,25 @@ void main() {
     expect(find.text('polvidal'), findsOneWidget);
   });
 
+  testWidgets("Es pot verificar enganxant l'enllaç del correu", (tester) async {
+    await pumpApp(tester);
+    await registerPol(tester);
+
+    await fill(tester, 'Enllaç del correu', 'no és cap enllaç');
+    await tapButton(tester, "Verifica amb l'enllaç");
+    expect(find.textContaining("Aquest enllaç no és vàlid"), findsOneWidget);
+
+    await fill(
+      tester,
+      'Enllaç del correu',
+      'https://aprop-919ec.firebaseapp.com/__/auth/action?mode=verifyEmail'
+          '&oobCode=codi-de-prova',
+    );
+    await tapButton(tester, "Verifica amb l'enllaç");
+
+    expect(find.text('Jazz al parc').hitTestable(), findsOneWidget);
+  });
+
   testWidgets("Un compte sense verificar no pot entrar a l'app", (
     tester,
   ) async {
@@ -145,6 +164,53 @@ void main() {
 
     expect(find.text('Verifica el teu correu'), findsOneWidget);
     expect(find.byType(NavigationBar), findsNothing);
+  });
+
+  testWidgets("El primer accés amb Google demana el nom d'usuari", (
+    tester,
+  ) async {
+    await pumpApp(tester);
+    await tapButton(tester, 'Continua amb Google');
+
+    expect(find.text("Tria el teu nom d'usuari"), findsOneWidget);
+    expect(find.textContaining('Hola, Jordi!'), findsOneWidget);
+    expect(find.byType(NavigationBar), findsNothing);
+
+    await fill(tester, "Nom d'usuari", 'laiasoler');
+    await tapButton(tester, 'Continua');
+
+    expect(
+      find.text("Aquest nom d'usuari ja està agafat. Prova'n un altre."),
+      findsOneWidget,
+    );
+
+    await fill(tester, "Nom d'usuari", 'jordipuig');
+    await tapButton(tester, 'Continua');
+
+    expect(find.text('Jazz al parc').hitTestable(), findsOneWidget);
+
+    await tester.tap(find.widgetWithText(NavigationDestination, 'Perfil'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Jordi Puig'), findsOneWidget);
+    expect(find.text('jordipuig'), findsOneWidget);
+  });
+
+  testWidgets('Google des del registre tanca el formulari', (tester) async {
+    await pumpApp(tester);
+    await tapButton(tester, 'Crea un compte');
+    await tapButton(tester, 'Continua amb Google');
+
+    expect(find.widgetWithText(AppBar, 'Crea un compte'), findsNothing);
+    expect(find.text("Tria el teu nom d'usuari"), findsOneWidget);
+  });
+
+  testWidgets("Es pot sortir sense triar el nom d'usuari", (tester) async {
+    await pumpApp(tester);
+    await tapButton(tester, 'Continua amb Google');
+    await tapButton(tester, 'Tanca la sessió');
+
+    expect(find.text('Inicia sessió'), findsOneWidget);
   });
 
   testWidgets('Tanca la sessió des de la configuració de Perfil', (

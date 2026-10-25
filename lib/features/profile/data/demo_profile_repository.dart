@@ -3,7 +3,7 @@ import '../../auth/models/app_user.dart';
 import '../models/user_profile.dart';
 import '../repositories/profile_repository.dart';
 
-// TODO(DP-025): Replace mockup statistics/attendance with the authenticated API.
+// TODO(DP-032): Replace mockup statistics/attendance with the authenticated API.
 class DemoProfileRepository implements ProfileRepository {
   DemoProfileRepository({required this.activityRepository});
 
@@ -23,7 +23,7 @@ class DemoProfileRepository implements ProfileRepository {
         : const <CompletedPlan>[];
     return UserProfile(
       userId: user.id,
-      displayName: '${user.firstName} ${user.lastName}'.trim(),
+      displayName: user.fullName,
       username: user.username,
       biography:
           details?.biography ??

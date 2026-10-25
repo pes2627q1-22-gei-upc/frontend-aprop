@@ -2,7 +2,7 @@ import '../models/profile_settings.dart';
 import '../repositories/profile_settings_repository.dart';
 
 /// Per-account preferences, retained through sign-out during this app run only.
-// TODO(DP-026): Integrate privacy enforcement and notification delivery settings.
+// TODO(DP-033): Integrate privacy enforcement and notification delivery settings.
 class DemoProfileSettingsRepository implements ProfileSettingsRepository {
   final _settings = <String, ProfileSettings>{};
 

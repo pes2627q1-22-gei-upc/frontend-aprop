@@ -195,7 +195,7 @@ class _MainShellState extends State<MainShell> {
           repository: _activityRepository,
           locationRepository: const DemoLocationRepository(),
           creator: ActivityCreator(
-            name: '${widget.user.firstName} ${widget.user.lastName}',
+            name: widget.user.fullName,
             userId: widget.user.id,
             isFriend: false,
           ),
@@ -221,7 +221,7 @@ class _MainShellState extends State<MainShell> {
     );
   }
 
-  // TODO(DP-025): Share a real public link when a profile route is agreed.
+  // TODO(DP-032): Share a real public link when a profile route is agreed.
   void _shareOwnProfile() {
     final username = widget.user.username;
     if (username == null || username.isEmpty) return;

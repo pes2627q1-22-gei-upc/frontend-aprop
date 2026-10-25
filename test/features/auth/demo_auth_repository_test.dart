@@ -102,4 +102,36 @@ void main() {
       throwsA(AuthFailure.usernameAlreadyInUse),
     );
   });
+
+  test("El primer accés amb Google no té nom d'usuari", () async {
+    expect(await repository.signInWithGoogle(), isTrue);
+
+    final user = await repository.authStateChanges().first;
+    expect(user?.emailVerified, isTrue);
+    expect(user?.username, isNull);
+  });
+
+  test(
+    "Conserva el nom d'usuari triat en tornar a entrar amb Google",
+    () async {
+      await repository.signInWithGoogle();
+      await repository.chooseUsername('jordipuig');
+      await repository.signOut();
+      await repository.signInWithGoogle();
+
+      expect(
+        (await repository.authStateChanges().first)?.username,
+        'jordipuig',
+      );
+    },
+  );
+
+  test("No deixa triar un nom d'usuari agafat", () async {
+    await repository.signInWithGoogle();
+
+    expect(
+      repository.chooseUsername('laiasoler'),
+      throwsA(AuthFailure.usernameAlreadyInUse),
+    );
+  });
 }

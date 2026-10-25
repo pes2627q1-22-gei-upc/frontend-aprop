@@ -50,5 +50,12 @@ documentació del contracte (OpenAPI a `api-aprop/api/`?).
 
 ## Frontend
 
-Encara no hi ha client HTTP. Els repositoris `Demo*` se substituiran per implementacions a `data/` quan el
-contracte sigui real. No inventis endpoints ni DTO (regla de `AGENTS.md`).
+Client HTTP: paquet `http`. L'adreça del backend es passa en executar o compilar:
+`flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8080` (des de l'emulador, `10.0.2.2` és el `localhost` de
+l'ordinador). Sense `API_BASE_URL`, l'app fa servir els repositoris `Demo*`. No inventis endpoints ni DTO (regla de
+`AGENTS.md`).
+
+| Endpoint | Ús al frontend | Estat |
+|---|---|---|
+| `POST /auth/sync` | `HttpUserSyncRepository`: token de Firebase a `Authorization: Bearer`; cos `{"username"}` només el primer cop. 200/201 → `{"user": {...}, "created"}`; 409 nom repetit; 422 sense nom → cal triar-ne un | branca `feature/auth` del backend, sense fusionar (DP-028) |
+| `PATCH /users/me` | `HttpUserSyncRepository.updateName`: token de Firebase; cos `{"name"}` (nom i cognoms, màx. 100). 200 → perfil (`id`, `username`, `name`, `email`…) | `develop` del backend (DP-026) |

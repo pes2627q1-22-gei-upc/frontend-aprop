@@ -124,7 +124,7 @@ Les operacions del repositori llancen `AuthFailure` quan l'error es pot explicar
 
 Criteris de Taiga aplicats: confirmació de contrasenya en el registre; contrasenya de mínim 8 caràcters amb majúscula, minúscula, número i caràcter especial; nom d'usuari únic; inici de sessió amb nom d'usuari o correu; i rebuig de credencials incorrectes.
 
-L'aplicació queda bloquejada fins que l'usuari verifica el correu. El registre envia el correu de verificació i, mentre `AppUser.emailVerified` és fals, `AuthGate` mostra `VerifyEmailScreen` en lloc de l'app, també en tornar a iniciar la sessió o obrir l'aplicació. La pantalla permet comprovar de nou la verificació, tornar a enviar el correu i tancar la sessió, per si l'usuari s'ha equivocat de correu. Per no reenviar el correu sense parar, el botó d'enviar espera 30 segons en obrir la pantalla i després de cada enviament correcte. `DemoAuthRepository` no envia cap correu: la comprovació simula que l'usuari ha obert l'enllaç.
+L'aplicació queda bloquejada fins que l'usuari verifica el correu. El registre envia el correu de verificació i, mentre `AppUser.emailVerified` és fals, `AuthGate` mostra `VerifyEmailScreen` en lloc de l'app, també en tornar a iniciar la sessió o obrir l'aplicació. La pantalla permet comprovar de nou la verificació, tornar a enviar el correu i tancar la sessió, per si l'usuari s'ha equivocat de correu. Per no reenviar el correu sense parar, el botó d'enviar espera 60 segons en obrir la pantalla i després de cada enviament correcte (Firebase rebutja els reenviaments més seguits). `DemoAuthRepository` no envia cap correu: la comprovació simula que l'usuari ha obert l'enllaç.
 
 Cada pantalla crea el seu ViewModel amb el repositori que rep i l'allibera en tancar-se. `LoginScreen` obre `RegisterScreen` amb el mateix repositori. El tancament de sessió és a Perfil → Configuració; el ViewModel espera la confirmació d'Auth i presenta un error si falla.
 
@@ -176,7 +176,7 @@ La descoberta i la cerca viuen dins de `features/activities/`, perquè consulten
 
 `ProfileSettingsScreen` crea/allibera el seu `ProfileSettingsViewModel`; les escriptures se serialitzen per evitar sobreescriure snapshots concurrents. Idioma, tema i serveis no disponibles es mostren explícitament pendents. El callback de tancament de sessió ara retorna `Future<void>` i es confirma/gestiona sense navegar des del ViewModel. `MainShell` compon la ruta `/profile/settings`, les fitxes i el diàleg de copiar el nom d’usuari al navegador de Perfil.
 
-L’autoria usa `ActivityCreator.userId` opcional, completat en crear activitats. La funcionalitat no dedueix identitats per nom ni canvia contractes HTTP. Colors de nivell centralitzats a `AppTheme` mitjançant `ProfilePalette`. Decisions DP-025/DP-026 i explicació dels fitxers/flux a `docs/profile.md`.
+L’autoria usa `ActivityCreator.userId` opcional, completat en crear activitats. La funcionalitat no dedueix identitats per nom ni canvia contractes HTTP. Colors de nivell centralitzats a `AppTheme` mitjançant `ProfilePalette`. Decisions DP-032/DP-033 i explicació dels fitxers/flux a `docs/profile.md`.
 
 ## Recursos i dependències
 

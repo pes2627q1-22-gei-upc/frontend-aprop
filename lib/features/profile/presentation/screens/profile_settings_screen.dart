@@ -118,7 +118,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                 ],
               ),
               if (settings != null) ...[
-                // TODO(DP-026): Activate language/theme only when they apply to
+                // TODO(DP-033): Activate language/theme only when they apply to
                 // the whole app. These controls must not pretend to change them.
                 const SettingsGroup(
                   title: 'PREFERÈNCIES',

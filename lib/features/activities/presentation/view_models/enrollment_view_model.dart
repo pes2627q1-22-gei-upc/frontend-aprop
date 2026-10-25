@@ -13,7 +13,9 @@ class EnrollmentViewModel extends ChangeNotifier {
   StreamSubscription<Set<String>>? _subscription;
   Set<String> _enrolledActivityIds = const {};
   final Set<String> _pendingActivityIds = {};
+  final Set<String> _unenrollingActivityIds = {};
   final Map<String, String> _errors = {};
+  final Map<String, String> _unenrollErrors = {};
   bool _isLoading = false;
   bool _hasLoaded = false;
   bool _isDisposed = false;
@@ -26,7 +28,8 @@ class EnrollmentViewModel extends ChangeNotifier {
   String? get loadError => _loadError;
   bool isEnrolled(String id) => _enrolledActivityIds.contains(id);
   bool isEnrolling(String id) => _pendingActivityIds.contains(id);
-  String? errorFor(String id) => _errors[id];
+  bool isUnenrolling(String id) => _unenrollingActivityIds.contains(id);
+  String? errorFor(String id) => _errors[id] ?? _unenrollErrors[id];
 
   Future<void> load() async {
     if (_isDisposed || _isLoading) return;
@@ -47,7 +50,10 @@ class EnrollmentViewModel extends ChangeNotifier {
               _hasLoaded = true;
               _isLoading = false;
               _loadError = null;
+              // Each error stops applying once the plan reaches the state the
+              // failed action wanted.
               _errors.removeWhere((id, _) => ids.contains(id));
+              _unenrollErrors.removeWhere((id, _) => !ids.contains(id));
               notifyListeners();
             },
             onError: (Object error, StackTrace stackTrace) =>
@@ -72,7 +78,8 @@ class EnrollmentViewModel extends ChangeNotifier {
         _isLoading ||
         _loadError != null ||
         isEnrolled(activityId) ||
-        isEnrolling(activityId)) {
+        isEnrolling(activityId) ||
+        isUnenrolling(activityId)) {
       return;
     }
 
@@ -93,6 +100,40 @@ class EnrollmentViewModel extends ChangeNotifier {
     } finally {
       if (!_isDisposed) {
         _pendingActivityIds.remove(activityId);
+        notifyListeners();
+      }
+    }
+  }
+
+  /// Removes a confirmed plan. The screen asks the user first, so an
+  /// accidental tap does not remove it.
+  Future<void> unenroll(String activityId) async {
+    if (_isDisposed ||
+        !_hasLoaded ||
+        _isLoading ||
+        _loadError != null ||
+        !isEnrolled(activityId) ||
+        isEnrolling(activityId) ||
+        isUnenrolling(activityId)) {
+      return;
+    }
+
+    _unenrollingActivityIds.add(activityId);
+    _unenrollErrors.remove(activityId);
+    notifyListeners();
+    try {
+      await _repository.unenroll(userId: userId, activityId: activityId);
+      if (_isDisposed) return;
+      _enrolledActivityIds = Set.unmodifiable(
+        _enrolledActivityIds.where((id) => id != activityId),
+      );
+    } catch (_) {
+      if (_isDisposed) return;
+      _unenrollErrors[activityId] =
+          'No t’hem pogut desapuntar. Torna-ho a provar.';
+    } finally {
+      if (!_isDisposed) {
+        _unenrollingActivityIds.remove(activityId);
         notifyListeners();
       }
     }
