@@ -11,6 +11,7 @@ import '../../features/activities/repositories/enrollment_repository.dart';
 import '../../features/assistant/data/demo_assistant_repository.dart';
 import '../../features/assistant/repositories/assistant_repository.dart';
 import '../../features/auth/models/app_user.dart';
+import '../../features/auth/presentation/screens/choose_username_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/verify_email_screen.dart';
 import '../../features/auth/repositories/auth_repository.dart';
@@ -19,7 +20,8 @@ import '../../features/notifications/repositories/notification_repository.dart';
 import 'main_shell.dart';
 
 /// Mostra el login si no hi ha sessió, la verificació del correu si encara no
-/// està verificat i, si tot és correcte, l'aplicació.
+/// està verificat, la tria del nom d'usuari si encara no en té (primer accés
+/// amb Google) i, si tot és correcte, l'aplicació.
 class AuthGate extends StatefulWidget {
   const AuthGate({
     super.key,
@@ -105,6 +107,14 @@ class _AuthGateState extends State<AuthGate> {
           return VerifyEmailScreen(
             repository: widget.authRepository,
             email: user.email,
+          );
+        }
+
+        if (user.username == null) {
+          return ChooseUsernameScreen(
+            repository: widget.authRepository,
+            firstName: user.firstName,
+            rejectedUsername: user.rejectedUsername,
           );
         }
 
