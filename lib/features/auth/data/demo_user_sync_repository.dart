@@ -43,6 +43,21 @@ class DemoUserSyncRepository implements UserSyncRepository {
       id: uid,
       username: saved ?? username!,
       email: _currentEmail() ?? '',
+      name: await _preferences.getString('auth.name.$uid') ?? '',
+    );
+  }
+
+  @override
+  Future<UserProfile> updateName(String name) async {
+    final uid = _currentUid();
+    if (uid == null) throw StateError('No hi ha cap sessió iniciada.');
+
+    await _preferences.setString('auth.name.$uid', name);
+    return UserProfile(
+      id: uid,
+      username: await _preferences.getString('auth.username.$uid') ?? '',
+      email: _currentEmail() ?? '',
+      name: name,
     );
   }
 }

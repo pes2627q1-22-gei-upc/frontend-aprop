@@ -58,3 +58,4 @@ l'ordinador). Sense `API_BASE_URL`, l'app fa servir els repositoris `Demo*`. No 
 | Endpoint | Ús al frontend | Estat |
 |---|---|---|
 | `POST /auth/sync` | `HttpUserSyncRepository`: token de Firebase a `Authorization: Bearer`; cos `{"username"}` només el primer cop. 200/201 → `{"user": {...}, "created"}`; 409 nom repetit; 422 sense nom → cal triar-ne un | branca `feature/auth` del backend, sense fusionar (DP-028) |
+| `PATCH /users/me` | `HttpUserSyncRepository.updateName`: token de Firebase; cos `{"name"}` (nom i cognoms, màx. 100). 200 → perfil (`id`, `username`, `name`, `email`…) | `develop` del backend (DP-026) |

@@ -47,4 +47,13 @@ void main() {
       throwsA(AuthFailure.usernameAlreadyInUse),
     );
   });
+
+  test('Desa el nom i el retorna en sincronitzar', () async {
+    await repository().sync(username: 'polvidal');
+    final updated = await repository().updateName('Pol Vidal');
+
+    expect(updated.name, 'Pol Vidal');
+    expect(updated.username, 'polvidal');
+    expect((await repository().sync())?.name, 'Pol Vidal');
+  });
 }

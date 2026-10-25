@@ -71,6 +71,6 @@ flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8080
 
 ## Què és provisional (DP-026, DP-028)
 
-- El nom i els cognoms es desen al `displayName` de Firebase, fins que el backend els desi.
+- El nom i els cognoms es desen al backend (`PATCH /users/me`) en un sol camp; l'app els separa pel primer espai.
 - Només es pot entrar amb el correu: si s'escriu un nom d'usuari, l'app demana el correu.
 - El contracte de `POST /auth/sync` és d'una branca del backend encara no fusionada.

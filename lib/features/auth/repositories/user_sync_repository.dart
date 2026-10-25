@@ -13,4 +13,8 @@ abstract interface class UserSyncRepository {
   /// [username] (cal que en triï un). Llança `AuthFailure.usernameAlreadyInUse`
   /// si el nom ja és d'una altra persona.
   Future<UserProfile?> sync({String? username});
+
+  /// Desa el nom i cognoms de l'usuari de la sessió i retorna el perfil
+  /// actualitzat. L'usuari ja ha d'existir (després de [sync]).
+  Future<UserProfile> updateName(String name);
 }

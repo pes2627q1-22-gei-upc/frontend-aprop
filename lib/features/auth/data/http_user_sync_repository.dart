@@ -53,7 +53,7 @@ class HttpUserSyncRepository implements UserSyncRepository {
     }
 
     return switch (response.statusCode) {
-      200 || 201 => _profileFrom(response.body),
+      200 || 201 => _userFrom((_decode(response) as Map)['user'] as Map),
       409 => throw AuthFailure.usernameAlreadyInUse,
       // Sense nom d'usuari, el backend no pot crear l'usuari: encara no
       // existeix i cal que en triï un.
@@ -71,12 +71,49 @@ class HttpUserSyncRepository implements UserSyncRepository {
     return Uri.parse('$base/$path');
   }
 
-  UserProfile _profileFrom(String body) {
-    final user = (jsonDecode(body) as Map<String, dynamic>)['user'] as Map;
+  /// `PATCH /users/me` amb el nom. Retorna el perfil sencer.
+  @override
+  Future<UserProfile> updateName(String name) async {
+    final token = await _idToken();
+    if (token == null) throw StateError('No hi ha cap sessió iniciada.');
+
+    final http.Response response;
+    try {
+      response = await _client
+          .patch(
+            _endpoint('users/me'),
+            headers: {
+              'Authorization': 'Bearer $token',
+              'Content-Type': 'application/json',
+            },
+            body: jsonEncode({'name': name}),
+          )
+          .timeout(timeout);
+    } on http.ClientException {
+      throw AuthFailure.network;
+    } on TimeoutException {
+      throw AuthFailure.network;
+    }
+
+    if (response.statusCode != 200) {
+      throw StateError(
+        'PATCH /users/me ha respost ${response.statusCode}: ${response.body}',
+      );
+    }
+    return _userFrom(_decode(response) as Map);
+  }
+
+  UserProfile _userFrom(Map user) {
     return UserProfile(
       id: '${user['id']}',
       username: user['username'] as String,
       email: user['email'] as String? ?? '',
+      name: user['name'] as String? ?? '',
     );
   }
+
+  /// El backend no indica el joc de caràcters: es llegeix com a UTF-8 perquè
+  /// els accents del nom no es facin malbé.
+  Object? _decode(http.Response response) =>
+      jsonDecode(utf8.decode(response.bodyBytes));
 }
