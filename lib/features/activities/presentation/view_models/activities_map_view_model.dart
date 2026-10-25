@@ -31,6 +31,7 @@ class ActivitiesMapViewModel extends ChangeNotifier {
   List<Activity> get activities => _activities;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
+  bool get hasLoaded => _loadedArea != null;
 
   /// Carrega les activitats de [visibleArea] si encara no hi són. Mentre es
   /// carrega, es continuen mostrant les de la zona anterior.

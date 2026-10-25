@@ -13,7 +13,7 @@ void main() {
   late FakeActivityRepository repository;
   late List<Activity> published;
 
-  Future<void> pumpForm(WidgetTester tester) async {
+  Future<void> pumpForm(WidgetTester tester, {DateTime? now}) async {
     tester.view.physicalSize = const Size(390, 844);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
@@ -28,7 +28,7 @@ void main() {
           locationRepository: const DemoLocationRepository(),
           creator: const ActivityCreator(name: 'Laia Soler', isFriend: false),
           onCreated: published.add,
-          now: () => DateTime(2026, 10, 19, 12),
+          now: () => now ?? DateTime(2026, 10, 19, 12),
         ),
       ),
     );
@@ -90,6 +90,19 @@ void main() {
     // En escriure «Vic», el marcador s'ha posat al centre del municipi.
     expect(sent.location, const GeoPoint(latitude: 41.9301, longitude: 2.2549));
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('La data per defecte és demà també quan acaba l’horari d’estiu', (
+    tester,
+  ) async {
+    await pumpForm(tester, now: DateTime(2026, 10, 25, 23, 30));
+    await tapVisible(tester, find.text('Tria la data i l’hora'));
+    expect(find.text('Dilluns 26 d’octubre de 2026'), findsOneWidget);
+    final confirm = find.widgetWithText(FilledButton, 'Fet');
+    expect(tester.widget<FilledButton>(confirm).onPressed, isNotNull);
+    await tester.tap(confirm);
+    await tester.pumpAndSettle();
+    expect(find.text('Dilluns 26 d’octubre de 2026 · 19.00 h'), findsOneWidget);
   });
 
   testWidgets('El mapa mostra el marcador i tocar-lo l’ajusta', (tester) async {

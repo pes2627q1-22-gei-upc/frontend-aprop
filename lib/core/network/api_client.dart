@@ -298,7 +298,7 @@ class ApiClient {
   /// Converteix qualsevol identificador d'usuari (com un UID de Firebase) en un
   /// UUID canònic determinista (8-4-4-4-12) per als endpoints del backend que
   /// exigeixen el tipus UUID de PostgreSQL.
-  /// TODO(DP-034): Eliminar la normalització al client quan el backend resolgui
+  /// TODO(DP-036): Eliminar la normalització al client quan el backend resolgui
   /// `X-User-ID` / UID de Firebase cap a l'UUID intern a tots els serveis.
   static String toCanonicalUuid(String value) {
     final trimmed = value.trim();

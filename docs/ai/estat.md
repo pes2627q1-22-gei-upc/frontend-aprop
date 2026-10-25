@@ -12,8 +12,8 @@
 
 | Taiga | Història / tasca | Repo | Branca | Responsable | Estat |
 |---|---|---|---|---|---|
-| #231 | Client HTTP i integració de la API de Render | frontend-aprop | `feature/api-client` | Wenqiang | Implementat (`ApiConfig`, `ApiClient`, repositoris HTTP i injecció a `main.dart`) i verificat amb tests; pendent de commit i PR |
-| #230 | Frontend perfil i Configuració | frontend-aprop | `feature/profile` | Adam | commit `aff43e6` pujat; conflictes amb `develop` (`f1d1066`) resolts; 318 proves i anàlisi de capes correctes; configuració Firebase absent; resolució sense commit/push |
+| #231 | Client HTTP i integració de la API de Render | frontend-aprop | `feature/api-client` | Wenqiang | Implementat (`ApiConfig`, `ApiClient`, repositoris HTTP i injecció a `main.dart`) i verificat amb tests; PR oberta; conflictes amb `develop` (`f6c07d9`, PR #22 i #24) resolts; pendent de revisió |
+| #87 | Frontend filtrar esdeveniments | frontend-aprop | `feature/activity-filters` | Adam | 366 proves; conflicte amb PR #22 resolt; commit de merge/push i revisió humana pendents |
 | — | Configuració d'IA per a l'equip | frontend-aprop | `feature/ai-setup` | Wenqiang | sense scripts/hooks; pendent PR |
 | — | Configuració d'IA per a l'equip | api-aprop | `feature/ai-setup` | Wenqiang | pendent de revisió humana |
 
@@ -26,6 +26,8 @@
 - #93 / #31 Creació d'activitats (PR #9 i #10) i #79 / #21 Mapa d'Inici (PR #14), fusionades a `develop`.
 - #86 Avisos fusionats a `develop` (PR #15); conflictes resolts preservant les DP anteriors.
 - #96 Descobreix i cerca fusionades a `develop` (PR #16).
+- #230 Perfil (PR #20) i mapa connectat al backend (PR #21), fusionats a `develop`.
+- Grups del mapa: zoom i llista al mateix lloc, fusionats a `develop` (PR #22).
 
 ## Bloquejos
 
@@ -36,13 +38,17 @@
 - Creació i mapa: contracte backend i decisions provisionals pendents (DP-017 a DP-022).
 - Avisos: API, amistats reals, perfils i enviament pendents (DP-023; abans DP-017 a la branca).
 - Descobreix/cerca: API, interessos i cerca de persones/perfils pendents (DP-024).
+- Filtres: contracte, categories i catàleg compartit pendents (DP-035/DP-029).
+- Firebase local: sessió iniciada, però sense permisos del projecte; configuració absent.
 - Perfil/Configuració: contractes i integracions pendents (DP-032/DP-033); només perfil propi demo.
 
 ## Propers passos
 
-1. Generar la configuració local de Firebase segons `docs/firebase-auth.md`, contrastar els criteris de #230 i revisar Perfil en Android.
-2. Revisió humana abans de commit/PR i acord dels contractes d'API pendents.
+1. Revisar i publicar el merge de `develop` a #87 per actualitzar la PR; contrastar criteris de Taiga.
+2. Generar Firebase quan el compte tingui accés al projecte (`docs/firebase-auth.md`).
+3. Revisió humana abans de commit/PR i acord dels contractes d’API pendents.
 
 ## Traspàs entre eines
 
-Última eina: Codex (2026-10-25) · Context mínim: aquest fitxer + `docs/profile.md` + DP-032/DP-033. Branca creada des de `origin/develop` (`3808c1d`); integració de `f1d1066` en curs, sense commit ni push de la resolució.
+2026-10-25 · Context: aquest fitxer, `docs/activity-filters.md` i DP-035/DP-029.
+Branca `feature/activity-filters`: codi publicat a `e7d7343`; merge de `c0815d9` resolt, sense finalitzar.
