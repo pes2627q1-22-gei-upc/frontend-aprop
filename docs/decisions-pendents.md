@@ -388,6 +388,17 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Qui decideix:** equip
 - **Resolució:**
 
+### DP-035 · Filtres de dates i categories: dades disponibles i contracte pendent
+- **Estat:** oberta
+- **Obert per:** 2026-10-25 · frontend · Taiga #87 Frontend filtrar esdeveniments
+- **Identificador:** renumerat de DP-034 a DP-035 en integrar la PR #22 de `develop`, per conservar la decisió publicada del mapa amb DP-034.
+- **Context:** `ActivityFilters`, `ActivitiesViewModel`, panells Dates/Categories i mapa per zona. Mockups aprovats; ID i títol de Taiga confirmats, criteris detallats demanats a l'usuari.
+- **Dubte:** falta contracte de consulta amb filtres i IDs canònics de categories. El mapa pot no retornar categoria (DP-029), Mapa/Llista tenen fonts diferents i `Activity` només conté inici i una categoria. Zona/municipi no té abast ni disseny confirmats.
+- **Opcions:** A) backend amb filtres, metadades i catàleg compartit · B) filtratge local sobre dades disponibles, amb límits explícits.
+- **Provisionalment:** B per a Dates/Categories. Un únic valor immutable a `ActivitiesViewModel` s'aplica al catàleg i a la zona carregada; sense endpoints/paràmetres nous. Interval inclusiu de dies civils basat en l'inici; categories OR i dates AND; vuit etiquetes dels mockups, coincidència tolerant a accents i sense equivalències deduïdes. Cap categoria = sense restricció. Categories no informades excloses quan se'n tria una, amb recompte visible. Cap de setmana = dissabte/diumenge actual si ja és cap de setmana, o el següent en dies laborables. Esborrany local, Aplicar confirma, tancar descarta; filtres per sessió i només d'Inici. Zona/municipi pendent. `TODO(DP-035)` al model; detalls a `docs/activity-filters.md`.
+- **Qui decideix:** frontend + backend + equip (criteris i categories)
+- **Resolució:**
+
 ## Resoltes
 
 (cap)

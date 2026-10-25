@@ -62,7 +62,7 @@ Els marcadors són imatges generades amb els colors del tema (`forest`, `coral` 
   local). Falta que `feature/events-map` es fusioni i que la llista faci servir la mateixa font (DP-022, DP-029).
 - **Color dels grups**: el número dels grups el dibuixa Google amb el seu estil per defecte, no amb el verd del
   mockup (DP-022).
-- Filtres de zona, dates i categories: història #25, fora d'aquesta.
+- Dates i Categories: implementats amb filtratge local a la tasca #87; vegeu [la guia](activity-filters.md). Zona/municipi i filtratge global amb servidor continuen pendents (DP-035).
 - El botó de la meva ubicació del mockup no hi és: necessitaria permisos de localització.
 
 ## Proves

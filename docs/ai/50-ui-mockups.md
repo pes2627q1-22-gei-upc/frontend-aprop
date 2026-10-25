@@ -47,6 +47,8 @@ Accés amb Google; en el primer accés es completa el perfil i es fa el test d'i
 
 ## Estat actual vs mockups
 
+Taiga #87 implementa els panells Dates/Categories aprovats: calendari inclusiu, dreceres, vuit caselles, esborrany, Aplicar/Netejar i cancel·lació sense guardar. La capçalera mostra selecció i resum; Mapa/Llista comparteixen els filtres. Inclou buit filtrat, metadades de categoria absents i disposició accessible amb text ampliat. Filtratge local sobre dades disponibles; font compartida i consultes del backend pendents (DP-035/DP-029). Zona/municipi continua pendent. Vegeu `docs/activity-filters.md`.
+
 Perfil propi i Configuració implementats a partir de `perfil_1_principal.png` i `perfil_2_configuracio.png` aportats per l'usuari. La identitat ve de la sessió; només Laia té estadístiques demo i els tres plans històrics resolubles. Edició de biografia/municipi i preferències per compte en memòria; compartir copia `@username`. Idioma/tema, serveis socials, Calendar, test i eliminació continuen pendents, amb Calendar «No connectat». Colors centralitzats, disposició adaptable i retorn a fitxes compartides. Taiga #230; DP-032/DP-033 i `docs/profile.md`.
 
 Taiga #96 implementa Descobreix i la cerca d'activitats amb les targetes/inscripcions existents, el navegador de la secció i estats complets. La selecció demo no és personalitzada: subtítol «Una selecció per començar» i accés «Cerca activitats». «Persones» continua desactivat amb una explicació fins a tenir-ne l'abast/contracte. No s'inventen perfils ni recomanacions de producció (DP-024); detalls a `docs/discovery.md`.

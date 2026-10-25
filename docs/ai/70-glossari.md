@@ -41,6 +41,8 @@
 | «Mostrar els meus plans» | Mostrar mis planes | `ProfileSettings.showMyPlans` | `TODO` | Privacitat; valor inicial fals; aplicació al servidor pendent |
 | Descobreix | Descubre | secció 2 de `MainShell` | — | |
 | Inici | Inicio | secció 0 de `MainShell` | — | Mapa / Llista |
+| Filtres d’esdeveniments | Filtros de eventos | `ActivityFilters`, `ActivitiesViewModel.filters` | — | Selecció confirmada d’Inici; dates AND categories (DP-035) |
+| Interval de dates | Intervalo de fechas | `ActivityDateRange` | — | Dies civils inclusius segons l’inici de l’activitat |
 | Perfil | Perfil | `UserProfile`, `ProfileRepository`, `ProfileViewModel`, secció 4 de `MainShell` | `TODO` | Perfil propi; perfils aliens pendents |
 | Fallada d'accés | Error de acceso | `AuthFailure` | — | |
 

@@ -178,6 +178,21 @@ La descoberta i la cerca viuen dins de `features/activities/`, perquè consulten
 
 L’autoria usa `ActivityCreator.userId` opcional, completat en crear activitats. La funcionalitat no dedueix identitats per nom ni canvia contractes HTTP. Colors de nivell centralitzats a `AppTheme` mitjançant `ProfilePalette`. Decisions DP-032/DP-033 i explicació dels fitxers/flux a `docs/profile.md`.
 
+## Filtres d’Inici — Taiga #87
+
+`ActivityFilters` i `ActivityDateRange` són valors immutables en Dart pur. `ActivitiesViewModel` conserva
+el catàleg i és l’únic propietari dels filtres confirmats; en calcula una projecció sense modificar el
+repositori. Les respostes pendents es projecten amb els filtres vigents en rebre-les.
+
+`ActivitiesScreen` obre els panells reutilitzables Dates/Categories. Cada panell té un esborrany local;
+només Aplicar retorna una selecció confirmada. La pantalla aplica el mateix valor als resultats de
+`ActivitiesMapViewModel`, sense duplicar-lo ni tornar a demanar la zona. La ruta modal cobreix la barra
+inferior i es retira quan desapareix el compte propietari. Widgets i ViewModel respecten les capes
+existents; no s’afegeixen paquets, repositoris ni consultes HTTP de filtratge.
+
+Les fonts diferents i metadades incompletes del mapa continuen a DP-029; l’abast provisional del
+filtratge i el contracte pendent es registren a DP-035. Vegeu `docs/activity-filters.md`.
+
 ## Recursos i dependències
 
 Els recursos van a `assets/`, fora de `lib/`. Les fotografies de demostració i l’avatar són a `assets/images/`, declarat a `pubspec.yaml`. S’han preparat amb la vista «Llista» aprovada com a referència; representen contingut fictici, no fotografies verificades d’esdeveniments reals. La procedència i els prompts es documenten a `docs/demo-assets.json`. `assets/branding/aprop_logo.png` és una còpia sense modificacions del logotip aprovat `output/logo/aprop-logo-oficial.png` de la carpeta PES; `assets/branding/` també està declarat a `pubspec.yaml`. `assets/icons/google_g.png` és el logotip «G» de Google per al botó d'accés: s'ha retallat de `Theme=Light, Show text=No, Shape=Square` (PNG @4x) del paquet oficial `signin-assets.zip` de Google Identity i se n'ha tret el fons blanc, sense modificar-ne la forma ni els colors.

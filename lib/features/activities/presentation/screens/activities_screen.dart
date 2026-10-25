@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 
+import '../../models/activity_filters.dart';
+import '../formatters/activity_filter_formatter.dart';
 import '../view_models/activities_map_view_model.dart';
 import '../view_models/activities_view_model.dart';
 import '../view_models/enrollment_view_model.dart';
 import '../widgets/activities_header.dart';
 import '../widgets/activities_map.dart';
 import '../widgets/activity_card.dart';
+import '../widgets/activity_categories_filter_sheet.dart';
+import '../widgets/activity_date_filter_sheet.dart';
+import '../widgets/activity_filter_feedback.dart';
 import '../widgets/enrollment_action.dart';
 
 class ActivitiesScreen extends StatefulWidget {
@@ -18,12 +23,14 @@ class ActivitiesScreen extends StatefulWidget {
     this.onMapOverlayChanged,
     this.mapViewModel,
     this.onMapActivitySelected,
+    this.now = DateTime.now,
   });
 
   final ActivitiesViewModel viewModel;
   final EnrollmentViewModel enrollmentViewModel;
   final ValueChanged<String> onActivitySelected;
   final VoidCallback? onAssistantPressed;
+  final DateTime Function() now;
 
   /// Si hi és, el mapa carrega les activitats per zona visible (backend) en
   /// lloc de mostrar les de la llista.
@@ -43,11 +50,123 @@ class ActivitiesScreen extends StatefulWidget {
 }
 
 class _ActivitiesScreenState extends State<ActivitiesScreen> {
-  // Mapa i llista mostren el mateix conjunt d'activitats. La llista és la
-  // vista inicial: si Google Maps falla (p. ex. sense clau), Inici continua
+  // La llista és la vista inicial: si Google Maps falla (p. ex. sense clau), Inici continua
   // funcionant (CA3 de la #21).
   // TODO(DP-022): el mockup (fig. 7) obre Inici amb el mapa.
   ActivitiesView _view = ActivitiesView.list;
+  late final _listController = ScrollController(onAttach: _onListAttached);
+  bool _resetListOnAttach = false;
+  Route<dynamic>? _activeFilterRoute;
+
+  @override
+  void didUpdateWidget(covariant ActivitiesScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.viewModel != widget.viewModel) _closeFilter();
+  }
+
+  @override
+  void dispose() {
+    _closeFilter();
+    _listController.dispose();
+    super.dispose();
+  }
+
+  void _closeFilter() {
+    final route = _activeFilterRoute;
+    _activeFilterRoute = null;
+    if (route == null) return;
+    // A root modal covers the bottom navigation. Remove only our own route
+    // after the current frame if its account/screen disappears underneath it.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (route.isActive) route.navigator?.removeRoute(route);
+    });
+  }
+
+  Future<T?> _showFilter<T>(String name, WidgetBuilder builder) async {
+    if (_activeFilterRoute != null) return null;
+    final navigator = Navigator.of(context, rootNavigator: true);
+    final route = ModalBottomSheetRoute<T>(
+      settings: RouteSettings(name: '/activities/filters/$name'),
+      builder: builder,
+      capturedThemes: InheritedTheme.capture(
+        from: context,
+        to: navigator.context,
+      ),
+      isScrollControlled: true,
+      useSafeArea: true,
+      showDragHandle: true,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      barrierLabel: 'Tancar el filtre',
+    );
+    _activeFilterRoute = route;
+    try {
+      return await navigator.push<T>(route);
+    } finally {
+      if (identical(_activeFilterRoute, route)) _activeFilterRoute = null;
+    }
+  }
+
+  void _applyFilters(ActivityFilters filters) {
+    if (filters == viewModel.filters) return;
+    _resetListOnAttach = true;
+    viewModel.applyFilters(filters);
+    if (_listController.hasClients) {
+      _listController.jumpTo(0);
+      _resetListOnAttach = false;
+    }
+  }
+
+  void _onListAttached(ScrollPosition position) {
+    if (!_resetListOnAttach) return;
+    // The list may have been unmounted while filters changed on the map.
+    // Wait for layout before replacing its stored scroll position.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted &&
+          _resetListOnAttach &&
+          _listController.positions.contains(position)) {
+        position.jumpTo(0);
+        _resetListOnAttach = false;
+      }
+    });
+  }
+
+  void _clearFilters() => _applyFilters(ActivityFilters());
+
+  Future<void> _openDates() async {
+    final owner = viewModel;
+    final initial = owner.filters.dates;
+    final today = widget.now();
+    final result = await _showFilter<ActivityDateSelection>(
+      'dates',
+      (_) => ActivityDateFilterSheet(today: today, initialDates: initial),
+    );
+    if (mounted && identical(owner, viewModel) && result != null) {
+      _applyFilters(owner.filters.withDates(result.dates));
+    }
+  }
+
+  Future<void> _openCategories() async {
+    final owner = viewModel;
+    final initial = owner.filters.categories;
+    final result = await _showFilter<Set<String>>(
+      'categories',
+      (_) => ActivityCategoriesFilterSheet(initialCategories: initial),
+    );
+    if (mounted && identical(owner, viewModel) && result != null) {
+      _applyFilters(owner.filters.withCategories(result));
+    }
+  }
+
+  String? get _filterSummary {
+    final filters = viewModel.filters;
+    if (!filters.isActive) return null;
+    return [
+      if (filters.dates != null)
+        formatFilterDateRange(filters.dates, year: widget.now().year),
+      if (filters.categories.isNotEmpty)
+        formatCategorySelection(filters.categories),
+    ].join(' · ');
+  }
 
   ActivitiesViewModel get viewModel => widget.viewModel;
   EnrollmentViewModel get enrollmentViewModel => widget.enrollmentViewModel;
@@ -62,16 +181,42 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        ActivitiesHeader(
-          selectedView: _view,
-          onAssistantPressed: widget.onAssistantPressed,
-          onMapPressed: () => _show(ActivitiesView.map),
-          onListPressed: () => _show(ActivitiesView.list),
-        ),
-        Expanded(child: _buildContent()),
-      ],
+    final header = ListenableBuilder(
+      listenable: viewModel,
+      builder: (context, child) => ActivitiesHeader(
+        selectedView: _view,
+        onAssistantPressed: widget.onAssistantPressed,
+        onMapPressed: () => _show(ActivitiesView.map),
+        onListPressed: () => _show(ActivitiesView.list),
+        onDatesPressed: _openDates,
+        onCategoriesPressed: _openCategories,
+        datesSelected: viewModel.filters.dates != null,
+        categoriesSelected: viewModel.filters.categories.isNotEmpty,
+        filterSummary: _filterSummary,
+        onClearFilters: _clearFilters,
+      ),
+    );
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final largeText = MediaQuery.textScalerOf(context).scale(14) > 18;
+        return Column(
+          children: [
+            if (largeText || constraints.maxHeight < 600)
+              ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxHeight: constraints.maxHeight * .6,
+                ),
+                child: SingleChildScrollView(
+                  key: const ValueKey('activities-header-scroll'),
+                  child: header,
+                ),
+              )
+            else
+              header,
+            Expanded(child: _buildContent()),
+          ],
+        );
+      },
     );
   }
 
@@ -115,41 +260,71 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
         if (_view == ActivitiesView.map) {
           return Padding(
             padding: const EdgeInsets.only(top: 12),
-            child: ActivitiesMap(
-              activities: activities,
-              onActivitySelected: onActivitySelected,
-              onOverlayHeightChanged: widget.onMapOverlayChanged,
+            child: Stack(
+              children: [
+                Positioned.fill(
+                  child: ActivitiesMap(
+                    activities: activities,
+                    onActivitySelected: onActivitySelected,
+                    onOverlayHeightChanged: widget.onMapOverlayChanged,
+                  ),
+                ),
+                if (viewModel.filters.isActive &&
+                    (activities.isEmpty || viewModel.missingCategoryCount > 0))
+                  Positioned.fill(
+                    child: MapFilterFeedback(
+                      isEmpty: activities.isEmpty,
+                      missingCategories: viewModel.missingCategoryCount,
+                      onClear: _clearFilters,
+                    ),
+                  ),
+              ],
             ),
           );
         }
 
         if (activities.isEmpty) {
+          if (viewModel.filters.isActive) {
+            return FilteredActivitiesEmptyState(
+              onClear: _clearFilters,
+              missingCategories: viewModel.missingCategoryCount,
+            );
+          }
           return const Center(child: Text('No hi ha activitats disponibles.'));
         }
 
-        return ListView.separated(
-          key: const PageStorageKey<String>('activities-list'),
-          // Marge inferior perquè el botó «Crear activitat» no tapi l'última
-          // targeta.
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
-          itemCount: activities.length,
-          separatorBuilder: (context, index) {
-            return const SizedBox(height: 12);
-          },
-          itemBuilder: (context, index) {
-            final activity = activities[index];
+        return Column(
+          children: [
+            if (viewModel.missingCategoryCount > 0)
+              MissingCategoryNotice(count: viewModel.missingCategoryCount),
+            Expanded(
+              child: ListView.separated(
+                key: const PageStorageKey<String>('activities-list'),
+                controller: _listController,
+                // Marge inferior perquè el botó «Crear activitat» no tapi l'última
+                // targeta.
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
+                itemCount: activities.length,
+                separatorBuilder: (context, index) {
+                  return const SizedBox(height: 12);
+                },
+                itemBuilder: (context, index) {
+                  final activity = activities[index];
 
-            return ActivityCard(
-              key: ValueKey(activity.id),
-              activity: activity,
-              onTap: () => onActivitySelected(activity.id),
-              participationAction: EnrollmentAction(
-                viewModel: enrollmentViewModel,
-                activityId: activity.id,
-                activityTitle: activity.title,
+                  return ActivityCard(
+                    key: ValueKey(activity.id),
+                    activity: activity,
+                    onTap: () => onActivitySelected(activity.id),
+                    participationAction: EnrollmentAction(
+                      viewModel: enrollmentViewModel,
+                      activityId: activity.id,
+                      activityTitle: activity.title,
+                    ),
+                  );
+                },
               ),
-            );
-          },
+            ),
+          ],
         );
       },
     );
@@ -159,9 +334,14 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
   /// mostrant les activitats que ja tenia.
   Widget _buildAreaMap(ActivitiesMapViewModel mapViewModel) {
     return ListenableBuilder(
-      listenable: mapViewModel,
+      listenable: Listenable.merge([mapViewModel, viewModel]),
       builder: (context, child) {
         final errorMessage = mapViewModel.errorMessage;
+        final filters = viewModel.filters;
+        final activities = filters.applyTo(mapViewModel.activities);
+        final missingCategories = filters.missingCategoryCount(
+          mapViewModel.activities,
+        );
 
         return Padding(
           padding: const EdgeInsets.only(top: 12),
@@ -169,7 +349,7 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
             children: [
               Positioned.fill(
                 child: ActivitiesMap(
-                  activities: mapViewModel.activities,
+                  activities: activities,
                   onActivitySelected:
                       widget.onMapActivitySelected ?? onActivitySelected,
                   onOverlayHeightChanged: widget.onMapOverlayChanged,
@@ -193,6 +373,19 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
                   child: _MapErrorBanner(
                     message: errorMessage,
                     onRetry: mapViewModel.retry,
+                  ),
+                ),
+              if (!mapViewModel.isLoading &&
+                  errorMessage == null &&
+                  ((filters.isActive &&
+                          activities.isEmpty &&
+                          mapViewModel.hasLoaded) ||
+                      missingCategories > 0))
+                Positioned.fill(
+                  child: MapFilterFeedback(
+                    isEmpty: activities.isEmpty,
+                    missingCategories: missingCategories,
+                    onClear: _clearFilters,
                   ),
                 ),
             ],

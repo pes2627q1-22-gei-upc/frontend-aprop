@@ -108,6 +108,20 @@ class _ActivitiesMapState extends State<ActivitiesMap> {
   }
 
   @override
+  void didUpdateWidget(covariant ActivitiesMap oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (_selectedId != null &&
+        !widget.activities.any(
+          (activity) => activity.id == _selectedId && activity.location != null,
+        )) {
+      _selectedId = null;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _reportOverlay();
+      });
+    }
+  }
+
+  @override
   void dispose() {
     _controller?.dispose();
     super.dispose();

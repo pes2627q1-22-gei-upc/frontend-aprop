@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import '../../models/activity.dart';
+import '../../models/activity_filters.dart';
 import '../../repositories/activity_repository.dart';
 
 class ActivitiesViewModel extends ChangeNotifier {
@@ -9,13 +10,26 @@ class ActivitiesViewModel extends ChangeNotifier {
   final ActivityRepository _repository;
 
   List<Activity> _activities = const [];
+  List<Activity> _catalogue = const [];
+  ActivityFilters _filters = ActivityFilters();
   bool _isLoading = false;
   bool _isDisposed = false;
   String? _errorMessage;
 
   List<Activity> get activities => _activities;
+  ActivityFilters get filters => _filters;
+  int get missingCategoryCount => _filters.missingCategoryCount(_catalogue);
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
+
+  void applyFilters(ActivityFilters filters) {
+    if (_isDisposed || filters == _filters) return;
+    _filters = filters;
+    _activities = filters.applyTo(_catalogue);
+    notifyListeners();
+  }
+
+  void clearFilters() => applyFilters(ActivityFilters());
 
   Future<void> load() async {
     //activa la carga, borra el error anterior y avisa a sus posibles oyentes
@@ -30,7 +44,8 @@ class ActivitiesViewModel extends ChangeNotifier {
 
       if (_isDisposed) return;
 
-      _activities = List.unmodifiable(result);
+      _catalogue = List.unmodifiable(result);
+      _activities = _filters.applyTo(_catalogue);
     } catch (_) {
       if (_isDisposed) return;
 

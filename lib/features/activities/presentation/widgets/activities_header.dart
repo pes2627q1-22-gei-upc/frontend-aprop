@@ -13,6 +13,10 @@ class ActivitiesHeader extends StatelessWidget {
     this.onCategoriesPressed,
     this.onMapPressed,
     this.onListPressed,
+    this.datesSelected = false,
+    this.categoriesSelected = false,
+    this.filterSummary,
+    this.onClearFilters,
   });
 
   final ActivitiesView selectedView;
@@ -22,6 +26,10 @@ class ActivitiesHeader extends StatelessWidget {
   final VoidCallback? onCategoriesPressed;
   final VoidCallback? onMapPressed;
   final VoidCallback? onListPressed;
+  final bool datesSelected;
+  final bool categoriesSelected;
+  final String? filterSummary;
+  final VoidCallback? onClearFilters;
 
   @override
   Widget build(BuildContext context) {
@@ -32,36 +40,7 @@ class ActivitiesHeader extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: Image.asset(
-                  'assets/branding/aprop_logo.png',
-                  height: 80,
-                  fit: BoxFit.contain,
-                  alignment: Alignment.centerLeft,
-                  semanticLabel: 'AProp!',
-                ),
-              ),
-              const SizedBox(width: 8),
-              Tooltip(
-                message: onAssistantPressed == null
-                    ? 'Assistent disponible properament'
-                    : 'Obrir l’assistent',
-                child: FilledButton.tonalIcon(
-                  onPressed: onAssistantPressed,
-                  icon: const Icon(Icons.smart_toy_outlined, size: 20),
-                  label: const Text('Assistent'),
-                  style: FilledButton.styleFrom(
-                    minimumSize: const Size(0, 48),
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    disabledBackgroundColor: colors.primaryContainer,
-                    disabledForegroundColor: colors.onSurfaceVariant,
-                  ),
-                ),
-              ),
-            ],
-          ),
+          _ActivitiesBrand(onAssistantPressed: onAssistantPressed),
           const SizedBox(height: 8),
           LayoutBuilder(
             builder: (context, constraints) {
@@ -72,14 +51,18 @@ class ActivitiesHeader extends StatelessWidget {
                   onPressed: onLocationPressed,
                 ),
                 _FilterButton(
+                  key: const ValueKey('activities-filter-dates'),
                   label: 'Dates',
                   icon: Icons.calendar_month_outlined,
                   onPressed: onDatesPressed,
+                  selected: datesSelected,
                 ),
                 _FilterButton(
+                  key: const ValueKey('activities-filter-categories'),
                   label: 'Categories',
                   icon: Icons.sell_outlined,
                   onPressed: onCategoriesPressed,
+                  selected: categoriesSelected,
                 ),
               ];
 
@@ -101,6 +84,17 @@ class ActivitiesHeader extends StatelessWidget {
               );
             },
           ),
+          if (filterSummary case final summary?)
+            Row(
+              children: [
+                Expanded(child: Text(summary)),
+                IconButton(
+                  onPressed: onClearFilters,
+                  tooltip: 'Netejar tots els filtres',
+                  icon: const Icon(Icons.filter_alt_off_outlined),
+                ),
+              ],
+            ),
           const SizedBox(height: 12),
           DecoratedBox(
             decoration: BoxDecoration(
@@ -138,44 +132,100 @@ class ActivitiesHeader extends StatelessWidget {
   }
 }
 
+class _ActivitiesBrand extends StatelessWidget {
+  const _ActivitiesBrand({required this.onAssistantPressed});
+  final VoidCallback? onAssistantPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    final logo = Image.asset(
+      'assets/branding/aprop_logo.png',
+      height: 80,
+      fit: BoxFit.contain,
+      alignment: Alignment.centerLeft,
+      semanticLabel: 'AProp!',
+    );
+    final assistant = Tooltip(
+      message: onAssistantPressed == null
+          ? 'Assistent disponible properament'
+          : 'Obrir l’assistent',
+      child: FilledButton.tonalIcon(
+        onPressed: onAssistantPressed,
+        icon: const Icon(Icons.smart_toy_outlined, size: 20),
+        label: const Text('Assistent'),
+        style: FilledButton.styleFrom(
+          minimumSize: const Size(0, 48),
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          disabledBackgroundColor: colors.primaryContainer,
+          disabledForegroundColor: colors.onSurfaceVariant,
+        ),
+      ),
+    );
+    if (MediaQuery.textScalerOf(context).scale(14) > 18) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [logo, const SizedBox(height: 8), assistant],
+      );
+    }
+    return Row(
+      children: [
+        Expanded(child: logo),
+        const SizedBox(width: 8),
+        assistant,
+      ],
+    );
+  }
+}
+
 class _FilterButton extends StatelessWidget {
   const _FilterButton({
+    super.key,
     required this.label,
     required this.icon,
     this.onPressed,
+    this.selected = false,
   });
 
   final String label;
   final IconData icon;
   final VoidCallback? onPressed;
+  final bool selected;
 
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
 
-    return Tooltip(
-      message: onPressed == null ? '$label disponible properament' : label,
-      child: OutlinedButton(
-        onPressed: onPressed,
-        style: OutlinedButton.styleFrom(
-          minimumSize: const Size(0, 48),
-          padding: const EdgeInsets.symmetric(horizontal: 4),
-          backgroundColor: colors.surface,
-          disabledForegroundColor: colors.onSurfaceVariant,
-          side: BorderSide(color: colors.outlineVariant),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
+    return Semantics(
+      selected: selected,
+      child: Tooltip(
+        message: onPressed == null ? '$label disponible properament' : label,
+        child: OutlinedButton(
+          onPressed: onPressed,
+          style: OutlinedButton.styleFrom(
+            minimumSize: const Size(0, 48),
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            backgroundColor: selected
+                ? colors.primary.withValues(alpha: .08)
+                : colors.surface,
+            disabledForegroundColor: colors.onSurfaceVariant,
+            side: BorderSide(
+              color: selected ? colors.primary : colors.outlineVariant,
+            ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
+            ),
           ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 16),
-            const SizedBox(width: 4),
-            Flexible(child: Text(label)),
-            const SizedBox(width: 4),
-            const Icon(Icons.expand_more, size: 16),
-          ],
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 16),
+              const SizedBox(width: 4),
+              Flexible(child: Text(label)),
+              const SizedBox(width: 4),
+              Icon(selected ? Icons.check : Icons.expand_more, size: 16),
+            ],
+          ),
         ),
       ),
     );
