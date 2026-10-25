@@ -1,4 +1,5 @@
 import 'package:aprop/app/aprop_app.dart';
+import 'package:aprop/features/activities/data/demo_activity_repository.dart';
 import 'package:aprop/features/activities/presentation/widgets/activity_card.dart';
 import 'package:aprop/features/auth/data/demo_auth_repository.dart';
 import 'package:flutter/material.dart';
@@ -14,7 +15,10 @@ void main() {
       addTearDown(tester.view.resetDevicePixelRatio);
       final auth = DemoAuthRepository();
       await auth.signIn(usernameOrEmail: 'laiasoler', password: 'Aprop2026!');
-      await tester.pumpWidget(APropApp(authRepository: auth));
+      final catalogue = DemoActivityRepository();
+      await tester.pumpWidget(
+        APropApp(authRepository: auth, activityRepository: catalogue),
+      );
       await tester.pumpAndSettle();
 
       await tester.tap(find.text('Crear activitat'));
@@ -56,6 +60,10 @@ void main() {
       expect(find.text('Concert a la plaça'), findsOneWidget);
       expect(find.text('Gratuït'), findsOneWidget);
       expect(find.text('Apuntat'), findsOneWidget);
+      expect(
+        (await catalogue.getActivityById('demo-created-1'))!.creator!.userId,
+        'demo-laiasoler',
+      );
 
       await tester.tap(find.byTooltip('Tornar enrere'));
       await tester.pumpAndSettle();
@@ -76,6 +84,30 @@ void main() {
         findsOneWidget,
       );
       expect(tester.takeException(), isNull);
+      await tester.tap(find.widgetWithText(NavigationDestination, 'Perfil'));
+      await tester.pumpAndSettle();
+      final profileScroll = find.descendant(
+        of: find.byKey(const PageStorageKey('profile-scroll')),
+        matching: find.byWidgetPredicate(
+          (widget) =>
+              widget is Scrollable &&
+              widget.axisDirection == AxisDirection.down,
+        ),
+      );
+      await tester.scrollUntilVisible(
+        find.text('Creats per mi'),
+        200,
+        scrollable: profileScroll,
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Creats per mi'));
+      await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(
+        find.text('Concert a la plaça'),
+        200,
+        scrollable: profileScroll,
+      );
+      expect(find.text('Concert a la plaça'), findsOneWidget);
     },
   );
 }

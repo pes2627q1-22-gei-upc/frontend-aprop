@@ -21,6 +21,10 @@ import '../../features/auth/presentation/screens/verify_email_screen.dart';
 import '../../features/auth/repositories/auth_repository.dart';
 import '../../features/notifications/data/demo_notification_repository.dart';
 import '../../features/notifications/repositories/notification_repository.dart';
+import '../../features/profile/data/demo_profile_repository.dart';
+import '../../features/profile/data/demo_profile_settings_repository.dart';
+import '../../features/profile/repositories/profile_repository.dart';
+import '../../features/profile/repositories/profile_settings_repository.dart';
 import 'main_shell.dart';
 
 /// Mostra el login si no hi ha sessió, la verificació del correu si encara no
@@ -36,6 +40,8 @@ class AuthGate extends StatefulWidget {
     this.notificationRepository,
     this.discoveryRepository,
     this.activityMapRepository,
+    this.profileRepository,
+    this.profileSettingsRepository,
   });
 
   final AuthRepository authRepository;
@@ -44,6 +50,8 @@ class AuthGate extends StatefulWidget {
   final AssistantRepository? assistantRepository;
   final NotificationRepository? notificationRepository;
   final DiscoveryRepository? discoveryRepository;
+  final ProfileRepository? profileRepository;
+  final ProfileSettingsRepository? profileSettingsRepository;
 
   /// Per defecte, el backend si s'ha passat `API_BASE_URL`. Sense backend, el
   /// mapa mostra les activitats de demostració de la llista.
@@ -60,6 +68,8 @@ class _AuthGateState extends State<AuthGate> {
   late final NotificationRepository _notificationRepository;
   late final DiscoveryRepository _discoveryRepository;
   late final ActivityMapRepository? _activityMapRepository;
+  late final ProfileRepository _profileRepository;
+  late final ProfileSettingsRepository _profileSettingsRepository;
   DemoEnrollmentRepository? _ownedEnrollmentRepository;
 
   @override
@@ -101,6 +111,11 @@ class _AuthGateState extends State<AuthGate> {
     _discoveryRepository =
         widget.discoveryRepository ??
         DemoDiscoveryRepository(activityRepository: _activityRepository);
+    _profileRepository =
+        widget.profileRepository ??
+        DemoProfileRepository(activityRepository: _activityRepository);
+    _profileSettingsRepository =
+        widget.profileSettingsRepository ?? DemoProfileSettingsRepository();
   }
 
   @override
@@ -155,6 +170,8 @@ class _AuthGateState extends State<AuthGate> {
           notificationRepository: _notificationRepository,
           discoveryRepository: _discoveryRepository,
           activityMapRepository: _activityMapRepository,
+          profileRepository: _profileRepository,
+          profileSettingsRepository: _profileSettingsRepository,
         );
       },
     );
