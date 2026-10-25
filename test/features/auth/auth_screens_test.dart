@@ -231,4 +231,33 @@ void main() {
     expect(find.textContaining('Hola!'), findsOneWidget);
     expect(find.textContaining('Hola, '), findsNothing);
   });
+
+  testWidgets("Explica que el nom triat en registrar-se ja era d'algú altre", (
+    tester,
+  ) async {
+    await pumpScreen(
+      tester,
+      ChooseUsernameScreen(
+        repository: repository,
+        firstName: 'Pol',
+        rejectedUsername: 'polvidal',
+      ),
+    );
+
+    expect(
+      find.text(
+        "El nom «polvidal» ja és d'una altra persona. Tria'n un altre.",
+      ),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('Sense nom rebutjat no mostra cap avís', (tester) async {
+    await pumpScreen(
+      tester,
+      ChooseUsernameScreen(repository: repository, firstName: 'Pol'),
+    );
+
+    expect(find.textContaining("ja és d'una altra persona"), findsNothing);
+  });
 }

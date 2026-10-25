@@ -13,10 +13,15 @@ class ChooseUsernameScreen extends StatefulWidget {
     super.key,
     required this.repository,
     required this.firstName,
+    this.rejectedUsername,
   });
 
   final AuthRepository repository;
   final String firstName;
+
+  /// Nom que es va demanar en registrar-se i ja era d'una altra persona. Si
+  /// no és nul, la pantalla explica per què se'n demana un altre.
+  final String? rejectedUsername;
 
   @override
   State<ChooseUsernameScreen> createState() => _ChooseUsernameScreenState();
@@ -95,6 +100,13 @@ class _ChooseUsernameScreenState extends State<ChooseUsernameScreen> {
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
                       ),
+                      if (widget.rejectedUsername case final rejected?) ...[
+                        const SizedBox(height: 16),
+                        AuthStatusMessage.info(
+                          "El nom «$rejected» ja és d'una altra persona. "
+                          "Tria'n un altre.",
+                        ),
+                      ],
                       const SizedBox(height: 24),
                       TextField(
                         controller: _usernameController,

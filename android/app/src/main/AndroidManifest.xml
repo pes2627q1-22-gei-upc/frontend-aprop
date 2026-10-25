@@ -1,4 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Firebase, el backend i els mapes necessiten internet també a la versió
+         de llançament (abans només arribava a través de google_sign_in). -->
+    <uses-permission android:name="android.permission.INTERNET"/>
     <application
         android:label="AProp!"
         android:name="${applicationName}"

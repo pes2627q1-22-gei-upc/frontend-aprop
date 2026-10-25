@@ -7,19 +7,20 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/app_user.dart';
 import '../models/auth_failure.dart';
+import '../models/user_profile.dart';
 import '../repositories/auth_repository.dart';
+import '../repositories/user_sync_repository.dart';
 import 'firebase_auth_failure.dart';
 
 /// Comptes reals amb Firebase Auth: correu i contrasenya, i Google (a
 /// Android amb el selector del sistema i a la web amb una finestra emergent).
 ///
-/// El backend encara no desa el perfil (`POST /auth/sync` és en una branca
-/// sense fusionar), així que provisionalment:
-/// - el nom i els cognoms van al `displayName` de Firebase;
-/// - el nom d'usuari es desa en aquest dispositiu.
-// TODO(DP-026): substituir les dades provisionals per `POST /auth/sync`.
+/// El nom d'usuari és al backend ([UserSyncRepository]). El nom i els cognoms
+/// van provisionalment al `displayName` de Firebase, fins que el backend els
+/// desi (DP-026).
 class FirebaseAuthRepository implements AuthRepository {
   FirebaseAuthRepository({
+    required this._userSync,
     FirebaseAuth? auth,
     GoogleSignIn? googleSignIn,
     SharedPreferencesAsync? preferences,
@@ -30,9 +31,16 @@ class FirebaseAuthRepository implements AuthRepository {
   /// Idioma dels correus que envia Firebase (verificació del compte).
   static const _emailLanguage = 'ca';
 
+  final UserSyncRepository _userSync;
   final FirebaseAuth _auth;
   final GoogleSignIn _googleSignIn;
+
+  /// Còpia de l'últim nom d'usuari conegut, per si el backend no respon.
   final SharedPreferencesAsync _preferences;
+
+  /// Perfils ja consultats en aquesta sessió, per no preguntar-los al backend
+  /// cada vegada que Firebase avisa d'un canvi (com renovar el token).
+  final Map<String, UserProfile> _profiles = {};
 
   /// Avisa que l'usuari ha canviat sense que Firebase ho emeti: el nom
   /// d'usuari desat al dispositiu o la verificació del correu en recarregar.
@@ -104,11 +112,20 @@ class FirebaseAuthRepository implements AuthRepository {
     // tornar a enviar el formulari diria «ja hi ha un compte amb aquest
     // correu». Per això no s'aturen: el correu es pot reenviar des de la
     // pantalla de verificació.
-    // TODO(DP-026): el backend encara no comprova que el nom d'usuari sigui
-    // únic: `usernameAlreadyInUse` no es pot produir fins que hi hagi sync.
-    await _saveUsername(user.uid, username);
+    // Si el nom d'usuari ja és d'algú altre, l'usuari en triarà un altre
+    // després de verificar el correu, i la pantalla li explicarà per què.
     await _ignoreFailure(() => user.updateDisplayName('$firstName $lastName'));
+    await _ignoreFailure(() async {
+      try {
+        await _syncUsername(user.uid, username);
+        await _saveName(user.uid, '$firstName $lastName');
+      } on AuthFailure catch (failure) {
+        if (failure != AuthFailure.usernameAlreadyInUse) rethrow;
+        await _preferences.setString(_rejectedUsernameKey(user.uid), username);
+      }
+    });
     await _ignoreFailure(() => _sendEmailVerification(user));
+    _localChanges.add(null);
   }
 
   @override
@@ -155,16 +172,41 @@ class FirebaseAuthRepository implements AuthRepository {
     }
   }
 
-  // TODO(DP-025): el nom d'usuari s'haurà de desar al backend.
   @override
   Future<void> chooseUsername(String username) async {
-    await _saveUsername(_requireCurrentUser().uid, username);
+    final user = _requireCurrentUser();
+    final profile = await _syncUsername(user.uid, username);
+    // Primer accés amb Google (o nom rebutjat en registrar-se): el backend
+    // encara no té el nom, i el de Firebase és el bo.
+    if (profile.name.isEmpty) {
+      await _ignoreFailure(() => _saveName(user.uid, user.displayName ?? ''));
+    }
     _localChanges.add(null);
   }
 
   @override
   Future<void> sendEmailVerification() {
     return _run(() => _sendEmailVerification(_requireCurrentUser()));
+  }
+
+  /// Els enllaços dels correus porten una clau d'API antiga que ja no és
+  /// vàlida, i la pàgina de Firebase que els obre falla («ha caducat»). Amb
+  /// l'enllaç enganxat a l'app, el codi es confirma amb la clau de l'app.
+  // TODO(DP-031): sobrarà si Firebase torna a associar una clau vàlida als
+  // correus.
+  @override
+  Future<void> verifyEmailWithLink(String link) async {
+    final code = verificationCodeFromLink(link);
+    if (code == null) throw AuthFailure.invalidVerificationLink;
+
+    await _run(() => _auth.applyActionCode(code));
+    await _run(_requireCurrentUser().reload);
+
+    // Un enllaç d'un altre compte s'aplica a aquell compte, no a aquest.
+    if (!(_auth.currentUser?.emailVerified ?? false)) {
+      throw AuthFailure.invalidVerificationLink;
+    }
+    _localChanges.add(null);
   }
 
   @override
@@ -190,6 +232,7 @@ class FirebaseAuthRepository implements AuthRepository {
     } catch (_) {
       // Si Google falla, la sessió de l'app s'ha de tancar igualment.
     } finally {
+      _profiles.clear();
       await _auth.signOut();
     }
   }
@@ -214,22 +257,89 @@ class FirebaseAuthRepository implements AuthRepository {
   Future<AppUser?> _toAppUser(User? user) async {
     if (user == null) return null;
 
-    final (firstName, lastName) = splitDisplayName(user.displayName);
+    final profile = await _profileFor(user);
+    final username = profile?.username;
+    // El nom del backend mana; mentre no en té, el de Firebase.
+    final name = profile?.name ?? '';
+    final (firstName, lastName) = splitDisplayName(
+      name.isNotEmpty ? name : user.displayName,
+    );
     return AppUser(
       id: user.uid,
       email: user.email ?? '',
       firstName: firstName,
       lastName: lastName,
       emailVerified: user.emailVerified,
-      username: await _preferences.getString(_usernameKey(user.uid)),
+      username: username,
+      rejectedUsername: username == null
+          ? await _preferences.getString(_rejectedUsernameKey(user.uid))
+          : null,
     );
   }
 
-  Future<void> _saveUsername(String uid, String username) {
-    return _preferences.setString(_usernameKey(uid), username);
+  /// Perfil del backend, o `null` si encara no té nom d'usuari.
+  Future<UserProfile?> _profileFor(User user) async {
+    final uid = user.uid;
+    final known = _profiles[uid];
+    if (known != null) return known;
+
+    try {
+      final profile = await _userSync.sync();
+      if (profile == null) return null;
+      await _remember(uid, profile);
+      // Si en registrar-se no es va poder desar el nom, es torna a provar.
+      if (profile.name.isEmpty) {
+        await _ignoreFailure(() => _saveName(uid, user.displayName ?? ''));
+      }
+      return _profiles[uid];
+    } catch (error) {
+      // Sense connexió no es demana un nom nou: es fa servir l'últim conegut.
+      debugPrint("Auth: no s'ha pogut consultar l'usuari: $error");
+      final username = await _preferences.getString(_cachedUsernameKey(uid));
+      if (username == null) return null;
+      return UserProfile(
+        id: uid,
+        username: username,
+        email: '',
+        name: await _preferences.getString(_cachedNameKey(uid)) ?? '',
+      );
+    }
   }
 
-  String _usernameKey(String uid) => 'auth.username.$uid';
+  /// Crea l'usuari al backend amb [username]. Si ja existia, el backend en
+  /// conserva el nom original.
+  Future<UserProfile> _syncUsername(String uid, String username) async {
+    final profile = await _userSync.sync(username: username);
+    if (profile == null) {
+      throw StateError('El backend no ha retornat cap usuari.');
+    }
+    return _remember(uid, profile);
+  }
+
+  /// Desa el nom i cognoms al backend (`PATCH /users/me`).
+  // TODO(DP-026): el backend només té un camp «name», sense separar el nom
+  // dels cognoms.
+  Future<void> _saveName(String uid, String name) async {
+    if (name.trim().isEmpty) return;
+    await _remember(uid, await _userSync.updateName(name.trim()));
+  }
+
+  Future<UserProfile> _remember(String uid, UserProfile profile) async {
+    _profiles[uid] = profile;
+    await _preferences.setString(_cachedUsernameKey(uid), profile.username);
+    await _preferences.setString(_cachedNameKey(uid), profile.name);
+    // Ja té nom: l'avís del nom rebutjat deixa de tenir sentit.
+    await _preferences.remove(_rejectedUsernameKey(uid));
+    return profile;
+  }
+
+  String _cachedUsernameKey(String uid) => 'auth.cachedUsername.$uid';
+
+  String _cachedNameKey(String uid) => 'auth.cachedName.$uid';
+
+  /// Es desa al dispositiu perquè l'avís sobrevisqui si l'app es tanca abans
+  /// de verificar el correu.
+  String _rejectedUsernameKey(String uid) => 'auth.rejectedUsername.$uid';
 
   User _requireCurrentUser() {
     return _auth.currentUser ??

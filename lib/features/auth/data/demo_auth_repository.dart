@@ -129,6 +129,14 @@ class DemoAuthRepository implements AuthRepository {
     _verificationEmailsSent.add(_requireCurrentUser().email);
   }
 
+  /// Simula l'enllaç del correu: n'hi ha prou que porti un codi (`oobCode`).
+  @override
+  Future<void> verifyEmailWithLink(String link) async {
+    if (!link.contains('oobCode=')) throw AuthFailure.invalidVerificationLink;
+    final user = _requireCurrentUser();
+    _updateCurrentUser(user.copyWith(emailVerified: true));
+  }
+
   @override
   Future<bool> checkEmailVerified() async {
     final user = _requireCurrentUser();

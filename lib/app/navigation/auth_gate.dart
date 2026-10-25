@@ -114,6 +114,7 @@ class _AuthGateState extends State<AuthGate> {
           return ChooseUsernameScreen(
             repository: widget.authRepository,
             firstName: user.firstName,
+            rejectedUsername: user.rejectedUsername,
           );
         }
 
