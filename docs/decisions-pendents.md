@@ -378,6 +378,16 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Qui decideix:** frontend + backend + responsables d'Auth/notificacions/Calendar
 - **Resolució:**
 
+### DP-034 · Mapa d'Inici: què fa tocar un grup de marcadors
+- **Estat:** oberta
+- **Obert per:** 2026-10-25 · Claude Code (Opus 5.5) amb confirmació de l'usuari · Taiga #79 / #21
+- **Context:** `ActivitiesMap` (`_onClusterTap`, `isSamePlace`, `_SamePlaceSheet`), llegenda del mapa. En provar-ho a l'emulador, tocar un grup no feia res.
+- **Dubte:** no hi ha mockup de què passa en tocar un grup. A més, moltes activitats de l'Agenda Cultural comparteixen el mateix punt exacte (a la BD local, 2.019 de 2.335 activitats amb ubicació, en 603 llocs i fins a 32 en un de sol): apropar-s'hi no les separaria mai.
+- **Opcions:** A) només apropar-s'hi · B) apropar-s'hi i, si són al mateix lloc, mostrar-ne la llista · C) mostrar sempre la llista.
+- **Provisionalment:** B, triada per l'usuari («que t'augmenti la pantalla»). El mapa s'apropa fins que hi caben tots els marcadors del grup, amb 64 px de marge. Si les activitats són a menys de 0,0003° (uns 30 m) entre elles, surt un full inferior «N activitats en aquest lloc» amb el municipi, les activitats ordenades per data amb la data completa, i en tocar-ne una s'obre la fitxa. Molt a prop, Google deixa d'agrupar i els marcadors d'un mateix lloc queden apilats (provat a Girona: 4 activitats a l'Auditori i només se'n podia obrir una); per això tocar un marcador que en té d'altres al mateix lloc també mostra aquesta llista en lloc de la targeta. El llindar i el disseny del full són provisionals (`TODO(DP-034)`).
+- **Qui decideix:** equip
+- **Resolució:**
+
 ## Resoltes
 
 (cap)
