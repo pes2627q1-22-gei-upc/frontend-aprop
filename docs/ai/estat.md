@@ -12,6 +12,7 @@
 
 | Taiga | Història / tasca | Repo | Branca | Responsable | Estat |
 |---|---|---|---|---|---|
+| #231 | Client HTTP i integració de la API de Render | frontend-aprop | `feature/api-client` | Wenqiang | Implementat (`ApiConfig`, `ApiClient`, repositoris HTTP i injecció a `main.dart`) i verificat amb tests; pendent de commit i PR |
 | #230 | Frontend perfil i Configuració | frontend-aprop | `feature/profile` | Adam | commit `aff43e6` pujat; conflictes amb `develop` (`f1d1066`) resolts; 318 proves i anàlisi de capes correctes; configuració Firebase absent; resolució sense commit/push |
 | — | Configuració d'IA per a l'equip | frontend-aprop | `feature/ai-setup` | Wenqiang | sense scripts/hooks; pendent PR |
 | — | Configuració d'IA per a l'equip | api-aprop | `feature/ai-setup` | Wenqiang | pendent de revisió humana |
