@@ -304,8 +304,18 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Context:** `UserSyncRepository`, `HttpUserSyncRepository`, `DemoUserSyncRepository`, `FirebaseAuthRepository`, `lib/core/config/api_config.dart`, `main.dart`, `android/app/src/debug/AndroidManifest.xml`. El número DP-027 és a `feature/apuntar-esdeveniment`, encara sense fusionar.
 - **Dubte:** el contracte de `POST /auth/sync` s'ha llegit de la branca `feature/auth` d'api-aprop, que encara no està fusionada; no hi ha servidor desplegat (ni URL), i el backend respon 422 tant si l'usuari encara no existeix com si el nom no és vàlid.
 - **Opcions:** resposta per a «cal triar nom»: A) 422 (com ara) · B) un codi propi (p. ex. 404 o `username required`). URL: A) `--dart-define=API_BASE_URL` en executar i compilar (com ara) · B) un fitxer de configuració per entorn.
-- **Provisionalment:** paquet nou `http`; la URL es passa amb `--dart-define=API_BASE_URL=…` i, si no n'hi ha, el nom d'usuari es desa al dispositiu (`DemoUserSyncRepository`, que reserva `laiasoler` per provar el nom repetit). Amb URL, s'envia el token de Firebase a `Authorization: Bearer` i es tracten 200/201, 409 i 422 (sense nom → cal triar-ne un). Si el backend no respon, es fa servir l'últim nom conegut desat al dispositiu. Si el nom ja és d'algú altre en registrar-se, el compte es crea igualment i l'usuari en tria un altre després de verificar el correu. HTTP sense xifrar només a la versió de depuració. `TODO(DP-028)` al codi.
+- **Provisionalment:** paquet nou `http`; la URL es passa amb `--dart-define=API_BASE_URL=…` i, si no n'hi ha, el nom d'usuari es desa al dispositiu (`DemoUserSyncRepository`, que reserva `laiasoler` per provar el nom repetit). Amb URL, s'envia el token de Firebase a `Authorization: Bearer` i es tracten 200/201, 409 i 422 (sense nom → cal triar-ne un). Si el backend no respon, es fa servir l'últim nom conegut desat al dispositiu. Si el nom ja és d'algú altre en registrar-se, el compte es crea igualment i l'usuari en tria un altre després de verificar el correu; la pantalla ho explica («El nom «…» ja és d'una altra persona»). Per avisar-ho abans de crear el compte caldria un endpoint públic del backend per comprovar si un nom està lliure. HTTP sense xifrar només a la versió de depuració. `TODO(DP-028)` al codi.
 - **Qui decideix:** backend + frontend
+- **Resolució:**
+
+### DP-031 · Enllaços de verificació amb la clau d'API antiga
+- **Estat:** oberta
+- **Obert per:** 2026-10-25 · Claude Code (Opus 5.5) amb confirmació de l'usuari · Taiga #73
+- **Context:** `VerifyEmailScreen`, `VerifyEmailViewModel`, `AuthRepository.verifyEmailWithLink`, `verificationCodeFromLink`. Relacionada amb DP-004. Els números DP-027, DP-029 i DP-030 són a altres branques sense fusionar.
+- **Dubte:** en renovar la clau (DP-004) es va esborrar la «Browser key» original, però Firebase Authentication la continua posant als enllaços dels correus (`client.apiKey` de la configuració, de només lectura: ni la consola ni l'API la deixen canviar). La pàgina de Firebase que obre l'enllaç falla i diu «ha caducat o ja s'ha fet servir»: ningú no pot verificar el correu fent clic a l'enllaç.
+- **Opcions:** A) demanar al suport de Firebase que hi associïn la clau nova · B) projecte de Firebase nou · C) recuperar la clau antiga restringida a `aprop-919ec.firebaseapp.com` · D) enganxar l'enllaç a l'app (com ara) · E) pàgina pròpia per als enllaços a Firebase Hosting.
+- **Provisionalment:** D, triada per l'usuari (descarta C i E): a «Verifica el teu correu» es pot enganxar l'enllaç del correu; l'app en treu el codi (`oobCode`) i el confirma amb `applyActionCode` i la clau de l'app. Fer clic a l'enllaç continua fallant. `TODO(DP-031)` al repositori i a la pantalla.
+- **Qui decideix:** equip
 - **Resolució:**
 
 ## Resoltes

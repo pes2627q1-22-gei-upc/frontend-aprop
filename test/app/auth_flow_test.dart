@@ -130,6 +130,25 @@ void main() {
     expect(find.text('@polvidal'), findsOneWidget);
   });
 
+  testWidgets("Es pot verificar enganxant l'enllaç del correu", (tester) async {
+    await pumpApp(tester);
+    await registerPol(tester);
+
+    await fill(tester, 'Enllaç del correu', 'no és cap enllaç');
+    await tapButton(tester, "Verifica amb l'enllaç");
+    expect(find.textContaining("Aquest enllaç no és vàlid"), findsOneWidget);
+
+    await fill(
+      tester,
+      'Enllaç del correu',
+      'https://aprop-919ec.firebaseapp.com/__/auth/action?mode=verifyEmail'
+          '&oobCode=codi-de-prova',
+    );
+    await tapButton(tester, "Verifica amb l'enllaç");
+
+    expect(find.text('Jazz al parc').hitTestable(), findsOneWidget);
+  });
+
   testWidgets("Un compte sense verificar no pot entrar a l'app", (
     tester,
   ) async {

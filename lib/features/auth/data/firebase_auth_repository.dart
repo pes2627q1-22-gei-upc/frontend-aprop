@@ -112,9 +112,16 @@ class FirebaseAuthRepository implements AuthRepository {
     // correu». Per això no s'aturen: el correu es pot reenviar des de la
     // pantalla de verificació.
     // Si el nom d'usuari ja és d'algú altre, l'usuari en triarà un altre
-    // després de verificar el correu («Tria el teu nom d'usuari»).
+    // després de verificar el correu, i la pantalla li explicarà per què.
     await _ignoreFailure(() => user.updateDisplayName('$firstName $lastName'));
-    await _ignoreFailure(() => _syncUsername(user.uid, username));
+    await _ignoreFailure(() async {
+      try {
+        await _syncUsername(user.uid, username);
+      } on AuthFailure catch (failure) {
+        if (failure != AuthFailure.usernameAlreadyInUse) rethrow;
+        await _preferences.setString(_rejectedUsernameKey(user.uid), username);
+      }
+    });
     await _ignoreFailure(() => _sendEmailVerification(user));
     _localChanges.add(null);
   }
@@ -174,6 +181,26 @@ class FirebaseAuthRepository implements AuthRepository {
     return _run(() => _sendEmailVerification(_requireCurrentUser()));
   }
 
+  /// Els enllaços dels correus porten una clau d'API antiga que ja no és
+  /// vàlida, i la pàgina de Firebase que els obre falla («ha caducat»). Amb
+  /// l'enllaç enganxat a l'app, el codi es confirma amb la clau de l'app.
+  // TODO(DP-031): sobrarà si Firebase torna a associar una clau vàlida als
+  // correus.
+  @override
+  Future<void> verifyEmailWithLink(String link) async {
+    final code = verificationCodeFromLink(link);
+    if (code == null) throw AuthFailure.invalidVerificationLink;
+
+    await _run(() => _auth.applyActionCode(code));
+    await _run(_requireCurrentUser().reload);
+
+    // Un enllaç d'un altre compte s'aplica a aquell compte, no a aquest.
+    if (!(_auth.currentUser?.emailVerified ?? false)) {
+      throw AuthFailure.invalidVerificationLink;
+    }
+    _localChanges.add(null);
+  }
+
   @override
   Future<bool> checkEmailVerified() async {
     await _run(_requireCurrentUser().reload);
@@ -223,13 +250,17 @@ class FirebaseAuthRepository implements AuthRepository {
     if (user == null) return null;
 
     final (firstName, lastName) = splitDisplayName(user.displayName);
+    final username = await _usernameFor(user.uid);
     return AppUser(
       id: user.uid,
       email: user.email ?? '',
       firstName: firstName,
       lastName: lastName,
       emailVerified: user.emailVerified,
-      username: await _usernameFor(user.uid),
+      username: username,
+      rejectedUsername: username == null
+          ? await _preferences.getString(_rejectedUsernameKey(user.uid))
+          : null,
     );
   }
 
@@ -261,10 +292,16 @@ class FirebaseAuthRepository implements AuthRepository {
   Future<String> _remember(String uid, String username) async {
     _usernames[uid] = username;
     await _preferences.setString(_cachedUsernameKey(uid), username);
+    // Ja té nom: l'avís del nom rebutjat deixa de tenir sentit.
+    await _preferences.remove(_rejectedUsernameKey(uid));
     return username;
   }
 
   String _cachedUsernameKey(String uid) => 'auth.cachedUsername.$uid';
+
+  /// Es desa al dispositiu perquè l'avís sobrevisqui si l'app es tanca abans
+  /// de verificar el correu.
+  String _rejectedUsernameKey(String uid) => 'auth.rejectedUsername.$uid';
 
   User _requireCurrentUser() {
     return _auth.currentUser ??
