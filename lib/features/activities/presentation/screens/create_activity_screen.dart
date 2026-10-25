@@ -70,7 +70,8 @@ class _CreateActivityScreenState extends State<CreateActivityScreen> {
 
   Future<void> _pickStartsAt() async {
     FocusScope.of(context).unfocus();
-    final tomorrow = _viewModel.today.add(const Duration(days: 1));
+    final today = _viewModel.today;
+    final tomorrow = DateTime(today.year, today.month, today.day + 1);
 
     final startsAt = await showStartDateTimeSheet(
       context,
