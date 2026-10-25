@@ -2,9 +2,13 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../../core/config/api_config.dart';
+import '../../features/activities/data/combined_activity_repository.dart';
 import '../../features/activities/data/demo_activity_repository.dart';
 import '../../features/activities/data/demo_discovery_repository.dart';
 import '../../features/activities/data/demo_enrollment_repository.dart';
+import '../../features/activities/data/http_activity_map_repository.dart';
+import '../../features/activities/repositories/activity_map_repository.dart';
 import '../../features/activities/repositories/activity_repository.dart';
 import '../../features/activities/repositories/discovery_repository.dart';
 import '../../features/activities/repositories/enrollment_repository.dart';
@@ -35,6 +39,7 @@ class AuthGate extends StatefulWidget {
     this.assistantRepository,
     this.notificationRepository,
     this.discoveryRepository,
+    this.activityMapRepository,
     this.profileRepository,
     this.profileSettingsRepository,
   });
@@ -48,6 +53,10 @@ class AuthGate extends StatefulWidget {
   final ProfileRepository? profileRepository;
   final ProfileSettingsRepository? profileSettingsRepository;
 
+  /// Per defecte, el backend si s'ha passat `API_BASE_URL`. Sense backend, el
+  /// mapa mostra les activitats de demostració de la llista.
+  final ActivityMapRepository? activityMapRepository;
+
   @override
   State<AuthGate> createState() => _AuthGateState();
 }
@@ -58,6 +67,7 @@ class _AuthGateState extends State<AuthGate> {
   late final AssistantRepository _assistantRepository;
   late final NotificationRepository _notificationRepository;
   late final DiscoveryRepository _discoveryRepository;
+  late final ActivityMapRepository? _activityMapRepository;
   late final ProfileRepository _profileRepository;
   late final ProfileSettingsRepository _profileSettingsRepository;
   DemoEnrollmentRepository? _ownedEnrollmentRepository;
@@ -65,7 +75,24 @@ class _AuthGateState extends State<AuthGate> {
   @override
   void initState() {
     super.initState();
-    _activityRepository = widget.activityRepository ?? DemoActivityRepository();
+    _activityMapRepository =
+        widget.activityMapRepository ??
+        (ApiConfig.isConfigured
+            ? HttpActivityMapRepository(
+                baseUrl: Uri.parse(ApiConfig.baseUrl),
+                idToken: widget.authRepository.currentIdToken,
+              )
+            : null);
+
+    final catalogue = widget.activityRepository ?? DemoActivityRepository();
+    // Amb backend, les activitats obertes des del mapa també s'han de trobar
+    // en apuntar-s'hi i a l'Agenda.
+    _activityRepository = switch (_activityMapRepository) {
+      final backend? when widget.activityRepository == null =>
+        CombinedActivityRepository(catalogue: catalogue, backend: backend),
+      _ => catalogue,
+    };
+
     final suppliedRepository = widget.enrollmentRepository;
     if (suppliedRepository != null) {
       _enrollmentRepository = suppliedRepository;
@@ -142,6 +169,7 @@ class _AuthGateState extends State<AuthGate> {
           assistantRepository: _assistantRepository,
           notificationRepository: _notificationRepository,
           discoveryRepository: _discoveryRepository,
+          activityMapRepository: _activityMapRepository,
           profileRepository: _profileRepository,
           profileSettingsRepository: _profileSettingsRepository,
         );

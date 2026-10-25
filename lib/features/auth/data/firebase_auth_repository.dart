@@ -220,6 +220,10 @@ class FirebaseAuthRepository implements AuthRepository {
     return verified;
   }
 
+  /// Firebase el renova sol quan està a punt de caducar (dura una hora).
+  @override
+  Future<String?> currentIdToken() async => _auth.currentUser?.getIdToken();
+
   @override
   Future<void> signOut() async {
     try {

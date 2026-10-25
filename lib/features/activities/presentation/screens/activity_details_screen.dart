@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../models/activity.dart';
-import '../../repositories/activity_repository.dart';
+import '../../repositories/activity_details_repository.dart';
 import '../formatters/activity_date_formatter.dart';
 import '../formatters/activity_price_formatter.dart';
 import '../view_models/activity_details_view_model.dart';
@@ -19,7 +19,7 @@ class ActivityDetailsScreen extends StatefulWidget {
   });
 
   final String activityId;
-  final ActivityRepository repository;
+  final ActivityDetailsRepository repository;
   final EnrollmentViewModel enrollmentViewModel;
 
   @override

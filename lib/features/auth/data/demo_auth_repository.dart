@@ -148,6 +148,10 @@ class DemoAuthRepository implements AuthRepository {
     return true;
   }
 
+  /// Els comptes de demostració no tenen token: el backend no els coneix.
+  @override
+  Future<String?> currentIdToken() async => null;
+
   @override
   Future<void> signOut() async {
     _setCurrentUser(null);

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../view_models/activities_map_view_model.dart';
 import '../view_models/activities_view_model.dart';
 import '../view_models/enrollment_view_model.dart';
 import '../widgets/activities_header.dart';
@@ -15,12 +16,23 @@ class ActivitiesScreen extends StatefulWidget {
     required this.onActivitySelected,
     this.onAssistantPressed,
     this.onMapOverlayChanged,
+    this.mapViewModel,
+    this.onMapActivitySelected,
   });
 
   final ActivitiesViewModel viewModel;
   final EnrollmentViewModel enrollmentViewModel;
   final ValueChanged<String> onActivitySelected;
   final VoidCallback? onAssistantPressed;
+
+  /// Si hi és, el mapa carrega les activitats per zona visible (backend) en
+  /// lloc de mostrar les de la llista.
+  // TODO(DP-029): mapa i llista haurien de tenir el mateix conjunt d'activitats.
+  final ActivitiesMapViewModel? mapViewModel;
+
+  /// Obre una activitat del mapa quan ve d'una altra font que la llista. Per
+  /// defecte, [onActivitySelected].
+  final ValueChanged<String>? onMapActivitySelected;
 
   /// Espai que ocupa la targeta del mapa des de baix (0 si no n'hi ha), per
   /// apartar-hi el botó «Crear activitat».
@@ -64,6 +76,11 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
   }
 
   Widget _buildContent() {
+    final mapViewModel = widget.mapViewModel;
+    if (_view == ActivitiesView.map && mapViewModel != null) {
+      return _buildAreaMap(mapViewModel);
+    }
+
     return ListenableBuilder(
       listenable: viewModel,
       builder: (context, child) {
@@ -135,6 +152,87 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
           },
         );
       },
+    );
+  }
+
+  /// Mapa que carrega la zona visible. Mentre carrega o si falla, continua
+  /// mostrant les activitats que ja tenia.
+  Widget _buildAreaMap(ActivitiesMapViewModel mapViewModel) {
+    return ListenableBuilder(
+      listenable: mapViewModel,
+      builder: (context, child) {
+        final errorMessage = mapViewModel.errorMessage;
+
+        return Padding(
+          padding: const EdgeInsets.only(top: 12),
+          child: Stack(
+            children: [
+              Positioned.fill(
+                child: ActivitiesMap(
+                  activities: mapViewModel.activities,
+                  onActivitySelected:
+                      widget.onMapActivitySelected ?? onActivitySelected,
+                  onOverlayHeightChanged: widget.onMapOverlayChanged,
+                  onVisibleAreaChanged: mapViewModel.loadArea,
+                ),
+              ),
+              if (mapViewModel.isLoading)
+                const Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  child: LinearProgressIndicator(
+                    semanticsLabel: 'Carregant les activitats de la zona',
+                  ),
+                ),
+              if (errorMessage != null)
+                Positioned(
+                  top: 12,
+                  left: 12,
+                  right: 12,
+                  child: _MapErrorBanner(
+                    message: errorMessage,
+                    onRetry: mapViewModel.retry,
+                  ),
+                ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _MapErrorBanner extends StatelessWidget {
+  const _MapErrorBanner({required this.message, required this.onRetry});
+
+  final String message;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+
+    return Card(
+      margin: EdgeInsets.zero,
+      color: colors.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: colors.outlineVariant),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
+        child: Row(
+          children: [
+            Expanded(child: Text(message)),
+            const SizedBox(width: 8),
+            TextButton(
+              onPressed: onRetry,
+              child: const Text('Tornar-ho a provar'),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
