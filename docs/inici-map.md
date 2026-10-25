@@ -11,6 +11,11 @@
   - coral amb el distintiu groc: publicada per una amistat (`creator.isFriend`).
 - Els marcadors propers s'agrupen amb un número (`ClusterManager` de `google_maps_flutter`); en ampliar el mapa
   se separen.
+- En tocar un grup, el mapa s'hi apropa fins que hi caben tots els marcadors (`newLatLngBounds`), que així es
+  van separant. Si són tots al mateix lloc (menys d'uns 30 m), apropar-s'hi no els separaria mai: es mostra la
+  llista d'activitats d'aquell lloc ordenades per data, i en tocar-ne una s'obre la fitxa (DP-034). Tocar un
+  marcador que en té d'altres al mateix lloc també mostra la llista: molt a prop, Google ja no els agrupa i
+  quedarien l'un sobre l'altre.
 - En tocar un marcador surt una targeta a sota (CA2) amb la fotografia, la categoria, el títol, el municipi,
   l'horari i la procedència («Publicat per …» amb «Amiga» o «Font: Agenda Cultural · Generalitat»).
   «Veure activitat» obre la fitxa (#75) dins d'Inici. La creu o tocar el mapa la tanquen.
@@ -63,7 +68,8 @@ Els marcadors són imatges generades amb els colors del tema (`forest`, `coral` 
 ## Proves
 
 `test/features/activities/activities_map_test.dart`: selector Mapa / Llista, un marcador per activitat amb el
-tipus i el grup correctes, targeta i «Veure activitat», tancar-la, activitats sense ubicació i llegenda. Amb
+tipus i el grup correctes, targeta i «Veure activitat», tancar-la, tocar un grup (llista si són al mateix lloc,
+apropar-s'hi si no), activitats sense ubicació i llegenda. Amb
 el backend: marcadors de la zona, fitxa des del mapa, error i reintent.
 `activities_map_view_model_test.dart`: càrrega amb marge, zona ja carregada, error amb reintent i respostes
 antigues. `http_activity_map_repository_test.dart`: petició per zona, conversió del JSON, errors i fitxa.
