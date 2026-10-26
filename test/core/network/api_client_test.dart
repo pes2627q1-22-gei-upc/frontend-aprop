@@ -17,49 +17,43 @@ void main() {
   });
 
   group('ApiClient', () {
-    test(
-      'Injecta Accept, Content-Type, Authorization i X-User-ID i resol la URI',
-      () async {
-        late http.Request capturedRequest;
-        final client = ApiClient(
-          baseUrl: Uri.parse('https://api-aprop.onrender.com/'),
-          idToken: () async => 'token-firebase-123',
-          userId: () => 'f53add44-367c-4c16-bbee-38878f3fed48',
-          client: MockClient((request) async {
-            capturedRequest = request;
-            return http.Response.bytes(
-              utf8.encode(jsonEncode({'ok': true})),
-              200,
-            );
-          }),
-        );
+    test('Injecta Accept, Content-Type i Authorization (sense X-User-ID) i resol la URI', () async {
+      late http.Request capturedRequest;
+      final client = ApiClient(
+        baseUrl: Uri.parse('https://api-aprop.onrender.com/'),
+        idToken: () async => 'token-firebase-123',
+        client: MockClient((request) async {
+          capturedRequest = request;
+          return http.Response.bytes(
+            utf8.encode(jsonEncode({'ok': true})),
+            200,
+          );
+        }),
+      );
 
-        final result = await client.postJson(
-          '/events/12/signup',
-          queryParameters: {'source': 'app'},
-          body: {'note': 'test'},
-        );
+      final result = await client.postJson(
+        '/events/12/signup',
+        queryParameters: {'source': 'app'},
+        body: {'note': 'test'},
+      );
 
-        expect(
-          capturedRequest.url.toString(),
-          'https://api-aprop.onrender.com/events/12/signup?source=app',
-        );
-        expect(capturedRequest.headers['Accept'], 'application/json');
-        expect(
-          capturedRequest.headers['Content-Type'],
-          startsWith('application/json'),
-        );
-        expect(
-          capturedRequest.headers['Authorization'],
-          'Bearer token-firebase-123',
-        );
-        expect(
-          capturedRequest.headers['X-User-ID'],
-          'f53add44-367c-4c16-bbee-38878f3fed48',
-        );
-        expect(result, {'ok': true});
-      },
-    );
+      expect(
+        capturedRequest.url.toString(),
+        'https://api-aprop.onrender.com/events/12/signup?source=app',
+      );
+      expect(capturedRequest.headers['Accept'], 'application/json');
+      expect(
+        capturedRequest.headers['Content-Type'],
+        startsWith('application/json'),
+      );
+      expect(
+        capturedRequest.headers['Authorization'],
+        'Bearer token-firebase-123',
+      );
+      // L'usuari surt del token: ja no s'envia cap altra identitat.
+      expect(capturedRequest.headers.containsKey('X-User-ID'), isFalse);
+      expect(result, {'ok': true});
+    });
 
     test('Descodifica l’error estandarditzat {"error": "..."}', () async {
       final client = ApiClient(

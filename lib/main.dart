@@ -32,14 +32,6 @@ Future<void> main() async {
 Future<APropApp> createConfiguredApp() async {
   final authRepository = await _createAuthRepository();
 
-  // `X-User-ID` porta l'UUID de l'usuari a la base de dades del backend, el que
-  // retorna `POST /auth/sync`. Sense sessió o sense backend, no s'envia.
-  // TODO(DP-036): sobrarà quan el backend tregui l'usuari del token.
-  String? serverUserId;
-  authRepository.authStateChanges().listen((user) {
-    serverUserId = user?.serverId;
-  });
-
   if (!ApiConfig.isConfigured) {
     return APropApp(authRepository: authRepository);
   }
@@ -47,7 +39,6 @@ Future<APropApp> createConfiguredApp() async {
   final apiClient = ApiClient(
     baseUrl: Uri.parse(ApiConfig.baseUrl),
     idToken: authRepository.currentIdToken,
-    userId: () => serverUserId,
   );
 
   final activityRepository = HttpActivityRepository(apiClient: apiClient);
@@ -89,7 +80,6 @@ Future<AuthRepository> _createAuthRepository() async {
       ? HttpUserSyncRepository(
           baseUrl: Uri.parse(ApiConfig.baseUrl),
           idToken: () async => auth.currentUser?.getIdToken(),
-          userId: () => auth.currentUser?.uid,
         )
       : DemoUserSyncRepository(
           currentUid: () => auth.currentUser?.uid,

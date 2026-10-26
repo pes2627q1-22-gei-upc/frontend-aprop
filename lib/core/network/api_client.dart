@@ -40,24 +40,22 @@ class ApiException extends StateError implements Exception {
 ///
 /// Gestiona:
 /// - Injecció de capçaleres comunes (`Accept`, `Content-Type`).
-/// - Injecció d'autenticació (`Authorization: Bearer <token>` i `X-User-ID`).
+/// - Injecció d'autenticació (`Authorization: Bearer <token>`): el backend
+///   treu l'usuari del token.
 /// - Timeout de 60s per absorbir el cold start de Render Free.
 /// - Descodificació UTF-8 i d'errors estandarditzats `{"error": "..."}`.
 class ApiClient {
   ApiClient({
     Uri? baseUrl,
     Future<String?> Function()? idToken,
-    FutureOr<String?> Function()? userId,
     http.Client? client,
     this.timeout = ApiConfig.connectTimeout,
   }) : baseUrl = baseUrl ?? Uri.parse(ApiConfig.baseUrl),
        idTokenProvider = idToken,
-       userIdProvider = userId,
        _client = client ?? http.Client();
 
   final Uri baseUrl;
   final Future<String?> Function()? idTokenProvider;
-  final FutureOr<String?> Function()? userIdProvider;
   final http.Client _client;
   final Duration timeout;
 
@@ -78,13 +76,11 @@ class ApiClient {
     Map<String, String>? extraHeaders,
   }) async {
     final token = await idTokenProvider?.call();
-    final uid = await userIdProvider?.call();
 
     return <String, String>{
       'Accept': 'application/json',
       if (hasJsonBody) 'Content-Type': 'application/json',
       if (token != null && token.isNotEmpty) 'Authorization': 'Bearer $token',
-      if (uid != null && uid.isNotEmpty) 'X-User-ID': uid,
       ...?extraHeaders,
     };
   }

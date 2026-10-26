@@ -399,8 +399,10 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Qui decideix:** frontend + backend + equip (criteris i categories)
 - **Resolució:**
 
+## Resoltes
+
 ### DP-036 · Format UUID de `X-User-ID` i sincronització d'UID de Firebase a Render
-- **Estat:** oberta
+- **Estat:** resolta 2026-10-26
 - **Obert per:** 2026-10-25 · Antigravity · Taiga #231
 - **Identificador:** renumerat de DP-034 a DP-036 en integrar `develop` (PR #22 i #24), que ja feien servir DP-034 i DP-035.
 - **Context:** `ApiClient.toCanonicalUuid` (`lib/core/network/api_client.dart`), `HttpEnrollmentRepository`, `main.dart`; `api-aprop` (`normalizeUserID` a `event_service`, `signup_service`, `assistant_service`).
@@ -414,8 +416,4 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
   - s'han eliminat `ApiClient.toCanonicalUuid` i `isCanonicalUuid`.
   Amb Firebase actiu al backend continua fallant: `getUserID` agafa l'UID de Firebase del token i no el tradueix (`GetByFirebaseUID` només es fa servir a `/auth/sync` i al perfil). Cal l'opció A al backend; quan hi sigui, `X-User-ID` sobrarà (`TODO(DP-036)` a `main.dart`).
 - **Qui decideix:** backend + frontend
-- **Resolució:**
-
-## Resoltes
-
-(cap)
+- **Resolució:** A, al backend. `fix/resolve-user-id` (PR #36 d'api-aprop, Tasca #237, Wen) i `feature/esdeveniment-no-ofi` (PR #35, Tasca #236, Arnau) tradueixen l'UID de Firebase del token a l'UUID de `users` (`requester.ID`, `EventService.ResolveUserID` amb `GetByFirebaseUID`) a inscripcions, crear esdeveniments, xatbot i preferències. `X-User-ID` només es llegeix quan el backend funciona sense Firebase. Al frontend (2026-10-26, Taiga #82) ja no s'envia `X-User-ID`: l'usuari surt només del token. `AppUser.serverId` (l'`id` de `POST /auth/sync`) es continua fent servir per a `GET /users/{id}/events` i com a clau de les inscripcions.
