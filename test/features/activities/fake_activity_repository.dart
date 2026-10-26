@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:aprop/features/activities/models/activity.dart';
+import 'package:aprop/features/activities/models/activity_filters.dart';
 import 'package:aprop/features/activities/models/activity_page.dart';
 import 'package:aprop/features/activities/models/new_activity.dart';
 import 'package:aprop/features/activities/repositories/activity_repository.dart';
@@ -9,6 +10,7 @@ class FakeActivityRepository implements ActivityRepository {
   Future<Activity?> Function(String id)? findActivity;
   final requestedIds = <String>[];
   int listRequests = 0;
+  Future<List<String>> Function()? onCategories;
 
   /// Resposta de [getActivities].
   List<Activity> activities = const [];
@@ -32,13 +34,19 @@ class FakeActivityRepository implements ActivityRepository {
   Future<ActivityPage> getActivitiesPage({
     int page = 0,
     int pageSize = 50,
+    ActivityFilters? filters,
   }) async {
-    final source = await getActivities();
+    final catalogue = await getActivities();
+    final source = filters?.applyTo(catalogue) ?? catalogue;
     return ActivityPage(
       items: source.skip(page * pageSize).take(pageSize),
       hasMore: (page + 1) * pageSize < source.length,
     );
   }
+
+  @override
+  Future<List<String>> getFilterCategories() async =>
+      onCategories == null ? activityFilterCategories : await onCategories!();
 
   @override
   Future<Activity?> getActivityById(String id) {

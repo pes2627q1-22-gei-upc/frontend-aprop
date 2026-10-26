@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui' show SemanticsAction;
 
 import 'package:aprop/app/theme/app_theme.dart';
@@ -99,6 +100,102 @@ void main() {
   }
 
   GoogleMap map(WidgetTester tester) => tester.widget(find.byType(GoogleMap));
+
+  testWidgets(
+    'Categories load from the repository, with retry and draft selection',
+    (tester) async {
+      final pending = Completer<List<String>>();
+      final repository = FakeActivityRepository()
+        ..onCategories = () => pending.future;
+      model.dispose();
+      model = ActivitiesViewModel(repository: repository);
+      await pumpScreen(tester);
+      await tester.tap(
+        find.byKey(const ValueKey('activities-filter-categories')),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      expect(
+        tester
+            .widget<FilledButton>(find.widgetWithText(FilledButton, 'Aplicar'))
+            .onPressed,
+        isNull,
+      );
+      pending.completeError(StateError('offline'));
+      await tester.pumpAndSettle();
+      expect(
+        find.text('No hem pogut carregar les categories.'),
+        findsOneWidget,
+      );
+      expect(find.byType(CheckboxListTile), findsNothing);
+      repository.onCategories = () async => ['Concerts', 'Teatre'];
+      await tester.tap(find.text('Tornar-ho a provar'));
+      await tester.pumpAndSettle();
+      expect(find.byType(CheckboxListTile), findsNWidgets(2));
+      await tester.tap(category('Concerts'));
+      expect(model.filters.isActive, isFalse);
+      await apply(tester);
+      expect(model.filters.categories, {'Concerts'});
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'An empty category catalogue keeps the unrestricted option usable',
+    (tester) async {
+      model.dispose();
+      model = ActivitiesViewModel(
+        repository: FakeActivityRepository()..onCategories = () async => [],
+      );
+      await pumpScreen(tester);
+      await open(tester, 'categories');
+      expect(
+        find.text(
+          'No hi ha categories disponibles. Pots consultar totes les activitats.',
+        ),
+        findsOneWidget,
+      );
+      expect(find.byType(CheckboxListTile), findsNothing);
+      await apply(tester);
+      expect(model.filters.isActive, isFalse);
+      expect(find.byType(ActivityCategoriesFilterSheet), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'Missing map categories offer the server-filtered list, not a false empty result',
+    (tester) async {
+      final areaModel = ActivitiesMapViewModel(
+        repository: FakeActivityMapRepository()
+          ..activities = [
+            event('unknown', DateTime(2026, 9, 26), category: 'Activitat'),
+          ],
+      );
+      addTearDown(areaModel.dispose);
+      await areaModel.loadArea(
+        const GeoBounds(
+          southWest: GeoPoint(latitude: 41, longitude: 1),
+          northEast: GeoPoint(latitude: 42, longitude: 3),
+        ),
+      );
+      await pumpScreen(tester, areaModel: areaModel);
+      await open(tester, 'categories');
+      await tester.tap(category('Música'));
+      await apply(tester);
+      await tester.tap(find.text('Mapa'));
+      await tester.pumpAndSettle();
+      expect(
+        find.text('No hi ha activitats amb aquests filtres en aquesta zona.'),
+        findsNothing,
+      );
+      await tester.tap(find.text('Veure llista'));
+      await tester.pumpAndSettle();
+      expect(find.text('Jazz al parc'), findsOneWidget);
+      expect(model.filters.categories, {'Música'});
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   testWidgets(
     'Category edits remain a draft until Apply and appear in both views',
@@ -412,13 +509,22 @@ void main() {
     'Map feedback stays scrollable with narrow screens and doubled text',
     (tester) async {
       model.dispose();
-      model = ActivitiesViewModel(
-        repository: FakeActivityRepository()
+      model = ActivitiesViewModel(repository: FakeActivityRepository());
+      await model.applyFilters(ActivityFilters(categories: ['Cinema']));
+      final areaModel = ActivitiesMapViewModel(
+        repository: FakeActivityMapRepository()
           ..activities = [
             event('unknown', DateTime(2026, 9, 26), category: 'Activitat'),
           ],
-      )..applyFilters(ActivityFilters(categories: ['Cinema']));
-      await pumpScreen(tester, scale: 2);
+      );
+      addTearDown(areaModel.dispose);
+      await areaModel.loadArea(
+        const GeoBounds(
+          southWest: GeoPoint(latitude: 41, longitude: 1),
+          northEast: GeoPoint(latitude: 42, longitude: 3),
+        ),
+      );
+      await pumpScreen(tester, scale: 2, areaModel: areaModel);
       await tester.ensureVisible(find.text('Mapa'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Mapa'));

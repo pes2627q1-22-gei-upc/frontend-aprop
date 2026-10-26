@@ -1,4 +1,5 @@
 import '../models/activity.dart';
+import '../models/activity_filters.dart';
 import '../models/activity_page.dart';
 import '../models/new_activity.dart';
 import 'activity_details_repository.dart';
@@ -9,7 +10,15 @@ abstract interface class ActivityRepository
 
   /// Loads one zero-based page, preserving the source's order. Throws on a
   /// request or decoding failure; an empty result is a valid catalogue end.
-  Future<ActivityPage> getActivitiesPage({int page = 0, int pageSize = 50});
+  Future<ActivityPage> getActivitiesPage({
+    int page = 0,
+    int pageSize = 50,
+    ActivityFilters? filters,
+  });
+
+  /// Available category labels from the same source as the catalogue.
+  /// Throws on a loading/decoding failure; an empty list is valid.
+  Future<List<String>> getFilterCategories();
 
   /// Returns null when the activity does not exist.
   @override

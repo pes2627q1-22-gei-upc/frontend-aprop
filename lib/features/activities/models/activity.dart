@@ -22,7 +22,7 @@ class ActivityCreator {
 }
 
 class Activity {
-  const Activity({
+  Activity({
     required this.id,
     required this.title,
     required this.category,
@@ -36,11 +36,17 @@ class Activity {
     this.location,
     this.price,
     this.imageUrl,
-  });
+    Iterable<String> categories = const [],
+  }) : categories = List.unmodifiable(
+         categories.isEmpty ? [category] : categories,
+       );
 
   final String id;
   final String title;
   final String category;
+
+  /// All reported categories participate in filtering, not just the badge.
+  final List<String> categories;
   final String municipality;
   final DateTime startsAt;
   final String imageAsset;

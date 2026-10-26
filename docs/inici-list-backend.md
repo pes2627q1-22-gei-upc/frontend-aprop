@@ -24,9 +24,9 @@ commit cal confirmar-ne l'estat a Taiga. Branca `feature/inici-list-backend`, de
 una resposta curta o buida marca el final. Si el total és múltiple de 50 cal una última petició buida.
 Es respecta l'ordre del backend: ordenar cada pàgina per separat alterava la coherència entre pàgines.
 
-Els filtres actuals només afecten les dades carregades. Si no hi ha coincidències però queden pàgines,
-el text és «Cap coincidència entre les activitats carregades» i es pot continuar carregant. No s'afirma
-que tot el catàleg estigui buit. Aplicar-los no fa peticions de filtratge al servidor en aquesta tasca.
+En la primera tasca, els filtres només afectaven les dades carregades. La segona (#87) els passa al
+servidor abans de paginar; vegeu [la integració de filtres](inici-server-filters.md). El text de buit
+parcial es conserva com a defensa si una font retorna dades que no coincideixen amb la consulta.
 
 ## Arquitectura i recorregut del codi
 

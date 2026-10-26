@@ -149,9 +149,19 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
   Future<void> _openCategories() async {
     final owner = viewModel;
     final initial = owner.filters.categories;
+    owner.loadFilterCategories();
     final result = await _showFilter<Set<String>>(
       'categories',
-      (_) => ActivityCategoriesFilterSheet(initialCategories: initial),
+      (_) => ListenableBuilder(
+        listenable: owner,
+        builder: (context, _) => ActivityCategoriesFilterSheet(
+          initialCategories: initial,
+          categories: owner.filterCategories,
+          isLoading: owner.isLoadingCategories,
+          errorMessage: owner.categoriesError,
+          onRetry: owner.loadFilterCategories,
+        ),
+      ),
     );
     if (mounted && identical(owner, viewModel) && result != null) {
       _applyFilters(owner.filters.withCategories(result));
@@ -427,6 +437,7 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
                     isEmpty: activities.isEmpty,
                     missingCategories: missingCategories,
                     onClear: _clearFilters,
+                    onShowList: () => _show(ActivitiesView.list),
                   ),
                 ),
             ],

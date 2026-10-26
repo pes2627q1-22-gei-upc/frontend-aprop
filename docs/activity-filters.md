@@ -31,8 +31,9 @@ el calendari, sense sumar 24 hores, per respectar canvis de mes, any i horari d'
 
 ### Categories
 
-Caselles per a les vuit categories del mockup: Música, Teatre, Cinema, Dansa, Exposicions, Llibres i
-lletres, Fires i mercats i Cultura popular. Les categories són **OR** i es combinen amb les dates
+Caselles per a les categories de la font del catàleg. En HTTP es carreguen de `/categories`; les vuit
+categories del mockup es conserven només al repositori Demo. Hi ha càrrega, error amb reintent i resposta
+buida vàlida, sense substituir errors del servidor per opcions inventades. Les categories són **OR** i es combinen amb les dates
 mitjançant **AND**. Cap categoria triada elimina la restricció de categoria.
 
 La coincidència ignora majúscules, espais sobrants i accents; no inventa equivalències entre etiquetes
@@ -52,9 +53,11 @@ diferents. No es modifica la llista provisional de categories de creació (DP-01
 | [activity_filter_formatter.dart](../lib/features/activities/presentation/formatters/activity_filter_formatter.dart) | Mesos, intervals i resums en català. |
 | [activity_filter_feedback.dart](../lib/features/activities/presentation/widgets/activity_filter_feedback.dart) | Estats sense coincidències i categories no informades. |
 
-`MainShell` ja crea el ViewModel per compte. `load()` consulta el repositori existent i aplica els
-filtres confirmats en arribar la resposta, encara que hagin canviat durant l'espera. Filtrar no fa
-peticions noves ni modifica els `Activity`. Una recàrrega fallida conserva dades i filtres al ViewModel.
+`MainShell` ja crea el ViewModel per compte. Aplicar filtres reinicia la consulta a la pàgina 0 i passa
+el valor immutable al repositori; carregar més o actualitzar el torna a passar. Les respostes d’una
+consulta antiga s’ignoren. Una recàrrega de la mateixa consulta conserva dades si falla; un canvi de
+consulta no mostra targetes anteriors sota la selecció nova. `Activity.categories` conserva totes les
+categories rebudes i no permet canvis a través de la llista original ni del getter.
 
 Un retorn nul del panell és cancel·lació; una selecció buida confirmada és vàlida. Només es modifica
 el camp editat del filtre actual. Model i ViewModel no naveguen ni reben `BuildContext`. No s'afegeixen
@@ -78,17 +81,21 @@ Els missatges superposats al mapa també admeten desplaçament si el text amplia
 
 ## Backend i límits (DP-035)
 
-Filtratge local sobre dades carregades, sense inventar consultes HTTP. La petició de mapa per zona i
-el seu marge no canvien; una resposta nova es filtra amb la selecció actual sense repetir la consulta.
+La llista filtra al servidor abans de paginar. Les dates es passen com a dies civils inclusius i les
+categories es resolen a IDs de `/categories`; diverses seleccions combinen les peticions com OR.
+Vegeu el contracte, la paginació i els límits a [la guia d’integració](inici-server-filters.md), DP-038.
+La petició de mapa per zona i el seu marge no canvien: l’endpoint no admet aquests paràmetres. Una
+resposta nova es filtra localment amb la selecció actual sense repetir la consulta.
 
 DP-029 continua oberta: amb backend, Mapa i Llista encara tenen fonts diferents. `Activity` només té
-data d'inici i una categoria. No s'infereix la durada d'un esdeveniment de diversos dies ni una categoria
+data d'inici i conserva totes les categories informades. No s'infereix la durada d'un esdeveniment de diversos dies ni una categoria
 que el backend no retorni. Una categoria buida o «Activitat» és no informada: amb categories triades
 no és una coincidència i es mostra quantes activitats queden excloses dins de les dates seleccionades.
 Sense restricció de categoria continuen visibles.
 
-Cal acordar filtres del servidor, categories canòniques i font compartida abans de considerar completa
-la integració global de filtratge amb el backend.
+Quan falten categories al mapa es mostra l’abast de les dades excloses i un accés «Veure llista».
+No es presenta aquesta falta de metadades com si la zona no tingués coincidències. Cal ampliar el
+contracte del mapa abans de considerar completa la integració global amb els mateixos resultats.
 
 ## Verificació
 
@@ -100,8 +107,8 @@ La base tenia un error preexistent en crear activitats: sumar 24 hores des de mi
 el mateix dia quan acabava l'horari d'estiu. Es corregeix amb `DateTime(any, mes, dia + 1)` i una regressió
 del 25 d'octubre de 2026; el recorregut complet de creació torna a passar.
 
-La configuració local de Firebase continua pendent de permisos. Les proves demo no en depenen, però
-l'anàlisi i compilació de l'entrada de producció sí.
+La configuració local de Firebase d’Adam ja està generada (26 d’octubre). La verificació actual de la
+integració s’indica a `inici-server-filters.md`; el resultat següent correspon a la implementació inicial.
 
 Resultat del 25 d'octubre de 2026:
 
