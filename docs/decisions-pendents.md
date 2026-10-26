@@ -205,6 +205,12 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Dubte:** no hi ha endpoint per publicar un `NoOficial` a `api-aprop`: ruta, JSON, format del preu (s'ha fet servir `double` en euros, `0` = gratuïta) i si el backend apunta automàticament la persona creadora.
 - **Opcions:** A) el backend crea l'activitat i la inscripció de qui la crea en una sola operació · B) el frontend crida després l'endpoint d'inscripció.
 - **Provisionalment:** `createActivity` en Dart pur i implementació en memòria; `MainShell` apunta la creadora amb `EnrollmentViewModel` (`TODO(DP-017)`).
+- **Amb el backend (2026-10-26, Claude Code (Opus 5.5) amb confirmació de l'usuari):** `POST /events` ja existeix i `HttpActivityRepository.createActivity` (PR #23, Taiga #231) l'envia. S'hi ajusta `newActivityToJson`:
+  - la data s'envia amb l'hora d'aquí com si fos UTC: el backend desa només el dia i, passant-la a UTC, una activitat a les 00.30 h quedaria el dia anterior (DP-029);
+  - la categoria és l'etiqueta del backend (DP-018);
+  - les indicacions van només a `address` (abans també a `place`, i en llegir-la sortien repetides);
+  - `free` només s'envia si hi ha preu: sense preu no se sap si és gratuïta.
+  No es desen al backend l'import del preu, la imatge triada (#94, DP-019) ni l'hora. El backend no apunta qui crea l'activitat: `MainShell` la continua apuntant (opció B). Després de crear-la, el mapa d'Inici torna a demanar la zona visible perquè hi surti. Amb login real, el backend encara respon 400 «invalid user id» fins que tradueixi l'UID de Firebase a l'UUID de `users` (DP-036).
 - **Qui decideix:** frontend + backend
 - **Resolució:**
 
@@ -215,6 +221,7 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Dubte:** la llista tancada de categories no està definida, i el CA1 diu «categoria (≥ 1)» mentre que el model `Activity` en té una sola.
 - **Opcions:** A) una sola categoria (com ara) · B) diverses categories (cal canviar `Activity.category` i la llista, la fitxa i l'agenda).
 - **Provisionalment:** una sola categoria triada d'una llista provisional (Música, Teatre, Exposicions) (`TODO(DP-018)`). L'usuari ho ha decidit així de moment per no canviar el model.
+- **Amb el backend (2026-10-26, Claude Code (Opus 5.5) amb confirmació de l'usuari):** amb backend, el formulari carrega `GET /categories` (`HttpActivityRepository.getCategories`) i només ofereix les de l'Agenda Cultural (`agenda:categories/…`), ordenades pel nom. No ofereix els àmbits (`agenda:ambits/…`) ni les que s'han creat escrivint un nom nou. S'envia l'etiqueta (p. ex. `agenda:categories/teatre`), perquè `POST /events` crea una categoria nova amb qualsevol nom que no existeixi. El nom que es veu surt de l'etiqueta i no porta accents («Conferencies», DP-029). Sense backend, continua la llista provisional. Els filtres d'Inici (DP-035) tenen vuit etiquetes pròpies dels mockups: algunes coincideixen amb categories (Teatre, Dansa, Exposicions, Fires i mercats) i d'altres amb àmbits (Música, Cinema, Llibres i lletres), així que una activitat creada amb, per exemple, «Concerts» no surt filtrant per «Música».
 - **Qui decideix:** equip
 - **Resolució:**
 

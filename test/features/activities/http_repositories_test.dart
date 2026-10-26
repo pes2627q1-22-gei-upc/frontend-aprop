@@ -110,6 +110,92 @@ void main() {
       expect(created.source, ActivitySource.community);
       expect(created.creator?.userId, 'uid-1');
     });
+
+    group('Crear (POST /events)', () {
+      late Map<String, Object?> sent;
+
+      HttpActivityRepository repository() => HttpActivityRepository(
+        apiClient: ApiClient(
+          client: MockClient((request) async {
+            sent = jsonDecode(
+              utf8.decode(request.bodyBytes),
+            ) as Map<String, Object?>;
+            return jsonResponse(
+              sampleEventJson(id: 506, isOfficial: false),
+              201,
+            );
+          }),
+        ),
+      );
+
+      NewActivity newActivity({double? price, String? directions}) =>
+          NewActivity(
+            title: 'Taller de ceràmica',
+            description: 'Per a tots els nivells.',
+            category: 'agenda:categories/exposicions',
+            startsAt: DateTime(2026, 11, 7, 0, 30),
+            municipality: 'Sant Cugat del Vallès',
+            imageAsset: 'assets/images/jazz_al_parc.jpg',
+            creator: const ActivityCreator(
+              name: 'Pol Vidal',
+              userId: 'uid-1',
+              isFriend: false,
+            ),
+            directions: directions,
+            price: price,
+          );
+
+      test('Envia l’hora d’aquí sense canviar de dia i l’etiqueta', () async {
+        await repository().createActivity(
+          newActivity(price: 0, directions: 'Entrada pel pati'),
+        );
+
+        // Passada a UTC, les 00.30 h serien el dia 6.
+        expect(sent['start-date'], '2026-11-07T00:30:00.000Z');
+        expect(sent['categories'], ['agenda:categories/exposicions']);
+        expect(sent['free'], isTrue);
+        // Les indicacions només a l'adreça: lloc i adreça s'ajunten en llegir.
+        expect(sent['address'], 'Entrada pel pati');
+        expect(sent.containsKey('place'), isFalse);
+      });
+
+      test('Sense preu, no diu que sigui gratuïta', () async {
+        await repository().createActivity(newActivity());
+
+        expect(sent.containsKey('free'), isFalse);
+        expect(sent['address'], '');
+      });
+    });
+
+    test(
+      'Categories: les de l’Agenda Cultural, ordenades i llegibles',
+      () async {
+        final repo = HttpActivityRepository(
+          apiClient: ApiClient(
+            client: MockClient((request) async {
+              expect(request.url.path, '/categories');
+              return jsonResponse([
+                {'id': 1, 'name': 'agenda:categories/teatre'},
+                {'id': 13, 'name': ''},
+                {'id': 20, 'name': 'agenda:categories/cultura-digital'},
+                {'id': 27, 'name': 'agenda:ambits/musica'},
+                {'id': 34, 'name': 'Música'},
+              ]);
+            }),
+          ),
+        );
+
+        final categories = await repo.getCategories();
+
+        expect(categories.map((c) => c.label), ['Cultura digital', 'Teatre']);
+        // Es desa l'etiqueta, perquè l'activitat quedi a la categoria que ja
+        // existeix en lloc de crear-ne una de nova.
+        expect(categories.map((c) => c.value), [
+          'agenda:categories/cultura-digital',
+          'agenda:categories/teatre',
+        ]);
+      },
+    );
   });
 
   group('HttpEnrollmentRepository', () {

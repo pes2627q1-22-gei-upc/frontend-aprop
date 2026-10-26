@@ -6,6 +6,7 @@ import '../../features/activities/data/combined_activity_repository.dart';
 import '../../features/activities/data/demo_activity_repository.dart';
 import '../../features/activities/data/demo_discovery_repository.dart';
 import '../../features/activities/data/demo_enrollment_repository.dart';
+import '../../features/activities/repositories/activity_category_repository.dart';
 import '../../features/activities/repositories/activity_map_repository.dart';
 import '../../features/activities/repositories/activity_repository.dart';
 import '../../features/activities/repositories/discovery_repository.dart';
@@ -40,6 +41,7 @@ class AuthGate extends StatefulWidget {
     this.activityMapRepository,
     this.profileRepository,
     this.profileSettingsRepository,
+    this.activityCategoryRepository,
   });
 
   final AuthRepository authRepository;
@@ -50,6 +52,7 @@ class AuthGate extends StatefulWidget {
   final DiscoveryRepository? discoveryRepository;
   final ProfileRepository? profileRepository;
   final ProfileSettingsRepository? profileSettingsRepository;
+  final ActivityCategoryRepository? activityCategoryRepository;
 
   /// Repositori opcional per al mapa d'Inici. Si és nul, el mapa mostra les
   /// activitats del catàleg d'`activityRepository`.
@@ -163,6 +166,7 @@ class _AuthGateState extends State<AuthGate> {
           activityMapRepository: _activityMapRepository,
           profileRepository: _profileRepository,
           profileSettingsRepository: _profileSettingsRepository,
+          activityCategoryRepository: widget.activityCategoryRepository,
         );
       },
     );

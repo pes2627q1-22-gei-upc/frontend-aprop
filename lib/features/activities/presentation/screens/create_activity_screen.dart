@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../../models/activity.dart';
+import '../../models/activity_category.dart';
 import '../../models/activity_options.dart';
+import '../../repositories/activity_category_repository.dart';
 import '../../repositories/activity_repository.dart';
 import '../../repositories/location_repository.dart';
 import '../formatters/activity_date_formatter.dart';
@@ -20,10 +22,14 @@ class CreateActivityScreen extends StatefulWidget {
     required this.locationRepository,
     required this.creator,
     required this.onCreated,
+    this.categoryRepository,
     this.now = DateTime.now,
   });
 
   final ActivityRepository repository;
+
+  /// Categories del backend. Si és nul, es fa servir la llista provisional.
+  final ActivityCategoryRepository? categoryRepository;
   final LocationRepository locationRepository;
   final ActivityCreator creator;
 
@@ -53,8 +59,9 @@ class _CreateActivityScreenState extends State<CreateActivityScreen> {
       repository: widget.repository,
       locationRepository: widget.locationRepository,
       creator: widget.creator,
+      categoryRepository: widget.categoryRepository,
       now: widget.now,
-    );
+    )..loadCategories();
   }
 
   @override
@@ -163,10 +170,43 @@ class _CreateActivityScreenState extends State<CreateActivityScreen> {
                 const SizedBox(height: 16),
                 Text('Categoria', style: theme.textTheme.titleMedium),
                 const SizedBox(height: 8),
-                _CategorySelector(
-                  selected: _viewModel.category,
-                  onSelected: _viewModel.setCategory,
-                ),
+                if (_viewModel.isLoadingCategories)
+                  const SizedBox(
+                    height: 48,
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: SizedBox.square(
+                        dimension: 24,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          semanticsLabel: 'Carregant les categories',
+                        ),
+                      ),
+                    ),
+                  )
+                else if (_viewModel.categoriesError case final error?)
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          error,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: colors.error,
+                          ),
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: _viewModel.loadCategories,
+                        child: const Text('Tornar-ho a provar'),
+                      ),
+                    ],
+                  )
+                else
+                  _CategorySelector(
+                    categories: _viewModel.categories,
+                    selected: _viewModel.category,
+                    onSelected: _viewModel.setCategory,
+                  ),
                 if (_viewModel.fieldError(CreateActivityField.category)
                     case final categoryError?) ...[
                   const SizedBox(height: 4),
@@ -308,8 +348,15 @@ IconData _categoryIcon(String category) =>
 /// Fila horitzontal de categories que es pot desplaçar. Cada una té els
 /// colors de la seva insígnia; només se'n pot triar una.
 class _CategorySelector extends StatelessWidget {
-  const _CategorySelector({required this.selected, required this.onSelected});
+  const _CategorySelector({
+    required this.categories,
+    required this.selected,
+    required this.onSelected,
+  });
 
+  final List<ActivityCategory> categories;
+
+  /// `ActivityCategory.value` de la triada.
   final String? selected;
   final ValueChanged<String> onSelected;
 
@@ -321,16 +368,16 @@ class _CategorySelector extends StatelessWidget {
       height: 48,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        itemCount: activityCategories.length,
+        itemCount: categories.length,
         separatorBuilder: (context, index) => const SizedBox(width: 8),
         itemBuilder: (context, index) {
-          final category = activityCategories[index];
+          final category = categories[index];
           return _CategoryPill(
-            label: category,
-            icon: _categoryIcon(category),
-            colors: ActivityCategoryBadge.colorsFor(category, colors),
-            isSelected: selected == category,
-            onTap: () => onSelected(category),
+            label: category.label,
+            icon: _categoryIcon(category.label),
+            colors: ActivityCategoryBadge.colorsFor(category.label, colors),
+            isSelected: selected == category.value,
+            onTap: () => onSelected(category.value),
           );
         },
       ),

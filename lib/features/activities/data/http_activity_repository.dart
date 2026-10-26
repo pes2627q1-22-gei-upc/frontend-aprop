@@ -1,12 +1,15 @@
 import '../../../core/network/api_client.dart';
 import '../models/activity.dart';
+import '../models/activity_category.dart';
 import '../models/new_activity.dart';
+import '../repositories/activity_category_repository.dart';
 import '../repositories/activity_repository.dart';
 import 'activity_json_mapper.dart';
 
 /// Implementació d'[ActivityRepository] connectada al backend de Render
 /// (`/events` i `/categories`).
-class HttpActivityRepository implements ActivityRepository {
+class HttpActivityRepository
+    implements ActivityRepository, ActivityCategoryRepository {
   HttpActivityRepository({required this.apiClient, this.defaultPageSize = 50});
 
   final ApiClient apiClient;
@@ -116,16 +119,24 @@ class HttpActivityRepository implements ActivityRepository {
     return null;
   }
 
-  /// Obté la llista de categories del catàleg (`GET /categories`).
-  Future<List<({int id, String name})>> getCategories() async {
+  /// Categories per crear activitats (`GET /categories`): només les de
+  /// l'Agenda Cultural (`agenda:categories/…`), ordenades pel nom. Els àmbits
+  /// (`agenda:ambits/…`) i les que s'han creat escrivint un nom nou no
+  /// s'ofereixen.
+  // TODO(DP-018): llista provisional fins que l'equip tanqui les categories.
+  @override
+  Future<List<ActivityCategory>> getCategories() async {
     final decoded = await apiClient.getJson('categories');
     if (decoded is! List<Object?>) return const [];
-    return [
+    final categories = [
       for (final item in decoded)
-        if (item is Map<String, Object?> &&
-            item['id'] is num &&
-            item['name'] is String)
-          (id: (item['id'] as num).toInt(), name: item['name'] as String),
+        if (item is Map<String, Object?>)
+          if (item['name'] case final String name
+              when name.startsWith(_categoryPrefix))
+            ActivityCategory(value: name, label: activityCategoryLabel(name)),
     ];
+    return categories..sort((a, b) => a.label.compareTo(b.label));
   }
 }
+
+const _categoryPrefix = 'agenda:categories/';

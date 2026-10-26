@@ -1,9 +1,11 @@
 import 'package:flutter/foundation.dart';
 
 import '../../models/activity.dart';
+import '../../models/activity_category.dart';
 import '../../models/activity_options.dart';
 import '../../models/geo_point.dart';
 import '../../models/new_activity.dart';
+import '../../repositories/activity_category_repository.dart';
 import '../../repositories/activity_repository.dart';
 import '../../repositories/location_repository.dart';
 
@@ -30,10 +32,19 @@ class CreateActivityViewModel extends ChangeNotifier {
     required this._repository,
     required this._locationRepository,
     required this._creator,
+    this._categoryRepository,
     this._now = DateTime.now,
-  });
+  }) : _categories = _categoryRepository == null
+           ? [
+               for (final name in activityCategories)
+                 ActivityCategory.plain(name),
+             ]
+           : const [];
 
   final ActivityRepository _repository;
+
+  /// D'on surten les categories. Si és nul, es fa servir la llista provisional.
+  final ActivityCategoryRepository? _categoryRepository;
   final LocationRepository _locationRepository;
   final ActivityCreator _creator;
   final DateTime Function() _now;
@@ -55,7 +66,15 @@ class CreateActivityViewModel extends ChangeNotifier {
   bool _isDisposed = false;
   String? _errorMessage;
 
+  List<ActivityCategory> _categories;
+  bool _isLoadingCategories = false;
+  String? _categoriesError;
+
+  /// Valor de la categoria triada (`ActivityCategory.value`).
   String? get category => _category;
+  List<ActivityCategory> get categories => _categories;
+  bool get isLoadingCategories => _isLoadingCategories;
+  String? get categoriesError => _categoriesError;
   DateTime? get startsAt => _startsAt;
   String get imageAsset => _imageAsset;
   GeoPoint? get location => _location;
@@ -72,6 +91,30 @@ class CreateActivityViewModel extends ChangeNotifier {
   DateTime get today {
     final now = _now();
     return DateTime(now.year, now.month, now.day);
+  }
+
+  /// Carrega les categories del repositori, si n'hi ha. També serveix per
+  /// tornar-ho a provar.
+  Future<void> loadCategories() async {
+    final repository = _categoryRepository;
+    if (repository == null || _isLoadingCategories || _isDisposed) return;
+
+    _isLoadingCategories = true;
+    _categoriesError = null;
+    notifyListeners();
+    try {
+      final categories = await repository.getCategories();
+      if (_isDisposed) return;
+      _categories = List.unmodifiable(categories);
+    } catch (_) {
+      if (_isDisposed) return;
+      _categoriesError = 'No hem pogut carregar les categories.';
+    } finally {
+      if (!_isDisposed) {
+        _isLoadingCategories = false;
+        notifyListeners();
+      }
+    }
   }
 
   void setCategory(String? category) {

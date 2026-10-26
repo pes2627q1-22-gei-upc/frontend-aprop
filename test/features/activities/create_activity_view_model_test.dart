@@ -3,11 +3,13 @@ import 'dart:async';
 import 'package:aprop/features/activities/data/demo_activity_repository.dart';
 import 'package:aprop/features/activities/data/demo_location_repository.dart';
 import 'package:aprop/features/activities/models/activity.dart';
+import 'package:aprop/features/activities/models/activity_category.dart';
 import 'package:aprop/features/activities/models/activity_options.dart';
 import 'package:aprop/features/activities/models/geo_point.dart';
 import 'package:aprop/features/activities/models/new_activity.dart';
 import 'package:aprop/features/activities/presentation/formatters/activity_price_formatter.dart';
 import 'package:aprop/features/activities/presentation/view_models/create_activity_view_model.dart';
+import 'package:aprop/features/activities/repositories/activity_category_repository.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'fake_activity_repository.dart';
@@ -300,4 +302,61 @@ void main() {
     expect(created.source, ActivitySource.community);
     expect(created.creator?.name, 'Laia Soler');
   });
+
+  group('Categories', () {
+    CreateActivityViewModel withCategories(_FakeCategoryRepository source) =>
+        CreateActivityViewModel(
+          repository: repository,
+          locationRepository: const DemoLocationRepository(),
+          creator: creator,
+          categoryRepository: source,
+          now: () => now,
+        );
+
+    test('Sense repositori, ofereix la llista provisional', () {
+      expect(viewModel.categories.map((c) => c.label), activityCategories);
+    });
+
+    test('Les carrega del repositori i desa el valor de la triada', () async {
+      final source = _FakeCategoryRepository();
+      final viewModel = withCategories(source);
+      addTearDown(viewModel.dispose);
+
+      final load = viewModel.loadCategories();
+      expect(viewModel.isLoadingCategories, isTrue);
+      await load;
+
+      expect(viewModel.isLoadingCategories, isFalse);
+      expect(viewModel.categories.map((c) => c.label), ['Teatre']);
+      viewModel.setCategory(viewModel.categories.single.value);
+      expect(viewModel.category, 'agenda:categories/teatre');
+    });
+
+    test('Si fallen, ho diu i es pot tornar a provar', () async {
+      final source = _FakeCategoryRepository()..fail = true;
+      final viewModel = withCategories(source);
+      addTearDown(viewModel.dispose);
+
+      await viewModel.loadCategories();
+      expect(viewModel.categoriesError, isNotNull);
+      expect(viewModel.categories, isEmpty);
+
+      source.fail = false;
+      await viewModel.loadCategories();
+      expect(viewModel.categoriesError, isNull);
+      expect(viewModel.categories, hasLength(1));
+    });
+  });
+}
+
+class _FakeCategoryRepository implements ActivityCategoryRepository {
+  bool fail = false;
+
+  @override
+  Future<List<ActivityCategory>> getCategories() async {
+    if (fail) throw Exception('Offline');
+    return const [
+      ActivityCategory(value: 'agenda:categories/teatre', label: 'Teatre'),
+    ];
+  }
 }
