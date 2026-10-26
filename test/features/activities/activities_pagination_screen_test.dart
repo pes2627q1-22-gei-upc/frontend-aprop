@@ -132,7 +132,7 @@ void main() {
   testWidgets(
     'A locally filtered page does not claim the whole catalogue is empty',
     (tester) async {
-      model.applyFilters(ActivityFilters(categories: ['Teatre']));
+      await model.applyFilters(ActivityFilters(categories: ['Teatre']));
       await pump(tester);
       expect(
         find.text('Cap coincidència entre les activitats carregades'),

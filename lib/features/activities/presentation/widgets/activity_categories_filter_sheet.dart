@@ -1,14 +1,21 @@
 import 'package:flutter/material.dart';
 
-import '../../models/activity_filters.dart';
 import 'activity_filter_sheet.dart';
 
 class ActivityCategoriesFilterSheet extends StatefulWidget {
   const ActivityCategoriesFilterSheet({
     super.key,
     required this.initialCategories,
+    required this.categories,
+    this.isLoading = false,
+    this.errorMessage,
+    this.onRetry,
   });
   final Set<String> initialCategories;
+  final List<String> categories;
+  final bool isLoading;
+  final String? errorMessage;
+  final VoidCallback? onRetry;
 
   @override
   State<ActivityCategoriesFilterSheet> createState() =>
@@ -31,14 +38,39 @@ class _ActivityCategoriesFilterSheetState
         final count => '$count categories seleccionades',
       }),
       onClear: () => setState(_selected.clear),
-      onApply: () {
-        if (ModalRoute.of(context)?.isCurrent ?? false) {
-          Navigator.of(context).pop(Set<String>.unmodifiable(_selected));
-        }
-      },
+      onApply: widget.isLoading || widget.errorMessage != null
+          ? null
+          : () {
+              if (ModalRoute.of(context)?.isCurrent ?? false) {
+                Navigator.of(context).pop(Set<String>.unmodifiable(_selected));
+              }
+            },
       content: Column(
         children: [
-          for (final category in activityFilterCategories)
+          if (widget.isLoading)
+            const Padding(
+              padding: EdgeInsets.all(24),
+              child: Center(
+                child: CircularProgressIndicator(
+                  semanticsLabel: 'Carregant categories',
+                ),
+              ),
+            )
+          else if (widget.errorMessage case final error?)
+            Column(
+              children: [
+                Semantics(liveRegion: true, child: Text(error)),
+                TextButton(
+                  onPressed: widget.onRetry,
+                  child: const Text('Tornar-ho a provar'),
+                ),
+              ],
+            )
+          else if (widget.categories.isEmpty)
+            const Text(
+              'No hi ha categories disponibles. Pots consultar totes les activitats.',
+            ),
+          for (final category in widget.categories)
             Padding(
               padding: const EdgeInsets.only(bottom: 4),
               child: ConstrainedBox(

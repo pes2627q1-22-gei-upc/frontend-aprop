@@ -18,6 +18,14 @@ Activity activityFromJson(Map<String, Object?> json) {
   final date = DateTime.tryParse(rawDate);
   if (date == null) throw const FormatException('Invalid event start date');
   final image = _cover(json['image-url']) ?? _cover(json['images']);
+  final rawCategories = json['categories'] ?? json['category'];
+  final categories = List<String>.unmodifiable({
+    for (final tag
+        in rawCategories is List
+            ? rawCategories.whereType<String>()
+            : [if (rawCategories is String) rawCategories])
+      if (tag.trim().isNotEmpty) activityCategoryLabel(tag),
+  });
   final isOfficial =
       json['is-official'] as bool? ?? (json['code'] as num? ?? 0) != 0;
   final latitude = (json['latitude'] as num?)?.toDouble() ?? 0;
@@ -42,7 +50,8 @@ Activity activityFromJson(Map<String, Object?> json) {
   return Activity(
     id: id,
     title: title,
-    category: _category(json['categories'] ?? json['category']),
+    category: categories.firstOrNull ?? 'Activitat',
+    categories: categories,
     municipality: _municipality(json['municipality']) ?? place ?? '',
     // The backend stores civil dates; preserve its calendar fields (DP-029).
     startsAt: DateTime(date.year, date.month, date.day, date.hour, date.minute),
@@ -115,16 +124,8 @@ String? _text(Object? value) {
   return null;
 }
 
-String _category(Object? categories) {
-  if (categories is String && categories.trim().isNotEmpty) {
-    return _capitalize(categories.trim().split('/').last.replaceAll('-', ' '));
-  }
-  final tag = categories is List
-      ? categories.whereType<String>().where((c) => c.isNotEmpty).firstOrNull
-      : null;
-  if (tag == null) return 'Activitat';
-  return _capitalize(tag.split('/').last.replaceAll('-', ' '));
-}
+String activityCategoryLabel(String tag) =>
+    _capitalize(tag.trim().split('/').last.replaceAll('-', ' '));
 
 const _lowercaseWords = {'de', 'del', 'dels', 'la', 'les', 'el', 'els', 'i'};
 

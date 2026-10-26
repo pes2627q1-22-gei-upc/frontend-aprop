@@ -55,10 +55,13 @@ void main() {
       await model.loadMore();
       expect(model.isLoadingMore, isTrue);
       expect(model.isLoading, isFalse);
-      model.applyFilters(ActivityFilters(categories: ['Teatre']));
+      final filtered = model.applyFilters(
+        ActivityFilters(categories: ['Teatre']),
+      );
       pending.complete(page([c]));
       await loading;
-      expect(repository.pagesRequested, [0, 1]);
+      await filtered;
+      expect(repository.pagesRequested, [0, 1, 0]);
       expect(model.activities.map((a) => a.id), ['c']);
       expect(model.isLoadingMore, isFalse);
     },
@@ -103,7 +106,7 @@ void main() {
     'Failed refresh retains catalogue and continuation; retry resets to zero',
     () async {
       await model.load();
-      model.applyFilters(ActivityFilters(categories: ['Música']));
+      await model.applyFilters(ActivityFilters(categories: ['Música']));
       repository.onPage = (_) async => throw StateError('offline');
       await model.load();
       expect(model.errorMessage, isNotNull);
@@ -113,27 +116,24 @@ void main() {
       expect(model.filters.categories, {'Música'});
       repository.onPage = (_) async => page([b]);
       await model.load();
-      expect(repository.pagesRequested, [0, 0, 0]);
+      expect(repository.pagesRequested, [0, 0, 0, 0]);
       expect(model.errorMessage, isNull);
       expect(model.activities.map((a) => a.id), ['b']);
       expect(model.hasMore, isFalse);
     },
   );
 
-  test(
-    'A repeated full page offers retry instead of an endless continuation',
-    () async {
-      await model.load();
-      repository.onPage = (_) async => page([a, b], more: true);
-      await model.loadMore();
-      expect(model.loadMoreError, isNotNull);
-      expect(model.loadedCount, 2);
-      repository.onPage = (_) async => page([c]);
-      await model.loadMore();
-      expect(repository.pagesRequested, [0, 1, 1]);
-      expect(model.loadMoreError, isNull);
-    },
-  );
+  test('Overlapping category batches advance without duplicate cards or false errors', () async {
+    await model.load();
+    repository.onPage = (_) async => page([a, b], more: true);
+    await model.loadMore();
+    expect(model.loadMoreError, isNull);
+    expect(model.loadedCount, 2);
+    repository.onPage = (_) async => page([c]);
+    await model.loadMore();
+    expect(repository.pagesRequested, [0, 1, 2]);
+    expect(model.loadMoreError, isNull);
+  });
 
   test('Initial failure is distinct from a valid empty catalogue', () async {
     repository.onPage = (_) async => throw StateError('offline');

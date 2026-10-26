@@ -7,11 +7,13 @@ class MapFilterFeedback extends StatelessWidget {
     required this.isEmpty,
     required this.missingCategories,
     required this.onClear,
+    this.onShowList,
   });
 
   final bool isEmpty;
   final int missingCategories;
   final VoidCallback onClear;
+  final VoidCallback? onShowList;
 
   @override
   Widget build(BuildContext context) => Align(
@@ -23,9 +25,18 @@ class MapFilterFeedback extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (isEmpty) MapFilterNotice(onClear: onClear),
+            if (isEmpty && missingCategories == 0)
+              MapFilterNotice(onClear: onClear),
             if (missingCategories > 0)
-              MissingCategoryNotice(count: missingCategories),
+              MissingCategoryNotice(
+                count: missingCategories,
+                onShowList: onShowList,
+              ),
+            if (isEmpty && missingCategories > 0)
+              TextButton(
+                onPressed: onClear,
+                child: const Text('Netejar filtres'),
+              ),
           ],
         ),
       ),
@@ -106,17 +117,37 @@ class MapFilterNotice extends StatelessWidget {
 }
 
 class MissingCategoryNotice extends StatelessWidget {
-  const MissingCategoryNotice({super.key, required this.count});
+  const MissingCategoryNotice({
+    super.key,
+    required this.count,
+    this.onShowList,
+  });
   final int count;
+  final VoidCallback? onShowList;
 
   @override
   Widget build(BuildContext context) => Card(
     child: Padding(
       padding: const EdgeInsets.all(12),
-      child: Text(
-        count == 1
-            ? '1 activitat sense categoria informada no s’inclou en aquest filtre.'
-            : '$count activitats sense categoria informada no s’inclouen en aquest filtre.',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            count == 1
+                ? '1 activitat sense categoria informada no s’inclou en aquest filtre.'
+                : '$count activitats sense categoria informada no s’inclouen en aquest filtre.',
+          ),
+          if (onShowList != null) ...[
+            const SizedBox(height: 8),
+            const Text(
+              'Consulta la llista per veure els resultats per categoria.',
+            ),
+            TextButton(
+              onPressed: onShowList,
+              child: const Text('Veure llista'),
+            ),
+          ],
+        ],
       ),
     ),
   );

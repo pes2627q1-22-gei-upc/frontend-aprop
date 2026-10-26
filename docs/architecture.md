@@ -181,17 +181,22 @@ L’autoria usa `ActivityCreator.userId` opcional, completat en crear activitats
 ## Filtres d’Inici — Taiga #87
 
 `ActivityFilters` i `ActivityDateRange` són valors immutables en Dart pur. `ActivitiesViewModel` conserva
-el catàleg i és l’únic propietari dels filtres confirmats; en calcula una projecció sense modificar el
-repositori. Les respostes pendents es projecten amb els filtres vigents en rebre-les.
+el catàleg i és l’únic propietari dels filtres confirmats. `getActivitiesPage(filters: …)` aplica la
+consulta a la font abans de paginar. Canviar-la buida les pàgines anteriors i invalida respostes antigues;
+actualitzar sense canviar-la conserva les dades si falla.
 
 `ActivitiesScreen` obre els panells reutilitzables Dates/Categories. Cada panell té un esborrany local;
 només Aplicar retorna una selecció confirmada. La pantalla aplica el mateix valor als resultats de
 `ActivitiesMapViewModel`, sense duplicar-lo ni tornar a demanar la zona. La ruta modal cobreix la barra
 inferior i es retira quan desapareix el compte propietari. Widgets i ViewModel respecten les capes
-existents; no s’afegeixen paquets, repositoris ni consultes HTTP de filtratge.
+existents; no s’afegeixen paquets ni repositoris concrets a presentació.
 
 Les fonts diferents i metadades incompletes del mapa continuen a DP-029; l’abast provisional del
-filtratge i el contracte pendent es registren a DP-035. Vegeu `docs/activity-filters.md`.
+filtratge i el contracte pendent es registren a DP-035/DP-038. `getFilterCategories()` carrega les opcions
+de la mateixa font: el ViewModel en gestiona càrrega/error/reintent i el panell només conserva l’esborrany.
+L’adaptador HTTP resol les etiquetes a IDs reals, combina consultes d’una categoria com OR (màxim quatre
+simultànies), elimina IDs d’activitats duplicats i conserva totes les categories d’una activitat en un
+snapshot immutable. Cap crida HTTP ni mapping d’IDs als widgets. Vegeu `docs/inici-server-filters.md`.
 
 ## Llista paginada d'Inici
 

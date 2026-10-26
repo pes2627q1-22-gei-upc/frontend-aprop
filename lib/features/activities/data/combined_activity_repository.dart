@@ -1,4 +1,5 @@
 import '../models/activity.dart';
+import '../models/activity_filters.dart';
 import '../models/activity_page.dart';
 import '../models/new_activity.dart';
 import '../repositories/activity_details_repository.dart';
@@ -22,8 +23,18 @@ class CombinedActivityRepository implements ActivityRepository {
   Future<List<Activity>> getActivities() => catalogue.getActivities();
 
   @override
-  Future<ActivityPage> getActivitiesPage({int page = 0, int pageSize = 50}) =>
-      catalogue.getActivitiesPage(page: page, pageSize: pageSize);
+  Future<ActivityPage> getActivitiesPage({
+    int page = 0,
+    int pageSize = 50,
+    ActivityFilters? filters,
+  }) => catalogue.getActivitiesPage(
+    page: page,
+    pageSize: pageSize,
+    filters: filters,
+  );
+
+  @override
+  Future<List<String>> getFilterCategories() => catalogue.getFilterCategories();
 
   @override
   Future<Activity?> getActivityById(String id) {

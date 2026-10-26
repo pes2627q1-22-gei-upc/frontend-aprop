@@ -1,5 +1,6 @@
 import '../../../core/network/api_client.dart';
 import '../models/activity.dart';
+import '../models/activity_filters.dart';
 import '../models/activity_page.dart';
 import '../models/new_activity.dart';
 import '../repositories/activity_repository.dart';
@@ -12,6 +13,7 @@ class HttpActivityRepository implements ActivityRepository {
 
   final ApiClient apiClient;
   final int defaultPageSize;
+  Future<List<({int id, String name})>>? _categoriesRequest;
 
   @override
   Future<List<Activity>> getActivities({
@@ -35,10 +37,8 @@ class HttpActivityRepository implements ActivityRepository {
       if (filterCategory != null) 'filterCategory': '$filterCategory',
       if (filterRegion != null && filterRegion.isNotEmpty)
         'filterRegion': filterRegion,
-      if (startAfter != null)
-        'startAfter': startAfter.toUtc().toIso8601String(),
-      if (startBefore != null)
-        'startBefore': startBefore.toUtc().toIso8601String(),
+      if (startAfter != null) 'startAfter': _civilDate(startAfter),
+      if (startBefore != null) 'startBefore': _civilDate(startBefore),
       if (filterFree != null) 'filterFree': '$filterFree',
       if (filterOfficial != null) 'filterOfficial': '$filterOfficial',
       if (filterModality != null && filterModality.isNotEmpty)
@@ -67,11 +67,55 @@ class HttpActivityRepository implements ActivityRepository {
   Future<ActivityPage> getActivitiesPage({
     int page = 0,
     int pageSize = 50,
+    ActivityFilters? filters,
   }) async {
-    final items = await getActivities(pageNum: page, pageSize: pageSize);
+    RangeError.checkNotNegative(page, 'page');
+    if (pageSize < 1) throw RangeError.range(pageSize, 1, null, 'pageSize');
+    final selected = filters ?? ActivityFilters();
+    final categoryIds = <int>{};
+    if (selected.categories.isNotEmpty) {
+      final categories = await getCategories();
+      for (final label in selected.categories) {
+        final matching = categories.where(
+          (category) => activityCategoryLabel(category.name) == label,
+        );
+        if (matching.isEmpty) {
+          throw StateError('Selected category is not in the server catalogue');
+        }
+        categoryIds.addAll(matching.map((category) => category.id));
+      }
+    }
+    // TODO(DP-038): The API accepts a single category. A batch is page N from
+    // each selected category, combined as OR. Bound concurrency and commit the
+    // whole batch only when every request succeeds. No new endpoint is assumed.
+    final queries = categoryIds.isEmpty
+        ? <int?>[null]
+        : (categoryIds.toList()..sort()).cast<int?>();
+    final batches = <List<Activity>>[];
+    for (var offset = 0; offset < queries.length; offset += 4) {
+      batches.addAll(
+        await Future.wait([
+          for (final id in queries.skip(offset).take(4))
+            getActivities(
+              pageNum: page,
+              pageSize: pageSize,
+              filterCategory: id,
+              startAfter: selected.dates?.start,
+              startBefore: selected.dates?.end,
+            ),
+        ]),
+      );
+    }
+    final items = <String, Activity>{
+      for (final batch in batches)
+        for (final activity in batch) activity.id: activity,
+    }.values;
     // TODO(DP-037): GET /events has no total/next-page metadata. A full page
     // may be followed by an empty last request; preserve the server's order.
-    return ActivityPage(items: items, hasMore: items.length >= pageSize);
+    return ActivityPage(
+      items: items,
+      hasMore: batches.any((batch) => batch.length >= pageSize),
+    );
   }
 
   @override
@@ -103,6 +147,9 @@ class HttpActivityRepository implements ActivityRepository {
       category: parsed.category != 'Activitat'
           ? parsed.category
           : activity.category,
+      categories: parsed.category != 'Activitat'
+          ? parsed.categories
+          : [activity.category],
       municipality: parsed.municipality.isNotEmpty
           ? parsed.municipality
           : activity.municipality,
@@ -139,15 +186,43 @@ class HttpActivityRepository implements ActivityRepository {
   }
 
   /// Obté la llista de categories del catàleg (`GET /categories`).
-  Future<List<({int id, String name})>> getCategories() async {
+  Future<List<({int id, String name})>> getCategories() =>
+      _categoriesRequest ??= _fetchCategories().catchError((Object error) {
+        _categoriesRequest = null;
+        throw error;
+      });
+
+  Future<List<({int id, String name})>> _fetchCategories() async {
     final decoded = await apiClient.getJson('categories');
-    if (decoded is! List<Object?>) return const [];
-    return [
-      for (final item in decoded)
-        if (item is Map<String, Object?> &&
-            item['id'] is num &&
-            item['name'] is String)
-          (id: (item['id'] as num).toInt(), name: item['name'] as String),
-    ];
+    if (decoded is! List<Object?>) {
+      throw const FormatException('Expected a category list');
+    }
+    final categories = <({int id, String name})>[];
+    for (final item in decoded) {
+      if (item case {'id': final int id, 'name': final String name}
+          when id > 0 && activityCategoryLabel(name).isNotEmpty) {
+        categories.add((id: id, name: name));
+      } else {
+        throw const FormatException('Expected a category ID and name');
+      }
+    }
+    return List.unmodifiable(categories);
   }
+
+  @override
+  Future<List<String>> getFilterCategories() async {
+    final labels = {
+      for (final category in await getCategories())
+        activityCategoryLabel(category.name),
+    }.toList()..sort();
+    return List.unmodifiable(labels);
+  }
+}
+
+// The Go parser requires milliseconds without a zone. SQL compares inclusive
+// civil dates; converting to UTC would move midnight to the preceding day.
+String _civilDate(DateTime date) {
+  String two(int number) => number.toString().padLeft(2, '0');
+  return '${date.year.toString().padLeft(4, '0')}-${two(date.month)}-'
+      '${two(date.day)}T00:00:00.000';
 }
