@@ -268,8 +268,10 @@ class FirebaseAuthRepository implements AuthRepository {
     final (firstName, lastName) = splitDisplayName(
       name.isNotEmpty ? name : user.displayName,
     );
+    final serverId = profile?.id ?? '';
     return AppUser(
       id: user.uid,
+      serverId: serverId.isEmpty ? null : serverId,
       email: user.email ?? '',
       firstName: firstName,
       lastName: lastName,
@@ -302,7 +304,7 @@ class FirebaseAuthRepository implements AuthRepository {
       final username = await _preferences.getString(_cachedUsernameKey(uid));
       if (username == null) return null;
       return UserProfile(
-        id: uid,
+        id: await _preferences.getString(_cachedServerIdKey(uid)) ?? '',
         username: username,
         email: '',
         name: await _preferences.getString(_cachedNameKey(uid)) ?? '',
@@ -328,10 +330,23 @@ class FirebaseAuthRepository implements AuthRepository {
     await _remember(uid, await _userSync.updateName(name.trim()));
   }
 
-  Future<UserProfile> _remember(String uid, UserProfile profile) async {
+  Future<UserProfile> _remember(String uid, UserProfile received) async {
+    // Si una resposta no porta l'identificador, es conserva el que ja se sabia.
+    final knownId = _profiles[uid]?.id ?? '';
+    final profile = received.id.isNotEmpty || knownId.isEmpty
+        ? received
+        : UserProfile(
+            id: knownId,
+            username: received.username,
+            email: received.email,
+            name: received.name,
+          );
     _profiles[uid] = profile;
     await _preferences.setString(_cachedUsernameKey(uid), profile.username);
     await _preferences.setString(_cachedNameKey(uid), profile.name);
+    if (profile.id.isNotEmpty) {
+      await _preferences.setString(_cachedServerIdKey(uid), profile.id);
+    }
     // Ja té nom: l'avís del nom rebutjat deixa de tenir sentit.
     await _preferences.remove(_rejectedUsernameKey(uid));
     return profile;
@@ -340,6 +355,8 @@ class FirebaseAuthRepository implements AuthRepository {
   String _cachedUsernameKey(String uid) => 'auth.cachedUsername.$uid';
 
   String _cachedNameKey(String uid) => 'auth.cachedName.$uid';
+
+  String _cachedServerIdKey(String uid) => 'auth.cachedServerId.$uid';
 
   /// Es desa al dispositiu perquè l'avís sobrevisqui si l'app es tanca abans
   /// de verificar el correu.

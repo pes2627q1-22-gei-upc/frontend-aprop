@@ -152,7 +152,9 @@ class _AuthGateState extends State<AuthGate> {
         }
 
         return MainShell(
-          key: ValueKey(user.id),
+          // Si l'identificador del backend arriba més tard (sense connexió en
+          // obrir l'app), les inscripcions s'han de tornar a carregar amb ell.
+          key: ValueKey((user.id, user.serverId)),
           user: user,
           onSignOut: widget.authRepository.signOut,
           activityRepository: _activityRepository,

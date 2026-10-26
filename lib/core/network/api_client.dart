@@ -288,42 +288,5 @@ class ApiClient {
     return 'Error HTTP ${response.statusCode}';
   }
 
-  /// Comprova si [value] ja té el format UUID canònic (8-4-4-4-12 dígits hexadecimals).
-  static bool isCanonicalUuid(String value) {
-    return RegExp(
-      r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$',
-    ).hasMatch(value);
-  }
-
-  /// Converteix qualsevol identificador d'usuari (com un UID de Firebase) en un
-  /// UUID canònic determinista (8-4-4-4-12) per als endpoints del backend que
-  /// exigeixen el tipus UUID de PostgreSQL.
-  /// TODO(DP-036): Eliminar la normalització al client quan el backend resolgui
-  /// `X-User-ID` / UID de Firebase cap a l'UUID intern a tots els serveis.
-  static String toCanonicalUuid(String value) {
-    final trimmed = value.trim();
-    if (isCanonicalUuid(trimmed)) {
-      return trimmed.toLowerCase();
-    }
-    final bytes = utf8.encode(trimmed);
-    final hex = List<int>.generate(16, (i) {
-      var acc = (i * 31 + 17) & 0xff;
-      for (var j = 0; j < bytes.length; j++) {
-        acc = (acc * 33 + bytes[j] + j + i) & 0xff;
-      }
-      return acc;
-    });
-    // Marquem versió 4 i variant RFC 4122.
-    hex[6] = (hex[6] & 0x0f) | 0x40;
-    hex[8] = (hex[8] & 0x3f) | 0x80;
-
-    String part(int start, int end) => hex
-        .sublist(start, end)
-        .map((b) => b.toRadixString(16).padLeft(2, '0'))
-        .join();
-
-    return '${part(0, 4)}-${part(4, 6)}-${part(6, 8)}-${part(8, 10)}-${part(10, 16)}';
-  }
-
   void close() => _client.close();
 }

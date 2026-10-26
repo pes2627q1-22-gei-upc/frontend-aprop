@@ -407,6 +407,12 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Dubte:** en mode tolerant a Render (sense `FIREBASE_CREDENTIALS_FILE`), el middleware d'autenticació llegeix la capçalera `X-User-ID`, però els serveis d'esdeveniments, inscripcions i assistent validen que l'identificador d'usuari tingui format UUID canònic de 36 caràcters (`8-4-4-4-12`), mentre que els UID de Firebase Auth fan 28 caràcters alfanumèrics (i els comptes demo tenen prefix `demo-...`), provocant `HTTP 400: {"error": "invalid user id"}`.
 - **Opcions:** A) que el backend resolgui sempre el `firebase_uid` cap a l'UUID intern de `Users` al middleware o accepti `firebase_uid` als serveis · B) transformar de manera determinista qualsevol identificador no UUID a un UUID v4 canònic al client (`ApiClient.toCanonicalUuid`) quan s'envia `X-User-ID`.
 - **Provisionalment:** B (`TODO(DP-036)` a `lib/core/network/api_client.dart`), de manera que les peticions a Render amb `X-User-ID` funcionen tant amb UID de Firebase com amb comptes de demostració sense fallar per validació d'UUID.
+- **Canvi (2026-10-26, Claude Code (Opus 5.5) amb confirmació de l'usuari, Taiga #82):** des de `userid-fixes` (US #222), l'`id` de `users` és un UUID i les inscripcions tenen clau forana cap a `users(id)`. L'UUID calculat al client (B) no existeix a `users` i la BD el rebutja. Ara:
+  - `AppUser.serverId` és l'`id` que retorna `POST /auth/sync` (l'UUID real), desat també al dispositiu com el nom d'usuari;
+  - `X-User-ID` envia aquest UUID; sense sessió o sense backend no s'envia;
+  - apuntar-se i l'Agenda fan servir `serverId` (o l'`id` del compte amb dades de demostració), perquè `GET /users/{id}/events` necessita l'UUID;
+  - s'han eliminat `ApiClient.toCanonicalUuid` i `isCanonicalUuid`.
+  Amb Firebase actiu al backend continua fallant: `getUserID` agafa l'UID de Firebase del token i no el tradueix (`GetByFirebaseUID` només es fa servir a `/auth/sync` i al perfil). Cal l'opció A al backend; quan hi sigui, `X-User-ID` sobrarà (`TODO(DP-036)` a `main.dart`).
 - **Qui decideix:** backend + frontend
 - **Resolució:**
 

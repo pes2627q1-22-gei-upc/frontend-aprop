@@ -127,6 +127,7 @@ class HttpEnrollmentRepository implements EnrollmentRepository {
   }
 
   /// Obté l'agenda d'esdeveniments als quals l'usuari està inscrit (`GET /users/{userId}/events`).
+  /// [userId] és l'UUID de l'usuari al backend (`AppUser.serverId`).
   Future<List<Activity>> getUserEvents(
     String userId, {
     String? from,
@@ -136,23 +137,10 @@ class HttpEnrollmentRepository implements EnrollmentRepository {
       if (from != null && from.isNotEmpty) 'from': from,
       if (to != null && to.isNotEmpty) 'to': to,
     };
-    Object? decoded;
-    try {
-      decoded = await apiClient.getJson(
-        'users/$userId/events',
-        queryParameters: query.isEmpty ? null : query,
-      );
-    } on ApiException catch (e) {
-      if (e.statusCode == 400 && !ApiClient.isCanonicalUuid(userId)) {
-        final uuid = ApiClient.toCanonicalUuid(userId);
-        decoded = await apiClient.getJson(
-          'users/$uuid/events',
-          queryParameters: query.isEmpty ? null : query,
-        );
-      } else {
-        rethrow;
-      }
-    }
+    final decoded = await apiClient.getJson(
+      'users/$userId/events',
+      queryParameters: query.isEmpty ? null : query,
+    );
     if (decoded is! List<Object?>) return const [];
     return [
       for (final item in decoded)

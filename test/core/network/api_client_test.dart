@@ -24,7 +24,7 @@ void main() {
         final client = ApiClient(
           baseUrl: Uri.parse('https://api-aprop.onrender.com/'),
           idToken: () async => 'token-firebase-123',
-          userId: () => 'uid-firebase-456',
+          userId: () => 'f53add44-367c-4c16-bbee-38878f3fed48',
           client: MockClient((request) async {
             capturedRequest = request;
             return http.Response.bytes(
@@ -53,7 +53,10 @@ void main() {
           capturedRequest.headers['Authorization'],
           'Bearer token-firebase-123',
         );
-        expect(capturedRequest.headers['X-User-ID'], 'uid-firebase-456');
+        expect(
+          capturedRequest.headers['X-User-ID'],
+          'f53add44-367c-4c16-bbee-38878f3fed48',
+        );
         expect(result, {'ok': true});
       },
     );
@@ -109,21 +112,5 @@ void main() {
         ),
       );
     });
-
-    test(
-      'Normalitza identificadors d’usuari a UUID canònic determinista quan cal',
-      () {
-        const validUuid = '550e8400-e29b-41d4-a716-446655440000';
-        expect(ApiClient.isCanonicalUuid(validUuid), isTrue);
-        expect(ApiClient.toCanonicalUuid(validUuid), validUuid);
-
-        final generated = ApiClient.toCanonicalUuid('firebase-uid-28chars-xyz');
-        expect(ApiClient.isCanonicalUuid(generated), isTrue);
-        expect(
-          ApiClient.toCanonicalUuid('firebase-uid-28chars-xyz'),
-          generated,
-        );
-      },
-    );
   });
 }
