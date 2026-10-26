@@ -193,6 +193,18 @@ existents; no s’afegeixen paquets, repositoris ni consultes HTTP de filtratge.
 Les fonts diferents i metadades incompletes del mapa continuen a DP-029; l’abast provisional del
 filtratge i el contracte pendent es registren a DP-035. Vegeu `docs/activity-filters.md`.
 
+## Llista paginada d'Inici
+
+`ActivityRepository.getActivitiesPage` retorna un `ActivityPage` immutable amb el lot i la continuació,
+amb índex inicial 0. HTTP, Demo i Combined comparteixen aquest contracte; `getActivities()` es conserva
+per als consumidors existents. La pantalla no coneix el repositori concret.
+
+`ActivitiesViewModel` manté cursor, catàleg carregat i projecció local, diferencia errors de càrrega,
+refresc i continuació, i invalida respostes anteriors quan es refresca. La pantalla conserva les targetes
+i el desplaçament en afegir pàgines. `ActivityImage` resol la presentació d'assets i `Activity.imageUrl`
+a llista, fitxa i previsualització del mapa. Vegeu `docs/inici-list-backend.md` i DP-037. La integració
+dels filtres al servidor queda fora d'aquesta primera tasca.
+
 ## Recursos i dependències
 
 Els recursos van a `assets/`, fora de `lib/`. Les fotografies de demostració i l’avatar són a `assets/images/`, declarat a `pubspec.yaml`. S’han preparat amb la vista «Llista» aprovada com a referència; representen contingut fictici, no fotografies verificades d’esdeveniments reals. La procedència i els prompts es documenten a `docs/demo-assets.json`. `assets/branding/aprop_logo.png` és una còpia sense modificacions del logotip aprovat `output/logo/aprop-logo-oficial.png` de la carpeta PES; `assets/branding/` també està declarat a `pubspec.yaml`. `assets/icons/google_g.png` és el logotip «G» de Google per al botó d'accés: s'ha retallat de `Theme=Light, Show text=No, Shape=Square` (PNG @4x) del paquet oficial `signin-assets.zip` de Google Identity i se n'ha tret el fons blanc, sense modificar-ne la forma ni els colors.

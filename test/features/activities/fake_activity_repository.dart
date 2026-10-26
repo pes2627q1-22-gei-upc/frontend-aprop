@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:aprop/features/activities/models/activity.dart';
+import 'package:aprop/features/activities/models/activity_page.dart';
 import 'package:aprop/features/activities/models/new_activity.dart';
 import 'package:aprop/features/activities/repositories/activity_repository.dart';
 
@@ -25,6 +26,18 @@ class FakeActivityRepository implements ActivityRepository {
   Future<List<Activity>> getActivities() async {
     listRequests++;
     return activities;
+  }
+
+  @override
+  Future<ActivityPage> getActivitiesPage({
+    int page = 0,
+    int pageSize = 50,
+  }) async {
+    final source = await getActivities();
+    return ActivityPage(
+      items: source.skip(page * pageSize).take(pageSize),
+      hasMore: (page + 1) * pageSize < source.length,
+    );
   }
 
   @override

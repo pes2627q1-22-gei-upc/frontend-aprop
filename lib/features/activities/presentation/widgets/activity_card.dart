@@ -4,6 +4,7 @@ import '../../models/activity.dart';
 import '../formatters/activity_date_formatter.dart';
 import 'activity_badges.dart';
 import 'activity_information_row.dart';
+import 'activity_image.dart';
 
 class ActivityCard extends StatelessWidget {
   const ActivityCard({
@@ -81,18 +82,9 @@ class ActivityCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                       child: InkWell(
                         onTap: onTap,
-                        child: Image.asset(
-                          activity.imageAsset,
+                        child: ActivityImage(
+                          activity: activity,
                           semanticLabel: 'Veure activitat: ${activity.title}',
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                            return ColoredBox(
-                              color: colors.surfaceContainerHighest,
-                              child: const Center(
-                                child: Icon(Icons.image_outlined, size: 32),
-                              ),
-                            );
-                          },
                         ),
                       ),
                     ),

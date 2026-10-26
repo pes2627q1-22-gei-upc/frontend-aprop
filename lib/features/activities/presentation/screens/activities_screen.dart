@@ -11,6 +11,7 @@ import '../widgets/activity_card.dart';
 import '../widgets/activity_categories_filter_sheet.dart';
 import '../widgets/activity_date_filter_sheet.dart';
 import '../widgets/activity_filter_feedback.dart';
+import '../widgets/activity_list_pagination.dart';
 import '../widgets/enrollment_action.dart';
 
 class ActivitiesScreen extends StatefulWidget {
@@ -229,16 +230,15 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
     return ListenableBuilder(
       listenable: viewModel,
       builder: (context, child) {
-        if (viewModel.isLoading) {
-          //si el VM aun esta calculando la lista de actividades, se muestra un indicador de carga circular en el centro de la pantalla.
+        if (viewModel.isLoading && !viewModel.hasLoaded) {
           return const Center(child: CircularProgressIndicator());
         }
 
         final errorMessage = viewModel.errorMessage;
 
-        if (errorMessage != null) {
+        if (errorMessage != null && !viewModel.hasLoaded) {
           return Center(
-            child: Padding(
+            child: SingleChildScrollView(
               padding: const EdgeInsets.all(24),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -283,45 +283,86 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
           );
         }
 
-        if (activities.isEmpty) {
-          if (viewModel.filters.isActive) {
-            return FilteredActivitiesEmptyState(
-              onClear: _clearFilters,
-              missingCategories: viewModel.missingCategoryCount,
-            );
-          }
-          return const Center(child: Text('No hi ha activitats disponibles.'));
-        }
-
+        final contentCount = activities.isEmpty ? 1 : activities.length;
+        final showPagination = viewModel.hasMore;
+        final notices = <Widget>[
+          if (errorMessage != null)
+            Column(
+              children: [
+                Semantics(liveRegion: true, child: Text(errorMessage)),
+                TextButton(
+                  onPressed: viewModel.load,
+                  child: const Text('Tornar-ho a provar'),
+                ),
+              ],
+            ),
+          if (viewModel.missingCategoryCount > 0 && activities.isNotEmpty)
+            MissingCategoryNotice(count: viewModel.missingCategoryCount),
+        ];
         return Column(
           children: [
-            if (viewModel.missingCategoryCount > 0)
-              MissingCategoryNotice(count: viewModel.missingCategoryCount),
+            if (viewModel.isLoading)
+              const LinearProgressIndicator(
+                semanticsLabel: 'Actualitzant les activitats',
+              ),
             Expanded(
-              child: ListView.separated(
-                key: const PageStorageKey<String>('activities-list'),
-                controller: _listController,
-                // Marge inferior perquè el botó «Crear activitat» no tapi l'última
-                // targeta.
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
-                itemCount: activities.length,
-                separatorBuilder: (context, index) {
-                  return const SizedBox(height: 12);
-                },
-                itemBuilder: (context, index) {
-                  final activity = activities[index];
+              child: RefreshIndicator(
+                onRefresh: viewModel.load,
+                child: ListView.separated(
+                  key: const PageStorageKey<String>('activities-list'),
+                  controller: _listController,
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  // Marge inferior perquè el botó «Crear activitat» no tapi l'última
+                  // targeta.
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
+                  itemCount:
+                      notices.length + contentCount + (showPagination ? 1 : 0),
+                  separatorBuilder: (context, index) {
+                    return const SizedBox(height: 12);
+                  },
+                  itemBuilder: (context, index) {
+                    if (index < notices.length) return notices[index];
+                    final contentIndex = index - notices.length;
+                    if (contentIndex == contentCount) {
+                      return ActivityListPagination(
+                        loadedCount: viewModel.loadedCount,
+                        isLoading:
+                            viewModel.isLoadingMore || viewModel.isLoading,
+                        errorMessage: viewModel.loadMoreError,
+                        onLoadMore: viewModel.loadMore,
+                      );
+                    }
+                    if (activities.isEmpty) {
+                      if (viewModel.filters.isActive) {
+                        return FilteredActivitiesEmptyState(
+                          onClear: _clearFilters,
+                          missingCategories: viewModel.missingCategoryCount,
+                          isPartialCatalogue: viewModel.hasMore,
+                          scrollable: false,
+                        );
+                      }
+                      return const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 32),
+                        child: Text(
+                          'No hi ha activitats disponibles.',
+                          textAlign: TextAlign.center,
+                        ),
+                      );
+                    }
+                    final activity = activities[contentIndex];
 
-                  return ActivityCard(
-                    key: ValueKey(activity.id),
-                    activity: activity,
-                    onTap: () => onActivitySelected(activity.id),
-                    participationAction: EnrollmentAction(
-                      viewModel: enrollmentViewModel,
-                      activityId: activity.id,
-                      activityTitle: activity.title,
-                    ),
-                  );
-                },
+                    return ActivityCard(
+                      key: ValueKey(activity.id),
+                      activity: activity,
+                      onTap: () => onActivitySelected(activity.id),
+                      participationAction: EnrollmentAction(
+                        viewModel: enrollmentViewModel,
+                        activityId: activity.id,
+                        activityTitle: activity.title,
+                      ),
+                    );
+                  },
+                ),
               ),
             ),
           ],

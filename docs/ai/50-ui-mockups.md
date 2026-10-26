@@ -59,3 +59,5 @@ Accés real amb Firebase a Android i web (correu + contrasenya i Google, amb tri
 d'Inici amb capçalera, i fitxa (#75). Els controls pendents es mostren desactivats. Detall a `README.md`.
 `TODO(confirmar)`: els criteris de Taiga #7 diuen «usuari o correu», però amb Firebase de moment només es pot
 entrar amb el correu (DP-026).
+
+Llista real d’Inici (ampliació de #77): conserva la capçalera i les targetes; afegeix «Carregar més activitats», actualització arrossegant i reintents sense perdre el contingut. Portades HTTP o assets amb la mateixa geometria i alternativa coherent. Un filtre sense coincidències entre pàgines carregades es diferencia del catàleg complet buit (DP-037). Guia `docs/inici-list-backend.md`.

@@ -8,6 +8,7 @@ import '../../models/geo_point.dart';
 import '../formatters/activity_date_formatter.dart';
 import 'activity_badges.dart';
 import 'activity_information_row.dart';
+import 'activity_image.dart';
 
 const _clusterManagerId = ClusterManagerId('activities');
 
@@ -517,19 +518,11 @@ class _MapActivityCard extends StatelessWidget {
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(12),
-                  child: Image.asset(
-                    activity.imageAsset,
+                  child: ActivityImage(
+                    activity: activity,
                     width: 88,
                     height: 88,
-                    fit: BoxFit.cover,
                     excludeFromSemantics: true,
-                    errorBuilder: (context, error, stackTrace) => ColoredBox(
-                      color: colors.surfaceContainerHighest,
-                      child: const SizedBox.square(
-                        dimension: 88,
-                        child: Icon(Icons.image_outlined),
-                      ),
-                    ),
                   ),
                 ),
                 const SizedBox(width: 12),

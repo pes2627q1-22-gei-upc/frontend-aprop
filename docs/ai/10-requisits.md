@@ -105,6 +105,8 @@ Columna «Sprint (entra, acaba)»: format de la memòria §1.4. `TODO(confirmar)
 
 ## Criteris d'acceptació coneguts
 
+- **#77, ampliació d’integració:** llista HTTP paginada des de 0, portades remotes i retorn del detall amb estat conservat. Primera tasca autoritzada: només frontend; filtres de servidor a la segona. Referència original indicada per l’usuari, pendent de contrastar Taiga. Guia `docs/inici-list-backend.md` i límits DP-037.
+
 - **#7 Accés:** vegeu `docs/architecture.md` § «Accés i sessió» (contrasenya ≥ 8 amb majúscula, minúscula,
   número i caràcter especial; confirmació; nom d'usuari únic; accés per nom o correu).
 - **#75 Detall:** vegeu `docs/activity-details.md`.
