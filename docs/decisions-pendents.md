@@ -400,17 +400,6 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Actualització 2026-10-26:** la llista consulta el servidor amb dates i categories reals abans de paginar. Les opcions deixen de ser les vuit de demostració quan s’injecta HTTP. El mapa continua limitat al filtratge local i metadades absents. Detalls a DP-038; la decisió continua oberta per font compartida i abast global.
 - **Resolució:**
 
-### DP-036 · Format UUID de `X-User-ID` i sincronització d'UID de Firebase a Render
-- **Estat:** oberta
-- **Obert per:** 2026-10-25 · Antigravity · Taiga #231
-- **Identificador:** renumerat de DP-034 a DP-036 en integrar `develop` (PR #22 i #24), que ja feien servir DP-034 i DP-035.
-- **Context:** `ApiClient.toCanonicalUuid` (`lib/core/network/api_client.dart`), `HttpEnrollmentRepository`, `main.dart`; `api-aprop` (`normalizeUserID` a `event_service`, `signup_service`, `assistant_service`).
-- **Dubte:** en mode tolerant a Render (sense `FIREBASE_CREDENTIALS_FILE`), el middleware d'autenticació llegeix la capçalera `X-User-ID`, però els serveis d'esdeveniments, inscripcions i assistent validen que l'identificador d'usuari tingui format UUID canònic de 36 caràcters (`8-4-4-4-12`), mentre que els UID de Firebase Auth fan 28 caràcters alfanumèrics (i els comptes demo tenen prefix `demo-...`), provocant `HTTP 400: {"error": "invalid user id"}`.
-- **Opcions:** A) que el backend resolgui sempre el `firebase_uid` cap a l'UUID intern de `Users` al middleware o accepti `firebase_uid` als serveis · B) transformar de manera determinista qualsevol identificador no UUID a un UUID v4 canònic al client (`ApiClient.toCanonicalUuid`) quan s'envia `X-User-ID`.
-- **Provisionalment:** B (`TODO(DP-036)` a `lib/core/network/api_client.dart`), de manera que les peticions a Render amb `X-User-ID` funcionen tant amb UID de Firebase com amb comptes de demostració sense fallar per validació d'UUID.
-- **Qui decideix:** backend + frontend
-- **Resolució:**
-
 ### DP-037 · Llista real d'Inici: paginació i metadades disponibles
 - **Estat:** oberta
 - **Obert per:** 2026-10-26 · frontend · ampliació de la tasca #77
@@ -434,4 +423,13 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 
 ## Resoltes
 
-(cap)
+### DP-036 · Format UUID de `X-User-ID` i sincronització d'UID de Firebase a Render
+- **Estat:** resolta 2026-10-26
+- **Obert per:** 2026-10-25 · Antigravity · Taiga #231
+- **Identificador:** renumerat de DP-034 a DP-036 en integrar `develop` (PR #22 i #24), que ja feien servir DP-034 i DP-035.
+- **Context:** `ApiClient.toCanonicalUuid` (`lib/core/network/api_client.dart`), `HttpEnrollmentRepository`, `main.dart`; `api-aprop` (`normalizeUserID` a `event_service`, `signup_service`, `assistant_service`).
+- **Dubte:** en mode tolerant a Render (sense `FIREBASE_CREDENTIALS_FILE`), el middleware d'autenticació llegeix la capçalera `X-User-ID`, però els serveis d'esdeveniments, inscripcions i assistent validen que l'identificador d'usuari tingui format UUID canònic de 36 caràcters (`8-4-4-4-12`), mentre que els UID de Firebase Auth fan 28 caràcters alfanumèrics (i els comptes demo tenen prefix `demo-...`), provocant `HTTP 400: {"error": "invalid user id"}`.
+- **Opcions:** A) que el backend resolgui sempre el `firebase_uid` cap a l'UUID intern de `Users` al middleware o accepti `firebase_uid` als serveis · B) transformar de manera determinista qualsevol identificador no UUID a un UUID v4 canònic al client (`ApiClient.toCanonicalUuid`) quan s'envia `X-User-ID`.
+- **Provisionalment:** B (`TODO(DP-036)` a `lib/core/network/api_client.dart`), de manera que les peticions a Render amb `X-User-ID` funcionen tant amb UID de Firebase com amb comptes de demostració sense fallar per validació d'UUID.
+- **Qui decideix:** backend + frontend
+- **Resolució:** A, al backend. `fix/resolve-user-id` (PR #36 d'api-aprop, Tasca #237, Wen) i `feature/esdeveniment-no-ofi` (PR #35, Tasca #236, Arnau) tradueixen l'UID de Firebase del token a l'UUID de `users` (`requester.ID`, `EventService.ResolveUserID` amb `GetByFirebaseUID`) a inscripcions, crear esdeveniments, xatbot i preferències. `X-User-ID` només es llegeix quan el backend funciona sense Firebase. Al frontend (2026-10-26, Taiga #82) ja no s'envia `X-User-ID`: l'usuari surt només del token. `AppUser.serverId` (l'`id` de `POST /auth/sync`) es continua fent servir per a `GET /users/{id}/events` i com a clau de les inscripcions.

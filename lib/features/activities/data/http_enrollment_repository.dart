@@ -23,6 +23,15 @@ class HttpEnrollmentRepository implements EnrollmentRepository {
     late final StreamController<Set<String>> controller;
     StreamSubscription<String>? subscription;
 
+    // Cada subscripció ha de rebre almenys un valor, encara que una altra
+    // n'hagi demanat el mateix alhora (Inici i l'Agenda en obrir l'app).
+    var delivered = false;
+    void deliver() {
+      if (controller.isClosed) return;
+      delivered = true;
+      controller.add(_snapshot(userId));
+    }
+
     controller = StreamController<Set<String>>(
       onListen: () {
         if (_isDisposed) {
@@ -32,9 +41,7 @@ class HttpEnrollmentRepository implements EnrollmentRepository {
         }
         subscription = _changes.stream.listen(
           (changedUserId) {
-            if (changedUserId == userId && !controller.isClosed) {
-              controller.add(_snapshot(userId));
-            }
+            if (changedUserId == userId) deliver();
           },
           onError: (Object error, StackTrace stackTrace) {
             if (!controller.isClosed) controller.addError(error, stackTrace);
@@ -42,11 +49,17 @@ class HttpEnrollmentRepository implements EnrollmentRepository {
           onDone: controller.close,
         );
 
-        if (_enrolledByUser.containsKey(userId)) {
-          controller.add(_snapshot(userId));
-        }
+        if (_enrolledByUser.containsKey(userId)) deliver();
 
-        unawaited(_fetchInitialEnrollments(userId, controller));
+        unawaited(
+          _fetchInitialEnrollments(
+            userId,
+            controller,
+            deliverIfPending: () {
+              if (!delivered) deliver();
+            },
+          ),
+        );
       },
       onCancel: () => subscription?.cancel(),
     );
@@ -54,10 +67,14 @@ class HttpEnrollmentRepository implements EnrollmentRepository {
     return controller.stream;
   }
 
+  /// Si la resposta canvia les inscripcions conegudes, avisa totes les
+  /// subscripcions; si no, només la que encara no n'ha rebut cap
+  /// ([deliverIfPending]).
   Future<void> _fetchInitialEnrollments(
     String userId,
-    StreamController<Set<String>> controller,
-  ) async {
+    StreamController<Set<String>> controller, {
+    required void Function() deliverIfPending,
+  }) async {
     try {
       final events = await getUserEvents(userId);
       if (_isDisposed || controller.isClosed) return;
@@ -65,7 +82,9 @@ class HttpEnrollmentRepository implements EnrollmentRepository {
       final existing = _enrolledByUser[userId];
       _enrolledByUser[userId] = fetchedIds;
       if (existing == null || !_sameSet(existing, fetchedIds)) {
-        controller.add(_snapshot(userId));
+        _changes.add(userId);
+      } else {
+        deliverIfPending();
       }
     } catch (error, stackTrace) {
       if (_isDisposed || controller.isClosed) return;
@@ -127,6 +146,7 @@ class HttpEnrollmentRepository implements EnrollmentRepository {
   }
 
   /// Obté l'agenda d'esdeveniments als quals l'usuari està inscrit (`GET /users/{userId}/events`).
+  /// [userId] és l'UUID de l'usuari al backend (`AppUser.serverId`).
   Future<List<Activity>> getUserEvents(
     String userId, {
     String? from,
@@ -136,23 +156,10 @@ class HttpEnrollmentRepository implements EnrollmentRepository {
       if (from != null && from.isNotEmpty) 'from': from,
       if (to != null && to.isNotEmpty) 'to': to,
     };
-    Object? decoded;
-    try {
-      decoded = await apiClient.getJson(
-        'users/$userId/events',
-        queryParameters: query.isEmpty ? null : query,
-      );
-    } on ApiException catch (e) {
-      if (e.statusCode == 400 && !ApiClient.isCanonicalUuid(userId)) {
-        final uuid = ApiClient.toCanonicalUuid(userId);
-        decoded = await apiClient.getJson(
-          'users/$uuid/events',
-          queryParameters: query.isEmpty ? null : query,
-        );
-      } else {
-        rethrow;
-      }
-    }
+    final decoded = await apiClient.getJson(
+      'users/$userId/events',
+      queryParameters: query.isEmpty ? null : query,
+    );
     if (decoded is! List<Object?>) return const [];
     return [
       for (final item in decoded)

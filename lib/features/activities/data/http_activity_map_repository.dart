@@ -15,7 +15,6 @@ class HttpActivityMapRepository implements ActivityMapRepository {
   HttpActivityMapRepository({
     Uri? baseUrl,
     Future<String?> Function()? idToken,
-    FutureOr<String?> Function()? userId,
     http.Client? client,
     Duration timeout = ApiConfig.connectTimeout,
     ApiClient? apiClient,
@@ -24,7 +23,6 @@ class HttpActivityMapRepository implements ActivityMapRepository {
            ApiClient(
              baseUrl: baseUrl,
              idToken: idToken,
-             userId: userId,
              client: client,
              timeout: timeout,
            );

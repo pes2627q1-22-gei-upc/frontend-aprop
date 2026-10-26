@@ -23,8 +23,11 @@ class FakeAuthRepository implements AuthRepository {
 
   int googleSignIns = 0;
 
+  /// Usuari amb la sessió iniciada que emet [authStateChanges].
+  AppUser? signedInUser;
+
   @override
-  Stream<AppUser?> authStateChanges() => Stream.value(null);
+  Stream<AppUser?> authStateChanges() => Stream.value(signedInUser);
 
   @override
   Future<void> signIn({

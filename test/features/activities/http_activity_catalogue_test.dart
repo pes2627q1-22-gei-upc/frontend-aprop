@@ -36,11 +36,11 @@ void main() {
         apiClient: ApiClient(
           baseUrl: Uri.parse('https://api.example.test'),
           idToken: () async => 'test-token',
-          userId: () => 'test-user',
           client: MockClient((request) async {
             expect(request.url.path, '/events');
             expect(request.headers['Authorization'], 'Bearer test-token');
-            expect(request.headers['X-User-ID'], 'test-user');
+            // L'usuari surt del token: ja no s'envia X-User-ID.
+            expect(request.headers.containsKey('X-User-ID'), isFalse);
             expect(request.url.queryParameters['pageSize'], '2');
             pages.add(request.url.queryParameters['pageNum']);
             return json(

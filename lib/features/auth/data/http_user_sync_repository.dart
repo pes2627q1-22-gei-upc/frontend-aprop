@@ -10,15 +10,14 @@ import '../repositories/user_sync_repository.dart';
 
 /// `POST /auth/sync` i `PATCH /users/me` del backend d'AProp!.
 ///
-/// Envia el token de Firebase de la sessió a `Authorization: Bearer` i
-/// opcionalment `X-User-ID`. El backend en treu el compte i el correu, i
+/// Envia el token de Firebase de la sessió a `Authorization: Bearer`. El
+/// backend en treu el compte i el correu, i
 /// retorna l'usuari de la base de dades: el crea el primer cop amb el nom
 /// d'usuari del cos.
 class HttpUserSyncRepository implements UserSyncRepository {
   HttpUserSyncRepository({
     required this.baseUrl,
     required this._idToken,
-    this.userId,
     http.Client? client,
     this.timeout = ApiConfig.connectTimeout,
   }) : _client = client ?? http.Client();
@@ -27,7 +26,6 @@ class HttpUserSyncRepository implements UserSyncRepository {
 
   /// Token de Firebase de l'usuari de la sessió, o `null` si no n'hi ha.
   final Future<String?> Function() _idToken;
-  final FutureOr<String?> Function()? userId;
   final http.Client _client;
   final Duration timeout;
 
@@ -35,7 +33,6 @@ class HttpUserSyncRepository implements UserSyncRepository {
   Future<UserProfile?> sync({String? username}) async {
     final token = await _idToken();
     if (token == null) throw StateError('No hi ha cap sessió iniciada.');
-    final uid = await userId?.call();
 
     final http.Response response;
     try {
@@ -45,7 +42,6 @@ class HttpUserSyncRepository implements UserSyncRepository {
             headers: {
               'Accept': 'application/json',
               'Authorization': 'Bearer $token',
-              if (uid != null && uid.isNotEmpty) 'X-User-ID': uid,
               if (username != null) 'Content-Type': 'application/json',
             },
             // El cos només cal el primer cop, per crear l'usuari.
@@ -81,7 +77,6 @@ class HttpUserSyncRepository implements UserSyncRepository {
   Future<UserProfile> updateName(String name) async {
     final token = await _idToken();
     if (token == null) throw StateError('No hi ha cap sessió iniciada.');
-    final uid = await userId?.call();
 
     final http.Response response;
     try {
@@ -91,7 +86,6 @@ class HttpUserSyncRepository implements UserSyncRepository {
             headers: {
               'Accept': 'application/json',
               'Authorization': 'Bearer $token',
-              if (uid != null && uid.isNotEmpty) 'X-User-ID': uid,
               'Content-Type': 'application/json',
             },
             body: jsonEncode({'name': name}),

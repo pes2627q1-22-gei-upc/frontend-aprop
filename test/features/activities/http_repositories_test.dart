@@ -51,7 +51,6 @@ void main() {
       final requests = <http.Request>[];
       final apiClient = ApiClient(
         idToken: () async => 'token-1',
-        userId: () => 'uid-1',
         client: MockClient((request) async {
           requests.add(request);
           if (request.method == 'GET' && request.url.path == '/events') {
@@ -115,7 +114,6 @@ void main() {
   group('HttpEnrollmentRepository', () {
     test('Sincronitza inscripcions, inscriu i cancel·la inscripció', () async {
       final apiClient = ApiClient(
-        userId: () => 'uid-1',
         client: MockClient((request) async {
           if (request.method == 'GET' &&
               request.url.path == '/users/uid-1/events') {
@@ -177,7 +175,6 @@ void main() {
   group('HttpDiscoveryRepository & HttpAssistantRepository', () {
     test('Cerca esdeveniments i envia consultes al xatbot', () async {
       final apiClient = ApiClient(
-        userId: () => 'uid-1',
         client: MockClient((request) async {
           if (request.url.path == '/events/search') {
             return jsonResponse({
@@ -233,7 +230,6 @@ void main() {
   group('HttpProfileRepository, Settings & Notifications', () {
     test('Consulta i edita el perfil, preferències i avisos', () async {
       final apiClient = ApiClient(
-        userId: () => 'uid-1',
         client: MockClient((request) async {
           if (request.method == 'GET' && request.url.path == '/users/me') {
             return jsonResponse({

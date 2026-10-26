@@ -67,6 +67,11 @@ class MainShell extends StatefulWidget {
 class _MainShellState extends State<MainShell> {
   int _selectedIndex = 0;
 
+  /// Identificador de les inscripcions: el backend les desa amb l'UUID de
+  /// l'usuari, no amb l'UID de Firebase. Apuntar-se i l'Agenda han de fer
+  /// servir el mateix, perquè comparteixen les inscripcions.
+  String get _enrollmentUserId => widget.user.serverId ?? widget.user.id;
+
   /// Quant ha de pujar «Crear activitat» perquè no el tapi la targeta del mapa.
   final _createButtonLift = ValueNotifier<double>(0);
   final _sectionNavigatorKeys = List.generate(
@@ -95,7 +100,7 @@ class _MainShellState extends State<MainShell> {
       );
     }
     _enrollmentViewModel = EnrollmentViewModel(
-      userId: widget.user.id,
+      userId: _enrollmentUserId,
       repository: widget.enrollmentRepository,
     );
     _assistantViewModel = AssistantViewModel(
@@ -407,7 +412,7 @@ class _MainShellState extends State<MainShell> {
               (context) => _sectionRoot(
                 1,
                 AgendaScreen(
-                  userId: widget.user.id,
+                  userId: _enrollmentUserId,
                   enrollmentRepository: widget.enrollmentRepository,
                   activityRepository: _activityRepository,
                   onActivitySelected: _openActivityDetails,
