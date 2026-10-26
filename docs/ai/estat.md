@@ -32,7 +32,6 @@
 ## Bloquejos
 
 - Contractes amb Talaia i Mobilicat sense concretar (`40-api-i-serveis.md`).
-- CI del frontend (`.github/workflows/ci.yml`, branca `feature/ci-frontend`): pendent de PR i dels secrets `FIREBASE_OPTIONS_DART` i `GOOGLE_SERVICES_JSON` a GitHub.
 - Inscripcions: API autenticada pendent; agenda demo connectada (DP-010).
 - Assistent (xatbot): contracte d'API amb el backend i Gemini pendent (DP-016).
 - Creació i mapa: contracte backend i decisions provisionals pendents (DP-017 a DP-022).
