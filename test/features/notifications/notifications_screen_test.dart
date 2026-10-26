@@ -76,6 +76,123 @@ void main() {
   }
 
   testWidgets(
+    'Each filter starts at its own position and retains it when returning',
+    (tester) async {
+      repository.inboxes['user-a'] = [
+        for (var index = 0; index < 20; index++)
+          eventNotice(
+            id: 'event-$index',
+            receivedAt: notificationNow.subtract(Duration(minutes: index)),
+            type: index.isEven
+                ? NotificationType.recommendation
+                : NotificationType.reminder,
+          ),
+      ];
+      await pumpScreen(tester);
+      final list = find.byType(ListView);
+      double offset() => tester
+          .state<ScrollableState>(
+            find.descendant(of: list, matching: find.byType(Scrollable)),
+          )
+          .position
+          .pixels;
+      await tester.drag(list, const Offset(0, -500));
+      await tester.pumpAndSettle();
+      final allOffset = offset();
+      expect(allOffset, greaterThan(0));
+      await select(tester, 'recommendations');
+      expect(offset(), 0);
+      await tester.drag(list, const Offset(0, -300));
+      await tester.pumpAndSettle();
+      final recommendationsOffset = offset();
+      await select(tester, 'all');
+      expect(offset(), allOffset);
+      await select(tester, 'recommendations');
+      expect(offset(), recommendationsOffset);
+    },
+  );
+
+  testWidgets(
+    'Generic social and unknown notices show no simulated friendship actions',
+    (tester) async {
+      repository.inboxes['user-a'] = [
+        AppNotification.received(
+          id: 'social',
+          type: NotificationType.socialUpdate,
+          receivedAt: notificationNow,
+          isRead: false,
+        ),
+        AppNotification.received(
+          id: 'unknown',
+          type: NotificationType.other,
+          receivedAt: notificationNow,
+          isRead: false,
+        ),
+      ];
+      await pumpScreen(tester);
+      expect(find.text('Acceptar'), findsNothing);
+      expect(find.text('Rebutjar'), findsNothing);
+      expect(find.text('Tens un nou avís.'), findsOneWidget);
+      await select(tester, 'social');
+      expect(find.text('Tens un nou avís social.'), findsOneWidget);
+      expect(find.text('Tens un nou avís.'), findsNothing);
+      await tester.tap(find.text('Tens un nou avís social.'));
+      await tester.pumpAndSettle();
+      expect(unread('social'), findsNothing);
+      expect(activities, isEmpty);
+      expect(people, isEmpty);
+      expect(repository.responses, isEmpty);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'A deleted activity notice remains readable without a dead link',
+    (tester) async {
+      repository.inboxes['user-a'] = [
+        AppNotification.received(
+          id: 'missing',
+          type: NotificationType.reminder,
+          receivedAt: notificationNow,
+          isRead: false,
+          activityId: '7',
+          activityUnavailable: true,
+        ),
+      ];
+      await pumpScreen(tester);
+      expect(find.text('L’activitat ja no està disponible.'), findsOneWidget);
+      await tester.tap(find.text('Tens un recordatori cultural.'));
+      await tester.pumpAndSettle();
+      expect(repository.reads, ['user-a/missing']);
+      expect(activities, isEmpty);
+      expect(unread('missing'), findsNothing);
+    },
+  );
+
+  testWidgets('Failed activity context remains accessible with doubled text', (
+    tester,
+  ) async {
+    repository.inboxes['user-a'] = [
+      AppNotification.received(
+        id: 'retry',
+        type: NotificationType.recommendation,
+        receivedAt: notificationNow,
+        isRead: false,
+        activityId: '7',
+      ),
+    ];
+    await pumpScreen(tester, textScale: 2, size: const Size(320, 640));
+    final message = find.text('Tens una recomanació cultural.');
+    await tester.ensureVisible(message);
+    await tester.pumpAndSettle();
+    await tester.tap(message);
+    await tester.pumpAndSettle();
+    expect(activities, ['7']);
+    expect(unread('retry'), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets(
     'Shows the four filters, chronological groups and unread state without reading',
     (tester) async {
       await pumpScreen(tester);

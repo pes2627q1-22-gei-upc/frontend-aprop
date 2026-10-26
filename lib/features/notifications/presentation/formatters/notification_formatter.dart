@@ -1,10 +1,11 @@
 import '../../models/app_notification.dart';
 
-String notificationCategoryLabel(NotificationCategory category) =>
+String notificationCategoryLabel(NotificationCategory? category) =>
     switch (category) {
       NotificationCategory.social => 'Social',
       NotificationCategory.reminders => 'Recordatori',
       NotificationCategory.recommendations => 'Recomanació',
+      null => 'Avís',
     };
 
 String notificationFilterLabel(NotificationCategory? category) =>
@@ -16,9 +17,19 @@ String notificationFilterLabel(NotificationCategory? category) =>
     };
 
 String notificationMessage(AppNotification notice) => switch (notice.type) {
-  NotificationType.reminder => notice.activity!.title,
+  NotificationType.reminder =>
+    notice.activity?.title ?? 'Tens un recordatori cultural.',
   NotificationType.recommendation =>
-    '“${notice.activity!.title}” et pot interessar.',
+    notice.activity == null
+        ? 'Tens una recomanació cultural.'
+        : '“${notice.activity!.title}” et pot interessar.',
+  NotificationType.socialUpdate =>
+    notice.activity != null
+        ? 'Avís social sobre “${notice.activity!.title}”.'
+        : notice.person != null
+        ? 'Tens un avís social relacionat amb ${notice.person!.name}.'
+        : 'Tens un nou avís social.',
+  NotificationType.other => 'Tens un nou avís.',
   NotificationType.activityPublished =>
     '${notice.person!.name} ha publicat “${notice.activity!.title}”.',
   NotificationType.friendEnrolled =>
@@ -69,4 +80,6 @@ String notificationDate(DateTime date) {
 }
 
 String notificationActivitySchedule(DateTime date) =>
-    '${notificationDate(date)} · ${notificationTime(date)}';
+    date.year == 1 && date.month == 1 && date.day == 1
+    ? 'Data no informada'
+    : '${notificationDate(date)} · ${notificationTime(date)}';

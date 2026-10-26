@@ -152,13 +152,19 @@ Calendar integration must use the same repository instance and user ID through i
 
 ## Avisos — Taiga #86
 
-`NotificationRepository` és el contracte en Dart pur per consultar els avisos rebuts, confirmar-ne la lectura i respondre una sol·licitud. `DemoNotificationRepository` conserva les bústies separades per compte durant la mateixa execució; els exemples reutilitzen activitats del catàleg, sense modificar inscripcions. L'adaptador del backend, l'autorització i la sincronització d'amistats són pendents (DP-023).
+`NotificationRepository` és el contracte en Dart pur per consultar els avisos rebuts, confirmar-ne la lectura i respondre una sol·licitud. `HttpNotificationRepository` rep `ApiClient` i el contracte `ActivityDetailsRepository`; obté el UUID real de `/users/me`, valida la identitat sol·licitada i consulta `/notificationtypes` i la bústia. El mapping JSON és a `data/notification_json_mapper.dart`; models i ViewModel no coneixen HTTP ni IDs de tipus. `DemoNotificationRepository` conserva exemples separats per compte, sense modificar inscripcions. Les accions socials de Demo no es simulen al repositori HTTP (fora de l’Sprint 1, confirmat per l’usuari).
 
 `AuthGate` crea o rep el repositori compartit, i `MainShell` l'injecta a `NotificationsScreen`. La pantalla crea i allibera el seu `NotificationsViewModel`. Els widgets no fan peticions ni contenen avisos de demostració. El ViewModel ordena i filtra, controla les operacions pendents i només confirma lectura/resposta després de l'èxit del repositori. Un error de recàrrega conserva els avisos ja carregats.
 
 La navegació surt per `onActivitySelected` i `onPersonSelected`; la feature no importa cap pantalla ni ViewModel d'una altra feature. La fitxa s'obre amb la ruta i les inscripcions compartides. El callback de perfil queda absent fins que la funcionalitat existeixi, amb una indicació explícita a la UI. Cada filtre conserva el desplaçament i tornar d'una fitxa conserva l'estat. `TickerMode` atura les animacions de les seccions no visibles sense destruir-ne els navegadors.
 
 Els colors addicionals de les etiquetes s'injecten des d'`AppTheme` amb `NotificationBadgeTheme`. La fila de filtres es pot desplaçar en pantalles estretes o amb text ampliat. Vegeu `docs/notifications.md` per seguir els fitxers i les proves.
+
+El context d’activitats/persones es consulta una vegada per ID únic i refresc, amb màxim quatre peticions
+simultànies. L’avís conserva la seva referència si el context falla o ja no existeix; un tipus desconegut
+continua a «Tots». La lectura comprova destinatari i confirma `POST /read` abans de canviar la UI. Aquesta
+comprovació al client no substitueix l’autorització pendent al servidor. Identitat, errors, límits i
+dependències de generació/zona horària es documenten a `docs/notifications-backend.md`, DP-039/DP-023.
 
 ## Descobreix i cerca — Taiga #96
 

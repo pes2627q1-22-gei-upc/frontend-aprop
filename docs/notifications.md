@@ -1,5 +1,12 @@
 # Avisos — Taiga #86
 
+## Estat actual de la integració (26 d’octubre de 2026)
+
+La bústia i la lectura utilitzen el contracte real del servidor. Vegeu [la guia HTTP](notifications-backend.md)
+per seguir UUID, tipus, context, errors i verificació, i [el traspàs](notifications-backend-handoff.md) per
+les dependències del backend. Les accions socials són fora de l’Sprint 1, segons confirmació de l’usuari.
+La descripció següent conserva l’abast i les proves de la implementació inicial de la UI amb Demo.
+
 ## Fonts i abast
 
 Comportament contrastat amb la Incepció 2, figura 17 i text de les pàgines 29–30 (pàgines 30–31 del PDF), les restriccions del model conceptual i els prompts aprovats d'`output/mockup/aprop-avisos-*` de la carpeta PES. La capçalera conté només «Avisos»: el logotip i l'accés a l'assistent pertanyen a Inici.

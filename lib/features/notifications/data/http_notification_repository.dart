@@ -1,56 +1,140 @@
 import '../../../core/network/api_client.dart';
-import '../../activities/repositories/activity_repository.dart';
+import '../../activities/models/activity.dart';
+import '../../activities/repositories/activity_details_repository.dart';
 import '../models/app_notification.dart';
 import '../repositories/notification_repository.dart';
+import 'notification_json_mapper.dart';
 
-/// Implementació de [NotificationRepository] connectada al backend de Render
-/// (`/notifications/user/{id}`, `/notifications/{id}/read`).
+/// Received inbox and confirmed reads using the authenticated profile's UUID.
+/// No synthetic user IDs or simulated social mutations.
 class HttpNotificationRepository implements NotificationRepository {
   HttpNotificationRepository({
     required this.apiClient,
     required this.activityRepository,
   });
-
   final ApiClient apiClient;
-  final ActivityRepository activityRepository;
-  final Map<String, int> _numericUserIds = {};
-  final Map<String, FriendRequestStatus> _resolvedRequests = {};
+  final ActivityDetailsRepository activityRepository;
 
-  Future<int?> _resolveNumericUserId(String userId) async {
-    final direct = int.tryParse(userId);
-    if (direct != null) return direct;
-    if (_numericUserIds.containsKey(userId)) return _numericUserIds[userId];
-
-    try {
-      final decoded = await apiClient.getJson('users/me');
-      if (decoded is Map<String, Object?> && decoded['id'] is num) {
-        final numericId = (decoded['id'] as num).toInt();
-        _numericUserIds[userId] = numericId;
-        return numericId;
-      }
-    } on ApiException {
-      return null;
+  Future<({String id, Map<String, String> headers})> _sessionFor(
+    String accountId,
+  ) async {
+    if (accountId.isEmpty) throw ArgumentError.value(accountId, 'userId');
+    // Freeze one authenticated context for this operation. A response from a
+    // different signed-in account cannot resolve this caller's inbox.
+    final headers = await apiClient.buildHeaders(
+      extraHeaders: {'X-User-ID': accountId},
+    );
+    if (!RegExp(r'^Bearer \S+$').hasMatch(headers['Authorization'] ?? '')) {
+      throw ApiException(
+        'Cal iniciar sessió per consultar els avisos.',
+        statusCode: 401,
+      );
     }
-    return null;
+    final profile = await apiClient.getJson('users/me', headers: headers);
+    if (profile is! Map<String, Object?>) {
+      throw const FormatException('Expected the authenticated user profile');
+    }
+    final id = notificationUserId(profile['id']);
+    final matchesUuid =
+        ApiClient.isCanonicalUuid(accountId) && accountId.toLowerCase() == id;
+    if (!matchesUuid && profile['firebase-uid'] != accountId) {
+      throw ApiException(
+        'La sessió ha canviat. Torna a carregar els avisos.',
+        statusCode: 401,
+      );
+    }
+    return (
+      id: id,
+      headers: Map<String, String>.unmodifiable({...headers, 'X-User-ID': id}),
+    );
   }
 
   @override
   Future<List<AppNotification>> getNotifications(String userId) async {
-    if (userId.isEmpty) throw ArgumentError.value(userId, 'userId');
-    final numericId = await _resolveNumericUserId(userId);
-    if (numericId == null) return const [];
-
-    final decoded = await apiClient.getJson('notifications/user/$numericId');
-    if (decoded is! List<Object?>) return const [];
-
-    final notifications = <AppNotification>[];
-    for (final item in decoded) {
-      if (item is Map<String, Object?>) {
-        final mapped = await _notificationFromJson(item);
-        if (mapped != null) notifications.add(mapped);
-      }
+    final session = await _sessionFor(userId);
+    final decoded = await apiClient.getJson(
+      'notifications/user/${session.id}',
+      headers: session.headers,
+    );
+    if (decoded is! List<Object?>) {
+      throw const FormatException('Expected a notification list');
     }
-    return List.unmodifiable(notifications);
+    final records = <NotificationRecord>[
+      for (final row in decoded)
+        if (row is Map<String, Object?>)
+          NotificationRecord.fromJson(row, ownerId: session.id)
+        else
+          throw const FormatException('Expected a notification object'),
+    ];
+    if (records.isEmpty) return const [];
+    if (records.map((record) => record.id).toSet().length != records.length) {
+      throw const FormatException('Duplicate received notification ID');
+    }
+    final types = notificationTypesFromJson(
+      await apiClient.getJson('notificationtypes', headers: session.headers),
+    );
+    final activities = <String, ({Activity? activity, bool missing})>{};
+    final people = <String, NotificationPerson>{};
+    final jobs = <Future<void> Function()>[
+      for (final id in records.map((r) => r.activityId).nonNulls.toSet())
+        () async {
+          try {
+            final activity = await activityRepository.getActivityById(id);
+            activities[id] = (activity: activity, missing: activity == null);
+          } catch (error) {
+            if (error is ApiException && error.statusCode == 401) rethrow;
+            activities[id] = (activity: null, missing: false);
+          }
+        },
+      for (final id
+          in records
+              .where((r) => types[r.typeId] == NotificationType.socialUpdate)
+              .map((r) => r.personId)
+              .nonNulls
+              .toSet())
+        () async {
+          var name = 'Una persona';
+          try {
+            final profile = await apiClient.getJson(
+              'users/$id',
+              headers: session.headers,
+            );
+            if (profile is Map<String, Object?> &&
+                notificationUserId(profile['id']) == id) {
+              for (final field in ['name', 'username']) {
+                if (profile[field] case final String value
+                    when value.trim().isNotEmpty) {
+                  name = value.trim();
+                  break;
+                }
+              }
+            }
+          } catch (error) {
+            if (error is ApiException && error.statusCode == 401) rethrow;
+            // A deleted or unavailable actor does not delete a received notice.
+          }
+          people[id] = NotificationPerson(id: id, name: name);
+        },
+    ];
+    // Resolve each unique reference once per refresh, with a shared limit.
+    for (var offset = 0; offset < jobs.length; offset += 4) {
+      await Future.wait(jobs.skip(offset).take(4).map((job) => job()));
+    }
+    return List.unmodifiable([
+      for (final record in records)
+        AppNotification.received(
+          id: record.id,
+          receivedAt: record.receivedAt,
+          isRead: record.isRead,
+          type: types[record.typeId] ?? NotificationType.other,
+          activityId: record.activityId,
+          activity: activities[record.activityId]?.activity,
+          activityUnavailable: activities[record.activityId]?.missing ?? false,
+          person: types[record.typeId] == NotificationType.socialUpdate
+              ? people[record.personId]
+              : null,
+        ),
+    ]);
   }
 
   @override
@@ -58,14 +142,37 @@ class HttpNotificationRepository implements NotificationRepository {
     required String userId,
     required String notificationId,
   }) async {
-    await apiClient.postJson('notifications/$notificationId/read');
+    final id = int.tryParse(notificationId);
+    if (id == null || id < 1) {
+      throw ArgumentError.value(notificationId, 'notificationId');
+    }
+    final session = await _sessionFor(userId);
+    // TODO(DP-039): The server must also enforce recipient ownership. This
+    // check prevents accidental writes but does not replace server security.
+    final decoded = await apiClient.getJson(
+      'notifications/$id',
+      headers: session.headers,
+    );
+    if (decoded is! Map<String, Object?>) {
+      throw const FormatException('Expected a notification object');
+    }
+    final notice = NotificationRecord.fromJson(decoded, ownerId: session.id);
+    if (notice.id != '$id') {
+      throw const FormatException('Unexpected notification ID');
+    }
+    if (notice.isRead) return;
+    await apiClient.postJson(
+      'notifications/$id/read',
+      headers: session.headers,
+    );
   }
 
-  /// Marca totes les notificacions d'un usuari com a llegides (`POST /notifications/user/{id}/read`).
   Future<void> markAllAsRead(String userId) async {
-    final numericId = await _resolveNumericUserId(userId);
-    if (numericId == null) return;
-    await apiClient.postJson('notifications/user/$numericId/read');
+    final session = await _sessionFor(userId);
+    await apiClient.postJson(
+      'notifications/user/${session.id}/read',
+      headers: session.headers,
+    );
   }
 
   @override
@@ -74,87 +181,10 @@ class HttpNotificationRepository implements NotificationRepository {
     required String requestId,
     required bool accept,
   }) async {
-    final existing = _resolvedRequests[requestId];
-    if (existing != null && existing != FriendRequestStatus.pending) {
-      return existing;
-    }
-    final status = accept
-        ? FriendRequestStatus.accepted
-        : FriendRequestStatus.rejected;
-    _resolvedRequests[requestId] = status;
-    return status;
-  }
-
-  Future<AppNotification?> _notificationFromJson(
-    Map<String, Object?> json,
-  ) async {
-    final id = '${json['id']}';
-    final isRead = json['read'] as bool? ?? false;
-    final dateStr = json['notification-date'] as String?;
-    final receivedAt = dateStr != null && dateStr.isNotEmpty
-        ? DateTime.parse(dateStr)
-        : DateTime.now();
-
-    final typeCode = (json['type'] as num?)?.toInt() ?? 1;
-    final friendId = json['friend-id'] ?? json['friend'];
-    final eventId = json['event'];
-
-    final person = friendId != null
-        ? NotificationPerson(
-            id: '$friendId',
-            name: json['friend-name'] as String? ?? 'Usuari #$friendId',
-          )
-        : null;
-
-    if (typeCode == 2 && person != null) {
-      final requestId = 'req-$id';
-      return AppNotification.friendRequest(
-        id: id,
-        receivedAt: receivedAt,
-        person: person,
-        requestId: requestId,
-        status: _resolvedRequests[requestId] ?? FriendRequestStatus.pending,
-        isRead: isRead,
-      );
-    }
-
-    if (typeCode == 3 && person != null) {
-      return AppNotification.friendRequestAccepted(
-        id: id,
-        receivedAt: receivedAt,
-        person: person,
-        isRead: isRead,
-      );
-    }
-
-    if (eventId != null) {
-      final activity = await activityRepository.getActivityById('$eventId');
-      if (activity == null) return null;
-
-      final type = switch (typeCode) {
-        4 => NotificationType.friendEnrolled,
-        5 => NotificationType.activityPublished,
-        6 => NotificationType.recommendation,
-        _ => NotificationType.reminder,
-      };
-
-      final needsPerson =
-          type == NotificationType.friendEnrolled ||
-          type == NotificationType.activityPublished;
-
-      return AppNotification.activity(
-        id: id,
-        type: type,
-        receivedAt: receivedAt,
-        activity: activity,
-        person: needsPerson
-            ? (person ??
-                  const NotificationPerson(id: 'unknown', name: 'Una amistat'))
-            : null,
-        isRead: isRead,
-      );
-    }
-
-    return null;
+    // TODO(DP-039): No friendship action/status contract exists in the API.
+    // HTTP never emits an actionable request or confirms a local-only result.
+    throw UnsupportedError(
+      'Les respostes d’amistat encara no estan disponibles.',
+    );
   }
 }

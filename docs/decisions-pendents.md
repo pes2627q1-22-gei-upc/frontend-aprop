@@ -267,6 +267,7 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Opcions:** A) acordar contractes i integrar perfils/amistats · B) validar primer la pantalla i les interaccions amb dades demo aïllades.
 - **Provisionalment:** projecció de bústia en Dart pur, dades demo per compte, lectura/resposta confirmades i callbacks de destinació. El perfil s'indica com a pendent fins que hi hagi un callback real. La resposta d'amistat simula només el resultat a la bústia: no implementa un graf d'amistats, push, programació de recordatoris, tipus UML nous ni rutes d'API. Els recordatoris històrics no creen inscripcions. Filtres desplaçables amb pantalla estreta/text ampliat, paletes centrals al tema i inicials si no hi ha avatar. `TODO(DP-023)` marca els límits demo/integració. Textos nous de càrrega/error/buit provisionals en català.
 - **Qui decideix:** frontend + backend + responsables de perfils/amistats
+- **Actualització 2026-10-26:** l’usuari confirma que les accions socials són fora de l’Sprint 1. Bústia i lectura s’integren amb HTTP; no s’infereixen subtipus socials ni s’hi confirmen accions locals. Identitat, tipus i context es contrasten amb backend; límits actuals a DP-039.
 
 ### DP-024 · Descobreix i cerca: contractes, seleccions i abast social
 - **Estat:** oberta
@@ -432,6 +433,18 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Qui decideix:** equip frontend/backend; demanar multiselecció i ordre estable al servidor, filtres/categories al mapa i confirmar la taxonomia visible. Guia: `docs/inici-server-filters.md`. Render ha esgotat 15 s a `/categories`; verificació autenticada pendent. No es canvia cap fitxer del backend.
 - **Resolució:**
 
+### DP-039 · Avisos HTTP: identitat real, tipus, context i dependències del servidor
+- **Estat:** oberta
+- **Obert per:** 2026-10-26 · frontend · ampliació de #86 Frontend pantalla notificacions
+- **Context:** integració autoritzada només al frontend. Contracte de notificacions, perfils i middleware contrastat amb `api-aprop@c94ab70` i `origin/develop@d01f231`; aquests fitxers no han canviat entre les revisions. Usuari confirma accions socials fora de l’Sprint 1.
+- **Dubte:** IDs de tipus generats, identitat de Firebase diferent del UUID intern, Social sense subtipus/estat, context nullable/eliminat, timestamp sense zona i rutes de notificacions sense comprovació del destinatari autenticat. No es troba cap productor automàtic de recordatoris/recomanacions al `develop` inspeccionat.
+- **Provisionalment:** token i capçaleres d’una operació fixats; `/users/me` ha de retornar UUID real i correspondre al FirebaseUID/UUID sol·licitat. No es deriva ni s’inventa l’ID. DTO estricte amb propietari, ID, tipus, data i lectura; els errors no es transformen en buit. `/notificationtypes` classifica per noms definits, no IDs fixos. Social es presenta genèric; tipus desconeguts continuen a Tots com «Avís». Es consulta el context per ID únic amb màxim quatre peticions simultànies; falta de context no esborra l’avís. Activitat eliminada sense enllaç mort; error temporal permet obrir la fitxa. Reminders/recomanacions no reben actors encara que el DTO contingui `friend-id`. Dates amb offset es respecten; sense zona es mantenen locals fins a acordar la política. La lectura comprova destinatari amb GET abans de POST i només confirma després de resposta correcta; la comprovació client no substitueix l’autorització del servidor.
+- **Pendent del backend:** autoritzar GET/list/read pel destinatari de la sessió i evitar confiar en l’ID rebut; establir zona horària RFC 3339 amb offset; confirmar generació de recordatoris/recomanacions si entra a l’Sprint 1, perquè només s’ha trobat creació via `POST /notifications`. La consulta de disponibilitat a `/notificationtypes` ha esgotat 15 s sense resposta HTTP. No s’han executat backend, migracions ni escriptures reals.
+- **Fora de l’Sprint 1:** acceptar/rebutjar amistats, subtipus i estat de sol·licituds, graf social. L’adaptador HTTP no emet sol·licituds accionables ni simula una confirmació. Demo conserva els exemples del projecte final.
+- **Qui decideix:** equip frontend/backend. Guia `docs/notifications-backend.md`; missatge revisable per comunicar `docs/notifications-backend-handoff.md`.
+- **Resolució:**
+
 ## Resoltes
+
 
 (cap)

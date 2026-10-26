@@ -70,10 +70,9 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           !(ModalRoute.of(context)?.isCurrent ?? true)) {
         return;
       }
-      final activity = notice.activity;
-      if (activity != null) {
-        widget.onActivitySelected(activity.id);
-      } else {
+      if (notice.canOpenActivity) {
+        widget.onActivitySelected(notice.activityId!);
+      } else if (notice.activityId == null && notice.person != null) {
         widget.onPersonSelected?.call(notice.person!.id);
       }
     } finally {

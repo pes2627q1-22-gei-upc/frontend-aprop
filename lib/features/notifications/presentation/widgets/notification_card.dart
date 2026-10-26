@@ -34,7 +34,13 @@ class NotificationCard extends StatelessWidget {
     final notice = notification;
     final activity = notice.activity;
     final pendingRequest = notice.requestStatus == FriendRequestStatus.pending;
-    final unavailableProfile = activity == null && !profileAvailable;
+    final unavailableProfile =
+        notice.activityId == null && notice.person != null && !profileAvailable;
+    final hasDestination =
+        notice.canOpenActivity ||
+        (notice.activityId == null &&
+            notice.person != null &&
+            profileAvailable);
     final busy = reading || responding || !enabled;
 
     return Card(
@@ -59,9 +65,11 @@ class NotificationCard extends StatelessWidget {
             label: notice.isRead ? 'Llegit' : 'Sense llegir',
             hint: unavailableProfile
                 ? 'Marca l’avís com a llegit. El perfil encara no està disponible.'
-                : activity != null
+                : notice.canOpenActivity
                 ? 'Obre l’activitat'
-                : 'Obre el perfil',
+                : hasDestination
+                ? 'Obre el perfil'
+                : 'Marca l’avís com a llegit',
             child: InkWell(
               onTap: busy ? null : onOpen,
               child: Padding(
@@ -138,6 +146,16 @@ class NotificationCard extends StatelessWidget {
                               style: theme.textTheme.bodySmall,
                             ),
                           ],
+                          if (notice.activityId != null &&
+                              activity == null) ...[
+                            const SizedBox(height: 8),
+                            Text(
+                              notice.activityUnavailable
+                                  ? 'L’activitat ja no està disponible.'
+                                  : 'No s’ha pogut carregar la informació de l’activitat. Pots provar d’obrir-la.',
+                              style: theme.textTheme.bodySmall,
+                            ),
+                          ],
                         ],
                       ),
                     ),
@@ -148,7 +166,7 @@ class NotificationCard extends StatelessWidget {
                         height: 20,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    else if (!unavailableProfile)
+                    else if (hasDestination)
                       const Icon(Icons.chevron_right, size: 20),
                   ],
                 ),
@@ -246,11 +264,12 @@ class _NotificationAvatar extends StatelessWidget {
                   .map((s) => s[0])
                   .join(),
             )
-          : Icon(
-              notification.type == NotificationType.reminder
-                  ? Icons.notifications_none
-                  : Icons.lightbulb_outline,
-            ),
+          : Icon(switch (notification.category) {
+              NotificationCategory.reminders => Icons.notifications_none,
+              NotificationCategory.recommendations => Icons.lightbulb_outline,
+              NotificationCategory.social => Icons.people_outline,
+              null => Icons.info_outline,
+            }),
     );
     final asset = person?.avatarAsset;
     return SizedBox(
@@ -295,7 +314,7 @@ class _NotificationAvatar extends StatelessWidget {
 
 class _CategoryBadge extends StatelessWidget {
   const _CategoryBadge({required this.category});
-  final NotificationCategory category;
+  final NotificationCategory? category;
 
   @override
   Widget build(BuildContext context) {
@@ -315,6 +334,7 @@ class _CategoryBadge extends StatelessWidget {
         colors.primary.withValues(alpha: 0.08),
         colors.primary,
       ),
+      null => (colors.surfaceContainerLow, colors.onSurface),
     };
     return DecoratedBox(
       decoration: BoxDecoration(

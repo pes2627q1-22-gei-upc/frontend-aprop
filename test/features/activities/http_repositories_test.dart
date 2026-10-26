@@ -18,6 +18,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 
+import '../notifications/backend_notification_fixture.dart';
+
 void main() {
   http.Response jsonResponse(Object? body, [int status = 200]) =>
       http.Response.bytes(
@@ -232,12 +234,18 @@ void main() {
 
   group('HttpProfileRepository, Settings & Notifications', () {
     test('Consulta i edita el perfil, preferències i avisos', () async {
+      final notice = {
+        ...backendNotification(9, event: 101),
+        'notification-date': '2026-10-25T10:00:00Z',
+      };
       final apiClient = ApiClient(
+        idToken: () async => 'test-token',
         userId: () => 'uid-1',
         client: MockClient((request) async {
           if (request.method == 'GET' && request.url.path == '/users/me') {
             return jsonResponse({
-              'id': 7,
+              'id': backendUserId,
+              'firebase-uid': 'uid-1',
               'username': 'laiasoler',
               'name': 'Laia Soler',
               'biography': 'Amant del teatre.',
@@ -251,7 +259,8 @@ void main() {
           if (request.method == 'PATCH' && request.url.path == '/users/me') {
             final body = jsonDecode(request.body) as Map<String, Object?>;
             return jsonResponse({
-              'id': 7,
+              'id': backendUserId,
+              'firebase-uid': 'uid-1',
               'username': 'laiasoler',
               'name': 'Laia Soler',
               'biography': body['biography'] ?? 'Amant del teatre.',
@@ -271,17 +280,14 @@ void main() {
               ),
             ]);
           }
-          if (request.url.path == '/notifications/user/7') {
-            return jsonResponse([
-              {
-                'id': 9,
-                'user-id': 7,
-                'notification-date': '2026-10-25T10:00:00Z',
-                'event': 101,
-                'type': 1,
-                'read': false,
-              },
-            ]);
+          if (request.url.path == '/notifications/user/$backendUserId') {
+            return jsonResponse([notice]);
+          }
+          if (request.url.path == '/notificationtypes') {
+            return jsonResponse(backendNotificationTypes);
+          }
+          if (request.url.path == '/notifications/9') {
+            return jsonResponse(notice);
           }
           if (request.url.path == '/events/101') {
             return jsonResponse(sampleEventJson(id: 101));
