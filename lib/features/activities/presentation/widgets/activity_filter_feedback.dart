@@ -38,13 +38,17 @@ class FilteredActivitiesEmptyState extends StatelessWidget {
     super.key,
     required this.onClear,
     required this.missingCategories,
+    this.isPartialCatalogue = false,
+    this.scrollable = true,
   });
   final VoidCallback onClear;
   final int missingCategories;
+  final bool isPartialCatalogue;
+  final bool scrollable;
 
   @override
-  Widget build(BuildContext context) => Center(
-    child: SingleChildScrollView(
+  Widget build(BuildContext context) {
+    final content = Padding(
       padding: const EdgeInsets.all(24),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -52,7 +56,9 @@ class FilteredActivitiesEmptyState extends StatelessWidget {
           const Icon(Icons.filter_alt_off_outlined, size: 36),
           const SizedBox(height: 12),
           Text(
-            'No hi ha activitats amb aquests filtres',
+            isPartialCatalogue
+                ? 'Cap coincidència entre les activitats carregades'
+                : 'No hi ha activitats amb aquests filtres',
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.titleMedium,
           ),
@@ -70,8 +76,11 @@ class FilteredActivitiesEmptyState extends StatelessWidget {
           ),
         ],
       ),
-    ),
-  );
+    );
+    return Center(
+      child: scrollable ? SingleChildScrollView(child: content) : content,
+    );
+  }
 }
 
 class MapFilterNotice extends StatelessWidget {

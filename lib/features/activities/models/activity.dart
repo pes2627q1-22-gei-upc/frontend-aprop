@@ -35,6 +35,7 @@ class Activity {
     this.directions,
     this.location,
     this.price,
+    this.imageUrl,
   });
 
   final String id;
@@ -43,6 +44,9 @@ class Activity {
   final String municipality;
   final DateTime startsAt;
   final String imageAsset;
+
+  /// Remote cover when supplied by the server; demo assets remain independent.
+  final String? imageUrl;
   final ActivitySource source;
   final ActivityCreator? creator;
   final String? description;

@@ -1,5 +1,6 @@
 import '../../../core/network/api_client.dart';
 import '../models/activity.dart';
+import '../models/activity_page.dart';
 import '../models/new_activity.dart';
 import '../repositories/activity_repository.dart';
 import 'activity_json_mapper.dart';
@@ -14,7 +15,7 @@ class HttpActivityRepository implements ActivityRepository {
 
   @override
   Future<List<Activity>> getActivities({
-    int pageNum = 1,
+    int pageNum = 0,
     int? pageSize,
     int? filterCategory,
     String? filterRegion,
@@ -24,6 +25,10 @@ class HttpActivityRepository implements ActivityRepository {
     bool? filterOfficial,
     String? filterModality,
   }) async {
+    RangeError.checkNotNegative(pageNum, 'pageNum');
+    if ((pageSize ?? defaultPageSize) < 1) {
+      throw ArgumentError.value(pageSize, 'pageSize', 'Must be positive');
+    }
     final query = <String, String>{
       'pageNum': '$pageNum',
       'pageSize': '${pageSize ?? defaultPageSize}',
@@ -44,15 +49,29 @@ class HttpActivityRepository implements ActivityRepository {
     final rawList = switch (decoded) {
       final List<Object?> list => list,
       {'events': final List<Object?> list} => list,
-      _ => const <Object?>[],
+      _ => throw const FormatException('Expected an event list'),
     };
 
     final activities = <Activity>[
       for (final item in rawList)
-        if (item is Map<String, Object?>) activityFromJson(item),
-    ]..sort((a, b) => a.startsAt.compareTo(b.startsAt));
+        if (item is Map<String, Object?>)
+          activityFromJson(item)
+        else
+          throw const FormatException('Expected an event object'),
+    ];
 
     return List.unmodifiable(activities);
+  }
+
+  @override
+  Future<ActivityPage> getActivitiesPage({
+    int page = 0,
+    int pageSize = 50,
+  }) async {
+    final items = await getActivities(pageNum: page, pageSize: pageSize);
+    // TODO(DP-037): GET /events has no total/next-page metadata. A full page
+    // may be followed by an empty last request; preserve the server's order.
+    return ActivityPage(items: items, hasMore: items.length >= pageSize);
   }
 
   @override
@@ -62,7 +81,9 @@ class HttpActivityRepository implements ActivityRepository {
     final response = await apiClient.get('events/$id');
     if (response.statusCode == 404) return null;
     final decoded = ApiClient.decodeOrThrow(response);
-    if (decoded is! Map<String, Object?>) return null;
+    if (decoded is! Map<String, Object?>) {
+      throw const FormatException('Expected an event object');
+    }
     return activityFromJson(decoded);
   }
 
@@ -89,6 +110,7 @@ class HttpActivityRepository implements ActivityRepository {
       imageAsset: parsed.imageAsset.isNotEmpty
           ? parsed.imageAsset
           : activity.imageAsset,
+      imageUrl: parsed.imageUrl,
       source: ActivitySource.community,
       creator: activity.creator,
       description: parsed.description ?? activity.description,

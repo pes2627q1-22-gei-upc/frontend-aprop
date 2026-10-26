@@ -410,6 +410,16 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Qui decideix:** backend + frontend
 - **Resolució:**
 
+### DP-037 · Llista real d'Inici: paginació i metadades disponibles
+- **Estat:** oberta
+- **Obert per:** 2026-10-26 · frontend · ampliació de la tasca #77
+- **Context:** primera tasca d'integració d'Inici autoritzada per l'usuari. Només es modifica `frontend-aprop`; `api-aprop@c94ab70` s'ha consultat, sense executar-lo ni modificar-lo. Referència #77 indicada per l'usuari; cal confirmar l'estat de Taiga abans del commit.
+- **Dubte:** `GET /events` retorna una llista sense total ni cursor. El backend compta pàgines des de 0 i ordena per `enddate`, sense desempatar per ID. Les imatges de Gencat poden ser relatives i separades per comes. Les dates absents es serialitzen com `0001-01-01…` (DP-013).
+- **Provisionalment:** `ActivityPage` i `getActivitiesPage` mantenen la paginació fora dels widgets. Pàgines de 50, botó explícit «Carregar més activitats», final inferit per pàgina curta/buida. Es conserva l'ordre del servidor, es fusiona per ID i un lot complet sense cap ID nou ofereix reintentar la mateixa pàgina. Una recàrrega invalida les respostes antigues. No es descarrega tot el catàleg ni es fingeix un total. `Activity.imageUrl` conserva la portada remota; només les rutes `/content/dam/` es resolen contra el domini oficial verificat `agenda.cultura.gencat.cat`. Errors d'imatge mostren un placeholder; el temps zero de Go es presenta com «Data no informada», sense inventar cap data.
+- **Límits:** deduplicar no garanteix exhaustivitat amb un ordre inestable del servidor; cal desempatar per ID. Cal un contracte de dates nul·les abans de poder situar plans sense data a l'Agenda. Filtres continuen locals sobre les pàgines carregades (DP-035), amb missatge de buit parcial i accés a les pàgines següents. CORS, disponibilitat de Render, categories del mapa i filtres del servidor s'han de coordinar amb backend; no es modifiquen en aquesta tasca.
+- **Qui decideix:** frontend + backend + equip (ordenació i UX de paginació). Guia i comprovacions a `docs/inici-list-backend.md`.
+- **Resolució:**
+
 ## Resoltes
 
 (cap)
