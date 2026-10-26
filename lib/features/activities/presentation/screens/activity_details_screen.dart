@@ -8,6 +8,7 @@ import '../view_models/activity_details_view_model.dart';
 import '../view_models/enrollment_view_model.dart';
 import '../widgets/activity_badges.dart';
 import '../widgets/activity_information_row.dart';
+import '../widgets/activity_image.dart';
 import '../widgets/enrollment_action.dart';
 
 class ActivityDetailsScreen extends StatefulWidget {
@@ -131,19 +132,11 @@ class _ActivityDetailsContent extends StatelessWidget {
       children: [
         ClipRRect(
           borderRadius: BorderRadius.circular(16),
-          child: Image.asset(
-            activity.imageAsset,
+          child: ActivityImage(
+            activity: activity,
             height: 168,
             width: double.infinity,
-            fit: BoxFit.cover,
             semanticLabel: activity.title,
-            errorBuilder: (context, error, stackTrace) => ColoredBox(
-              color: colors.surfaceContainerHighest,
-              child: const SizedBox(
-                height: 168,
-                child: Center(child: Icon(Icons.image_outlined, size: 48)),
-              ),
-            ),
           ),
         ),
         const SizedBox(height: 16),

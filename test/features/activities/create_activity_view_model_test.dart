@@ -353,7 +353,7 @@ class _FakeCategoryRepository implements ActivityCategoryRepository {
   bool fail = false;
 
   @override
-  Future<List<ActivityCategory>> getCategories() async {
+  Future<List<ActivityCategory>> getCreationCategories() async {
     if (fail) throw Exception('Offline');
     return const [
       ActivityCategory(value: 'agenda:categories/teatre', label: 'Teatre'),

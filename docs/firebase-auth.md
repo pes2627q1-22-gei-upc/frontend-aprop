@@ -22,6 +22,8 @@ El codi és a `lib/features/auth/data/firebase_auth_repository.dart` i es tria a
 Contenen la clau d'API de Firebase, així que **no es versionen** (són al `.gitignore`, DP-004). Cada persona
 els ha de generar al seu ordinador la primera vegada (i si canvia la configuració de Firebase o es renova
 la clau). `firebase.json` sí que es versiona: no té cap clau i indica a `flutterfire` on generar-los.
+La CI no en necessita els reals: escriu versions de mostra (sense cap clau) abans d'`analyze`, perquè les proves
+i el build de depuració no es connecten a Firebase.
 
 1. Demana accés al projecte de Firebase (rol Editor).
 2. Instal·la [Node.js LTS](https://nodejs.org) i després `npm install -g firebase-tools`.

@@ -185,7 +185,7 @@ void main() {
           ),
         );
 
-        final categories = await repo.getCategories();
+        final categories = await repo.getCreationCategories();
 
         expect(categories.map((c) => c.label), ['Cultura digital', 'Teatre']);
         // Es desa l'etiqueta, perquè l'activitat quedi a la categoria que ja

@@ -32,34 +32,37 @@ void main() {
   tearDown(() => model.dispose());
 
   test(
-    'Applying and clearing filters preserves source data without new requests',
+    'Applying and clearing filters reloads the source; equal selections do not',
     () async {
       await model.load();
       var notifications = 0;
       model.addListener(() => notifications++);
       final selected = ActivityFilters(categories: ['Teatre']);
-      model.applyFilters(selected);
+      await model.applyFilters(selected);
       expect(model.activities.map((a) => a.id), ['theatre']);
-      model.applyFilters(ActivityFilters(categories: ['Teatre']));
-      expect(notifications, 1);
-      expect(repository.listRequests, 1);
-      model.clearFilters();
+      await model.applyFilters(ActivityFilters(categories: ['Teatre']));
+      expect(notifications, 2);
+      expect(repository.listRequests, 2);
+      await model.clearFilters();
       expect(model.activities, repository.activities);
       expect(() => model.activities.clear(), throwsUnsupportedError);
     },
   );
 
   test(
-    'An in-flight load uses the latest confirmed filters and is deduplicated',
+    'Changing filters replaces an in-flight load with a new query',
     () async {
       final pending = Completer<List<Activity>>();
       repository.onLoad = () => pending.future;
       final loading = model.load();
       await model.load();
-      model.applyFilters(ActivityFilters(categories: ['Teatre']));
+      final filtered = model.applyFilters(
+        ActivityFilters(categories: ['Teatre']),
+      );
       pending.complete(repository.activities);
       await loading;
-      expect(repository.listRequests, 1);
+      await filtered;
+      expect(repository.listRequests, 2);
       expect(model.activities.map((a) => a.id), ['theatre']);
       expect(model.isLoading, isFalse);
     },
@@ -67,7 +70,7 @@ void main() {
 
   test('Refresh errors retain filters and data; retry includes newly created matches', () async {
     await model.load();
-    model.applyFilters(ActivityFilters(categories: ['Música']));
+    await model.applyFilters(ActivityFilters(categories: ['Música']));
     repository.onLoad = () async => throw StateError('offline');
     await model.load();
     expect(model.errorMessage, isNotNull);

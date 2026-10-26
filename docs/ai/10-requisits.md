@@ -105,6 +105,8 @@ Columna «Sprint (entra, acaba)»: format de la memòria §1.4. `TODO(confirmar)
 
 ## Criteris d'acceptació coneguts
 
+- **#77, ampliació d’integració:** llista HTTP paginada des de 0, portades remotes i retorn del detall amb estat conservat. Primera tasca autoritzada: només frontend; filtres de servidor a la segona. Referència original indicada per l’usuari, pendent de contrastar Taiga. Guia `docs/inici-list-backend.md` i límits DP-037.
+
 - **#7 Accés:** vegeu `docs/architecture.md` § «Accés i sessió» (contrasenya ≥ 8 amb majúscula, minúscula,
   número i caràcter especial; confirmació; nom d'usuari únic; accés per nom o correu).
 - **#75 Detall:** vegeu `docs/activity-details.md`.
@@ -112,6 +114,6 @@ Columna «Sprint (entra, acaba)»: format de la memòria §1.4. `TODO(confirmar)
 - **#86 Pantalla de notificacions:** bústia, filtres, lectura i resposta a sol·licituds segons la figura 17 i els mockups aprovats; vegeu `docs/notifications.md`. La tasca frontend no implica completar les històries d'enviament, recordatoris, perfils o amistats reals. Criteris complets de Taiga i contracte backend pendents (DP-023).
 - **#96 Frontend de cerca:** Descobreix i cerca d'activitats segons les figures 14–15, amb les targetes/inscripcions compartides, navegació de retorn, recompte i estats de càrrega/buit/error. ID i títol confirmats per l'usuari; criteris detallats de Taiga i contracte de cerca/recomanació pendents (DP-024). Cerca de persones/perfils pendent d'abast i contracte. Vegeu `docs/discovery.md`.
 - **#230 Frontend perfil:** autoritzat per l'usuari amb els dos mockups de les figures 18–19. Perfil, historial de mostra, autoria per ID, edició de biografia/municipi, còpia del nom d'usuari, preferències demo i tancament de sessió; vegeu `docs/profile.md`. ID/títol confirmats per l'usuari; criteris detallats de Taiga pendents de contrastar. Contractes i integracions pendents a DP-032/DP-033; no equival a completar les històries socials, de gamificació o de configuració globals.
-- **#87 Frontend filtrar esdeveniments:** Dates i Categories d’Inici segons els mockups aprovats: esborranys, Aplicar/Netejar, cancel·lació, resum, OR de categories i AND amb dates inclusives. Filtratge local compartit entre Mapa/Llista, amb límits de dades i contracte pendents (DP-035/DP-029). Zona/municipi i criteris detallats de Taiga pendents de confirmar. Vegeu `docs/activity-filters.md`.
+- **#87 Frontend filtrar esdeveniments:** Dates i Categories d’Inici: esborranys, Aplicar/Netejar, cancel·lació, resum, OR de categories i AND amb dates inclusives. La llista passa filtres al servidor abans de paginar i carrega opcions/IDs de `/categories`. El mapa conserva filtratge local i avisa de categories absents, amb accés a la llista (DP-035/DP-029/DP-038). Zona/municipi i criteris detallats de Taiga pendents de confirmar. Vegeu `docs/activity-filters.md` i `docs/inici-server-filters.md`.
 - **Resta:** `TODO(confirmar)` — consulta Taiga. El comportament dels mockups (`50-ui-mockups.md`) en dona
   pistes, però no substitueix els criteris.

@@ -12,8 +12,7 @@
 
 | Taiga | Història / tasca | Repo | Branca | Responsable | Estat |
 |---|---|---|---|---|---|
-| #231 | Client HTTP i integració de la API de Render | frontend-aprop | `feature/api-client` | Wenqiang | Implementat (`ApiConfig`, `ApiClient`, repositoris HTTP i injecció a `main.dart`) i verificat amb tests; PR oberta; conflictes amb `develop` (`f6c07d9`, PR #22 i #24) resolts; pendent de revisió |
-| #87 | Frontend filtrar esdeveniments | frontend-aprop | `feature/activity-filters` | Adam | 366 proves; conflicte amb PR #22 resolt; commit de merge/push i revisió humana pendents |
+| #87 | Filtres d’Inici al servidor (ampliació) | frontend-aprop | `feature/inici-server-filters` | Adam | 417 proves i APK correctes; revisió feta; verificació amb Render/mapa pendent; sense commit |
 | — | Configuració d'IA per a l'equip | frontend-aprop | `feature/ai-setup` | Wenqiang | sense scripts/hooks; pendent PR |
 | — | Configuració d'IA per a l'equip | api-aprop | `feature/ai-setup` | Wenqiang | pendent de revisió humana |
 
@@ -27,28 +26,28 @@
 - #86 Avisos fusionats a `develop` (PR #15); conflictes resolts preservant les DP anteriors.
 - #96 Descobreix i cerca fusionades a `develop` (PR #16).
 - #230 Perfil (PR #20) i mapa connectat al backend (PR #21), fusionats a `develop`.
-- Grups del mapa: zoom i llista al mateix lloc, fusionats a `develop` (PR #22).
+- Grups del mapa (PR #22), filtres #87 (PR #24) i client HTTP #231 (PR #23), fusionats a `develop`.
+- #77 llista real publicada a `9c35672`; encara no era a `origin/develop` en començar aquesta ampliació.
 
 ## Bloquejos
 
 - Contractes amb Talaia i Mobilicat sense concretar (`40-api-i-serveis.md`).
-- El frontend no té workflow de CI.
 - Inscripcions: API autenticada pendent; agenda demo connectada (DP-010).
 - Assistent (xatbot): contracte d'API amb el backend i Gemini pendent (DP-016).
 - Creació i mapa: contracte backend i decisions provisionals pendents (DP-017 a DP-022).
 - Avisos: API, amistats reals, perfils i enviament pendents (DP-023; abans DP-017 a la branca).
 - Descobreix/cerca: API, interessos i cerca de persones/perfils pendents (DP-024).
-- Filtres: contracte, categories i catàleg compartit pendents (DP-035/DP-029).
-- Firebase local: sessió iniciada, però sense permisos del projecte; configuració absent.
+- Filtres: llista connectada amb dates/IDs reals; mapa sense filtres/categories del servidor (DP-029/DP-035/DP-038).
+- Firebase local d’Adam: Android/web configurats, SHA-1 registrada; no versionar fitxers locals.
 - Perfil/Configuració: contractes i integracions pendents (DP-032/DP-033); només perfil propi demo.
 
 ## Propers passos
 
-1. Revisar i publicar el merge de `develop` a #87 per actualitzar la PR; contrastar criteris de Taiga.
-2. Generar Firebase quan el compte tingui accés al projecte (`docs/firebase-auth.md`).
-3. Revisió humana abans de commit/PR i acord dels contractes d’API pendents.
+1. Integrar la PR de #77 abans de portar aquesta ampliació de #87 a `develop`; revisió humana obligatòria.
+2. Coordinar backend: categories/filtres del mapa, multiselecció/ordre estable, disponibilitat i CORS.
+3. Verificar login → filtrar → detall → inscripció → agenda → recàrrega; API només de lectura aquí.
 
 ## Traspàs entre eines
 
-2026-10-25 · Context: aquest fitxer, `docs/activity-filters.md` i DP-035/DP-029.
-Branca `feature/activity-filters`: codi publicat a `e7d7343`; merge de `c0815d9` resolt, sense finalitzar.
+2026-10-26 · Context: `docs/inici-server-filters.md`, DP-038/DP-035/DP-037.
+Branca `feature/inici-server-filters` des de `9c35672`. Només frontend; sense commit ni push.

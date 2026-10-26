@@ -55,8 +55,7 @@ ActivityDateRange activityDatePresetRange(
   };
 }
 
-// TODO(DP-035): These are the approved filter labels, pending category IDs and
-// a filtering contract shared with the backend (see also DP-018 and DP-029).
+/// Approved example labels for the demo catalogue. HTTP uses GET /categories.
 const activityFilterCategories = [
   'Música',
   'Teatre',
@@ -88,7 +87,9 @@ class ActivityFilters {
   bool matches(Activity activity) =>
       (dates?.contains(activity.startsAt) ?? true) &&
       (_categoryKeys.isEmpty ||
-          _categoryKeys.contains(_categoryKey(activity.category)));
+          activity.categories.any(
+            (category) => _categoryKeys.contains(_categoryKey(category)),
+          ));
 
   List<Activity> applyTo(Iterable<Activity> source) =>
       List.unmodifiable(source.where(matches));
@@ -100,7 +101,10 @@ class ActivityFilters {
             .where(
               (activity) =>
                   (dates?.contains(activity.startsAt) ?? true) &&
-                  {'', 'activitat'}.contains(_categoryKey(activity.category)),
+                  activity.categories.every(
+                    (category) =>
+                        {'', 'activitat'}.contains(_categoryKey(category)),
+                  ),
             )
             .length;
 

@@ -103,7 +103,7 @@ class CreateActivityViewModel extends ChangeNotifier {
     _categoriesError = null;
     notifyListeners();
     try {
-      final categories = await repository.getCategories();
+      final categories = await repository.getCreationCategories();
       if (_isDisposed) return;
       _categories = List.unmodifiable(categories);
     } catch (_) {

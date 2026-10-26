@@ -5,6 +5,27 @@ import '../models/new_activity.dart';
 /// Converteix un objecte JSON d'esdeveniment del backend (en `kebab-case`)
 /// al model de domini [Activity] (en `camelCase`).
 Activity activityFromJson(Map<String, Object?> json) {
+  final rawId = json['id'];
+  final id = rawId is int ? rawId.toString() : _text(rawId);
+  final title = _text(json['title']);
+  final rawDate = _text(json['start-date']);
+  if (id == null ||
+      (int.tryParse(id) ?? 0) < 1 ||
+      title == null ||
+      rawDate == null) {
+    throw const FormatException('An event needs an ID, title and start date');
+  }
+  final date = DateTime.tryParse(rawDate);
+  if (date == null) throw const FormatException('Invalid event start date');
+  final image = _cover(json['image-url']) ?? _cover(json['images']);
+  final rawCategories = json['categories'] ?? json['category'];
+  final categories = List<String>.unmodifiable({
+    for (final tag
+        in rawCategories is List
+            ? rawCategories.whereType<String>()
+            : [if (rawCategories is String) rawCategories])
+      if (tag.trim().isNotEmpty) activityCategoryLabel(tag),
+  });
   final isOfficial =
       json['is-official'] as bool? ?? (json['code'] as num? ?? 0) != 0;
   final latitude = (json['latitude'] as num?)?.toDouble() ?? 0;
@@ -27,12 +48,15 @@ Activity activityFromJson(Map<String, Object?> json) {
   };
 
   return Activity(
-    id: '${json['id']}',
-    title: json['title'] as String? ?? '',
-    category: _category(json['categories'] ?? json['category']),
+    id: id,
+    title: title,
+    category: categories.firstOrNull ?? 'Activitat',
+    categories: categories,
     municipality: _municipality(json['municipality']) ?? place ?? '',
-    startsAt: _parseDate(json['start-date'] as String?),
-    imageAsset: _imageAsset(json['image-url'] ?? json['images']),
+    // The backend stores civil dates; preserve its calendar fields (DP-029).
+    startsAt: DateTime(date.year, date.month, date.day, date.hour, date.minute),
+    imageAsset: image?.asset ?? '',
+    imageUrl: image?.url,
     source: isOfficial
         ? ActivitySource.culturalAgenda
         : ActivitySource.community,
@@ -77,10 +101,6 @@ Map<String, Object?> newActivityToJson(NewActivity activity) {
   };
 }
 
-/// Nom que es mostra d'una etiqueta de categoria del backend:
-/// `agenda:categories/arts-visuals` → «Arts visuals».
-String activityCategoryLabel(String tag) => _category(tag);
-
 /// El backend desa només el dia, en UTC: passar l'hora d'aquí a UTC podria
 /// canviar-lo (les 00.30 h d'aquí són el dia anterior en UTC). Es llegeix igual
 /// a `_parseDate`, sense canviar de zona.
@@ -94,31 +114,31 @@ String? _text(Object? value) {
   return text.isEmpty ? null : text;
 }
 
-String _imageAsset(Object? value) {
+({String asset, String? url})? _cover(Object? value) {
   final raw = _text(value);
-  if (raw == null) return '';
-  if (raw.startsWith('assets/')) return raw;
-  return '';
+  if (raw == null) return null;
+  if (raw.startsWith('assets/')) return (asset: raw, url: null);
+  // Gencat separates covers with commas and can return /content/dam/ paths.
+  // TODO(DP-037): Prefer absolute image URLs from the API when available.
+  for (final candidate in raw.split(
+    RegExp(r',\s*(?=https?://|/content/dam/)'),
+  )) {
+    var uri = Uri.tryParse(candidate.trim());
+    if (uri == null) continue;
+    if (candidate.trim().startsWith('/content/dam/')) {
+      uri = Uri.https('agenda.cultura.gencat.cat', '/').resolveUri(uri);
+    }
+    if ((uri.scheme == 'https' || uri.scheme == 'http') &&
+        uri.host.isNotEmpty &&
+        uri.userInfo.isEmpty) {
+      return (asset: '', url: uri.toString());
+    }
+  }
+  return null;
 }
 
-DateTime _parseDate(String? value) {
-  if (value == null || value.isEmpty) {
-    return DateTime(2026, 1, 1);
-  }
-  final date = DateTime.parse(value);
-  return DateTime(date.year, date.month, date.day, date.hour, date.minute);
-}
-
-String _category(Object? categories) {
-  if (categories is String && categories.trim().isNotEmpty) {
-    return _capitalize(categories.trim().split('/').last.replaceAll('-', ' '));
-  }
-  final tag = categories is List
-      ? categories.whereType<String>().where((c) => c.isNotEmpty).firstOrNull
-      : null;
-  if (tag == null) return 'Activitat';
-  return _capitalize(tag.split('/').last.replaceAll('-', ' '));
-}
+String activityCategoryLabel(String tag) =>
+    _capitalize(tag.trim().split('/').last.replaceAll('-', ' '));
 
 const _lowercaseWords = {'de', 'del', 'dels', 'la', 'les', 'el', 'els', 'i'};
 

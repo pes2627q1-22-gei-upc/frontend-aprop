@@ -74,7 +74,7 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Context:** `docs/ai/30-arquitectura.md`, ADR-0003
 - **Dubte:** els PDFs diuen que totes les claus van al backend, però el login de Firebase i el SDK de Maps normalment s'executen al client amb claus restringides.
 - **Opcions:** A) SDK al client amb claus restringides per app · B) tot via backend (proxy)
-- **Provisionalment:** 2026-10-22: per al login s'ha seguit A amb Firebase Auth (vegeu DP-026). `flutterfire configure` genera `lib/firebase_options.dart` i `android/app/google-services.json` (projecte `aprop-919ec`). Es van versionar en un primer moment (repo privat), però el 2026-10-22 l'equip va decidir **no versionar-los**: són al `.gitignore`, la clau s'ha renovat (l'antiga queda a l'historial de la branca `feature/autenticacio`, però ja no és vàlida) i cada persona els genera amb `flutterfire configure` (`docs/firebase-auth.md`). Sense aquests fitxers l'app no compila. Pendent: restringir les claus noves (Android: paquet + SHA-1; navegador: `localhost:5000` i `aprop-919ec.firebaseapp.com`) i, si s'afegeix CI, generar-los des de secrets de GitHub.
+- **Provisionalment:** 2026-10-22: per al login s'ha seguit A amb Firebase Auth (vegeu DP-026). `flutterfire configure` genera `lib/firebase_options.dart` i `android/app/google-services.json` (projecte `aprop-919ec`). Es van versionar en un primer moment (repo privat), però el 2026-10-22 l'equip va decidir **no versionar-los**: són al `.gitignore`, la clau s'ha renovat (l'antiga queda a l'historial de la branca `feature/autenticacio`, però ja no és vàlida) i cada persona els genera amb `flutterfire configure` (`docs/firebase-auth.md`). Sense aquests fitxers l'app no compila. Pendent: restringir les claus noves (Android: paquet + SHA-1; navegador: `localhost:5000` i `aprop-919ec.firebaseapp.com`). 2026-10-26: la CI (`.github/workflows/ci.yml`) escriu versions de mostra dels dos fitxers (sense claus ni secrets de GitHub), perquè les proves i el build de depuració no es connecten a Firebase.
 - **Qui decideix:** equip (cal un ADR)
 - **Resolució:**
 
@@ -210,7 +210,7 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
   - la categoria és l'etiqueta del backend (DP-018);
   - les indicacions van només a `address` (abans també a `place`, i en llegir-la sortien repetides);
   - `free` només s'envia si hi ha preu: sense preu no se sap si és gratuïta.
-  No es desen al backend l'import del preu, la imatge triada (#94, DP-019) ni l'hora. El backend no apunta qui crea l'activitat: `MainShell` la continua apuntant (opció B). Després de crear-la, el mapa d'Inici torna a demanar la zona visible perquè hi surti. Amb login real, el backend encara respon 400 «invalid user id» fins que tradueixi l'UID de Firebase a l'UUID de `users` (DP-036).
+  No es desen al backend l'import del preu, la imatge triada (#94, DP-019) ni l'hora. El backend no apunta qui crea l'activitat: `MainShell` la continua apuntant (opció B). Després de crear-la, el mapa d'Inici torna a demanar la zona visible perquè hi surti. El backend treu el creador del token des de la PR #35 d'api-aprop (Tasca #236, Arnau), que també afegeix `PUT` i `DELETE /events/{id}` per editar i esborrar els esdeveniments no oficials (encara sense pantalla).
 - **Qui decideix:** frontend + backend
 - **Resolució:**
 
@@ -221,7 +221,7 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Dubte:** la llista tancada de categories no està definida, i el CA1 diu «categoria (≥ 1)» mentre que el model `Activity` en té una sola.
 - **Opcions:** A) una sola categoria (com ara) · B) diverses categories (cal canviar `Activity.category` i la llista, la fitxa i l'agenda).
 - **Provisionalment:** una sola categoria triada d'una llista provisional (Música, Teatre, Exposicions) (`TODO(DP-018)`). L'usuari ho ha decidit així de moment per no canviar el model.
-- **Amb el backend (2026-10-26, Claude Code (Opus 5.5) amb confirmació de l'usuari):** amb backend, el formulari carrega `GET /categories` (`HttpActivityRepository.getCategories`) i només ofereix les de l'Agenda Cultural (`agenda:categories/…`), ordenades pel nom. No ofereix els àmbits (`agenda:ambits/…`) ni les que s'han creat escrivint un nom nou. S'envia l'etiqueta (p. ex. `agenda:categories/teatre`), perquè `POST /events` crea una categoria nova amb qualsevol nom que no existeixi. El nom que es veu surt de l'etiqueta i no porta accents («Conferencies», DP-029). Sense backend, continua la llista provisional. Els filtres d'Inici (DP-035) tenen vuit etiquetes pròpies dels mockups: algunes coincideixen amb categories (Teatre, Dansa, Exposicions, Fires i mercats) i d'altres amb àmbits (Música, Cinema, Llibres i lletres), així que una activitat creada amb, per exemple, «Concerts» no surt filtrant per «Música».
+- **Amb el backend (2026-10-26, Claude Code (Opus 5.5) amb confirmació de l'usuari):** amb backend, el formulari carrega `GET /categories` (`HttpActivityRepository.getCategories`) i només ofereix les de l'Agenda Cultural (`agenda:categories/…`), ordenades pel nom. No ofereix els àmbits (`agenda:ambits/…`) ni les que s'han creat escrivint un nom nou. S'envia l'etiqueta (p. ex. `agenda:categories/teatre`), perquè `POST /events` crea una categoria nova amb qualsevol nom que no existeixi. El nom que es veu surt de l'etiqueta i no porta accents («Conferencies», DP-029). Sense backend, continua la llista provisional. Els filtres d'Inici també carreguen `GET /categories` (DP-038) i filtren al servidor per l'ID de la categoria, així que una activitat creada amb una categoria de l'Agenda Cultural surt en filtrar per aquesta categoria.
 - **Qui decideix:** equip
 - **Resolució:**
 
@@ -404,6 +404,7 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Opcions:** A) backend amb filtres, metadades i catàleg compartit · B) filtratge local sobre dades disponibles, amb límits explícits.
 - **Provisionalment:** B per a Dates/Categories. Un únic valor immutable a `ActivitiesViewModel` s'aplica al catàleg i a la zona carregada; sense endpoints/paràmetres nous. Interval inclusiu de dies civils basat en l'inici; categories OR i dates AND; vuit etiquetes dels mockups, coincidència tolerant a accents i sense equivalències deduïdes. Cap categoria = sense restricció. Categories no informades excloses quan se'n tria una, amb recompte visible. Cap de setmana = dissabte/diumenge actual si ja és cap de setmana, o el següent en dies laborables. Esborrany local, Aplicar confirma, tancar descarta; filtres per sessió i només d'Inici. Zona/municipi pendent. `TODO(DP-035)` al model; detalls a `docs/activity-filters.md`.
 - **Qui decideix:** frontend + backend + equip (criteris i categories)
+- **Actualització 2026-10-26:** la llista consulta el servidor amb dates i categories reals abans de paginar. Les opcions deixen de ser les vuit de demostració quan s’injecta HTTP. El mapa continua limitat al filtratge local i metadades absents. Detalls a DP-038; la decisió continua oberta per font compartida i abast global.
 - **Resolució:**
 
 ### DP-036 · Format UUID de `X-User-ID` i sincronització d'UID de Firebase a Render
@@ -415,6 +416,27 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Opcions:** A) que el backend resolgui sempre el `firebase_uid` cap a l'UUID intern de `Users` al middleware o accepti `firebase_uid` als serveis · B) transformar de manera determinista qualsevol identificador no UUID a un UUID v4 canònic al client (`ApiClient.toCanonicalUuid`) quan s'envia `X-User-ID`.
 - **Provisionalment:** B (`TODO(DP-036)` a `lib/core/network/api_client.dart`), de manera que les peticions a Render amb `X-User-ID` funcionen tant amb UID de Firebase com amb comptes de demostració sense fallar per validació d'UUID.
 - **Qui decideix:** backend + frontend
+- **Resolució:**
+
+### DP-037 · Llista real d'Inici: paginació i metadades disponibles
+- **Estat:** oberta
+- **Obert per:** 2026-10-26 · frontend · ampliació de la tasca #77
+- **Context:** primera tasca d'integració d'Inici autoritzada per l'usuari. Només es modifica `frontend-aprop`; `api-aprop@c94ab70` s'ha consultat, sense executar-lo ni modificar-lo. Referència #77 indicada per l'usuari; cal confirmar l'estat de Taiga abans del commit.
+- **Dubte:** `GET /events` retorna una llista sense total ni cursor. El backend compta pàgines des de 0 i ordena per `enddate`, sense desempatar per ID. Les imatges de Gencat poden ser relatives i separades per comes. Les dates absents es serialitzen com `0001-01-01…` (DP-013).
+- **Provisionalment:** `ActivityPage` i `getActivitiesPage` mantenen la paginació fora dels widgets. Pàgines de 50, botó explícit «Carregar més activitats», final inferit per pàgina curta/buida. Es conserva l'ordre del servidor, es fusiona per ID i un lot complet sense cap ID nou ofereix reintentar la mateixa pàgina. Una recàrrega invalida les respostes antigues. No es descarrega tot el catàleg ni es fingeix un total. `Activity.imageUrl` conserva la portada remota; només les rutes `/content/dam/` es resolen contra el domini oficial verificat `agenda.cultura.gencat.cat`. Errors d'imatge mostren un placeholder; el temps zero de Go es presenta com «Data no informada», sense inventar cap data.
+- **Límits:** deduplicar no garanteix exhaustivitat amb un ordre inestable del servidor; cal desempatar per ID. Cal un contracte de dates nul·les abans de poder situar plans sense data a l'Agenda. Filtres continuen locals sobre les pàgines carregades (DP-035), amb missatge de buit parcial i accés a les pàgines següents. CORS, disponibilitat de Render, categories del mapa i filtres del servidor s'han de coordinar amb backend; no es modifiquen en aquesta tasca.
+- **Qui decideix:** frontend + backend + equip (ordenació i UX de paginació). Guia i comprovacions a `docs/inici-list-backend.md`.
+- **Actualització 2026-10-26:** #87 passa filtres al servidor i un lot pot unir pàgines de diverses categories. Un lot sense IDs nous ja no es rebutja: pot ser un solapament legítim entre aquestes fonts. Cada acció explícita avança la pàgina; no hi ha càrrega automàtica en bucle. Es mantenen les limitacions d’ordenació de l’API.
+- **Resolució:**
+
+### DP-038 · Filtres d’Inici amb el contracte actual del servidor
+- **Estat:** oberta
+- **Obert per:** 2026-10-26 · frontend · ampliació de #87 Frontend filtrar esdeveniments
+- **Context:** segona tasca autoritzada; només frontend. Contracte consultat a `api-aprop@c94ab70`: `/events` admet una categoria i dates; `/categories` retorna ID/nom; `/events/map` només límits geogràfics i no informa categories.
+- **Dubte:** selecció múltiple OR sense paràmetre múltiple; etiquetes del mockup diferents de la taxonomia real; mapa sense metadades/filtres; dates en format Go estricte sense zona; sense ordre global estable entre consultes.
+- **Provisionalment:** opcions HTTP carregades i validades des de `/categories`, cache de sessió amb reintent si falla. Etiqueta llegible del nom/últim segment del tag, sense equivalències semàntiques inventades. Noms visibles coincidents agrupen els seus IDs amb OR. La pàgina N és un lot de la pàgina N de cada categoria, amb màxim quatre peticions simultànies; resposta atòmica, deduplicació per ID i continuació si alguna font retorna una pàgina completa. Ordre determinista per ID de categoria i ordre del servidor dins de cada resposta; no es promet ordre cronològic global. Poden carregar-se més de 50 activitats en un lot de diverses categories. Totes les categories d’una activitat es conserven en un snapshot immutable. Dates civils inclusives `YYYY-MM-DDT00:00:00.000`, sense UTC. Canviar filtres reinicia a 0 i invalida respostes antigues. Refresc/error conserva dades només de la mateixa consulta.
+- **Mapa:** es manté la consulta geogràfica existent i s’apliquen filtres locals a dades informades. Si falten categories, s’indica el nombre exclòs i s’ofereix «Veure llista»; no s’afirma falsament que no hi ha coincidències. No s’envien paràmetres que el servidor ignora ni es fan peticions de detall per cada marcador.
+- **Qui decideix:** equip frontend/backend; demanar multiselecció i ordre estable al servidor, filtres/categories al mapa i confirmar la taxonomia visible. Guia: `docs/inici-server-filters.md`. Render ha esgotat 15 s a `/categories`; verificació autenticada pendent. No es canvia cap fitxer del backend.
 - **Resolució:**
 
 ## Resoltes
