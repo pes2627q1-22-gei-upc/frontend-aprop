@@ -47,7 +47,7 @@ Accés amb Google; en el primer accés es completa el perfil i es fa el test d'i
 
 ## Estat actual vs mockups
 
-Taiga #87 implementa els panells Dates/Categories aprovats: calendari inclusiu, dreceres, vuit caselles, esborrany, Aplicar/Netejar i cancel·lació sense guardar. La capçalera mostra selecció i resum; Mapa/Llista comparteixen els filtres. Inclou buit filtrat, metadades de categoria absents i disposició accessible amb text ampliat. Filtratge local sobre dades disponibles; font compartida i consultes del backend pendents (DP-035/DP-029). Zona/municipi continua pendent. Vegeu `docs/activity-filters.md`.
+Taiga #87 implementa els panells Dates/Categories aprovats: calendari inclusiu, dreceres, caselles, esborrany, Aplicar/Netejar i cancel·lació sense guardar. Les vuit caselles del mockup són l’exemple Demo; en HTTP les opcions venen de `/categories`, amb càrrega/error/reintent. La capçalera mostra selecció i resum; Mapa/Llista comparteixen els filtres. La llista consulta el servidor abans de paginar. El mapa encara filtra dades disponibles i ofereix «Veure llista» si falten categories, sense confondre-les amb absència d’esdeveniments. Font compartida i contracte del mapa pendents (DP-035/DP-029/DP-038). Zona/municipi continua pendent. Vegeu `docs/activity-filters.md`.
 
 Perfil propi i Configuració implementats a partir de `perfil_1_principal.png` i `perfil_2_configuracio.png` aportats per l'usuari. La identitat ve de la sessió; només Laia té estadístiques demo i els tres plans històrics resolubles. Edició de biografia/municipi i preferències per compte en memòria; compartir copia `@username`. Idioma/tema, serveis socials, Calendar, test i eliminació continuen pendents, amb Calendar «No connectat». Colors centralitzats, disposició adaptable i retorn a fitxes compartides. Taiga #230; DP-032/DP-033 i `docs/profile.md`.
 
@@ -59,3 +59,5 @@ Accés real amb Firebase a Android i web (correu + contrasenya i Google, amb tri
 d'Inici amb capçalera, i fitxa (#75). Els controls pendents es mostren desactivats. Detall a `README.md`.
 `TODO(confirmar)`: els criteris de Taiga #7 diuen «usuari o correu», però amb Firebase de moment només es pot
 entrar amb el correu (DP-026).
+
+Llista real d’Inici (ampliació de #77): conserva la capçalera i les targetes; afegeix «Carregar més activitats», actualització arrossegant i reintents sense perdre el contingut. Portades HTTP o assets amb la mateixa geometria i alternativa coherent. Un filtre sense coincidències entre pàgines carregades es diferencia del catàleg complet buit (DP-037). Guia `docs/inici-list-backend.md`.

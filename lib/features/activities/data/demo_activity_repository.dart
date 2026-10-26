@@ -1,4 +1,6 @@
 import '../models/activity.dart';
+import '../models/activity_filters.dart';
+import '../models/activity_page.dart';
 import '../models/geo_point.dart';
 import '../models/new_activity.dart';
 import '../repositories/activity_repository.dart';
@@ -67,6 +69,26 @@ class DemoActivityRepository implements ActivityRepository {
       ..sort((a, b) => a.startsAt.compareTo(b.startsAt));
     return List.unmodifiable(sorted);
   }
+
+  @override
+  Future<ActivityPage> getActivitiesPage({
+    int page = 0,
+    int pageSize = 50,
+    ActivityFilters? filters,
+  }) async {
+    RangeError.checkNotNegative(page, 'page');
+    if (pageSize < 1) throw RangeError.range(pageSize, 1, null, 'pageSize');
+    final source = await getActivities();
+    final catalogue = filters?.applyTo(source) ?? source;
+    final offset = page * pageSize;
+    return ActivityPage(
+      items: catalogue.skip(offset).take(pageSize),
+      hasMore: offset + pageSize < catalogue.length,
+    );
+  }
+
+  @override
+  Future<List<String>> getFilterCategories() async => activityFilterCategories;
 
   @override
   Future<Activity?> getActivityById(String id) async {

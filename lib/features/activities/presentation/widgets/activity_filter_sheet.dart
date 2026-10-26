@@ -17,7 +17,7 @@ class ActivityFilterSheet extends StatelessWidget {
   final Widget content;
   final Widget summary;
   final VoidCallback onClear;
-  final VoidCallback onApply;
+  final VoidCallback? onApply;
 
   @override
   Widget build(BuildContext context) {
