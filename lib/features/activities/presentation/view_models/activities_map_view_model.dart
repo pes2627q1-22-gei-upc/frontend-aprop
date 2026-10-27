@@ -69,6 +69,13 @@ class ActivitiesMapViewModel extends ChangeNotifier {
     if (area != null) await loadArea(area);
   }
 
+  /// Torna a demanar la zona visible encara que ja hi fos, per exemple després
+  /// de publicar-hi una activitat.
+  Future<void> refresh() async {
+    _loadedArea = null;
+    await retry();
+  }
+
   @override
   void dispose() {
     _isDisposed = true;

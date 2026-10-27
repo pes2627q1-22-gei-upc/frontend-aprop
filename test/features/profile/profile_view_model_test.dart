@@ -27,7 +27,11 @@ void main() {
       expect(model.isLoading, isTrue);
       pending.complete(repository.profile);
       await loading;
-      expect(model.profile, same(repository.profile));
+      expect(model.profile!.displayName, repository.profile.displayName);
+      expect(
+        model.profile!.createdActivities,
+        repository.profile.createdActivities,
+      );
       expect(model.isLoading, isFalse);
     },
   );
@@ -81,7 +85,7 @@ void main() {
     () async {
       await model.load();
       expect(
-        await model.saveDetails(biography: 'x' * 201, municipality: ''),
+        await model.saveDetails(biography: 'x' * 501, municipality: ''),
         isFalse,
       );
       expect(repository.updates, isEmpty);

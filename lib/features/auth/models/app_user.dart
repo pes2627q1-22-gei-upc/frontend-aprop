@@ -7,9 +7,17 @@ class AppUser {
     required this.emailVerified,
     this.username,
     this.rejectedUsername,
+    this.serverId,
   });
 
+  /// Identificador del compte a l'app (l'UID de Firebase o el de
+  /// demostració).
   final String id;
+
+  /// Identificador de l'usuari a la base de dades del backend (l'UUID de
+  /// `users`), que el backend fa servir a inscripcions i agenda. És nul amb
+  /// dades de demostració o si encara no s'ha pogut consultar el backend.
+  final String? serverId;
   final String email;
   final String firstName;
   final String lastName;
@@ -36,6 +44,7 @@ class AppUser {
       lastName: lastName,
       emailVerified: emailVerified ?? this.emailVerified,
       username: username ?? this.username,
+      serverId: serverId,
     );
   }
 }

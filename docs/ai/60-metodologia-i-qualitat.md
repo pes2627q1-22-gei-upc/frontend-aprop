@@ -45,7 +45,8 @@ actualització de llibreries *deprecated*. **PATCH:** només correccions de bugs
 | Frontend | `dart format --output=none --set-exit-if-changed lib test` · `flutter analyze` · `flutter test` · `flutter build apk --debug` |
 | Backend | `go test ./...` (cobertura) · `golangci-lint run` · `govulncheck ./...` · `docker build` |
 
-Estat: el frontend encara **no té workflow** i el `go.yml` del backend és incomplet (`TODO`, agent `devops-ci`).
+Estat: el frontend té `.github/workflows/ci.yml` (PR i push a `develop`/`master`; necessita els secrets
+`FIREBASE_OPTIONS_DART` i `GOOGLE_SERVICES_JSON`, DP-004) i el `go.yml` del backend és incomplet (`TODO`, agent `devops-ci`).
 Desplegament: release a `master` → imatge → GHCR → EC2.
 
 ## Definition of Done

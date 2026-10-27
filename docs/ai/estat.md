@@ -1,40 +1,39 @@
 # Estat viu
 
-> Llegir a l’inici i en passar feina entre eines. Només estat actual; detalls a les guies.
+> Llegir a l’inici; només el present (~40 línies). Detalls a les guies de cada funcionalitat.
 
 ## Sprint
 
-Sprint 1 · dates/objectiu del frontend pendents de contrastar amb la planificació de l’equip.
+- Sprint 1 · només frontend. Social fora d’aquest sprint segons l’usuari.
+- Prioritat: resoldre la revisió i els conflictes de la PR #31 abans de continuar Descobreix.
 
 ## En curs
 
-| Taiga | Tasca | Branca | Responsable | Estat |
-|---|---|---|---|---|
-| #86 | Bústia i lectura d’Avisos HTTP | `feature/notifications-backend` | Adam | Implementada; validació real amb Render pendent; sense commit |
-| — | Configuració d’IA de l’equip | `feature/ai-setup` | Wenqiang | PR/revisió pendent als dos repositoris |
+| Taiga | Tasca | Branca | Estat |
+|---|---|---|---|
+| #86 | Integració HTTP d’Avisos, PR #31 | `feature/notifications-backend` | Conflictes resolts; 481 proves, analyze, APK/web i revisió correctes; merge preparat sense commit/push |
 
-## Fet recentment
+## Base i canvis
 
-- Accés #7, detall #75, inscripcions #82, Agenda #84/#39, Assistent #91/#14 i creació #93/#31 tenen frontend.
-- Avisos #86 (PR #15), Descobreix #96 (PR #16), Perfil #230 (PR #20), mapa (PR #21/#22), filtres #87 (PR #24) i client HTTP #231 (PR #23) són a develop; la integració real es verifica per secció.
-- Llista real #77 fusionada (PR #25). Filtres HTTP #87 publicats a `8aee081`, base de la branca actual.
-- Avisos: UUID real autenticat, catàleg de tipus, lectura confirmada i context absent conservat; accions socials fora de l’Sprint 1 per acord de l’usuari (DP-039).
+- HEAD publicat `8089a9d`; s’integra `origin/develop@572612a` amb `git merge --no-commit`.
+- El company aprova implementació/tests i demana sincronitzar develop (comentari copiat per l’usuari).
+- Conflictes: estat viu, decisions pendents i prova multi-repositori; es conserva la feina de les dues branques.
+- Autenticació d’Avisos adaptada a bearer-only; no es restaura `X-User-ID` ni UUID sintètics.
+- DP-039 i DP-040 preservades; DP-036 continua resolta; DP-031 conserva la verificació per enllaç web.
+- Perfil HTTP ja fusionat a develop (PR #32); creació backend (PR #30) i verificació web (PR #33) també.
+- Cap canvi al backend, credencials, desplegament ni branca protegida.
 
-## Bloquejos i límits
+## Verificació
 
-- Render sense resposta en 15 s a `/notificationtypes`; sessió real/persistència encara no verificades. Firebase Android/web local configurat i ignorat per Git.
-- Backend d’Avisos: autoritzar destinatari, concretar zona horària i confirmar generació automàtica de recordatoris/recomanacions. Traspàs a `docs/notifications-backend-handoff.md`.
-- Mapa: categories/filtres del servidor i ordre estable pendents (DP-029/DP-035/DP-037/DP-038).
-- Agenda/inscripcions, creació i Assistent: adaptadors existents; revisar identitat i recorregut real (DP-010/DP-016/DP-017/DP-036).
-- Descobreix/cerca i Perfil/Configuració són les integracions següents; contrastar contractes i criteris (DP-024/DP-032/DP-033).
-- Talaia/Mobilicat sense concretar (DP-006); CI frontend pendent a develop revisat.
+- Format correcte (234 fitxers); analitzador sense incidències; 72 proves dirigides i 481 globals superades.
+- APK debug i web compilats; revisió sense bloquejos. Cap entrada U ni marcador de conflicte.
+- No es pot certificar la CI remota sense accés autenticat a GitHub; reproduïm els passos locals.
+- Firebase local configurat i ignorat: no versionar configuracions ni secrets.
 
-## Propers passos
+## Pendents / següents passos
 
-1. Revisió humana i PR d’Avisos després d’integrar #87; cap commit/push automàtic.
-2. Comunicar el traspàs al backend; social no bloqueja aquest sprint.
-3. Integrar el que falti de Descobreix/Perfil i provar login → filtrar → detall → inscripció → Agenda → recàrrega.
-
-## Traspàs
-
-2026-10-27 · `docs/notifications-backend.md`, DP-039/DP-023. Branca des de `8aee081`; només frontend.
+1. Usuari revisa, fa el commit del merge i el push a la mateixa branca: actualitza la PR #31 existent.
+2. Esperar CI verda i aprovació humana; no crear una PR duplicada ni fusionar automàticament.
+3. Prova real d’Avisos: identitat/destinatari, lectura persistent, disponibilitat i zona horària (DP-039).
+4. Prova real de Perfil, galeria i S3; límits de contracte a DP-040.
+5. Descobreix: cerca i populars disponibles; recomanacions personalitzades/test en tasques separades (DP-024).

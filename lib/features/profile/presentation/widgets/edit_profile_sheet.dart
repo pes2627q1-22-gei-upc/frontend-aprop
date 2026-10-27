@@ -18,11 +18,19 @@ class _EditProfileSheetState extends State<EditProfileSheet> {
   late final _municipality = TextEditingController(
     text: widget.viewModel.profile!.municipality,
   );
+  late final _name = TextEditingController(
+    text: widget.viewModel.profile!.displayName,
+  );
+  late final _username = TextEditingController(
+    text: widget.viewModel.profile!.username,
+  );
 
   @override
   void dispose() {
     _biography.dispose();
     _municipality.dispose();
+    _name.dispose();
+    _username.dispose();
     super.dispose();
   }
 
@@ -66,23 +74,52 @@ class _EditProfileSheetState extends State<EditProfileSheet> {
                     ],
                   ),
                   const SizedBox(height: 12),
+                  if (widget.viewModel.capabilities.editIdentity) ...[
+                    TextFormField(
+                      controller: _name,
+                      enabled: !saving,
+                      validator: ProfileViewModel.validateName,
+                      maxLength: 100,
+                      onChanged: (_) => widget.viewModel.clearSaveError(),
+                      decoration: const InputDecoration(labelText: 'Nom'),
+                    ),
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      controller: _username,
+                      enabled: !saving,
+                      autocorrect: false,
+                      validator: ProfileViewModel.validateUsername,
+                      maxLength: 30,
+                      onChanged: (_) => widget.viewModel.clearSaveError(),
+                      decoration: const InputDecoration(
+                        labelText: 'Nom d’usuari',
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                  ],
                   TextFormField(
                     controller: _biography,
                     enabled: !saving,
                     minLines: 2,
                     maxLines: 4,
-                    maxLength: 200,
+                    maxLength: 500,
+                    onChanged: (_) => widget.viewModel.clearSaveError(),
                     validator: ProfileViewModel.validateBiography,
                     decoration: const InputDecoration(labelText: 'Biografia'),
                   ),
                   const SizedBox(height: 12),
-                  TextFormField(
-                    controller: _municipality,
-                    enabled: !saving,
-                    maxLength: 80,
-                    validator: ProfileViewModel.validateMunicipality,
-                    decoration: const InputDecoration(labelText: 'Municipi'),
-                  ),
+                  if (widget.viewModel.capabilities.editMunicipality)
+                    TextFormField(
+                      controller: _municipality,
+                      enabled: !saving,
+                      maxLength: 80,
+                      validator: ProfileViewModel.validateMunicipality,
+                      decoration: const InputDecoration(labelText: 'Municipi'),
+                    )
+                  else
+                    const Text(
+                      'L’edició del municipi estarà disponible properament.',
+                    ),
                   if (widget.viewModel.saveError case final error?) ...[
                     const SizedBox(height: 12),
                     Text(
@@ -101,6 +138,13 @@ class _EditProfileSheetState extends State<EditProfileSheet> {
                             final saved = await widget.viewModel.saveDetails(
                               biography: _biography.text,
                               municipality: _municipality.text,
+                              name: widget.viewModel.capabilities.editIdentity
+                                  ? _name.text
+                                  : null,
+                              username:
+                                  widget.viewModel.capabilities.editIdentity
+                                  ? _username.text
+                                  : null,
                             );
                             if (context.mounted && saved) {
                               Navigator.of(context).pop();

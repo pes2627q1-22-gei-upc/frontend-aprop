@@ -1,4 +1,3 @@
-import '../../../core/network/api_client.dart';
 import '../models/app_notification.dart';
 
 /// The kebab-case payload, before context lookup. Bad required fields are
@@ -41,7 +40,8 @@ String positiveNotificationId(Object? value) {
 
 String notificationUserId(Object? value) {
   if (value is String &&
-      ApiClient.isCanonicalUuid(value) &&
+      RegExp(r'^[0-9a-fA-F]{8}(-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}$')
+          .hasMatch(value) &&
       value != '00000000-0000-0000-0000-000000000000') {
     return value.toLowerCase();
   }

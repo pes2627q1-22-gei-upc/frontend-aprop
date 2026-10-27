@@ -23,8 +23,11 @@ class FakeAuthRepository implements AuthRepository {
 
   int googleSignIns = 0;
 
+  /// Usuari amb la sessió iniciada que emet [authStateChanges].
+  AppUser? signedInUser;
+
   @override
-  Stream<AppUser?> authStateChanges() => Stream.value(null);
+  Stream<AppUser?> authStateChanges() => Stream.value(signedInUser);
 
   @override
   Future<void> signIn({
@@ -75,6 +78,12 @@ class FakeAuthRepository implements AuthRepository {
   @override
   Future<void> verifyEmailWithLink(String link) {
     lastCall = {'link': link};
+    return _respond();
+  }
+
+  @override
+  Future<void> confirmEmailVerification(String code) {
+    lastCall = {'code': code};
     return _respond();
   }
 

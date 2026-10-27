@@ -176,13 +176,17 @@ La descoberta i la cerca viuen dins de `features/activities/`, perquè consulten
 
 ## Perfil propi i Configuració
 
-`features/profile/` té models i contractes en Dart pur, adaptadors de demostració, ViewModels i presentació. Comparteix només `AppUser`, `Activity` i `ActivityRepository` amb altres funcionalitats; no importa els seus widgets ni ViewModels. `ProfileRepository` retorna una projecció amb assistències confirmades, autoria i estadístiques; les inscripcions no s’interpreten com assistència. `ProfileSettingsRepository` modifica una preferència per operació i retorna la confirmació.
+`features/profile/` té models i contractes en Dart pur, adaptadors Demo/HTTP, ViewModels i presentació. Comparteix models i contractes d’Auth/activitats; no importa els seus widgets ni ViewModels. L’adaptador HTTP reutilitza el mapper d’activitats de la capa de dades. `ProfileRepository` separa metadades, activitats creades, edició i avatar; les inscripcions no s’interpreten com assistència. `ProfileCapabilities` indica els camps i col·leccions disponibles. `ProfileSettingsRepository` declara les preferències suportades i si són persistents.
 
 `AuthGate` crea/injecta els dos repositoris i els conserva durant l’execució. `MainShell`, identificat pel compte, crea i allibera `ProfileViewModel`, com ja fa amb el catàleg i les inscripcions; el refresca en entrar a Perfil perquè reflecteixi activitats creades des d’Inici. `ProfileScreen` conserva només la pestanya local i observa aquest ViewModel. El panell d’edició comparteix el mateix estat; cap perfil no es duplica dins d’un widget.
 
 `ProfileSettingsScreen` crea/allibera el seu `ProfileSettingsViewModel`; les escriptures se serialitzen per evitar sobreescriure snapshots concurrents. Idioma, tema i serveis no disponibles es mostren explícitament pendents. El callback de tancament de sessió ara retorna `Future<void>` i es confirma/gestiona sense navegar des del ViewModel. `MainShell` compon la ruta `/profile/settings`, les fitxes i el diàleg de copiar el nom d’usuari al navegador de Perfil.
 
-L’autoria usa `ActivityCreator.userId` opcional, completat en crear activitats. La funcionalitat no dedueix identitats per nom ni canvia contractes HTTP. Colors de nivell centralitzats a `AppTheme` mitjançant `ProfilePalette`. Decisions DP-032/DP-033 i explicació dels fitxers/flux a `docs/profile.md`.
+`ProfileApi` captura el bearer de cada operació i valida l’UUID real i l’UID del compte contra `/users/me`. Les escriptures i la consulta de creades retenen aquelles capçaleres; no s’inventen UUID ni s’envia `X-User-ID`. Els DTOs es converteixen només a `data/`. El ViewModel conserva les col·leccions si falla una recàrrega i fusiona una col·lecció que arriba tard amb els detalls confirmats; els callbacks després de `dispose` s’ignoren.
+
+`ProfileImagePicker` retorna bytes immutables o `null` en cancel·lar. `GalleryProfileImagePicker` encapsula `image_picker`; `MainShell` l’injecta només si el repositori suporta avatar. Un fitxer recuperat després d’una interrupció d’Android no es puja automàticament a un compte diferent. `ApiClient.postMultipart` comprova el límit del cos complet quan s’indica i permet retenir les capçaleres de l’operació. `ContentImage` és el component compartit per portades i avatars, sense enviar tokens al servidor d’imatges.
+
+L’autoria usa IDs, mai noms; crear una activitat i compartir el perfil utilitzen el nom/username confirmats del `ProfileViewModel`. Colors de nivell centralitzats a `AppTheme` mitjançant `ProfilePalette`. HTTP conserva l’XP i l’ID de nivell, però no dibuixa cinc insígnies ni llindars sense contracte. Decisions DP-032/DP-033/DP-040 i guia a `docs/profile-backend.md`.
 
 ## Filtres d’Inici — Taiga #87
 

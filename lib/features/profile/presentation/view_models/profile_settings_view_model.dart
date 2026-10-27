@@ -22,6 +22,9 @@ class ProfileSettingsViewModel extends ChangeNotifier {
   String? _actionError;
 
   ProfileSettings? get settings => _settings;
+  bool supports(ProfilePreference preference) =>
+      repository.supportedPreferences.contains(preference);
+  bool get persistsPreferences => repository.persistsPreferences;
   bool get isLoading => _isLoading;
   bool get isSigningOut => _isSigningOut;
   bool get isBusy => _savingPreference != null || _isSigningOut;
@@ -58,6 +61,7 @@ class ProfileSettingsViewModel extends ChangeNotifier {
         _isLoading ||
         isBusy ||
         _settings == null ||
+        !supports(preference) ||
         _settings!.valueOf(preference) == enabled) {
       return;
     }

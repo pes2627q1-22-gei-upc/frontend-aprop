@@ -6,9 +6,12 @@ Bústia rebuda, filtres, lectura persistent i navegació al detall compartit. L�
 les accions socials són fora de l’Sprint 1. No es generen recordatoris/recomanacions al client ni es
 configuren notificacions del sistema operatiu. Només s’ha modificat `frontend-aprop`.
 
-Branca `feature/notifications-backend`, des de `8aee081` (#87 publicada). Aquella ampliació encara no
-era a `origin/develop` en començar; cal comprovar-ne la integració abans d’obrir aquesta PR a develop.
-No s’ha fet commit ni push automàtic.
+Branca `feature/notifications-backend`, publicada a `8089a9d` com a PR #31. El 2026-10-27 s’hi integra
+`origin/develop@572612a` amb `git merge --no-commit`, tal com demana la revisió del company. Es resolen
+els conflictes a l’estat viu, les decisions pendents i la prova multi-repositori, conservant Perfil
+(PR #32), la creació backend (PR #30), la verificació per enllaç (PR #33) i les seves proves.
+No s’ha fet commit ni push automàtic de la resolució; l’usuari ha de completar el merge local i pujar
+la mateixa branca per actualitzar la PR existent.
 
 Contracte contrastat amb `api-aprop@c94ab70` i referència remota `origin/develop@d01f231`; els fitxers
 de notificacions, perfils i middleware són iguals en aquestes revisions. No s’ha canviat el checkout,
@@ -37,7 +40,10 @@ tipus, no l’índex d’un enum de sis accions socials.
    error/reintent, buit o contingut. Un refresc fallit conserva els avisos del mateix compte.
 3. L’adaptador fixa les capçaleres/token de l’operació i consulta `/users/me`. El perfil ha de
    correspondre al FirebaseUID o UUID sol·licitat. Fa servir el UUID retornat, sense inventar-lo ni
-   aplicar el convertidor provisional de DP-036. Una sessió absent/canviada és un error, no una bústia buida.
+   aplicar el convertidor provisional de DP-036. Després de sincronitzar develop només s’envia bearer:
+   no es restaura `X-User-ID` ni `ApiClient.isCanonicalUuid`, eliminats en aquella branca. El mapper
+   continua comprovant el UUID real sense dependre del client de xarxa. Una sessió absent/canviada és
+   un error, no una bústia buida.
 4. El mapper valida IDs, propietari, tipus, data i lectura. Un payload malformat, dates absents/zero de Go,
    notificacions duplicades o files alienes no s’accepten silenciosament.
 5. El catàleg de tipus es consulta si la bústia no és buida. La classificació depèn del nom, independent
@@ -117,3 +123,25 @@ contracte real de notificacions. No s’ha eliminat ni s’ha suavitzat la compr
 Format correcte, anàlisi sense incidències i APK Android debug compilat. Captures de components Flutter
 amb fonts reals i transport simulat a `PES/output/frontend/notifications-http-{all,social,reminders,
 recommendations,refresh-error}.png`, fora del repositori. Són fixtures, no avisos de producció.
+
+
+## Resolució de la revisió i conflictes de la PR #31 (2026-10-27)
+
+El comentari del company, copiat per l’usuari, valora positivament implementació i cobertura i demana
+sincronitzar develop. S’han preservat els canvis i proves de totes dues branques i les DP-039/040,
+la resolució de DP-036 i l’ampliació de verificació web a DP-031. La prova multi-repositori conserva
+els casos nous de creació; el seu bloc d’Avisos usa UUID real, catàleg i token i manté la lectura.
+La cobertura dedicada de Perfil de develop es conserva sense duplicar-la en aquell smoke test.
+
+La incompatibilitat de compilació amb l’ApiClient actual també s’ha corregit: no es passa `userId`
+al constructor ni s’utilitza `isCanonicalUuid`, i no s’envia `X-User-ID`. Les proves d’Avisos comproven
+la seva absència, el bearer i el UUID de destinatari. La sessió fixada per operació, els errors i els
+controls de canvi de compte es conserven; no s’afegeix cap endpoint ni dada de negoci.
+
+Verificació local: format de 234 fitxers sense canvis, analitzador net, **72 proves dirigides i 481 de
+la suite completa superades**, APK debug i web compilats. Revisió tècnica sense bloquejos. Les
+compilacions mantenen els avisos de Kotlin/Firebase, SDK XML i font Cupertino que no impedeixen
+compilar; aquesta resolució no canvia dependències ni la configuració de CI. No es certifica una
+execució remota de GitHub Actions: cal comprovar-la després de fer push. El repositori és privat i
+no hi ha una connexió autenticada disponible per llegir els checks. El merge local queda preparat,
+sense commit ni push automàtic; no cal crear cap PR nova.

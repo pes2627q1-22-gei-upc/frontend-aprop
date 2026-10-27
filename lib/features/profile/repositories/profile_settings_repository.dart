@@ -1,6 +1,9 @@
 import '../models/profile_settings.dart';
 
 abstract interface class ProfileSettingsRepository {
+  Set<ProfilePreference> get supportedPreferences;
+  bool get persistsPreferences;
+
   /// Returns this account's preferences, or its defaults. Throws on failure.
   Future<ProfileSettings> getSettings(String userId);
 

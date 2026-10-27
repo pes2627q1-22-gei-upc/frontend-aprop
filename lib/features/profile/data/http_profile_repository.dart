@@ -2,42 +2,53 @@ import '../../../core/network/api_client.dart';
 import '../../activities/data/activity_json_mapper.dart';
 import '../../activities/models/activity.dart';
 import '../../auth/models/app_user.dart';
+import '../models/profile_avatar.dart';
+import '../models/profile_capabilities.dart';
+import '../models/profile_failure.dart';
 import '../models/user_profile.dart';
 import '../repositories/profile_repository.dart';
+import 'profile_api.dart';
+import 'profile_json_mapper.dart';
 
-/// Implementació de [ProfileRepository] connectada al backend de Render
-/// (`GET /users/me`, `PATCH /users/me`, `GET /users/me/created-events`).
 class HttpProfileRepository implements ProfileRepository {
-  HttpProfileRepository({required this.apiClient});
-
+  HttpProfileRepository({required this.apiClient})
+    : _profiles = ProfileApi(apiClient);
   final ApiClient apiClient;
-  final Map<String, String> _localMunicipalities = {};
+  final ProfileApi _profiles;
 
   @override
-  Future<UserProfile> getProfile(AppUser user) async {
-    final profileDecoded = await apiClient.getJson('users/me');
-    if (profileDecoded is! Map<String, Object?>) {
-      throw ApiException('Resposta invàlida en obtenir el perfil.');
-    }
+  ProfileCapabilities get capabilities => ProfileCapabilities.backend;
 
-    List<Activity> createdActivities = const [];
-    try {
-      final createdDecoded = await apiClient.getJson('users/me/created-events');
-      if (createdDecoded is List<Object?>) {
-        createdActivities = [
-          for (final item in createdDecoded)
-            if (item is Map<String, Object?>) activityFromJson(item),
-        ];
-      }
-    } on ApiException {
-      // Si la consulta d'activitats creades falla, es conserva el perfil principal.
-    }
+  @override
+  Future<UserProfile> getProfile(AppUser user) async =>
+      profileFromJson((await _profiles.own(user.id)).profile, user);
 
-    return _profileFromJson(
-      profileDecoded,
-      fallbackUser: user,
-      createdActivities: createdActivities,
+  @override
+  Future<List<Activity>> getCreatedActivities(AppUser user) async {
+    final session = await _profiles.own(user.id);
+    final decoded = await apiClient.getJson(
+      'users/me/created-events',
+      headers: session.headers,
     );
+    if (decoded is! List<Object?>) {
+      throw const FormatException('Expected created activities');
+    }
+    final result = <Activity>[];
+    for (final item in decoded) {
+      if (item is! Map<String, Object?>) {
+        throw const FormatException('Expected an activity object');
+      }
+      final activity = activityFromJson(item);
+      if (activity.source != ActivitySource.community ||
+          (activity.creator?.userId != null &&
+              activity.creator!.userId != session.profile['id'])) {
+        throw const FormatException(
+          'Created activity belongs to another account',
+        );
+      }
+      result.add(activity);
+    }
+    return List.unmodifiable(result);
   }
 
   @override
@@ -45,130 +56,54 @@ class HttpProfileRepository implements ProfileRepository {
     required AppUser user,
     required String biography,
     required String municipality,
+    String? name,
+    String? username,
   }) async {
-    final trimmedBio = biography.trim();
-    final trimmedMunicipality = municipality.trim();
-    _localMunicipalities[user.id] = trimmedMunicipality;
-
-    final decoded = await apiClient.patchJson(
-      'users/me',
-      body: <String, Object?>{'biography': trimmedBio},
-    );
-    if (decoded is! Map<String, Object?>) {
-      throw ApiException('Resposta invàlida en actualitzar el perfil.');
+    if (municipality.isNotEmpty) {
+      throw UnsupportedError('Municipality is not stored by this API');
     }
-
-    List<Activity> createdActivities = const [];
+    final session = await _profiles.own(user.id);
     try {
-      final createdDecoded = await apiClient.getJson('users/me/created-events');
-      if (createdDecoded is List<Object?>) {
-        createdActivities = [
-          for (final item in createdDecoded)
-            if (item is Map<String, Object?>) activityFromJson(item),
-        ];
-      }
-    } on ApiException {
-      // Es conserva la llista buida si falla la consulta secundària.
+      final decoded = await apiClient.patchJson(
+        'users/me',
+        headers: session.headers,
+        body: {
+          'biography': biography.trim(),
+          if (name != null) 'name': name.trim(),
+          if (username != null) 'username': username.trim(),
+        },
+      );
+      return profileFromJson(validateOwnProfile(decoded, user.id), user);
+    } on ApiException catch (error) {
+      if (error.statusCode == 409) throw ProfileFailure.usernameInUse;
+      rethrow;
     }
-
-    return _profileFromJson(
-      decoded,
-      fallbackUser: user,
-      createdActivities: createdActivities,
-    );
   }
 
-  /// Puja la foto de perfil de l'usuari (`POST /users/me/avatar`).
+  @override
   Future<UserProfile> uploadAvatar({
     required AppUser user,
-    required List<int> bytes,
-    required String filename,
+    required ProfileAvatar avatar,
   }) async {
-    final decoded = await apiClient.postMultipart(
-      'users/me/avatar',
-      fieldName: 'avatar',
-      bytes: bytes,
-      filename: filename,
-    );
-    if (decoded is! Map<String, Object?>) {
-      throw ApiException('Resposta invàlida en pujar l’avatar.');
+    final session = await _profiles.own(user.id);
+    final Object? decoded;
+    try {
+      decoded = await apiClient.postMultipart(
+        'users/me/avatar',
+        headers: session.headers,
+        fieldName: 'avatar',
+        bytes: avatar.bytes,
+        filename: avatar.filename,
+        // The server limits the whole request, including multipart headers.
+        maximumBodyBytes: ProfileAvatar.maxBytes,
+      );
+    } on MultipartBodyTooLargeException {
+      throw const AvatarSelectionException('Tria una foto de menys de 5 MB.');
     }
-    return _profileFromJson(decoded, fallbackUser: user);
-  }
-
-  UserProfile _profileFromJson(
-    Map<String, Object?> json, {
-    required AppUser fallbackUser,
-    List<Activity> createdActivities = const [],
-  }) {
-    final experience =
-        (json['experience'] as num?)?.toInt().clamp(0, 999999) ?? 0;
-    final rawLevel = (json['level'] as num?)?.toInt();
-    final level = _mapLevel(rawLevel, experience);
-    final nextTarget = _nextLevelTarget(level, experience);
-
-    final rawRating = (json['reliability'] as num?) ?? (json['rating'] as num?);
-    final name = (json['name'] as String?)?.trim();
-    final username = (json['username'] as String?)?.trim();
-    final biography = (json['biography'] as String?)?.trim() ?? '';
-    final municipality =
-        (json['municipality'] as String?)?.trim() ??
-        _localMunicipalities[fallbackUser.id] ??
-        '';
-    final profilePicture = (json['profile-picture'] as String?)?.trim();
-
-    return UserProfile(
-      userId: fallbackUser.id,
-      displayName: (name != null && name.isNotEmpty)
-          ? name
-          : fallbackUser.fullName,
-      username: (username != null && username.isNotEmpty)
-          ? username
-          : fallbackUser.username,
-      biography: biography,
-      municipality: municipality,
-      avatarAsset:
-          (profilePicture != null && profilePicture.startsWith('assets/'))
-          ? profilePicture
-          : null,
-      friendCount: (json['friends-count'] as num?)?.toInt() ?? 0,
-      organizerRating: rawRating?.toDouble(),
-      progress: ProfileProgress(
-        level: level,
-        experience: experience,
-        nextLevelTarget: nextTarget,
-      ),
-      completedPlans: const [],
-      createdActivities: createdActivities,
-    );
-  }
-
-  ProfileLevel _mapLevel(int? backendLevel, int experience) {
-    if (backendLevel != null) {
-      return switch (backendLevel) {
-        <= 1 => ProfileLevel.curious,
-        2 => ProfileLevel.explorer,
-        3 => ProfileLevel.adventurer,
-        4 => ProfileLevel.discoverer,
-        _ => ProfileLevel.ambassador,
-      };
+    final profile = profileFromJson(validateOwnProfile(decoded, user.id), user);
+    if (profile.avatarUrl == null) {
+      throw const FormatException('Avatar upload did not return an image URL');
     }
-    if (experience >= 1500) return ProfileLevel.ambassador;
-    if (experience >= 1000) return ProfileLevel.discoverer;
-    if (experience >= 500) return ProfileLevel.adventurer;
-    if (experience >= 200) return ProfileLevel.explorer;
-    return ProfileLevel.curious;
-  }
-
-  int? _nextLevelTarget(ProfileLevel level, int experience) {
-    final baseTarget = switch (level) {
-      ProfileLevel.curious => 200,
-      ProfileLevel.explorer => 500,
-      ProfileLevel.adventurer => 1000,
-      ProfileLevel.discoverer => 1500,
-      ProfileLevel.ambassador => null,
-    };
-    if (baseTarget == null) return null;
-    return experience > baseTarget ? experience : baseTarget;
+    return profile;
   }
 }

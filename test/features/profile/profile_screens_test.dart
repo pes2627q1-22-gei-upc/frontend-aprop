@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:ui' show SemanticsAction;
 
 import 'package:aprop/app/theme/app_theme.dart';
+import 'package:aprop/features/profile/data/profile_json_mapper.dart';
+import 'package:aprop/features/profile/models/profile_capabilities.dart';
 import 'package:aprop/features/profile/models/profile_settings.dart';
 import 'package:aprop/features/profile/models/user_profile.dart';
 import 'package:aprop/features/profile/presentation/screens/profile_screen.dart';
@@ -12,6 +14,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'fake_profile_repositories.dart';
+import 'backend_profile_fixture.dart' as backend;
 import 'profile_test_data.dart';
 
 void main() {
@@ -84,6 +87,66 @@ void main() {
   }
 
   testWidgets(
+    'Backend identity is editable and updates only after confirmation without invented progression',
+    (tester) async {
+      profiles.sourceCapabilities = ProfileCapabilities.backend;
+      profiles.profile = profileFromJson(backend.backendProfile(), profileUser);
+      await pumpScreen(tester);
+      await tester.pumpAndSettle();
+      expect(find.text('maria'), findsOneWidget);
+      expect(find.text('340 XP'), findsOneWidget);
+      expect(find.text('340 / 500 XP'), findsNothing);
+      expect(find.text('Explorador/a'), findsNothing);
+      await tester.tap(find.text('Editar perfil'));
+      await tester.pumpAndSettle();
+      expect(find.widgetWithText(TextFormField, 'Municipi'), findsNothing);
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Nom'),
+        'Maria Casals',
+      );
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Nom d’usuari'),
+        'maria_c',
+      );
+      await tester.ensureVisible(find.text('Desar'));
+      await tester.tap(find.text('Desar'));
+      await tester.pumpAndSettle();
+      expect(find.text('maria_c'), findsOneWidget);
+      expect(find.text('Maria Casals'), findsOneWidget);
+      await scrollTo(tester, find.text('Plans fets'));
+      await tester.tap(find.text('Plans fets'));
+      await tester.pumpAndSettle();
+      await scrollTo(
+        tester,
+        find.text('Historial d’assistència disponible properament'),
+      );
+      expect(find.text('Encara no tens plans fets'), findsNothing);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'Server-only configuration shows unsupported notifications as pending with enlarged text',
+    (tester) async {
+      settings.supportedPreferences = {ProfilePreference.showMyPlans};
+      settings.persistsPreferences = true;
+      await pumpScreen(tester, configuration: true, scale: 2);
+      await tester.pumpAndSettle();
+      await scrollTo(tester, find.text('Recordatoris'));
+      expect(
+        find.byKey(const ValueKey('profile-preference-reminders')),
+        findsNothing,
+      );
+      expect(
+        find.byKey(const ValueKey('profile-preference-friendActivity')),
+        findsNothing,
+      );
+      await scrollTo(tester, find.text('Eliminar compte'));
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
     'Profile displays identity, statistics, levels and both activity tabs',
     (tester) async {
       await pumpScreen(tester);
@@ -131,6 +194,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Tornar-ho a provar'), findsOneWidget);
       profiles.onGet = (_) async => sampleProfile(empty: true);
+      profiles.onCreated = (_) async => [];
       await tester.tap(find.text('Tornar-ho a provar'));
       await tester.pumpAndSettle();
       await scrollTo(tester, find.text('Encara no tens plans fets'));

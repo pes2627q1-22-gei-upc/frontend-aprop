@@ -2,10 +2,12 @@ import 'dart:async';
 
 import 'package:aprop/app/aprop_app.dart';
 import 'package:aprop/features/auth/data/demo_auth_repository.dart';
+import 'package:aprop/features/auth/models/app_user.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../features/activities/fake_enrollment_repository.dart';
+import '../features/auth/fake_auth_repository.dart';
 
 void main() {
   late DemoAuthRepository auth;
@@ -163,6 +165,59 @@ void main() {
     await tester.pumpAndSettle();
     expect(cardLabel('demo-jazz', 'Apuntat'), findsOneWidget);
     expect(tester.takeException(), isNull);
+  });
+
+  group('Identificador de les inscripcions', () {
+    AppUser user({String? serverId}) => AppUser(
+      id: 'firebase-uid-pol',
+      serverId: serverId,
+      email: 'pol@example.test',
+      firstName: 'Pol',
+      lastName: 'Vidal',
+      emailVerified: true,
+      username: 'polvidal',
+    );
+
+    Future<void> pumpAs(WidgetTester tester, AppUser signedIn) async {
+      tester.view.physicalSize = const Size(390, 844);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      await tester.pumpWidget(
+        APropApp(
+          authRepository: FakeAuthRepository()..signedInUser = signedIn,
+          enrollmentRepository: enrollments,
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets(
+      'Amb backend, fa servir l’UUID de l’usuari, no el de Firebase',
+      (tester) async {
+        const uuid = 'f53add44-367c-4c16-bbee-38878f3fed48';
+        await pumpAs(tester, user(serverId: uuid));
+
+        await tester.tap(cardLabel('demo-jazz', 'M’hi apunto'));
+        await tester.pumpAndSettle();
+
+        // L'Agenda llegeix les mateixes inscripcions: si fes servir un altre
+        // identificador, no hi sortirien.
+        expect(enrollments.enrolledRequests, ['$uuid/demo-jazz']);
+        expect(cardLabel('demo-jazz', 'Apuntat'), findsOneWidget);
+      },
+    );
+
+    testWidgets('Sense backend, fa servir l’identificador del compte', (
+      tester,
+    ) async {
+      await pumpAs(tester, user());
+
+      await tester.tap(cardLabel('demo-jazz', 'M’hi apunto'));
+      await tester.pumpAndSettle();
+
+      expect(enrollments.enrolledRequests, ['firebase-uid-pol/demo-jazz']);
+    });
   });
 
   testWidgets(

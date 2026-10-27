@@ -77,23 +77,36 @@ Activity activityFromJson(Map<String, Object?> json) {
 }
 
 /// Converteix un [NewActivity] al cos JSON en `kebab-case` que espera `POST /events`.
+// TODO(DP-017): el preu, la imatge i l'hora no es desen al backend.
 Map<String, Object?> newActivityToJson(NewActivity activity) {
-  final isoDate = activity.startsAt.toUtc().toIso8601String();
+  final isoDate = _wallClockAsUtc(activity.startsAt).toIso8601String();
   return <String, Object?>{
     'title': activity.title,
     'description': activity.description,
+    // L'etiqueta del backend (`agenda:categories/teatre`): amb un nom que no
+    // existeix, el backend en crearia una categoria nova.
     'categories': <String>[activity.category],
     'municipality': activity.municipality,
-    'place': activity.directions ?? activity.municipality,
+    // En llegir-la, lloc i adreça s'ajunten com a indicacions: si totes dues
+    // portessin el mateix text, sortiria repetit.
     'address': activity.directions ?? '',
     'start-date': isoDate,
     'end-date': isoDate,
+    // (0, 0) vol dir sense ubicació.
     'latitude': activity.location?.latitude ?? 0.0,
     'longitude': activity.location?.longitude ?? 0.0,
-    'free': (activity.price ?? 0) == 0,
+    // Sense preu no se sap si és gratuïta.
+    if (activity.price case final price?) 'free': price == 0,
     'is-official': false,
   };
 }
+
+/// El backend desa només el dia, en UTC: passar l'hora d'aquí a UTC podria
+/// canviar-lo (les 00.30 h d'aquí són el dia anterior en UTC). Es llegeix igual
+/// a `_parseDate`, sense canviar de zona.
+// TODO(DP-029): sobrarà quan el backend desi també l'hora.
+DateTime _wallClockAsUtc(DateTime date) =>
+    DateTime.utc(date.year, date.month, date.day, date.hour, date.minute);
 
 String? _text(Object? value) {
   if (value is! String) return null;

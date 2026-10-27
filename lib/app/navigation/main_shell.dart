@@ -12,6 +12,7 @@ import '../../features/activities/presentation/view_models/activities_map_view_m
 import '../../features/activities/presentation/view_models/activities_view_model.dart';
 import '../../features/activities/presentation/view_models/enrollment_view_model.dart';
 import '../../features/activities/presentation/widgets/enrollment_action.dart';
+import '../../features/activities/repositories/activity_category_repository.dart';
 import '../../features/activities/repositories/activity_details_repository.dart';
 import '../../features/activities/repositories/activity_map_repository.dart';
 import '../../features/activities/repositories/activity_repository.dart';
@@ -27,6 +28,7 @@ import '../../features/notifications/repositories/notification_repository.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
 import '../../features/profile/presentation/screens/profile_settings_screen.dart';
 import '../../features/profile/presentation/view_models/profile_view_model.dart';
+import '../../features/profile/data/gallery_profile_image_picker.dart';
 import '../../features/profile/repositories/profile_repository.dart';
 import '../../features/profile/repositories/profile_settings_repository.dart';
 import 'activity_details_route.dart';
@@ -44,6 +46,7 @@ class MainShell extends StatefulWidget {
     this.activityMapRepository,
     required this.profileRepository,
     required this.profileSettingsRepository,
+    this.activityCategoryRepository,
   });
 
   final AppUser user;
@@ -56,6 +59,10 @@ class MainShell extends StatefulWidget {
   final ProfileRepository profileRepository;
   final ProfileSettingsRepository profileSettingsRepository;
 
+  /// Categories per crear activitats. Si no hi és, el formulari fa servir la
+  /// llista provisional.
+  final ActivityCategoryRepository? activityCategoryRepository;
+
   /// Si hi és, el mapa d'Inici carrega per zona des d'aquí. Si no, mostra les
   /// activitats de la llista.
   final ActivityMapRepository? activityMapRepository;
@@ -66,6 +73,11 @@ class MainShell extends StatefulWidget {
 
 class _MainShellState extends State<MainShell> {
   int _selectedIndex = 0;
+
+  /// Identificador de les inscripcions: el backend les desa amb l'UUID de
+  /// l'usuari, no amb l'UID de Firebase. Apuntar-se i l'Agenda han de fer
+  /// servir el mateix, perquè comparteixen les inscripcions.
+  String get _enrollmentUserId => widget.user.serverId ?? widget.user.id;
 
   /// Quant ha de pujar «Crear activitat» perquè no el tapi la targeta del mapa.
   final _createButtonLift = ValueNotifier<double>(0);
@@ -95,7 +107,7 @@ class _MainShellState extends State<MainShell> {
       );
     }
     _enrollmentViewModel = EnrollmentViewModel(
-      userId: widget.user.id,
+      userId: _enrollmentUserId,
       repository: widget.enrollmentRepository,
     );
     _assistantViewModel = AssistantViewModel(
@@ -104,7 +116,11 @@ class _MainShellState extends State<MainShell> {
     _profileViewModel = ProfileViewModel(
       user: widget.user,
       repository: widget.profileRepository,
+      imagePicker: widget.profileRepository.capabilities.uploadAvatar
+          ? GalleryProfileImagePicker()
+          : null,
     )..load();
+    _profileViewModel.checkInterruptedAvatarSelection();
     _enrollmentViewModel.load();
 
     _activitiesViewModel.load(); //mientras espera ésto flutter dibuja un indicador de carga. Cuando termina, el ViewModel notifica a la pantalla y ésta se redibuja con la lista de actividades.
@@ -213,8 +229,10 @@ class _MainShellState extends State<MainShell> {
         builder: (context) => CreateActivityScreen(
           repository: _activityRepository,
           locationRepository: const DemoLocationRepository(),
+          categoryRepository: widget.activityCategoryRepository,
           creator: ActivityCreator(
-            name: widget.user.fullName,
+            name:
+                _profileViewModel.profile?.displayName ?? widget.user.fullName,
             userId: widget.user.id,
             isFriend: false,
           ),
@@ -242,7 +260,8 @@ class _MainShellState extends State<MainShell> {
 
   // TODO(DP-032): Share a real public link when a profile route is agreed.
   void _shareOwnProfile() {
-    final username = widget.user.username;
+    final username =
+        _profileViewModel.profile?.username ?? widget.user.username;
     if (username == null || username.isEmpty) return;
     var copying = false;
     showDialog<void>(
@@ -315,6 +334,8 @@ class _MainShellState extends State<MainShell> {
   // l'activitat, aquesta crida a enroll sobrarà.
   void _showCreatedActivity(NavigatorState navigator, Activity activity) {
     _enrollmentViewModel.enroll(activity.id);
+    // Perquè l'activitat nova surti al mapa sense haver-lo de moure.
+    _activitiesMapViewModel?.refresh();
     _activitiesViewModel.load();
     navigator.pushReplacement<void, void>(
       activityDetailsRoute(
@@ -407,7 +428,7 @@ class _MainShellState extends State<MainShell> {
               (context) => _sectionRoot(
                 1,
                 AgendaScreen(
-                  userId: widget.user.id,
+                  userId: _enrollmentUserId,
                   enrollmentRepository: widget.enrollmentRepository,
                   activityRepository: _activityRepository,
                   onActivitySelected: _openActivityDetails,

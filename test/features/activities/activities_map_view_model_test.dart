@@ -89,6 +89,19 @@ void main() {
     },
   );
 
+  test(
+    'En refrescar torna a demanar la zona visible encara que ja hi fos',
+    () async {
+      await viewModel.loadArea(barcelona);
+
+      repository.activities = [activity('nova')];
+      await viewModel.refresh();
+
+      expect(repository.requestedAreas, hasLength(2));
+      expect(viewModel.activities.map((a) => a.id), ['nova']);
+    },
+  );
+
   test('Una resposta que arriba tard no tapa la de la zona actual', () async {
     final slow = Completer<List<Activity>>();
     repository.loadArea = (area) => area == barcelona.expandedBy(0.5)

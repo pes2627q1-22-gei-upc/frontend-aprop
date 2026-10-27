@@ -32,7 +32,6 @@ void main() {
   }) => HttpNotificationRepository(
     apiClient: ApiClient(
       idToken: token ?? () async => 'test-token',
-      userId: () => 'old-synthetic-id',
       client: MockClient(handle),
     ),
     activityRepository: activities,
@@ -46,10 +45,10 @@ void main() {
         paths.add(request.url.path);
         expect(request.headers['Authorization'], 'Bearer test-token');
         if (request.url.path == '/users/me') {
-          expect(request.headers['X-User-ID'], firebaseAccountId);
+          expect(request.headers.containsKey('X-User-ID'), isFalse);
           return json(backendOwnProfile());
         }
-        expect(request.headers['X-User-ID'], backendUserId);
+        expect(request.headers.containsKey('X-User-ID'), isFalse);
         if (request.url.path == '/notificationtypes') {
           return json(backendNotificationTypes);
         }

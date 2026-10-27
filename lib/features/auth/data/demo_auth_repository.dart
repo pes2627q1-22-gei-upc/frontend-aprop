@@ -137,6 +137,14 @@ class DemoAuthRepository implements AuthRepository {
     _updateCurrentUser(user.copyWith(emailVerified: true));
   }
 
+  /// Simula el codi de l'enllaç obert a la web: n'hi ha prou que no sigui buit.
+  @override
+  Future<void> confirmEmailVerification(String code) async {
+    if (code.trim().isEmpty) throw AuthFailure.invalidVerificationLink;
+    final user = _currentUser;
+    if (user != null) _updateCurrentUser(user.copyWith(emailVerified: true));
+  }
+
   @override
   Future<bool> checkEmailVerified() async {
     final user = _requireCurrentUser();

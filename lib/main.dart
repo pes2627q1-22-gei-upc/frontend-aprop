@@ -15,6 +15,7 @@ import 'features/auth/data/demo_auth_repository.dart';
 import 'features/auth/data/demo_user_sync_repository.dart';
 import 'features/auth/data/firebase_auth_repository.dart';
 import 'features/auth/data/http_user_sync_repository.dart';
+import 'features/auth/models/email_action.dart';
 import 'features/auth/repositories/auth_repository.dart';
 import 'features/auth/repositories/user_sync_repository.dart';
 import 'features/notifications/data/http_notification_repository.dart';
@@ -30,33 +31,28 @@ Future<void> main() async {
 /// Construeix l'[APropApp] injectant els repositoris HTTP connectats a Render
 /// quan [ApiConfig.isConfigured] és cert, o els de demostració altrament.
 Future<APropApp> createConfiguredApp() async {
-  String? currentUserId;
-  final authRepository = await _createAuthRepository(
-    onUserIdResolved: (getter) => currentUserId = getter(),
-  );
+  final authRepository = await _createAuthRepository();
 
-  // Manté l'ID d'usuari sincronitzat amb els canvis de sessió per a `X-User-ID`.
-  authRepository.authStateChanges().listen((user) {
-    currentUserId = user?.id;
-  });
+  // A la web, els enllaços dels correus obren l'app amb l'acció a l'adreça
+  // (`?mode=verifyEmail&oobCode=…`, DP-031). Al mòbil, `Uri.base` no en porta.
+  final emailAction = kIsWeb ? EmailAction.fromUri(Uri.base) : null;
 
   if (!ApiConfig.isConfigured) {
-    return APropApp(authRepository: authRepository);
+    return APropApp(authRepository: authRepository, emailAction: emailAction);
   }
 
   final apiClient = ApiClient(
     baseUrl: Uri.parse(ApiConfig.baseUrl),
     idToken: authRepository.currentIdToken,
-    userId: () => currentUserId == null
-        ? null
-        : ApiClient.toCanonicalUuid(currentUserId!),
   );
 
   final activityRepository = HttpActivityRepository(apiClient: apiClient);
 
   return APropApp(
     authRepository: authRepository,
+    emailAction: emailAction,
     activityRepository: activityRepository,
+    activityCategoryRepository: activityRepository,
     activityMapRepository: HttpActivityMapRepository(apiClient: apiClient),
     enrollmentRepository: HttpEnrollmentRepository(apiClient: apiClient),
     discoveryRepository: HttpDiscoveryRepository(
@@ -79,23 +75,18 @@ Future<APropApp> createConfiguredApp() async {
 /// per desenvolupar). A iOS es continuen fent servir els comptes de
 /// demostració.
 // TODO(DP-026): configurar iOS quan hi hagi qui ho pugui provar.
-Future<AuthRepository> _createAuthRepository({
-  required void Function(String? Function() getter) onUserIdResolved,
-}) async {
+Future<AuthRepository> _createAuthRepository() async {
   if (!kIsWeb && defaultTargetPlatform != TargetPlatform.android) {
-    onUserIdResolved(() => null);
     return DemoAuthRepository();
   }
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   final auth = FirebaseAuth.instance;
-  onUserIdResolved(() => auth.currentUser?.uid);
 
   final UserSyncRepository userSync = ApiConfig.isConfigured
       ? HttpUserSyncRepository(
           baseUrl: Uri.parse(ApiConfig.baseUrl),
           idToken: () async => auth.currentUser?.getIdToken(),
-          userId: () => auth.currentUser?.uid,
         )
       : DemoUserSyncRepository(
           currentUid: () => auth.currentUser?.uid,

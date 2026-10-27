@@ -74,7 +74,7 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Context:** `docs/ai/30-arquitectura.md`, ADR-0003
 - **Dubte:** els PDFs diuen que totes les claus van al backend, però el login de Firebase i el SDK de Maps normalment s'executen al client amb claus restringides.
 - **Opcions:** A) SDK al client amb claus restringides per app · B) tot via backend (proxy)
-- **Provisionalment:** 2026-10-22: per al login s'ha seguit A amb Firebase Auth (vegeu DP-026). `flutterfire configure` genera `lib/firebase_options.dart` i `android/app/google-services.json` (projecte `aprop-919ec`). Es van versionar en un primer moment (repo privat), però el 2026-10-22 l'equip va decidir **no versionar-los**: són al `.gitignore`, la clau s'ha renovat (l'antiga queda a l'historial de la branca `feature/autenticacio`, però ja no és vàlida) i cada persona els genera amb `flutterfire configure` (`docs/firebase-auth.md`). Sense aquests fitxers l'app no compila. Pendent: restringir les claus noves (Android: paquet + SHA-1; navegador: `localhost:5000` i `aprop-919ec.firebaseapp.com`) i, si s'afegeix CI, generar-los des de secrets de GitHub.
+- **Provisionalment:** 2026-10-22: per al login s'ha seguit A amb Firebase Auth (vegeu DP-026). `flutterfire configure` genera `lib/firebase_options.dart` i `android/app/google-services.json` (projecte `aprop-919ec`). Es van versionar en un primer moment (repo privat), però el 2026-10-22 l'equip va decidir **no versionar-los**: són al `.gitignore`, la clau s'ha renovat (l'antiga queda a l'historial de la branca `feature/autenticacio`, però ja no és vàlida) i cada persona els genera amb `flutterfire configure` (`docs/firebase-auth.md`). Sense aquests fitxers l'app no compila. Pendent: restringir les claus noves (Android: paquet + SHA-1; navegador: `localhost:5000` i `aprop-919ec.firebaseapp.com`). 2026-10-26: la CI (`.github/workflows/ci.yml`) escriu versions de mostra dels dos fitxers (sense claus ni secrets de GitHub), perquè les proves i el build de depuració no es connecten a Firebase.
 - **Qui decideix:** equip (cal un ADR)
 - **Resolució:**
 
@@ -205,6 +205,12 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Dubte:** no hi ha endpoint per publicar un `NoOficial` a `api-aprop`: ruta, JSON, format del preu (s'ha fet servir `double` en euros, `0` = gratuïta) i si el backend apunta automàticament la persona creadora.
 - **Opcions:** A) el backend crea l'activitat i la inscripció de qui la crea en una sola operació · B) el frontend crida després l'endpoint d'inscripció.
 - **Provisionalment:** `createActivity` en Dart pur i implementació en memòria; `MainShell` apunta la creadora amb `EnrollmentViewModel` (`TODO(DP-017)`).
+- **Amb el backend (2026-10-26, Claude Code (Opus 5.5) amb confirmació de l'usuari):** `POST /events` ja existeix i `HttpActivityRepository.createActivity` (PR #23, Taiga #231) l'envia. S'hi ajusta `newActivityToJson`:
+  - la data s'envia amb l'hora d'aquí com si fos UTC: el backend desa només el dia i, passant-la a UTC, una activitat a les 00.30 h quedaria el dia anterior (DP-029);
+  - la categoria és l'etiqueta del backend (DP-018);
+  - les indicacions van només a `address` (abans també a `place`, i en llegir-la sortien repetides);
+  - `free` només s'envia si hi ha preu: sense preu no se sap si és gratuïta.
+  No es desen al backend l'import del preu, la imatge triada (#94, DP-019) ni l'hora. El backend no apunta qui crea l'activitat: `MainShell` la continua apuntant (opció B). Després de crear-la, el mapa d'Inici torna a demanar la zona visible perquè hi surti. El backend treu el creador del token des de la PR #35 d'api-aprop (Tasca #236, Arnau), que també afegeix `PUT` i `DELETE /events/{id}` per editar i esborrar els esdeveniments no oficials (encara sense pantalla).
 - **Qui decideix:** frontend + backend
 - **Resolució:**
 
@@ -215,6 +221,7 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Dubte:** la llista tancada de categories no està definida, i el CA1 diu «categoria (≥ 1)» mentre que el model `Activity` en té una sola.
 - **Opcions:** A) una sola categoria (com ara) · B) diverses categories (cal canviar `Activity.category` i la llista, la fitxa i l'agenda).
 - **Provisionalment:** una sola categoria triada d'una llista provisional (Música, Teatre, Exposicions) (`TODO(DP-018)`). L'usuari ho ha decidit així de moment per no canviar el model.
+- **Amb el backend (2026-10-26, Claude Code (Opus 5.5) amb confirmació de l'usuari):** amb backend, el formulari carrega `GET /categories` (`HttpActivityRepository.getCategories`) i només ofereix les de l'Agenda Cultural (`agenda:categories/…`), ordenades pel nom. No ofereix els àmbits (`agenda:ambits/…`) ni les que s'han creat escrivint un nom nou. S'envia l'etiqueta (p. ex. `agenda:categories/teatre`), perquè `POST /events` crea una categoria nova amb qualsevol nom que no existeixi. El nom que es veu surt de l'etiqueta i no porta accents («Conferencies», DP-029). Sense backend, continua la llista provisional. Els filtres d'Inici també carreguen `GET /categories` (DP-038) i filtren al servidor per l'ID de la categoria, així que una activitat creada amb una categoria de l'Agenda Cultural surt en filtrar per aquesta categoria.
 - **Qui decideix:** equip
 - **Resolució:**
 
@@ -267,6 +274,7 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Opcions:** A) acordar contractes i integrar perfils/amistats · B) validar primer la pantalla i les interaccions amb dades demo aïllades.
 - **Provisionalment:** projecció de bústia en Dart pur, dades demo per compte, lectura/resposta confirmades i callbacks de destinació. El perfil s'indica com a pendent fins que hi hagi un callback real. La resposta d'amistat simula només el resultat a la bústia: no implementa un graf d'amistats, push, programació de recordatoris, tipus UML nous ni rutes d'API. Els recordatoris històrics no creen inscripcions. Filtres desplaçables amb pantalla estreta/text ampliat, paletes centrals al tema i inicials si no hi ha avatar. `TODO(DP-023)` marca els límits demo/integració. Textos nous de càrrega/error/buit provisionals en català.
 - **Qui decideix:** frontend + backend + responsables de perfils/amistats
+
 - **Actualització 2026-10-26:** l’usuari confirma que les accions socials són fora de l’Sprint 1. Bústia i lectura s’integren amb HTTP; no s’infereixen subtipus socials ni s’hi confirmen accions locals. Identitat, tipus i context es contrasten amb backend; límits actuals a DP-039.
 
 ### DP-024 · Descobreix i cerca: contractes, seleccions i abast social
@@ -354,6 +362,13 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Dubte:** en renovar la clau (DP-004) es va esborrar la «Browser key» original, però Firebase Authentication la continua posant als enllaços dels correus (`client.apiKey` de la configuració, de només lectura: ni la consola ni l'API la deixen canviar). La pàgina de Firebase que obre l'enllaç falla i diu «ha caducat o ja s'ha fet servir»: ningú no pot verificar el correu fent clic a l'enllaç.
 - **Opcions:** A) demanar al suport de Firebase que hi associïn la clau nova · B) projecte de Firebase nou · C) recuperar la clau antiga restringida a `aprop-919ec.firebaseapp.com` · D) enganxar l'enllaç a l'app (com ara) · E) pàgina pròpia per als enllaços a Firebase Hosting.
 - **Provisionalment:** D, triada per l'usuari (descarta C i E): a «Verifica el teu correu» es pot enganxar l'enllaç del correu; l'app en treu el codi (`oobCode`) i el confirma amb `applyActionCode` i la clau de l'app. Fer clic a l'enllaç continua fallant. `TODO(DP-031)` al repositori i a la pantalla.
+- **Opció E en curs (2026-10-27, Claude Code (Opus 5.5) amb confirmació de l'usuari, Taiga #73):** l'usuari descarta pegar l'enllaç perquè queda lleig i prova una pàgina pròpia per als enllaços:
+  - si la web s'obre amb `?mode=…&oobCode=…`, `main.dart` en treu l'`EmailAction` i `APropApp` mostra `EmailActionScreen` en lloc de l'inici de sessió;
+  - `AuthRepository.confirmEmailVerification` confirma el codi amb `applyActionCode` i la clau de l'app, **sense sessió** (l'enllaç sovint s'obre al navegador del mòbil); si la web ja tenia la sessió del compte, també entra;
+  - «Continua a AProp!» passa a l'app normal. Altres tipus d'enllaç (p. ex. `resetPassword`) mostren que no es poden obrir aquí;
+  - no es neteja l'adreça: si es recarrega la pàgina, el codi ja s'ha fet servir i surt l'avís de caducat;
+  - textos i disseny sense mockup (`TODO(DP-031)`).
+  Falta, en aquest ordre: publicar la web amb el canvi a `frontend-aprop.onrender.com`; afegir-hi el domini a *Authorized domains* de Firebase; posar `https://frontend-aprop.onrender.com/` a *Templates → Personalitza l'URL d'acció* (vegeu `docs/firebase-auth.md`); provar-ho amb un compte nou. Quan funcioni, treure l'opció d'enganxar l'enllaç (D) i resoldre aquesta DP amb E.
 - **Qui decideix:** equip
 - **Resolució:**
 
@@ -401,17 +416,6 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Actualització 2026-10-26:** la llista consulta el servidor amb dates i categories reals abans de paginar. Les opcions deixen de ser les vuit de demostració quan s’injecta HTTP. El mapa continua limitat al filtratge local i metadades absents. Detalls a DP-038; la decisió continua oberta per font compartida i abast global.
 - **Resolució:**
 
-### DP-036 · Format UUID de `X-User-ID` i sincronització d'UID de Firebase a Render
-- **Estat:** oberta
-- **Obert per:** 2026-10-25 · Antigravity · Taiga #231
-- **Identificador:** renumerat de DP-034 a DP-036 en integrar `develop` (PR #22 i #24), que ja feien servir DP-034 i DP-035.
-- **Context:** `ApiClient.toCanonicalUuid` (`lib/core/network/api_client.dart`), `HttpEnrollmentRepository`, `main.dart`; `api-aprop` (`normalizeUserID` a `event_service`, `signup_service`, `assistant_service`).
-- **Dubte:** en mode tolerant a Render (sense `FIREBASE_CREDENTIALS_FILE`), el middleware d'autenticació llegeix la capçalera `X-User-ID`, però els serveis d'esdeveniments, inscripcions i assistent validen que l'identificador d'usuari tingui format UUID canònic de 36 caràcters (`8-4-4-4-12`), mentre que els UID de Firebase Auth fan 28 caràcters alfanumèrics (i els comptes demo tenen prefix `demo-...`), provocant `HTTP 400: {"error": "invalid user id"}`.
-- **Opcions:** A) que el backend resolgui sempre el `firebase_uid` cap a l'UUID intern de `Users` al middleware o accepti `firebase_uid` als serveis · B) transformar de manera determinista qualsevol identificador no UUID a un UUID v4 canònic al client (`ApiClient.toCanonicalUuid`) quan s'envia `X-User-ID`.
-- **Provisionalment:** B (`TODO(DP-036)` a `lib/core/network/api_client.dart`), de manera que les peticions a Render amb `X-User-ID` funcionen tant amb UID de Firebase com amb comptes de demostració sense fallar per validació d'UUID.
-- **Qui decideix:** backend + frontend
-- **Resolució:**
-
 ### DP-037 · Llista real d'Inici: paginació i metadades disponibles
 - **Estat:** oberta
 - **Obert per:** 2026-10-26 · frontend · ampliació de la tasca #77
@@ -442,9 +446,30 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Pendent del backend:** autoritzar GET/list/read pel destinatari de la sessió i evitar confiar en l’ID rebut; establir zona horària RFC 3339 amb offset; confirmar generació de recordatoris/recomanacions si entra a l’Sprint 1, perquè només s’ha trobat creació via `POST /notifications`. La consulta de disponibilitat a `/notificationtypes` ha esgotat 15 s sense resposta HTTP. No s’han executat backend, migracions ni escriptures reals.
 - **Fora de l’Sprint 1:** acceptar/rebutjar amistats, subtipus i estat de sol·licituds, graf social. L’adaptador HTTP no emet sol·licituds accionables ni simula una confirmació. Demo conserva els exemples del projecte final.
 - **Qui decideix:** equip frontend/backend. Guia `docs/notifications-backend.md`; missatge revisable per comunicar `docs/notifications-backend-handoff.md`.
+- **Actualització 2026-10-27 · PR #31:** sincronitzada amb `origin/develop@572612a`, que ja resol l’UID al backend. Avisos envia només bearer; desapareix `X-User-ID` i la dependència de `ApiClient.isCanonicalUuid`. La validació del UUID real es conserva al mapper; les proves comproven que no s’envia cap identitat auxiliar. Es conserven DP-040 (Perfil), DP-031 (verificació web) i la resolució de DP-036.
+- **Resolució:**
+
+### DP-040 · Perfil HTTP, capacitats i camps sense contracte
+- **Estat:** oberta · 2026-10-27 · Taiga #230 Frontend perfil.
+- **Context:** ampliació autoritzada del perfil propi, només frontend. Referència: handlers/models/services de `api-aprop` a `origin/develop@a67ae9e`, llegits sense modificar-los. DP-039 es reserva per a la integració d’Avisos publicada a la branca separada `feature/notifications-backend` (`8089a9d`); no es reutilitza.
+- **Disponible:** `GET /users/me`, `PATCH /users/me` (nom/username/biografia/`show-plans`), `POST /users/me/avatar` i `GET /users/me/created-events`. Identitat validada amb UUID real i Firebase UID del compte; bearer capturat per operació. Sense `X-User-ID` ni dades Auth/Demo substituint errors.
+- **Adaptació provisional:** metadades i creades tenen càrregues/errors independents. `plans-count` s’etiqueta «Plans», no assistències confirmades; `completed-plans-count` només compta inscripcions acabades i no omple «Plans fets». HTTP inicia «Creats per mi»; historial confirmat pendent. L’XP s’ensenya tal com arriba i el FK `level` es conserva sense assignar-lo a les cinc insígnies/llindars del mockup. Demo conserva els seus exemples.
+- **Camps pendents:** municipi, historial/valoracions de plans amb assistència confirmada, metadades dels nivells i preferències de notificació. Només `show-plans` es desa al servidor; els quatre interruptors d’avisos queden pendents. Social fora del Sprint 1 segons l’usuari. Test d’interessos (amb endpoints propis), Calendar, eliminació, idioma/tema i bloquejos requereixen les seves històries; no s’integren aquí.
+- **Foto:** necessitat concreta de seleccionar un fitxer per al multipart existent; s’afegeix `image_picker ^1.2.4` (plugin oficial Flutter), encapsulat darrere `ProfileImagePicker`. Només galeria; text d’accés a fotos a iOS, sense càmera/micròfon. JPEG/PNG/WebP segons S3 del backend. Màxim de 5 MiB comprovat sobre el multipart complet, abans d’enviar. Android recupera l’estat d’una selecció interrompuda però demana triar de nou: mai puja un fitxer antic automàticament.
+- **Validació:** nom no buit ≤100 bytes UTF-8, biografia ≤500 bytes UTF-8 i username `[A-Za-z0-9_]{3,30}`. HTTP 409 mostra nom ocupat; només s’aplica la resposta confirmada. AppBar, compartir i crear activitat consumeixen el nom/username confirmats del perfil.
+- **Qui decideix:** equip frontend/backend per tancar les diferències amb els mockups; cal prova autenticada a Render, persistència entre execucions, configuració/accessibilitat S3 i galeria en Android/iOS físic. Guia i peticions concretes: `docs/profile-backend.md`.
+- **Relació:** actualitza parcialment DP-032 i DP-033; no les dona per resoltes ni completa les històries socials/gamificació.
 - **Resolució:**
 
 ## Resoltes
 
-
-(cap)
+### DP-036 · Format UUID de `X-User-ID` i sincronització d'UID de Firebase a Render
+- **Estat:** resolta 2026-10-26
+- **Obert per:** 2026-10-25 · Antigravity · Taiga #231
+- **Identificador:** renumerat de DP-034 a DP-036 en integrar `develop` (PR #22 i #24), que ja feien servir DP-034 i DP-035.
+- **Context:** `ApiClient.toCanonicalUuid` (`lib/core/network/api_client.dart`), `HttpEnrollmentRepository`, `main.dart`; `api-aprop` (`normalizeUserID` a `event_service`, `signup_service`, `assistant_service`).
+- **Dubte:** en mode tolerant a Render (sense `FIREBASE_CREDENTIALS_FILE`), el middleware d'autenticació llegeix la capçalera `X-User-ID`, però els serveis d'esdeveniments, inscripcions i assistent validen que l'identificador d'usuari tingui format UUID canònic de 36 caràcters (`8-4-4-4-12`), mentre que els UID de Firebase Auth fan 28 caràcters alfanumèrics (i els comptes demo tenen prefix `demo-...`), provocant `HTTP 400: {"error": "invalid user id"}`.
+- **Opcions:** A) que el backend resolgui sempre el `firebase_uid` cap a l'UUID intern de `Users` al middleware o accepti `firebase_uid` als serveis · B) transformar de manera determinista qualsevol identificador no UUID a un UUID v4 canònic al client (`ApiClient.toCanonicalUuid`) quan s'envia `X-User-ID`.
+- **Provisionalment:** B (`TODO(DP-036)` a `lib/core/network/api_client.dart`), de manera que les peticions a Render amb `X-User-ID` funcionen tant amb UID de Firebase com amb comptes de demostració sense fallar per validació d'UUID.
+- **Qui decideix:** backend + frontend
+- **Resolució:** A, al backend. `fix/resolve-user-id` (PR #36 d'api-aprop, Tasca #237, Wen) i `feature/esdeveniment-no-ofi` (PR #35, Tasca #236, Arnau) tradueixen l'UID de Firebase del token a l'UUID de `users` (`requester.ID`, `EventService.ResolveUserID` amb `GetByFirebaseUID`) a inscripcions, crear esdeveniments, xatbot i preferències. `X-User-ID` només es llegeix quan el backend funciona sense Firebase. Al frontend (2026-10-26, Taiga #82) ja no s'envia `X-User-ID`: l'usuari surt només del token. `AppUser.serverId` (l'`id` de `POST /auth/sync`) es continua fent servir per a `GET /users/{id}/events` i com a clau de les inscripcions.

@@ -5,6 +5,11 @@ import 'package:http/http.dart' as http;
 
 import '../config/api_config.dart';
 
+/// The encoded multipart body exceeds an endpoint's complete request limit.
+class MultipartBodyTooLargeException implements Exception {
+  const MultipartBodyTooLargeException();
+}
+
 /// Excepció estandarditzada per a les peticions HTTP al backend d'AProp!.
 class ApiException extends StateError implements Exception {
   ApiException(
@@ -40,24 +45,22 @@ class ApiException extends StateError implements Exception {
 ///
 /// Gestiona:
 /// - Injecció de capçaleres comunes (`Accept`, `Content-Type`).
-/// - Injecció d'autenticació (`Authorization: Bearer <token>` i `X-User-ID`).
+/// - Injecció d'autenticació (`Authorization: Bearer <token>`): el backend
+///   treu l'usuari del token.
 /// - Timeout de 60s per absorbir el cold start de Render Free.
 /// - Descodificació UTF-8 i d'errors estandarditzats `{"error": "..."}`.
 class ApiClient {
   ApiClient({
     Uri? baseUrl,
     Future<String?> Function()? idToken,
-    FutureOr<String?> Function()? userId,
     http.Client? client,
     this.timeout = ApiConfig.connectTimeout,
   }) : baseUrl = baseUrl ?? Uri.parse(ApiConfig.baseUrl),
        idTokenProvider = idToken,
-       userIdProvider = userId,
        _client = client ?? http.Client();
 
   final Uri baseUrl;
   final Future<String?> Function()? idTokenProvider;
-  final FutureOr<String?> Function()? userIdProvider;
   final http.Client _client;
   final Duration timeout;
 
@@ -78,13 +81,11 @@ class ApiClient {
     Map<String, String>? extraHeaders,
   }) async {
     final token = await idTokenProvider?.call();
-    final uid = await userIdProvider?.call();
 
     return <String, String>{
       'Accept': 'application/json',
       if (hasJsonBody) 'Content-Type': 'application/json',
       if (token != null && token.isNotEmpty) 'Authorization': 'Bearer $token',
-      if (uid != null && uid.isNotEmpty) 'X-User-ID': uid,
       ...?extraHeaders,
     };
   }
@@ -218,16 +219,21 @@ class ApiClient {
     required List<int> bytes,
     required String filename,
     Map<String, String>? fields,
+    Map<String, String>? headers,
+    int? maximumBodyBytes,
   }) async {
     final uri = resolveUri(path);
-    final headers = await buildHeaders();
+    final resolvedHeaders = await buildHeaders(extraHeaders: headers);
     final request = http.MultipartRequest('POST', uri)
-      ..headers.addAll(headers)
+      ..headers.addAll(resolvedHeaders)
       ..files.add(
         http.MultipartFile.fromBytes(fieldName, bytes, filename: filename),
       );
     if (fields != null) {
       request.fields.addAll(fields);
+    }
+    if (maximumBodyBytes != null && request.contentLength > maximumBodyBytes) {
+      throw const MultipartBodyTooLargeException();
     }
 
     final http.Response response;
@@ -286,43 +292,6 @@ class ApiClient {
       // Si la resposta no és JSON vàlid, fem servir el codi d'estat HTTP.
     }
     return 'Error HTTP ${response.statusCode}';
-  }
-
-  /// Comprova si [value] ja té el format UUID canònic (8-4-4-4-12 dígits hexadecimals).
-  static bool isCanonicalUuid(String value) {
-    return RegExp(
-      r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$',
-    ).hasMatch(value);
-  }
-
-  /// Converteix qualsevol identificador d'usuari (com un UID de Firebase) en un
-  /// UUID canònic determinista (8-4-4-4-12) per als endpoints del backend que
-  /// exigeixen el tipus UUID de PostgreSQL.
-  /// TODO(DP-036): Eliminar la normalització al client quan el backend resolgui
-  /// `X-User-ID` / UID de Firebase cap a l'UUID intern a tots els serveis.
-  static String toCanonicalUuid(String value) {
-    final trimmed = value.trim();
-    if (isCanonicalUuid(trimmed)) {
-      return trimmed.toLowerCase();
-    }
-    final bytes = utf8.encode(trimmed);
-    final hex = List<int>.generate(16, (i) {
-      var acc = (i * 31 + 17) & 0xff;
-      for (var j = 0; j < bytes.length; j++) {
-        acc = (acc * 33 + bytes[j] + j + i) & 0xff;
-      }
-      return acc;
-    });
-    // Marquem versió 4 i variant RFC 4122.
-    hex[6] = (hex[6] & 0x0f) | 0x40;
-    hex[8] = (hex[8] & 0x3f) | 0x80;
-
-    String part(int start, int end) => hex
-        .sublist(start, end)
-        .map((b) => b.toRadixString(16).padLeft(2, '0'))
-        .join();
-
-    return '${part(0, 4)}-${part(4, 6)}-${part(6, 8)}-${part(8, 10)}-${part(10, 16)}';
   }
 
   void close() => _client.close();

@@ -21,8 +21,8 @@ class HttpNotificationRepository implements NotificationRepository {
     if (accountId.isEmpty) throw ArgumentError.value(accountId, 'userId');
     // Freeze one authenticated context for this operation. A response from a
     // different signed-in account cannot resolve this caller's inbox.
-    final headers = await apiClient.buildHeaders(
-      extraHeaders: {'X-User-ID': accountId},
+    final headers = Map<String, String>.unmodifiable(
+      await apiClient.buildHeaders(),
     );
     if (!RegExp(r'^Bearer \S+$').hasMatch(headers['Authorization'] ?? '')) {
       throw ApiException(
@@ -35,18 +35,14 @@ class HttpNotificationRepository implements NotificationRepository {
       throw const FormatException('Expected the authenticated user profile');
     }
     final id = notificationUserId(profile['id']);
-    final matchesUuid =
-        ApiClient.isCanonicalUuid(accountId) && accountId.toLowerCase() == id;
+    final matchesUuid = accountId.toLowerCase() == id;
     if (!matchesUuid && profile['firebase-uid'] != accountId) {
       throw ApiException(
         'La sessió ha canviat. Torna a carregar els avisos.',
         statusCode: 401,
       );
     }
-    return (
-      id: id,
-      headers: Map<String, String>.unmodifiable({...headers, 'X-User-ID': id}),
-    );
+    return (id: id, headers: headers);
   }
 
   @override

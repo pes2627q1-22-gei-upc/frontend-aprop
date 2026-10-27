@@ -9,11 +9,7 @@ import 'package:aprop/features/activities/models/geo_point.dart';
 import 'package:aprop/features/activities/models/new_activity.dart';
 import 'package:aprop/features/assistant/data/http_assistant_repository.dart';
 import 'package:aprop/features/assistant/models/assistant_message.dart';
-import 'package:aprop/features/auth/models/app_user.dart';
 import 'package:aprop/features/notifications/data/http_notification_repository.dart';
-import 'package:aprop/features/profile/data/http_profile_repository.dart';
-import 'package:aprop/features/profile/data/http_profile_settings_repository.dart';
-import 'package:aprop/features/profile/models/profile_settings.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
@@ -53,7 +49,6 @@ void main() {
       final requests = <http.Request>[];
       final apiClient = ApiClient(
         idToken: () async => 'token-1',
-        userId: () => 'uid-1',
         client: MockClient((request) async {
           requests.add(request);
           if (request.method == 'GET' && request.url.path == '/events') {
@@ -112,12 +107,97 @@ void main() {
       expect(created.source, ActivitySource.community);
       expect(created.creator?.userId, 'uid-1');
     });
+
+    group('Crear (POST /events)', () {
+      late Map<String, Object?> sent;
+
+      HttpActivityRepository repository() => HttpActivityRepository(
+        apiClient: ApiClient(
+          client: MockClient((request) async {
+            sent = jsonDecode(
+              utf8.decode(request.bodyBytes),
+            ) as Map<String, Object?>;
+            return jsonResponse(
+              sampleEventJson(id: 506, isOfficial: false),
+              201,
+            );
+          }),
+        ),
+      );
+
+      NewActivity newActivity({double? price, String? directions}) =>
+          NewActivity(
+            title: 'Taller de ceràmica',
+            description: 'Per a tots els nivells.',
+            category: 'agenda:categories/exposicions',
+            startsAt: DateTime(2026, 11, 7, 0, 30),
+            municipality: 'Sant Cugat del Vallès',
+            imageAsset: 'assets/images/jazz_al_parc.jpg',
+            creator: const ActivityCreator(
+              name: 'Pol Vidal',
+              userId: 'uid-1',
+              isFriend: false,
+            ),
+            directions: directions,
+            price: price,
+          );
+
+      test('Envia l’hora d’aquí sense canviar de dia i l’etiqueta', () async {
+        await repository().createActivity(
+          newActivity(price: 0, directions: 'Entrada pel pati'),
+        );
+
+        // Passada a UTC, les 00.30 h serien el dia 6.
+        expect(sent['start-date'], '2026-11-07T00:30:00.000Z');
+        expect(sent['categories'], ['agenda:categories/exposicions']);
+        expect(sent['free'], isTrue);
+        // Les indicacions només a l'adreça: lloc i adreça s'ajunten en llegir.
+        expect(sent['address'], 'Entrada pel pati');
+        expect(sent.containsKey('place'), isFalse);
+      });
+
+      test('Sense preu, no diu que sigui gratuïta', () async {
+        await repository().createActivity(newActivity());
+
+        expect(sent.containsKey('free'), isFalse);
+        expect(sent['address'], '');
+      });
+    });
+
+    test(
+      'Categories: les de l’Agenda Cultural, ordenades i llegibles',
+      () async {
+        final repo = HttpActivityRepository(
+          apiClient: ApiClient(
+            client: MockClient((request) async {
+              expect(request.url.path, '/categories');
+              return jsonResponse([
+                {'id': 1, 'name': 'agenda:categories/teatre'},
+                {'id': 13, 'name': ''},
+                {'id': 20, 'name': 'agenda:categories/cultura-digital'},
+                {'id': 27, 'name': 'agenda:ambits/musica'},
+                {'id': 34, 'name': 'Música'},
+              ]);
+            }),
+          ),
+        );
+
+        final categories = await repo.getCreationCategories();
+
+        expect(categories.map((c) => c.label), ['Cultura digital', 'Teatre']);
+        // Es desa l'etiqueta, perquè l'activitat quedi a la categoria que ja
+        // existeix en lloc de crear-ne una de nova.
+        expect(categories.map((c) => c.value), [
+          'agenda:categories/cultura-digital',
+          'agenda:categories/teatre',
+        ]);
+      },
+    );
   });
 
   group('HttpEnrollmentRepository', () {
     test('Sincronitza inscripcions, inscriu i cancel·la inscripció', () async {
       final apiClient = ApiClient(
-        userId: () => 'uid-1',
         client: MockClient((request) async {
           if (request.method == 'GET' &&
               request.url.path == '/users/uid-1/events') {
@@ -179,7 +259,6 @@ void main() {
   group('HttpDiscoveryRepository & HttpAssistantRepository', () {
     test('Cerca esdeveniments i envia consultes al xatbot', () async {
       final apiClient = ApiClient(
-        userId: () => 'uid-1',
         client: MockClient((request) async {
           if (request.url.path == '/events/search') {
             return jsonResponse({
@@ -232,53 +311,19 @@ void main() {
     });
   });
 
-  group('HttpProfileRepository, Settings & Notifications', () {
-    test('Consulta i edita el perfil, preferències i avisos', () async {
+  group('HttpNotificationRepository', () {
+    test('Consulta i marca els avisos com a llegits', () async {
       final notice = {
         ...backendNotification(9, event: 101),
         'notification-date': '2026-10-25T10:00:00Z',
       };
       final apiClient = ApiClient(
         idToken: () async => 'test-token',
-        userId: () => 'uid-1',
         client: MockClient((request) async {
+          expect(request.headers['Authorization'], 'Bearer test-token');
+          expect(request.headers.containsKey('X-User-ID'), isFalse);
           if (request.method == 'GET' && request.url.path == '/users/me') {
-            return jsonResponse({
-              'id': backendUserId,
-              'firebase-uid': 'uid-1',
-              'username': 'laiasoler',
-              'name': 'Laia Soler',
-              'biography': 'Amant del teatre.',
-              'experience': 340,
-              'level': 2,
-              'rating': 4.8,
-              'friends-count': 12,
-              'show-plans': true,
-            });
-          }
-          if (request.method == 'PATCH' && request.url.path == '/users/me') {
-            final body = jsonDecode(request.body) as Map<String, Object?>;
-            return jsonResponse({
-              'id': backendUserId,
-              'firebase-uid': 'uid-1',
-              'username': 'laiasoler',
-              'name': 'Laia Soler',
-              'biography': body['biography'] ?? 'Amant del teatre.',
-              'experience': 340,
-              'level': 2,
-              'rating': 4.8,
-              'friends-count': 12,
-              'show-plans': body['show-plans'] ?? true,
-            });
-          }
-          if (request.url.path == '/users/me/created-events') {
-            return jsonResponse([
-              sampleEventJson(
-                id: 303,
-                title: 'Ruta literària',
-                isOfficial: false,
-              ),
-            ]);
+            return jsonResponse(backendOwnProfile(firebaseId: 'uid-1'));
           }
           if (request.url.path == '/notifications/user/$backendUserId') {
             return jsonResponse([notice]);
@@ -298,42 +343,7 @@ void main() {
           return jsonResponse({'error': 'not found'}, 404);
         }),
       );
-
-      const user = AppUser(
-        id: 'uid-1',
-        email: 'laia@aprop.cat',
-        firstName: 'Laia',
-        lastName: 'Soler',
-        emailVerified: true,
-        username: 'laiasoler',
-      );
-
-      final profileRepo = HttpProfileRepository(apiClient: apiClient);
-      final profile = await profileRepo.getProfile(user);
-      expect(profile.displayName, 'Laia Soler');
-      expect(profile.biography, 'Amant del teatre.');
-      expect(profile.friendCount, 12);
-      expect(profile.createdActivities, hasLength(1));
-      expect(profile.createdActivities.single.title, 'Ruta literària');
-
-      final updated = await profileRepo.updateDetails(
-        user: user,
-        biography: 'Teatre i música.',
-        municipality: 'Girona',
-      );
-      expect(updated.biography, 'Teatre i música.');
-      expect(updated.municipality, 'Girona');
-
-      final settingsRepo = HttpProfileSettingsRepository(apiClient: apiClient);
-      final settings = await settingsRepo.getSettings('uid-1');
-      expect(settings.showMyPlans, isTrue);
-      final updatedSettings = await settingsRepo.updatePreference(
-        userId: 'uid-1',
-        preference: ProfilePreference.showMyPlans,
-        enabled: false,
-      );
-      expect(updatedSettings.showMyPlans, isFalse);
-
+      addTearDown(apiClient.close);
       final activityRepo = HttpActivityRepository(apiClient: apiClient);
       final notifRepo = HttpNotificationRepository(
         apiClient: apiClient,
