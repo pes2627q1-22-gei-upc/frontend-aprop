@@ -82,6 +82,12 @@ class FakeAuthRepository implements AuthRepository {
   }
 
   @override
+  Future<void> confirmEmailVerification(String code) {
+    lastCall = {'code': code};
+    return _respond();
+  }
+
+  @override
   Future<bool> checkEmailVerified() async {
     await _respond();
     return emailVerified;

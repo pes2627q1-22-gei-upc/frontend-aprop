@@ -210,6 +210,22 @@ class FirebaseAuthRepository implements AuthRepository {
   }
 
   @override
+  Future<void> confirmEmailVerification(String code) async {
+    await _run(() => _auth.applyActionCode(code));
+
+    // Si aquesta web ja tenia la sessió del compte, entra sense més passos.
+    final user = _auth.currentUser;
+    if (user == null) return;
+    try {
+      await user.reload();
+      _localChanges.add(null);
+    } catch (error) {
+      // El correu ja està verificat: l'app ho veurà en tornar-ho a consultar.
+      debugPrint("Auth: no s'ha pogut actualitzar la sessió: $error");
+    }
+  }
+
+  @override
   Future<bool> checkEmailVerified() async {
     await _run(_requireCurrentUser().reload);
 
