@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:aprop/app/theme/app_theme.dart';
 import 'package:aprop/features/activities/data/demo_activity_repository.dart';
 import 'package:aprop/features/activities/models/activity.dart';
+import 'package:aprop/features/activities/models/activity_search_page.dart';
 import 'package:aprop/features/activities/models/discovery_feed.dart';
 import 'package:aprop/features/activities/presentation/screens/activity_search_screen.dart';
 import 'package:aprop/features/activities/presentation/screens/discover_screen.dart';
@@ -235,4 +236,97 @@ void main() {
     expect(opened, isNull);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets(
+    'Missing interests explains recommendations while featured cards remain accessible at 320 px',
+    (tester) async {
+      repository.feed = DiscoveryFeed(
+        recommended: [],
+        featured: [activities.last],
+        recommendationAvailability: RecommendationAvailability.needsInterests,
+      );
+      await pumpScreen(tester, scale: 2);
+      tester.view.physicalSize = const Size(320, 844);
+      await tester.pumpAndSettle();
+      expect(find.text('Coneguem els teus gustos'), findsOneWidget);
+      expect(find.text('Segons els teus interessos'), findsNothing);
+      expect(find.text('Encara no hi ha propostes'), findsNothing);
+      await tester.scrollUntilVisible(
+        find.text('Teatre sota les estrelles'),
+        200,
+      );
+      await tester.ensureVisible(find.text('Teatre sota les estrelles'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Teatre sota les estrelles'));
+      expect(opened, 'demo-theatre');
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'A failed recommendation section is not an empty or personalized success',
+    (tester) async {
+      repository.feed = DiscoveryFeed(
+        recommended: [],
+        featured: [activities.last],
+        recommendationAvailability: RecommendationAvailability.failed,
+      );
+      await pumpScreen(tester);
+      await tester.pumpAndSettle();
+      expect(
+        find.text('No hem pogut carregar les recomanacions.'),
+        findsOneWidget,
+      );
+      expect(find.text('No hi ha recomanacions disponibles.'), findsNothing);
+      expect(find.text('Segons els teus interessos'), findsNothing);
+      await tester.tap(find.text('Tornar-ho a provar'));
+      await tester.pumpAndSettle();
+      expect(repository.users, hasLength(2));
+    },
+  );
+
+  testWidgets(
+    'Search shows the server total and a continuation error keeps the first card for retry',
+    (tester) async {
+      var fail = true;
+      repository.onPage = (_, page) async {
+        if (page == 0) {
+          return ActivitySearchPage(
+            activities: [activities.first],
+            totalCount: 2,
+            nextPage: 1,
+          );
+        }
+        if (fail) throw StateError('Offline');
+        return ActivitySearchPage(activities: [activities[1]], totalCount: 2);
+      };
+      await pumpScreen(tester, search: true);
+      await submit(tester, 'cultura');
+      expect(find.text('2 activitats trobades'), findsOneWidget);
+      await tester.ensureVisible(find.text('Carregar més activitats'));
+      await tester.tap(find.text('Carregar més activitats'));
+      await tester.pumpAndSettle();
+      expect(find.text('Jazz al parc'), findsOneWidget);
+      expect(
+        find.text('No hem pogut carregar més activitats. Torna-ho a provar.'),
+        findsOneWidget,
+      );
+      fail = false;
+      await tester.ensureVisible(find.text('Tornar-ho a provar'));
+      await tester.tap(find.text('Tornar-ho a provar'));
+      await tester.pumpAndSettle();
+      expect(repository.pages.map((p) => p.page), [0, 1, 1]);
+      expect(find.text('Carregar més activitats'), findsNothing);
+      await tester.scrollUntilVisible(
+        find.text('Mirades de Catalunya'),
+        200,
+        scrollable: find.byWidgetPredicate(
+          (widget) =>
+              widget is Scrollable &&
+              widget.axisDirection == AxisDirection.down,
+        ),
+      );
+      expect(find.text('Mirades de Catalunya'), findsOneWidget);
+    },
+  );
 }

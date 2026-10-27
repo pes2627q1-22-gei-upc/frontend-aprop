@@ -1,5 +1,7 @@
 # Descobreix i cerca — Taiga #96 Frontend de cerca
 
+> **Actualització 2026-10-27:** la [integració HTTP](discovery-backend.md) amplia aquesta implementació inicial: recomanacions/populars reals, preferències absents, errors per secció i cerca paginada amb total del servidor. Les descripcions Demo i els resultats de prova següents són històrics; el contracte actual és DP-041.
+
 ## Abast i referències
 
 Implementació del recorregut Descobreix → Cerca d'activitats → Fitxa, amb les figures 14–16 i els prompts aprovats d'`output/mockup/aprop-descobreix-*` de PES. L'usuari confirma #96 i autoritza implementar Descobreix i la cerca d'activitats. Els criteris detallats de Taiga encara s'han de contrastar en la revisió humana.

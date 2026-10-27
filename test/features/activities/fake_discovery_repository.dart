@@ -1,4 +1,5 @@
 import 'package:aprop/features/activities/models/activity.dart';
+import 'package:aprop/features/activities/models/activity_search_page.dart';
 import 'package:aprop/features/activities/models/discovery_feed.dart';
 import 'package:aprop/features/activities/repositories/discovery_repository.dart';
 
@@ -7,6 +8,8 @@ class FakeDiscoveryRepository implements DiscoveryRepository {
   List<Activity> results = [];
   Future<DiscoveryFeed> Function(String userId)? onFeed;
   Future<List<Activity>> Function(String query)? onSearch;
+  Future<ActivitySearchPage> Function(String query, int page)? onPage;
+  final pages = <({String query, int page})>[];
   final users = <String>[];
   final queries = <String>[];
 
@@ -17,8 +20,17 @@ class FakeDiscoveryRepository implements DiscoveryRepository {
   }
 
   @override
-  Future<List<Activity>> searchActivities(String query) {
+  Future<ActivitySearchPage> searchActivitiesPage(
+    String query, {
+    int page = 0,
+  }) async {
     queries.add(query);
-    return onSearch?.call(query) ?? Future.value(results);
+    pages.add((query: query, page: page));
+    if (onPage != null) return onPage!(query, page);
+    final activities = await (onSearch?.call(query) ?? Future.value(results));
+    return ActivitySearchPage(
+      activities: activities,
+      totalCount: activities.length,
+    );
   }
 }

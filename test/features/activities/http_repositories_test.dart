@@ -259,12 +259,13 @@ void main() {
   group('HttpDiscoveryRepository & HttpAssistantRepository', () {
     test('Cerca esdeveniments i envia consultes al xatbot', () async {
       final apiClient = ApiClient(
+        idToken: () async => 'test-token',
         client: MockClient((request) async {
           if (request.url.path == '/events/search') {
             return jsonResponse({
               'query': request.url.queryParameters['q'],
               'total': 1,
-              'page-num': 1,
+              'page-num': 0,
               'page-size': 20,
               'events': [sampleEventJson(id: 101)],
             });
@@ -297,7 +298,8 @@ void main() {
       );
 
       final discovery = HttpDiscoveryRepository(apiClient: apiClient);
-      final searchResults = await discovery.searchActivities('Girona');
+      final searchResults = (await discovery.searchActivitiesPage('Girona'))
+          .activities;
       expect(searchResults, hasLength(1));
       expect(searchResults.single.id, '101');
 

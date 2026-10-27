@@ -1,4 +1,5 @@
 import '../models/activity.dart';
+import '../models/activity_search_page.dart';
 import '../models/discovery_feed.dart';
 import '../repositories/activity_repository.dart';
 import '../repositories/discovery_repository.dart';
@@ -6,9 +7,13 @@ import '../repositories/discovery_repository.dart';
 /// Uses the shared catalogue, so search can also find newly created activities.
 // TODO(DP-024): Replace fixture selections and local matching with agreed APIs.
 class DemoDiscoveryRepository implements DiscoveryRepository {
-  DemoDiscoveryRepository({required this.activityRepository});
+  DemoDiscoveryRepository({
+    required this.activityRepository,
+    this.pageSize = 20,
+  });
 
   final ActivityRepository activityRepository;
+  final int pageSize;
 
   @override
   Future<DiscoveryFeed> getFeed({required String userId}) async {
@@ -22,7 +27,21 @@ class DemoDiscoveryRepository implements DiscoveryRepository {
   }
 
   @override
-  Future<List<Activity>> searchActivities(String query) async {
+  Future<ActivitySearchPage> searchActivitiesPage(
+    String query, {
+    int page = 0,
+  }) async {
+    if (page < 0 || pageSize < 1) throw ArgumentError('Invalid search page');
+    final matches = await _search(query);
+    final end = (page + 1) * pageSize;
+    return ActivitySearchPage(
+      activities: matches.skip(page * pageSize).take(pageSize),
+      totalCount: matches.length,
+      nextPage: end < matches.length ? page + 1 : null,
+    );
+  }
+
+  Future<List<Activity>> _search(String query) async {
     final normalized = _normalize(query);
     if (normalized.isEmpty) return const [];
     final terms = normalized.split(' ');

@@ -51,22 +51,30 @@ void main() {
     'Search folds accents and case, trims whitespace and requires every term',
     () async {
       expect(
-        (await repository.searchActivities('  MUSICA   barceLONA ')).single.id,
+        (await repository.searchActivitiesPage('  MUSICA   barceLONA '))
+            .activities
+            .single
+            .id,
         'demo-jazz',
       );
       expect(
-        (await repository.searchActivities('exposicions girona')).single.id,
+        (await repository.searchActivitiesPage('exposicions girona'))
+            .activities
+            .single
+            .id,
         'demo-exhibition',
       );
       expect(
-        (await repository.searchActivities('exposicions tarragona')),
+        (await repository.searchActivitiesPage('exposicions tarragona'))
+            .activities,
         isEmpty,
       );
       expect(
-        (await repository.searchActivities('EXPOSICIO\u0301')),
+        (await repository.searchActivitiesPage('EXPOSICIO\u0301')).activities,
         isNotEmpty,
       );
-      final results = await repository.searchActivities('teatre');
+      final results = (await repository.searchActivitiesPage('teatre'))
+          .activities;
       expect(results.single.id, 'demo-theatre');
       expect(() => results.clear(), throwsUnsupportedError);
     },
@@ -77,19 +85,26 @@ void main() {
     () async {
       final fake = FakeActivityRepository();
       expect(
-        await DemoDiscoveryRepository(activityRepository: fake)
-            .searchActivities(' \n\t '),
+        (await DemoDiscoveryRepository(activityRepository: fake)
+                .searchActivitiesPage(' \n\t '))
+            .activities,
         isEmpty,
       );
       expect(fake.listRequests, 0);
-      expect(await repository.searchActivities('inexistent'), isEmpty);
+      expect(
+        (await repository.searchActivitiesPage('inexistent')).activities,
+        isEmpty,
+      );
     },
   );
 
   test(
     'Search reads the shared catalogue again after an activity is created',
     () async {
-      expect(await repository.searchActivities('castellers vic'), isEmpty);
+      expect(
+        (await repository.searchActivitiesPage('castellers vic')).activities,
+        isEmpty,
+      );
       final created = await catalogue.createActivity(
         NewActivity(
           title: 'Castellers a Vic',
@@ -102,7 +117,9 @@ void main() {
         ),
       );
       expect(
-        (await repository.searchActivities('castellers vic')).single,
+        (await repository.searchActivitiesPage('castellers vic'))
+            .activities
+            .single,
         same(created),
       );
     },
@@ -115,7 +132,10 @@ void main() {
         activityRepository: _UnavailableCatalogue(),
       );
       await expectLater(failing.getFeed(userId: 'user'), throwsStateError);
-      await expectLater(failing.searchActivities('teatre'), throwsStateError);
+      await expectLater(
+        failing.searchActivitiesPage('teatre'),
+        throwsStateError,
+      );
     },
   );
 }

@@ -287,6 +287,8 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Qui decideix:** frontend + backend + responsables d'interessos/perfils
 - **Resolució:**
 
+- **Actualització 2026-10-27:** integració HTTP de recomanacions/populars/cerca amb el contracte real de `api-aprop@be6c25e`. Total i pàgines des de 0, disponibilitat/error per secció i preferències absents. Els límits nous s’especifiquen a DP-041; Demo conserva la seva semàntica local.
+
 ### DP-025 · Primer accés amb Google: nom d'usuari i contracte amb el backend
 - **Estat:** oberta
 - **Obert per:** 2026-10-21 · Claude Code (Opus 5.5) amb confirmació de l'usuari · Taiga #7
@@ -459,6 +461,17 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Validació:** nom no buit ≤100 bytes UTF-8, biografia ≤500 bytes UTF-8 i username `[A-Za-z0-9_]{3,30}`. HTTP 409 mostra nom ocupat; només s’aplica la resposta confirmada. AppBar, compartir i crear activitat consumeixen el nom/username confirmats del perfil.
 - **Qui decideix:** equip frontend/backend per tancar les diferències amb els mockups; cal prova autenticada a Render, persistència entre execucions, configuració/accessibilitat S3 i galeria en Android/iOS físic. Guia i peticions concretes: `docs/profile-backend.md`.
 - **Relació:** actualitza parcialment DP-032 i DP-033; no les dona per resoltes ni completa les històries socials/gamificació.
+- **Resolució:**
+
+### DP-041 · Descobreix HTTP: preferències, seleccions i cerca paginada
+- **Estat:** oberta · 2026-10-27 · Taiga #96 Frontend de cerca.
+- **Context:** només frontend, branca `feature/discovery-backend` des de `60fbebc`; backend contrastat a `be6c25e`, conservat sense canvis. Actualitza parcialment DP-024; no completa social ni el frontend del test.
+- **Disponible:** `GET /users/me`, `/preferences`, `/events/recommended`, `/events/popular` i `/events/search`. Bearer fixat per operació i propietat del perfil validada; sense UUID inventats ni `X-User-ID`. Seleccions inicials de 5 activitats a pàgina 0, sense afirmar que siguin exhaustives. La cerca usa pàgines de 20, també des de 0.
+- **Estats:** preferències buides no criden recomanacions i s’expliquen a «Per a tu». Errors de preferències/recomanacions/populars s’indiquen per secció, preservant dades confirmades en refrescar; 401/403 són globals. Sense successos buits de JSON invàlid ni propostes oficials/comunitàries substituint el ranking.
+- **Cerca:** resultat immutable amb total i continuació; es comproven query, pàgina i mida rebudes. Deduplicació per ID, una continuació alhora, reintent sobre el mateix cursor i invalidació de respostes en editar/esborrar/refrescar/sortir. Es conserven cards i cursor davant errors de pàgina. El total és el del servidor, no el recompte carregat.
+- **Límits backend:** recomanacions ordena dins d’una pàgina i retorna 500 per pesos de categories absents. Populars/recomanacions no filtren activitats acabades; la cerca usa la consulta completa amb ILIKE sobre títol/lloc/municipi/descripció, sense categories ni folding d’accents de Demo. El join exterior de cerca no garanteix ordre explícit entre files; s’ha de garantir agrupació i ordre estable al servidor.
+- **Provisionalment:** conservar l’ordre/dates reals i mostrar error de recomanacions sense amagar populars. El text de cerca no promet categories. La UI mostra el test pendent sense inventar un accés a una pantalla inexistent. Els nous missatges i la continuació de cerca reutilitzen estils/components del projecte. `TODO(DP-041)` marca els límits de ranking al repositori.
+- **Qui decideix:** equip frontend/backend per ordre global, preferències incompletes, vigència temporal i semàntica de cerca. Guia i missatge de traspàs a `docs/discovery-backend.md`. Cal prova autenticada a Render i en Android/web; no s’ha modificat ni executat el backend.
 - **Resolució:**
 
 ## Resoltes
