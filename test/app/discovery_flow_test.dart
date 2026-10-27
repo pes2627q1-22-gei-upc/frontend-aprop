@@ -42,8 +42,9 @@ void main() {
     };
     discovery = FakeDiscoveryRepository()
       ..feed = DiscoveryFeed(recommended: [exhibition], featured: [])
-      ..onSearch = DemoDiscoveryRepository(activityRepository: catalogue)
-          .searchActivities;
+      ..onPage = (query, page) =>
+          DemoDiscoveryRepository(activityRepository: catalogue)
+              .searchActivitiesPage(query, page: page);
     enrollments = FakeEnrollmentRepository();
   });
   tearDown(() => enrollments.dispose());

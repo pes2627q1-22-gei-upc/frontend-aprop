@@ -126,7 +126,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                   ),
                 ),
               if (feed != null)
-                if (feed.isEmpty)
+                if (feed.isEmpty && !feed.hasErrors && !feed.needsInterests)
                   const SliverToBoxAdapter(
                     child: DiscoveryMessage(
                       icon: Icons.explore_outlined,
@@ -141,16 +141,27 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                     // repository actually supplies personalized recommendations.
                     subtitle: feed.isPersonalized
                         ? 'Segons els teus interessos'
+                        : feed.needsInterests || feed.recommendationsUnavailable
+                        ? null
                         : 'Una selecció per començar',
                     activities: feed.recommended,
                     keyPrefix: 'discover-recommended',
                     emptyText: 'No hi ha recomanacions disponibles.',
+                    message: feed.needsInterests
+                        ? 'Les recomanacions estaran disponibles quan hagis completat el test d’interessos.'
+                        : null,
+                    error: feed.recommendationsUnavailable
+                        ? 'No hem pogut carregar les recomanacions.'
+                        : null,
                   ),
                   ..._section(
                     title: 'Destacats',
                     activities: feed.featured,
                     keyPrefix: 'discover-featured',
                     emptyText: 'No hi ha activitats destacades.',
+                    error: feed.featuredUnavailable
+                        ? 'No hem pogut carregar les activitats destacades.'
+                        : null,
                   ),
                 ],
               const SliverToBoxAdapter(child: SizedBox(height: 24)),
@@ -167,6 +178,8 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
     required String keyPrefix,
     required String emptyText,
     String? subtitle,
+    String? message,
+    String? error,
   }) {
     final theme = Theme.of(context);
     return [
@@ -190,29 +203,46 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
           ),
         ),
       ),
-      SliverPadding(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-        sliver: activities.isEmpty
-            ? SliverToBoxAdapter(child: Text(emptyText))
-            : SliverList.separated(
-                itemCount: activities.length,
-                separatorBuilder: (context, index) =>
-                    const SizedBox(height: 12),
-                itemBuilder: (context, index) {
-                  final activity = activities[index];
-                  return ActivityCard(
-                    key: ValueKey('$keyPrefix-${activity.id}'),
-                    activity: activity,
-                    onTap: () => widget.onActivitySelected(activity.id),
-                    participationAction: EnrollmentAction(
-                      viewModel: widget.enrollmentViewModel,
-                      activityId: activity.id,
-                      activityTitle: activity.title,
-                    ),
-                  );
-                },
-              ),
-      ),
+      if (error != null)
+        SliverToBoxAdapter(
+          child: DiscoveryMessage(
+            icon: Icons.refresh,
+            title: error,
+            onRetry: _viewModel.load,
+          ),
+        ),
+      if (message != null)
+        SliverToBoxAdapter(
+          child: DiscoveryMessage(
+            icon: Icons.tune,
+            title: 'Coneguem els teus gustos',
+            description: message,
+          ),
+        ),
+      if (activities.isNotEmpty || (message == null && error == null))
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+          sliver: activities.isEmpty
+              ? SliverToBoxAdapter(child: Text(emptyText))
+              : SliverList.separated(
+                  itemCount: activities.length,
+                  separatorBuilder: (context, index) =>
+                      const SizedBox(height: 12),
+                  itemBuilder: (context, index) {
+                    final activity = activities[index];
+                    return ActivityCard(
+                      key: ValueKey('$keyPrefix-${activity.id}'),
+                      activity: activity,
+                      onTap: () => widget.onActivitySelected(activity.id),
+                      participationAction: EnrollmentAction(
+                        viewModel: widget.enrollmentViewModel,
+                        activityId: activity.id,
+                        activityTitle: activity.title,
+                      ),
+                    );
+                  },
+                ),
+        ),
     ];
   }
 }

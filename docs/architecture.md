@@ -168,11 +168,13 @@ dependències de generació/zona horària es documenten a `docs/notifications-ba
 
 ## Descobreix i cerca — Taiga #96
 
-La descoberta i la cerca viuen dins de `features/activities/`, perquè consulten el mateix catàleg i reutilitzen `ActivityCard` i `EnrollmentAction`. `DiscoveryFeed` és un snapshot immutable; `DiscoveryRepository` és una interfície en Dart pur amb operacions de feed i cerca. `DemoDiscoveryRepository` rep el `ActivityRepository` compartit: no duplica activitats ni inscripcions i no inventa endpoints. La personalització real, els criteris de cerca i l'abast social són pendents (DP-024).
+La descoberta i la cerca viuen dins de `features/activities/`, reutilitzant `ActivityCard`, `EnrollmentAction` i el detall. `DiscoveryRepository` declara `getFeed` i `searchActivitiesPage`; `DiscoveryFeed` i `ActivitySearchPage` són snapshots immutables en Dart pur, amb estats de disponibilitat per secció, total de cerca i continuació. Els ViewModels no coneixen HTTP, JSON, widgets ni `BuildContext`.
 
-`DiscoverScreen` i `ActivitySearchScreen` creen/alliberen els seus ViewModels. El primer coordina càrrega i recàrrega; el segon espera 350 ms mentre s'escriu, permet enviar immediatament amb el teclat i invalida respostes antigues en canviar/esborrar la consulta o sortir. Els ViewModels no naveguen ni reben `BuildContext`. El tema central configura el selector segmentat.
+`HttpDiscoveryRepository` comprova el compte amb `/users/me`, fixa el bearer i consulta preferències/recomanacions i populars en paral·lel. Les dues seccions poden fallar separadament; preferències buides són un estat propi. No es fabriquen propostes personalitzades des del catàleg. `DiscoverViewModel` conserva la secció confirmada que ha fallat i actualitza la resta. Errors d’autenticació continuen globals. Demo manté els exemples del mockup.
 
-`AuthGate` injecta el repositori a `MainShell`, que compon Descobreix, `/discover/search` i les rutes de detall dins del mateix navegador de secció. La cerca manté l'estat sota el detall i en canviar de pestanya. Les dues pantalles reben el `EnrollmentViewModel` existent: la inscripció és compartida amb Inici, fitxa i Agenda. El pas cap a perfils/cerca de persones continua pendent. Vegeu `docs/discovery.md` per seguir el flux.
+`ActivitySearchViewModel` espera 350 ms mentre s’escriu i permet enviar immediatament. Cerca des de 0, total del servidor, continuacions serialitzades, deduplicació per ID, error/reintent de pàgina i invalidació per revisió. Canviar/esborrar la consulta o sortir invalida respostes; refrescar també invalida una continuació pendent. Les pantalles creen/alliberen els ViewModels i la UI reutilitza `ActivityListPagination`.
+
+`AuthGate` injecta el repositori a `MainShell`, que compon Descobreix, `/discover/search` i les rutes de detall dins del mateix navegador de secció. Tornar conserva consulta, pàgines i scroll. Les dues pantalles reben el mateix `EnrollmentViewModel`; apuntar-se es confirma amb la font compartida d’Inici, detall i Agenda. «Persones» i el test d’interessos requereixen les seves històries. Vegeu `docs/discovery-backend.md`, DP-041/DP-024 per al contracte i els límits del ranking del servidor.
 
 ## Perfil propi i Configuració
 

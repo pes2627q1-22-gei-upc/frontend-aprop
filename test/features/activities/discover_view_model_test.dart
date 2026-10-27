@@ -76,4 +76,35 @@ void main() {
     expect(disposable.feed, isNull);
     expect(repository.users, ['old']);
   });
+
+  test('A partial refresh preserves only the failed section and exposes its failure', () async {
+    final activities = await DemoActivityRepository().getActivities();
+    repository.feed = DiscoveryFeed(
+      recommended: [activities.first],
+      featured: [activities.last],
+      isPersonalized: true,
+    );
+    await viewModel.load();
+    repository.feed = DiscoveryFeed(
+      recommended: [],
+      featured: [activities[1]],
+      recommendationAvailability: RecommendationAvailability.failed,
+    );
+    await viewModel.load();
+    expect(viewModel.feed!.recommended, [activities.first]);
+    expect(viewModel.feed!.featured, [activities[1]]);
+    expect(viewModel.feed!.recommendationsUnavailable, isTrue);
+    expect(viewModel.feed!.isPersonalized, isTrue);
+    repository.feed = DiscoveryFeed(
+      recommended: [],
+      featured: [],
+      recommendationAvailability: RecommendationAvailability.needsInterests,
+      featuredUnavailable: true,
+    );
+    await viewModel.load();
+    expect(viewModel.feed!.recommended, isEmpty);
+    expect(viewModel.feed!.needsInterests, isTrue);
+    expect(viewModel.feed!.featured, [activities[1]]);
+    expect(viewModel.feed!.isPersonalized, isFalse);
+  });
 }

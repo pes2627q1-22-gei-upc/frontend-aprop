@@ -24,7 +24,24 @@ class DiscoverViewModel extends ChangeNotifier {
     notifyListeners();
     try {
       final result = await repository.getFeed(userId: userId);
-      if (!_isDisposed) _feed = result;
+      if (!_isDisposed) {
+        final previous = _feed;
+        _feed = previous == null || !result.hasErrors
+            ? result
+            : DiscoveryFeed(
+                recommended: result.recommendationsUnavailable
+                    ? previous.recommended
+                    : result.recommended,
+                featured: result.featuredUnavailable
+                    ? previous.featured
+                    : result.featured,
+                isPersonalized: result.recommendationsUnavailable
+                    ? previous.isPersonalized
+                    : result.isPersonalized,
+                recommendationAvailability: result.recommendationAvailability,
+                featuredUnavailable: result.featuredUnavailable,
+              );
+      }
     } catch (_) {
       if (!_isDisposed) {
         _errorMessage =

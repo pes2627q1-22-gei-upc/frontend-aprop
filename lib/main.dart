@@ -55,10 +55,7 @@ Future<APropApp> createConfiguredApp() async {
     activityCategoryRepository: activityRepository,
     activityMapRepository: HttpActivityMapRepository(apiClient: apiClient),
     enrollmentRepository: HttpEnrollmentRepository(apiClient: apiClient),
-    discoveryRepository: HttpDiscoveryRepository(
-      apiClient: apiClient,
-      activityRepository: activityRepository,
-    ),
+    discoveryRepository: HttpDiscoveryRepository(apiClient: apiClient),
     assistantRepository: HttpAssistantRepository(apiClient: apiClient),
     notificationRepository: HttpNotificationRepository(
       apiClient: apiClient,

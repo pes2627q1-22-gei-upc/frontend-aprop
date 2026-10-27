@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:aprop/features/activities/data/demo_activity_repository.dart';
 import 'package:aprop/features/activities/models/activity.dart';
+import 'package:aprop/features/activities/models/activity_search_page.dart';
 import 'package:aprop/features/activities/presentation/view_models/activity_search_view_model.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -151,5 +152,89 @@ void main() {
     expect(notifications, before);
     expect(disposable.results, isEmpty);
     expect(repository.queries, ['jazz']);
+  });
+
+  test('Pagination keeps prior cards, deduplicates IDs and retries the same failed page', () async {
+    var fail = true;
+    repository.onPage = (_, page) async {
+      if (page == 0) {
+        return ActivitySearchPage(
+          activities: activities.take(1),
+          totalCount: 2,
+          nextPage: 1,
+        );
+      }
+      if (fail) throw StateError('Offline');
+      return ActivitySearchPage(activities: activities.take(2), totalCount: 2);
+    };
+    viewModel.updateQuery('jazz');
+    await viewModel.searchNow();
+    expect(viewModel.totalCount, 2);
+    expect(viewModel.results, hasLength(1));
+    await viewModel.loadMore();
+    expect(viewModel.results, hasLength(1));
+    expect(viewModel.pageError, isNotNull);
+    expect(viewModel.hasMore, isTrue);
+    fail = false;
+    await viewModel.loadMore();
+    expect(viewModel.results, activities.take(2));
+    expect(viewModel.hasMore, isFalse);
+    expect(viewModel.pageError, isNull);
+    expect(repository.pages.map((p) => p.page), [0, 1, 1]);
+  });
+
+  test(
+    'Duplicate page taps are ignored and changing query discards late pages',
+    () async {
+      final pending = Completer<ActivitySearchPage>();
+      repository.onPage = (query, page) async {
+        if (page == 1) return pending.future;
+        return ActivitySearchPage(
+          activities: [activities.first],
+          totalCount: 2,
+          nextPage: 1,
+        );
+      };
+      viewModel.updateQuery('old');
+      await viewModel.searchNow();
+      final loading = viewModel.loadMore();
+      await viewModel.loadMore();
+      expect(repository.pages, hasLength(2));
+      expect(viewModel.isLoadingMore, isTrue);
+      viewModel.updateQuery('new');
+      await viewModel.searchNow();
+      pending.complete(
+        ActivitySearchPage(activities: [activities.last], totalCount: 2),
+      );
+      await loading;
+      expect(viewModel.query, 'new');
+      expect(viewModel.results, [activities.first]);
+      expect(viewModel.hasMore, isTrue);
+      expect(viewModel.isLoadingMore, isFalse);
+    },
+  );
+
+  test('Refresh invalidates a pending page and a failed refresh preserves confirmed results', () async {
+    final pending = Completer<ActivitySearchPage>();
+    repository.onPage = (_, page) async => page == 0
+        ? ActivitySearchPage(
+            activities: [activities.first],
+            totalCount: 2,
+            nextPage: 1,
+          )
+        : pending.future;
+    viewModel.updateQuery('jazz');
+    await viewModel.searchNow();
+    final loading = viewModel.loadMore();
+    repository.onPage = (_, _) async => throw StateError('Offline');
+    await viewModel.searchNow();
+    pending.complete(
+      ActivitySearchPage(activities: [activities.last], totalCount: 2),
+    );
+    await loading;
+    expect(viewModel.results, [activities.first]);
+    expect(viewModel.totalCount, 2);
+    expect(viewModel.errorMessage, isNotNull);
+    expect(viewModel.hasSearched, isTrue);
   });
 }

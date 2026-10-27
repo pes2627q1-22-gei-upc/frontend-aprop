@@ -4,6 +4,7 @@ import '../../repositories/discovery_repository.dart';
 import '../view_models/activity_search_view_model.dart';
 import '../view_models/enrollment_view_model.dart';
 import '../widgets/activity_card.dart';
+import '../widgets/activity_list_pagination.dart';
 import '../widgets/discovery_message.dart';
 import '../widgets/enrollment_action.dart';
 
@@ -146,17 +147,17 @@ class _ActivitySearchScreenState extends State<ActivitySearchScreen> {
         child: DiscoveryMessage(
           icon: Icons.search,
           title: 'Quina activitat busques?',
-          description: 'Cerca pel títol, el municipi o la categoria.',
+          description: 'Escriu el nom d’una activitat o un municipi.',
         ),
       );
     }
-    if (_viewModel.isSearching ||
-        (!_viewModel.hasSearched && _viewModel.errorMessage == null)) {
+    if (!_viewModel.hasSearched && _viewModel.errorMessage == null) {
       return const Center(
         child: CircularProgressIndicator(semanticsLabel: 'Cercant activitats'),
       );
     }
-    if (_viewModel.errorMessage case final error?) {
+    if (_viewModel.errorMessage case final error?
+        when !_viewModel.hasSearched) {
       return SingleChildScrollView(
         child: DiscoveryMessage(
           icon: Icons.refresh,
@@ -173,15 +174,25 @@ class _ActivitySearchScreenState extends State<ActivitySearchScreen> {
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         physics: const AlwaysScrollableScrollPhysics(),
         slivers: [
+          if (_viewModel.isSearching)
+            const SliverToBoxAdapter(child: LinearProgressIndicator()),
+          if (_viewModel.errorMessage case final error?)
+            SliverToBoxAdapter(
+              child: DiscoveryMessage(
+                icon: Icons.refresh,
+                title: error,
+                onRetry: _viewModel.searchNow,
+              ),
+            ),
           SliverPadding(
             padding: const EdgeInsets.all(16),
             sliver: SliverToBoxAdapter(
               child: Semantics(
                 liveRegion: true,
                 child: Text(
-                  results.length == 1
+                  _viewModel.totalCount == 1
                       ? '1 activitat trobada'
-                      : '${results.length} activitats trobades',
+                      : '${_viewModel.totalCount} activitats trobades',
                 ),
               ),
             ),
@@ -217,6 +228,15 @@ class _ActivitySearchScreenState extends State<ActivitySearchScreen> {
                     ),
                   );
                 },
+              ),
+            ),
+          if (_viewModel.hasMore)
+            SliverToBoxAdapter(
+              child: ActivityListPagination(
+                loadedCount: results.length,
+                isLoading: _viewModel.isLoadingMore,
+                errorMessage: _viewModel.pageError,
+                onLoadMore: _viewModel.loadMore,
               ),
             ),
         ],
