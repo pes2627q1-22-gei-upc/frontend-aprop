@@ -46,6 +46,7 @@ Future<APropApp> createConfiguredApp() async {
   return APropApp(
     authRepository: authRepository,
     activityRepository: activityRepository,
+    activityCategoryRepository: activityRepository,
     activityMapRepository: HttpActivityMapRepository(apiClient: apiClient),
     enrollmentRepository: HttpEnrollmentRepository(apiClient: apiClient),
     discoveryRepository: HttpDiscoveryRepository(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../features/activities/repositories/activity_category_repository.dart';
 import '../features/activities/repositories/activity_map_repository.dart';
 import '../features/activities/repositories/activity_repository.dart';
 import '../features/activities/repositories/discovery_repository.dart';
@@ -24,6 +25,7 @@ class APropApp extends StatelessWidget {
     this.discoveryRepository,
     this.profileRepository,
     this.profileSettingsRepository,
+    this.activityCategoryRepository,
   });
 
   final AuthRepository authRepository;
@@ -35,6 +37,10 @@ class APropApp extends StatelessWidget {
   final DiscoveryRepository? discoveryRepository;
   final ProfileRepository? profileRepository;
   final ProfileSettingsRepository? profileSettingsRepository;
+
+  /// Categories per crear activitats. Si no hi és, el formulari fa servir la
+  /// llista provisional.
+  final ActivityCategoryRepository? activityCategoryRepository;
 
   @override
   Widget build(BuildContext context) {
@@ -53,6 +59,7 @@ class APropApp extends StatelessWidget {
           discoveryRepository,
           profileRepository,
           profileSettingsRepository,
+          activityCategoryRepository,
         )),
         authRepository: authRepository,
         activityRepository: activityRepository,
@@ -63,6 +70,7 @@ class APropApp extends StatelessWidget {
         discoveryRepository: discoveryRepository,
         profileRepository: profileRepository,
         profileSettingsRepository: profileSettingsRepository,
+        activityCategoryRepository: activityCategoryRepository,
       ),
     );
   }
