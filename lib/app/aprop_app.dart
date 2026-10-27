@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../features/activities/repositories/activity_category_repository.dart';
 import '../features/activities/repositories/activity_map_repository.dart';
 import '../features/activities/repositories/activity_repository.dart';
 import '../features/activities/repositories/discovery_repository.dart';
@@ -26,6 +27,7 @@ class APropApp extends StatelessWidget {
     this.discoveryRepository,
     this.profileRepository,
     this.profileSettingsRepository,
+    this.activityCategoryRepository,
     this.emailAction,
   });
 
@@ -38,6 +40,10 @@ class APropApp extends StatelessWidget {
   final DiscoveryRepository? discoveryRepository;
   final ProfileRepository? profileRepository;
   final ProfileSettingsRepository? profileSettingsRepository;
+
+  /// Categories per crear activitats. Si no hi és, el formulari fa servir la
+  /// llista provisional.
+  final ActivityCategoryRepository? activityCategoryRepository;
 
   /// Acció d'un enllaç dels correus amb què s'ha obert la web (DP-031). Si n'hi
   /// ha, primer es mostra [EmailActionScreen].
@@ -56,6 +62,7 @@ class APropApp extends StatelessWidget {
         discoveryRepository,
         profileRepository,
         profileSettingsRepository,
+        activityCategoryRepository,
       )),
       authRepository: authRepository,
       activityRepository: activityRepository,
@@ -66,6 +73,7 @@ class APropApp extends StatelessWidget {
       discoveryRepository: discoveryRepository,
       profileRepository: profileRepository,
       profileSettingsRepository: profileSettingsRepository,
+      activityCategoryRepository: activityCategoryRepository,
     );
 
     return MaterialApp(

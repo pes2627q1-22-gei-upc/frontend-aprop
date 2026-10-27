@@ -12,6 +12,7 @@ import '../../features/activities/presentation/view_models/activities_map_view_m
 import '../../features/activities/presentation/view_models/activities_view_model.dart';
 import '../../features/activities/presentation/view_models/enrollment_view_model.dart';
 import '../../features/activities/presentation/widgets/enrollment_action.dart';
+import '../../features/activities/repositories/activity_category_repository.dart';
 import '../../features/activities/repositories/activity_details_repository.dart';
 import '../../features/activities/repositories/activity_map_repository.dart';
 import '../../features/activities/repositories/activity_repository.dart';
@@ -45,6 +46,7 @@ class MainShell extends StatefulWidget {
     this.activityMapRepository,
     required this.profileRepository,
     required this.profileSettingsRepository,
+    this.activityCategoryRepository,
   });
 
   final AppUser user;
@@ -56,6 +58,10 @@ class MainShell extends StatefulWidget {
   final DiscoveryRepository discoveryRepository;
   final ProfileRepository profileRepository;
   final ProfileSettingsRepository profileSettingsRepository;
+
+  /// Categories per crear activitats. Si no hi és, el formulari fa servir la
+  /// llista provisional.
+  final ActivityCategoryRepository? activityCategoryRepository;
 
   /// Si hi és, el mapa d'Inici carrega per zona des d'aquí. Si no, mostra les
   /// activitats de la llista.
@@ -223,6 +229,7 @@ class _MainShellState extends State<MainShell> {
         builder: (context) => CreateActivityScreen(
           repository: _activityRepository,
           locationRepository: const DemoLocationRepository(),
+          categoryRepository: widget.activityCategoryRepository,
           creator: ActivityCreator(
             name:
                 _profileViewModel.profile?.displayName ?? widget.user.fullName,
@@ -327,6 +334,8 @@ class _MainShellState extends State<MainShell> {
   // l'activitat, aquesta crida a enroll sobrarà.
   void _showCreatedActivity(NavigatorState navigator, Activity activity) {
     _enrollmentViewModel.enroll(activity.id);
+    // Perquè l'activitat nova surti al mapa sense haver-lo de moure.
+    _activitiesMapViewModel?.refresh();
     _activitiesViewModel.load();
     navigator.pushReplacement<void, void>(
       activityDetailsRoute(
