@@ -43,6 +43,12 @@ abstract interface class AuthRepository {
   /// [authStateChanges].
   Future<void> verifyEmailWithLink(String link);
 
+  /// Confirma el codi (`oobCode`) d'un enllaç de verificació obert a la web de
+  /// l'app. No cal sessió: sovint l'enllaç s'obre al navegador del mòbil, on no
+  /// s'ha entrat. Llança `AuthFailure.invalidVerificationLink` si el codi no és
+  /// vàlid, ha caducat o ja s'ha fet servir.
+  Future<void> confirmEmailVerification(String code);
+
   /// Torna a consultar si l'usuari de la sessió ha verificat el correu.
   /// Retorna `true` si ja l'ha verificat; llavors el canvi també arriba per
   /// [authStateChanges].
