@@ -1,6 +1,9 @@
 import '../../activities/repositories/activity_repository.dart';
 import '../../auth/models/app_user.dart';
 import '../models/user_profile.dart';
+import '../models/profile_capabilities.dart';
+import '../models/profile_avatar.dart';
+import '../../activities/models/activity.dart';
 import '../repositories/profile_repository.dart';
 
 // TODO(DP-032): Replace mockup statistics/attendance with the authenticated API.
@@ -8,6 +11,8 @@ class DemoProfileRepository implements ProfileRepository {
   DemoProfileRepository({required this.activityRepository});
 
   final ActivityRepository activityRepository;
+  @override
+  ProfileCapabilities get capabilities => ProfileCapabilities.demo;
   final _details = <String, ({String biography, String municipality})>{};
 
   @override
@@ -48,10 +53,24 @@ class DemoProfileRepository implements ProfileRepository {
   }
 
   @override
+  Future<List<Activity>> getCreatedActivities(AppUser user) async =>
+      (await getProfile(user)).createdActivities;
+
+  @override
+  Future<UserProfile> uploadAvatar({
+    required AppUser user,
+    required ProfileAvatar avatar,
+  }) async => throw UnsupportedError(
+    'Avatar upload is not available in the demo source',
+  );
+
+  @override
   Future<UserProfile> updateDetails({
     required AppUser user,
     required String biography,
     required String municipality,
+    String? name,
+    String? username,
   }) async {
     final profile = await getProfile(user);
     final updated = profile.withDetails(

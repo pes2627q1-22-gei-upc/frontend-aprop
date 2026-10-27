@@ -9,11 +9,7 @@ import 'package:aprop/features/activities/models/geo_point.dart';
 import 'package:aprop/features/activities/models/new_activity.dart';
 import 'package:aprop/features/assistant/data/http_assistant_repository.dart';
 import 'package:aprop/features/assistant/models/assistant_message.dart';
-import 'package:aprop/features/auth/models/app_user.dart';
 import 'package:aprop/features/notifications/data/http_notification_repository.dart';
-import 'package:aprop/features/profile/data/http_profile_repository.dart';
-import 'package:aprop/features/profile/data/http_profile_settings_repository.dart';
-import 'package:aprop/features/profile/models/profile_settings.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
@@ -227,8 +223,8 @@ void main() {
     });
   });
 
-  group('HttpProfileRepository, Settings & Notifications', () {
-    test('Consulta i edita el perfil, preferències i avisos', () async {
+  group('HttpNotificationRepository', () {
+    test('Consulta i marca els avisos com a llegits', () async {
       final apiClient = ApiClient(
         client: MockClient((request) async {
           if (request.method == 'GET' && request.url.path == '/users/me') {
@@ -243,29 +239,6 @@ void main() {
               'friends-count': 12,
               'show-plans': true,
             });
-          }
-          if (request.method == 'PATCH' && request.url.path == '/users/me') {
-            final body = jsonDecode(request.body) as Map<String, Object?>;
-            return jsonResponse({
-              'id': 7,
-              'username': 'laiasoler',
-              'name': 'Laia Soler',
-              'biography': body['biography'] ?? 'Amant del teatre.',
-              'experience': 340,
-              'level': 2,
-              'rating': 4.8,
-              'friends-count': 12,
-              'show-plans': body['show-plans'] ?? true,
-            });
-          }
-          if (request.url.path == '/users/me/created-events') {
-            return jsonResponse([
-              sampleEventJson(
-                id: 303,
-                title: 'Ruta literària',
-                isOfficial: false,
-              ),
-            ]);
           }
           if (request.url.path == '/notifications/user/7') {
             return jsonResponse([
@@ -288,41 +261,6 @@ void main() {
           return jsonResponse({'error': 'not found'}, 404);
         }),
       );
-
-      const user = AppUser(
-        id: 'uid-1',
-        email: 'laia@aprop.cat',
-        firstName: 'Laia',
-        lastName: 'Soler',
-        emailVerified: true,
-        username: 'laiasoler',
-      );
-
-      final profileRepo = HttpProfileRepository(apiClient: apiClient);
-      final profile = await profileRepo.getProfile(user);
-      expect(profile.displayName, 'Laia Soler');
-      expect(profile.biography, 'Amant del teatre.');
-      expect(profile.friendCount, 12);
-      expect(profile.createdActivities, hasLength(1));
-      expect(profile.createdActivities.single.title, 'Ruta literària');
-
-      final updated = await profileRepo.updateDetails(
-        user: user,
-        biography: 'Teatre i música.',
-        municipality: 'Girona',
-      );
-      expect(updated.biography, 'Teatre i música.');
-      expect(updated.municipality, 'Girona');
-
-      final settingsRepo = HttpProfileSettingsRepository(apiClient: apiClient);
-      final settings = await settingsRepo.getSettings('uid-1');
-      expect(settings.showMyPlans, isTrue);
-      final updatedSettings = await settingsRepo.updatePreference(
-        userId: 'uid-1',
-        preference: ProfilePreference.showMyPlans,
-        enabled: false,
-      );
-      expect(updatedSettings.showMyPlans, isFalse);
 
       final activityRepo = HttpActivityRepository(apiClient: apiClient);
       final notifRepo = HttpNotificationRepository(

@@ -1,37 +1,31 @@
 import '../../../core/network/api_client.dart';
 import '../models/profile_settings.dart';
 import '../repositories/profile_settings_repository.dart';
+import 'profile_api.dart';
 
-/// Implementació de [ProfileSettingsRepository] connectada al backend de Render
-/// (`GET /users/me` i `PATCH /users/me` per a `show-plans`).
 class HttpProfileSettingsRepository implements ProfileSettingsRepository {
-  HttpProfileSettingsRepository({required this.apiClient});
-
+  HttpProfileSettingsRepository({required this.apiClient})
+    : _profiles = ProfileApi(apiClient);
   final ApiClient apiClient;
-  final Map<String, ProfileSettings> _settings = {};
+  final ProfileApi _profiles;
 
   @override
-  Future<ProfileSettings> getSettings(String userId) async {
-    final current = _settings[userId] ?? const ProfileSettings();
-    try {
-      final decoded = await apiClient.getJson('users/me');
-      if (decoded is Map<String, Object?>) {
-        final showPlans =
-            decoded['show-plans'] as bool? ??
-            decoded['plans-visible'] as bool? ??
-            current.showMyPlans;
-        final updated = current.withPreference(
-          ProfilePreference.showMyPlans,
-          showPlans,
-        );
-        _settings[userId] = updated;
-        return updated;
-      }
-    } on ApiException {
-      // Si el perfil encara no existeix al backend, retorna les preferències locals.
+  Set<ProfilePreference> get supportedPreferences => const {
+    ProfilePreference.showMyPlans,
+  };
+  @override
+  bool get persistsPreferences => true;
+
+  ProfileSettings _settings(Map<String, Object?> json) {
+    if (json['show-plans'] case final bool visible) {
+      return ProfileSettings(showMyPlans: visible);
     }
-    return current;
+    throw const FormatException('Expected show-plans setting');
   }
+
+  @override
+  Future<ProfileSettings> getSettings(String userId) async =>
+      _settings((await _profiles.own(userId)).profile);
 
   @override
   Future<ProfileSettings> updatePreference({
@@ -39,15 +33,17 @@ class HttpProfileSettingsRepository implements ProfileSettingsRepository {
     required ProfilePreference preference,
     required bool enabled,
   }) async {
-    if (preference == ProfilePreference.showMyPlans) {
-      await apiClient.patchJson(
-        'users/me',
-        body: <String, Object?>{'show-plans': enabled},
-      );
+    // TODO(DP-040): Only show-plans exists in PATCH /users/me. Never pretend
+    // that a notification toggle was saved by storing it in a local map.
+    if (!supportedPreferences.contains(preference)) {
+      throw UnsupportedError('Preference has no server endpoint');
     }
-    final current = _settings[userId] ?? const ProfileSettings();
-    final updated = current.withPreference(preference, enabled);
-    _settings[userId] = updated;
-    return updated;
+    final session = await _profiles.own(userId);
+    final decoded = await apiClient.patchJson(
+      'users/me',
+      headers: session.headers,
+      body: {'show-plans': enabled},
+    );
+    return _settings(validateOwnProfile(decoded, userId));
   }
 }

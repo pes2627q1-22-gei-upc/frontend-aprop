@@ -421,6 +421,18 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Qui decideix:** equip frontend/backend; demanar multiselecció i ordre estable al servidor, filtres/categories al mapa i confirmar la taxonomia visible. Guia: `docs/inici-server-filters.md`. Render ha esgotat 15 s a `/categories`; verificació autenticada pendent. No es canvia cap fitxer del backend.
 - **Resolució:**
 
+### DP-040 · Perfil HTTP, capacitats i camps sense contracte
+- **Estat:** oberta · 2026-10-27 · Taiga #230 Frontend perfil.
+- **Context:** ampliació autoritzada del perfil propi, només frontend. Referència: handlers/models/services de `api-aprop` a `origin/develop@a67ae9e`, llegits sense modificar-los. DP-039 es reserva per a la integració d’Avisos publicada a la branca separada `feature/notifications-backend` (`8089a9d`); no es reutilitza.
+- **Disponible:** `GET /users/me`, `PATCH /users/me` (nom/username/biografia/`show-plans`), `POST /users/me/avatar` i `GET /users/me/created-events`. Identitat validada amb UUID real i Firebase UID del compte; bearer capturat per operació. Sense `X-User-ID` ni dades Auth/Demo substituint errors.
+- **Adaptació provisional:** metadades i creades tenen càrregues/errors independents. `plans-count` s’etiqueta «Plans», no assistències confirmades; `completed-plans-count` només compta inscripcions acabades i no omple «Plans fets». HTTP inicia «Creats per mi»; historial confirmat pendent. L’XP s’ensenya tal com arriba i el FK `level` es conserva sense assignar-lo a les cinc insígnies/llindars del mockup. Demo conserva els seus exemples.
+- **Camps pendents:** municipi, historial/valoracions de plans amb assistència confirmada, metadades dels nivells i preferències de notificació. Només `show-plans` es desa al servidor; els quatre interruptors d’avisos queden pendents. Social fora del Sprint 1 segons l’usuari. Test d’interessos (amb endpoints propis), Calendar, eliminació, idioma/tema i bloquejos requereixen les seves històries; no s’integren aquí.
+- **Foto:** necessitat concreta de seleccionar un fitxer per al multipart existent; s’afegeix `image_picker ^1.2.4` (plugin oficial Flutter), encapsulat darrere `ProfileImagePicker`. Només galeria; text d’accés a fotos a iOS, sense càmera/micròfon. JPEG/PNG/WebP segons S3 del backend. Màxim de 5 MiB comprovat sobre el multipart complet, abans d’enviar. Android recupera l’estat d’una selecció interrompuda però demana triar de nou: mai puja un fitxer antic automàticament.
+- **Validació:** nom no buit ≤100 bytes UTF-8, biografia ≤500 bytes UTF-8 i username `[A-Za-z0-9_]{3,30}`. HTTP 409 mostra nom ocupat; només s’aplica la resposta confirmada. AppBar, compartir i crear activitat consumeixen el nom/username confirmats del perfil.
+- **Qui decideix:** equip frontend/backend per tancar les diferències amb els mockups; cal prova autenticada a Render, persistència entre execucions, configuració/accessibilitat S3 i galeria en Android/iOS físic. Guia i peticions concretes: `docs/profile-backend.md`.
+- **Relació:** actualitza parcialment DP-032 i DP-033; no les dona per resoltes ni completa les històries socials/gamificació.
+- **Resolució:**
+
 ## Resoltes
 
 ### DP-036 · Format UUID de `X-User-ID` i sincronització d'UID de Firebase a Render
