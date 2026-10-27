@@ -53,7 +53,11 @@ Perfil propi i Configuració segueixen `perfil_1_principal.png` i `perfil_2_conf
 
 Taiga #96 implementa Descobreix i la cerca d'activitats amb les targetes/inscripcions existents, el navegador de la secció i estats complets. La selecció demo no és personalitzada: subtítol «Una selecció per començar» i accés «Cerca activitats». «Persones» continua desactivat amb una explicació fins a tenir-ne l'abast/contracte. No s'inventen perfils ni recomanacions de producció (DP-024); detalls a `docs/discovery.md`.
 
-Taiga #86 implementa Avisos amb repositori de demostració: filtres, ordre/agrupació per data, lectura confirmada, respostes a sol·licituds i ruta al detall. El perfil es mostra com a pendent fins que s'injecti un callback real. Les inicials substitueixen avatars no disponibles. En pantalles estretes o amb text ampliat, els quatre filtres es desplacen horitzontalment sense truncar. Lliurament de notificacions, recordatoris programats i amistats reals no estan integrats (DP-023); detalls a `docs/notifications.md`.
+Ampliació HTTP de #86: les accions socials del mockup són del projecte final i queden fora de l’Sprint 1
+(confirmat per l’usuari). El servidor actual només informa una categoria Social; es mostra un missatge
+genèric sense inventar accions. Tipus desconeguts es conserven a «Tots» amb etiqueta «Avís». Activitat
+eliminada: l’avís continua llegible sense un enllaç mort; error temporal del context: es pot intentar
+obrir la fitxa. Capçalera, filtres, paleta i navegació es conserven. Vegeu DP-039 i `notifications-backend.md`.
 
 Accés real amb Firebase a Android i web (correu + contrasenya i Google, amb tria del nom d'usuari al primer accés; DP-025, DP-026; `docs/firebase-auth.md`). Implementat amb dades de demostració: llista
 d'Inici amb capçalera, i fitxa (#75). Els controls pendents es mostren desactivats. Detall a `README.md`.

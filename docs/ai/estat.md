@@ -4,38 +4,36 @@
 
 ## Sprint
 
-- Sprint 1. Dates i criteris detallats de Taiga pendents de confirmar.
-- Prioritat actual: integrar l’MVP amb els endpoints reals; només es modifica el frontend.
-- Social fora d’aquest sprint segons l’usuari.
+- Sprint 1 · només frontend. Social fora d’aquest sprint segons l’usuari.
+- Prioritat: resoldre la revisió i els conflictes de la PR #31 abans de continuar Descobreix.
 
 ## En curs
 
 | Taiga | Tasca | Branca | Estat |
 |---|---|---|---|
-| #230 | Integració HTTP de Perfil | `feature/profile-backend` | Implementada; 440 proves, analyze, APK/web i revisió tècnica correctes; sense commit/push |
-| #86 | Integració HTTP d’Avisos | `feature/notifications-backend` | Publicada a `8089a9d`; PR separada, pendent adaptar al bearer-only del nou develop |
+| #86 | Integració HTTP d’Avisos, PR #31 | `feature/notifications-backend` | Conflictes resolts; 481 proves, analyze, APK/web i revisió correctes; merge preparat sense commit/push |
 
-## Base i abast actual
+## Base i canvis
 
-- Perfil parteix d’`origin/develop@70ccb27` (inclou PR #25/#27, CI #26/#28 i inscripcions #29).
-- Backend consultat fins a `origin/develop@a67ae9e`; checkout/fitxers conservats sense canvis.
-- Perfil: GET/PATCH propi, avatar de galeria, creades amb error separat i `show-plans` persistent.
-- Sense dades Auth/Demo substituint errors, UUID inventats, assistències deduïdes o nivells ficticis.
-- Demo conserva els exemples; les funcionalitats sense contracte s’indiquen pendents en HTTP.
-- Arquitectura i flux: `docs/profile-backend.md`; adaptacions registrades a DP-040.
+- HEAD publicat `8089a9d`; s’integra `origin/develop@572612a` amb `git merge --no-commit`.
+- El company aprova implementació/tests i demana sincronitzar develop (comentari copiat per l’usuari).
+- Conflictes: estat viu, decisions pendents i prova multi-repositori; es conserva la feina de les dues branques.
+- Autenticació d’Avisos adaptada a bearer-only; no es restaura `X-User-ID` ni UUID sintètics.
+- DP-039 i DP-040 preservades; DP-036 continua resolta; DP-031 conserva la verificació per enllaç web.
+- Perfil HTTP ja fusionat a develop (PR #32); creació backend (PR #30) i verificació web (PR #33) també.
+- Cap canvi al backend, credencials, desplegament ni branca protegida.
 
-## Verificació (2026-10-27)
+## Verificació
 
-- Format correcte i `flutter analyze` sense incidències; 440 proves superades (base: 419).
-- `flutter build apk --debug` i `flutter build web` correctes.
-- Captures reals revisades: `PES/output/frontend/profile-backend-{principal,edicio,configuracio}.png`.
-- Revisió vigilant-decisions sense bloquejos; cap commit, push ni canvi al backend.
-- Firebase configurat localment; fitxers ignorats, no versionar credencials/configuració local.
+- Format correcte (234 fitxers); analitzador sense incidències; 72 proves dirigides i 481 globals superades.
+- APK debug i web compilats; revisió sense bloquejos. Cap entrada U ni marcador de conflicte.
+- No es pot certificar la CI remota sense accés autenticat a GitHub; reproduïm els passos locals.
+- Firebase local configurat i ignorat: no versionar configuracions ni secrets.
 
 ## Pendents / següents passos
 
-1. Prova autenticada real de Perfil: persistència, errors, S3 i galeria en Android físic; iOS Auth continua Demo.
-2. Revisió humana, commit amb ID real, PR cap a develop i CI; no fusionar automàticament.
-3. Backend: historial confirmat/valoracions, nivells, municipi i preferències d’avisos (DP-040).
-4. Continuar Descobreix/test d’interessos en tasques separades; mapa/filtres encara tenen límits DP-038.
-5. Auth, assistent, creació i serveis externs: contrastar les DP obertes abans de donar l’MVP per complet.
+1. Usuari revisa, fa el commit del merge i el push a la mateixa branca: actualitza la PR #31 existent.
+2. Esperar CI verda i aprovació humana; no crear una PR duplicada ni fusionar automàticament.
+3. Prova real d’Avisos: identitat/destinatari, lectura persistent, disponibilitat i zona horària (DP-039).
+4. Prova real de Perfil, galeria i S3; límits de contracte a DP-040.
+5. Descobreix: cerca i populars disponibles; recomanacions personalitzades/test en tasques separades (DP-024).

@@ -14,6 +14,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 
+import '../notifications/backend_notification_fixture.dart';
+
 void main() {
   http.Response jsonResponse(Object? body, [int status = 200]) =>
       http.Response.bytes(
@@ -311,32 +313,26 @@ void main() {
 
   group('HttpNotificationRepository', () {
     test('Consulta i marca els avisos com a llegits', () async {
+      final notice = {
+        ...backendNotification(9, event: 101),
+        'notification-date': '2026-10-25T10:00:00Z',
+      };
       final apiClient = ApiClient(
+        idToken: () async => 'test-token',
         client: MockClient((request) async {
+          expect(request.headers['Authorization'], 'Bearer test-token');
+          expect(request.headers.containsKey('X-User-ID'), isFalse);
           if (request.method == 'GET' && request.url.path == '/users/me') {
-            return jsonResponse({
-              'id': 7,
-              'username': 'laiasoler',
-              'name': 'Laia Soler',
-              'biography': 'Amant del teatre.',
-              'experience': 340,
-              'level': 2,
-              'rating': 4.8,
-              'friends-count': 12,
-              'show-plans': true,
-            });
+            return jsonResponse(backendOwnProfile(firebaseId: 'uid-1'));
           }
-          if (request.url.path == '/notifications/user/7') {
-            return jsonResponse([
-              {
-                'id': 9,
-                'user-id': 7,
-                'notification-date': '2026-10-25T10:00:00Z',
-                'event': 101,
-                'type': 1,
-                'read': false,
-              },
-            ]);
+          if (request.url.path == '/notifications/user/$backendUserId') {
+            return jsonResponse([notice]);
+          }
+          if (request.url.path == '/notificationtypes') {
+            return jsonResponse(backendNotificationTypes);
+          }
+          if (request.url.path == '/notifications/9') {
+            return jsonResponse(notice);
           }
           if (request.url.path == '/events/101') {
             return jsonResponse(sampleEventJson(id: 101));
@@ -347,7 +343,7 @@ void main() {
           return jsonResponse({'error': 'not found'}, 404);
         }),
       );
-
+      addTearDown(apiClient.close);
       final activityRepo = HttpActivityRepository(apiClient: apiClient);
       final notifRepo = HttpNotificationRepository(
         apiClient: apiClient,
