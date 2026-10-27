@@ -1,5 +1,7 @@
 # Perfil propi i Configuració
 
+> **Estat actual (2026-10-27):** la [guia d’integració HTTP](profile-backend.md) substitueix els límits Demo d’aquesta descripció inicial. Nom, username, biografia, avatar, creades i `show-plans` ja tenen adaptador real. La biografia admet 500 bytes UTF-8 segons el backend. Les seccions següents documenten els mockups i la implementació original; no són una declaració que tota la configuració ja estigui integrada.
+
 ## Abast i referències
 
 L'usuari aporta `perfil_1_principal.png` i `perfil_2_configuracio.png` i autoritza implementar-ne el frontend. Les còpies originals de referència són a `PES/output/mockup/aprop-perfil-principal-v2.png` i `aprop-perfil-configuracio-v2.png`. El contingut coincideix amb les figures 18–19 de la Incepció 2. L'usuari confirma la tasca **#230 Frontend perfil**; els criteris detallats de Taiga continuen pendents de contrastar.

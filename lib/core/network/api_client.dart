@@ -5,6 +5,11 @@ import 'package:http/http.dart' as http;
 
 import '../config/api_config.dart';
 
+/// The encoded multipart body exceeds an endpoint's complete request limit.
+class MultipartBodyTooLargeException implements Exception {
+  const MultipartBodyTooLargeException();
+}
+
 /// Excepció estandarditzada per a les peticions HTTP al backend d'AProp!.
 class ApiException extends StateError implements Exception {
   ApiException(
@@ -214,16 +219,21 @@ class ApiClient {
     required List<int> bytes,
     required String filename,
     Map<String, String>? fields,
+    Map<String, String>? headers,
+    int? maximumBodyBytes,
   }) async {
     final uri = resolveUri(path);
-    final headers = await buildHeaders();
+    final resolvedHeaders = await buildHeaders(extraHeaders: headers);
     final request = http.MultipartRequest('POST', uri)
-      ..headers.addAll(headers)
+      ..headers.addAll(resolvedHeaders)
       ..files.add(
         http.MultipartFile.fromBytes(fieldName, bytes, filename: filename),
       );
     if (fields != null) {
       request.fields.addAll(fields);
+    }
+    if (maximumBodyBytes != null && request.contentLength > maximumBodyBytes) {
+      throw const MultipartBodyTooLargeException();
     }
 
     final http.Response response;

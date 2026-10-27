@@ -27,6 +27,7 @@ import '../../features/notifications/repositories/notification_repository.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
 import '../../features/profile/presentation/screens/profile_settings_screen.dart';
 import '../../features/profile/presentation/view_models/profile_view_model.dart';
+import '../../features/profile/data/gallery_profile_image_picker.dart';
 import '../../features/profile/repositories/profile_repository.dart';
 import '../../features/profile/repositories/profile_settings_repository.dart';
 import 'activity_details_route.dart';
@@ -109,7 +110,11 @@ class _MainShellState extends State<MainShell> {
     _profileViewModel = ProfileViewModel(
       user: widget.user,
       repository: widget.profileRepository,
+      imagePicker: widget.profileRepository.capabilities.uploadAvatar
+          ? GalleryProfileImagePicker()
+          : null,
     )..load();
+    _profileViewModel.checkInterruptedAvatarSelection();
     _enrollmentViewModel.load();
 
     _activitiesViewModel.load(); //mientras espera ésto flutter dibuja un indicador de carga. Cuando termina, el ViewModel notifica a la pantalla y ésta se redibuja con la lista de actividades.
@@ -219,7 +224,8 @@ class _MainShellState extends State<MainShell> {
           repository: _activityRepository,
           locationRepository: const DemoLocationRepository(),
           creator: ActivityCreator(
-            name: widget.user.fullName,
+            name:
+                _profileViewModel.profile?.displayName ?? widget.user.fullName,
             userId: widget.user.id,
             isFriend: false,
           ),
@@ -247,7 +253,8 @@ class _MainShellState extends State<MainShell> {
 
   // TODO(DP-032): Share a real public link when a profile route is agreed.
   void _shareOwnProfile() {
-    final username = widget.user.username;
+    final username =
+        _profileViewModel.profile?.username ?? widget.user.username;
     if (username == null || username.isEmpty) return;
     var copying = false;
     showDialog<void>(

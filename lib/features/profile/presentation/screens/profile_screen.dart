@@ -25,7 +25,9 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  int _selectedTab = 0;
+  int? _chosenTab;
+  int get _selectedTab =>
+      _chosenTab ?? (widget.viewModel.capabilities.completedPlans ? 0 : 1);
 
   void _edit() {
     widget.viewModel.clearSaveError();
@@ -42,12 +44,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(
-      title: Text(
-        widget.viewModel.user.username ?? 'Perfil',
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: Theme.of(context).textTheme.titleLarge
-            ?.copyWith(fontWeight: FontWeight.bold),
+      title: ListenableBuilder(
+        listenable: widget.viewModel,
+        builder: (context, _) => Text(
+          widget.viewModel.profile?.username ??
+              widget.viewModel.user.username ??
+              'Perfil',
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: Theme.of(context).textTheme.titleLarge
+              ?.copyWith(fontWeight: FontWeight.bold),
+        ),
       ),
       actions: [
         const Tooltip(
@@ -122,7 +129,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ? null
                               : _edit,
                           onShare: widget.onSharePressed,
+                          showAvatarAction: model.canChangeAvatar,
+                          onChangeAvatar: model.isLoading || model.isSaving
+                              ? null
+                              : model.changeAvatar,
+                          isChangingAvatar: model.isChangingAvatar,
                         ),
+                        if (model.avatarError case final error?) ...[
+                          const SizedBox(height: 12),
+                          Semantics(
+                            liveRegion: true,
+                            child: Text(
+                              error,
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.error,
+                              ),
+                            ),
+                          ),
+                        ],
                         const SizedBox(height: 24),
                         ProfileProgressSection(progress: profile.progress),
                       ],
@@ -134,7 +158,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     length: 2,
                     initialIndex: _selectedTab,
                     child: TabBar(
-                      onTap: (index) => setState(() => _selectedTab = index),
+                      onTap: (index) => setState(() => _chosenTab = index),
                       tabs: [
                         for (final tab in [
                           (Icons.event_available_outlined, 'Plans fets'),
@@ -163,7 +187,33 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                   ),
                 ),
-                if (activities.isEmpty)
+                if (_selectedTab == 1 && model.isLoadingCreated)
+                  const SliverToBoxAdapter(
+                    child: Padding(
+                      padding: EdgeInsets.all(16),
+                      child: LinearProgressIndicator(
+                        semanticsLabel: 'Carregant les activitats creades',
+                      ),
+                    ),
+                  ),
+                if (model.createdError case final error? when _selectedTab == 1)
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: Column(
+                        children: [
+                          Semantics(liveRegion: true, child: Text(error)),
+                          TextButton(
+                            onPressed: model.loadCreatedActivities,
+                            child: const Text('Tornar-ho a provar'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                if (activities.isEmpty &&
+                    !(_selectedTab == 1 &&
+                        (model.isLoadingCreated || model.createdError != null)))
                   SliverToBoxAdapter(
                     child: Padding(
                       padding: const EdgeInsets.all(32),
@@ -179,14 +229,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           const SizedBox(height: 12),
                           Text(
                             _selectedTab == 0
-                                ? 'Encara no tens plans fets'
+                                ? model.capabilities.completedPlans
+                                      ? 'Encara no tens plans fets'
+                                      : 'Historial d’assistència disponible properament'
                                 : 'Encara no has creat cap activitat',
                             textAlign: TextAlign.center,
                           ),
                           const SizedBox(height: 8),
                           Text(
                             _selectedTab == 0
-                                ? 'Aquí veuràs les activitats amb assistència confirmada.'
+                                ? model.capabilities.completedPlans
+                                      ? 'Aquí veuràs les activitats amb assistència confirmada.'
+                                      : 'Pots consultar els plans guardats a l’Agenda.'
                                 : 'Pots crear-ne una des d’Inici.',
                             textAlign: TextAlign.center,
                           ),
@@ -194,7 +248,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                     ),
                   )
-                else
+                else if (activities.isNotEmpty)
                   SliverPadding(
                     padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
                     sliver: SliverLayoutBuilder(

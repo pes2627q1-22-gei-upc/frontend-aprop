@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/widgets/content_image.dart';
+
 import '../../../activities/models/activity.dart';
 
 class ProfileActivityTile extends StatelessWidget {
@@ -32,12 +34,11 @@ class ProfileActivityTile extends StatelessWidget {
             child: Stack(
               fit: StackFit.expand,
               children: [
-                Image.asset(
-                  activity.imageAsset,
-                  fit: BoxFit.cover,
+                ContentImage(
+                  url: activity.imageUrl,
+                  asset: activity.imageAsset,
+                  label: activity.title,
                   excludeFromSemantics: true,
-                  errorBuilder: (_, _, _) =>
-                      const Center(child: Icon(Icons.image_outlined)),
                 ),
                 DecoratedBox(
                   decoration: BoxDecoration(

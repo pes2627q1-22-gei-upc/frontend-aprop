@@ -20,12 +20,14 @@ class ProfileProgress {
     required this.level,
     required this.experience,
     this.nextLevelTarget,
+    this.serverLevel,
   }) : assert(experience >= 0),
        assert(nextLevelTarget == null || nextLevelTarget > 0);
 
-  final ProfileLevel level;
+  final ProfileLevel? level;
   final int experience;
   final int? nextLevelTarget;
+  final int? serverLevel;
 
   double get fraction {
     if (nextLevelTarget case final target?) {
@@ -49,6 +51,8 @@ class UserProfile {
     this.biography = '',
     this.municipality = '',
     this.avatarAsset,
+    this.avatarUrl,
+    this.planCount,
     this.friendCount = 0,
     this.organizerRating,
     Iterable<CompletedPlan> completedPlans = const [],
@@ -62,6 +66,9 @@ class UserProfile {
   final String biography;
   final String municipality;
   final String? avatarAsset;
+  final String? avatarUrl;
+  final int? planCount;
+  int get displayedPlanCount => planCount ?? completedPlans.length;
   final int friendCount;
 
   /// Feedback received as an organizer; not the user's ratings of attended plans.
@@ -73,14 +80,18 @@ class UserProfile {
   UserProfile withDetails({
     required String biography,
     required String municipality,
+    String? name,
+    String? username,
   }) {
     return UserProfile(
       userId: userId,
-      displayName: displayName,
-      username: username,
+      displayName: name ?? displayName,
+      username: username ?? this.username,
       biography: biography,
       municipality: municipality,
       avatarAsset: avatarAsset,
+      avatarUrl: avatarUrl,
+      planCount: planCount,
       friendCount: friendCount,
       organizerRating: organizerRating,
       progress: progress,
@@ -88,4 +99,21 @@ class UserProfile {
       createdActivities: createdActivities,
     );
   }
+
+  UserProfile withCreatedActivities(Iterable<Activity> activities) =>
+      UserProfile(
+        userId: userId,
+        displayName: displayName,
+        progress: progress,
+        username: username,
+        biography: biography,
+        municipality: municipality,
+        avatarAsset: avatarAsset,
+        avatarUrl: avatarUrl,
+        planCount: planCount,
+        friendCount: friendCount,
+        organizerRating: organizerRating,
+        completedPlans: completedPlans,
+        createdActivities: activities,
+      );
 }

@@ -181,10 +181,12 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                     ),
                   ],
                 ),
-                const Padding(
+                Padding(
                   padding: EdgeInsets.only(bottom: 16),
                   child: Text(
-                    'Les preferències es conserven durant aquesta sessió de l’app.',
+                    model.persistsPreferences
+                        ? 'Els canvis disponibles es desen al teu compte.'
+                        : 'Les preferències es conserven durant aquesta sessió de l’app.',
                   ),
                 ),
               ],
@@ -233,6 +235,13 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
     String? subtitle,
   ) {
     final model = _viewModel;
+    if (!model.supports(preference)) {
+      return PendingSettingsTile(
+        title: title,
+        icon: icon,
+        subtitle: 'Disponible properament',
+      );
+    }
     return SwitchListTile.adaptive(
       key: ValueKey('profile-preference-${preference.name}'),
       secondary: SettingsIcon(icon: icon),

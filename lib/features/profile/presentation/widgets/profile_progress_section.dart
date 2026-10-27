@@ -14,11 +14,20 @@ class ProfileProgressSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final palette = theme.extension<ProfilePalette>()!;
+    if (progress.level == null) {
+      return Align(
+        alignment: Alignment.centerLeft,
+        child: Text(
+          '${progress.experience} XP',
+          style: theme.textTheme.titleSmall,
+        ),
+      );
+    }
     final levels = ProfileLevel.values;
     final remaining = progress.remainingExperience;
     final next = progress.level == ProfileLevel.ambassador
         ? null
-        : levels[progress.level.index + 1];
+        : levels[progress.level!.index + 1];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -36,7 +45,10 @@ class ProfileProgressSection extends StatelessWidget {
                   for (final level in levels)
                     SizedBox(
                       width: width,
-                      child: _LevelBadge(level: level, current: progress.level),
+                      child: _LevelBadge(
+                        level: level,
+                        current: progress.level!,
+                      ),
                     ),
                 ],
               ),
