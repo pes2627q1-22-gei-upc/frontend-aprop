@@ -1,0 +1,8 @@
+# Els scripts s'executen a bash/WSL: han de tenir sempre finals de línia LF.
+*.sh text eol=lf
+*.py text eol=lf
+.agents/** text eol=lf
+.cursor/** text eol=lf
+docs/ai/** text eol=lf
+AGENTS.md text eol=lf
+*.pdf binary
