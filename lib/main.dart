@@ -18,6 +18,7 @@ import 'features/auth/data/http_user_sync_repository.dart';
 import 'features/auth/models/email_action.dart';
 import 'features/auth/repositories/auth_repository.dart';
 import 'features/auth/repositories/user_sync_repository.dart';
+import 'features/interest_test/data/http_interest_test_repository.dart';
 import 'features/notifications/data/http_notification_repository.dart';
 import 'features/profile/data/http_profile_repository.dart';
 import 'features/profile/data/http_profile_settings_repository.dart';
@@ -65,6 +66,7 @@ Future<APropApp> createConfiguredApp() async {
     profileSettingsRepository: HttpProfileSettingsRepository(
       apiClient: apiClient,
     ),
+    interestTestRepository: HttpInterestTestRepository(apiClient: apiClient),
   );
 }
 

@@ -474,6 +474,16 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Qui decideix:** equip frontend/backend per ordre global, preferències incompletes, vigència temporal i semàntica de cerca. Guia i missatge de traspàs a `docs/discovery-backend.md`. Cal prova autenticada a Render i en Android/web; no s’ha modificat ni executat el backend.
 - **Resolució:**
 
+### DP-042 · Test d’interessos: «m’agrada» no inscriu i accés només des de Configuració
+- **Estat:** oberta
+- **Obert per:** 2026-10-28 · agent (Claude Code, Opus 5.5) · Taiga #99
+- **Context:** `lib/features/interest_test/`, `profile_settings_screen.dart`, `main_shell.dart`; backend `GET/POST /preferences/test` (`api-aprop` `origin/develop`).
+- **Dubte:** la petició diu «si llisca a la dreta li agrada i *se lo apuntamos*». S’ha interpretat com a registrar la resposta (`likes: true`), no com a inscriure l’usuari a l’activitat: el test mostra fins a 25 activitats (ordenades per ID, potser ja passades) i apuntar-se és una intenció d’assistir. Tampoc no està decidit si el test s’ha de mostrar en el primer accés (mockups) ni si cal refrescar «Per a tu» en acabar.
+- **Opcions:** A) només registrar el gust (fet) · B) a més, inscriure a les activitats que agraden · C) oferir «Apuntar-m’hi» a la targeta, separat del gust.
+- **Provisionalment:** A. Les respostes s’envien totes juntes en acabar (el backend només accepta el lot sencer); si falla, es conserven i es pot reintentar. Accés des de Configuració › «Tornar a fer el test d’interessos». `TODO(DP-042)` a `interest_test_screen.dart`.
+- **Qui decideix:** equip / PO
+- **Resolució:**
+
 ## Resoltes
 
 ### DP-036 · Format UUID de `X-User-ID` i sincronització d'UID de Firebase a Render

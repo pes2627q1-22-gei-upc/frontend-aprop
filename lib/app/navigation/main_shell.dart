@@ -23,6 +23,8 @@ import '../../features/assistant/presentation/screens/assistant_screen.dart';
 import '../../features/assistant/presentation/view_models/assistant_view_model.dart';
 import '../../features/assistant/repositories/assistant_repository.dart';
 import '../../features/auth/models/app_user.dart';
+import '../../features/interest_test/presentation/screens/interest_test_screen.dart';
+import '../../features/interest_test/repositories/interest_test_repository.dart';
 import '../../features/notifications/presentation/screens/notifications_screen.dart';
 import '../../features/notifications/repositories/notification_repository.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
@@ -46,6 +48,7 @@ class MainShell extends StatefulWidget {
     this.activityMapRepository,
     required this.profileRepository,
     required this.profileSettingsRepository,
+    this.interestTestRepository,
     this.activityCategoryRepository,
   });
 
@@ -58,6 +61,9 @@ class MainShell extends StatefulWidget {
   final DiscoveryRepository discoveryRepository;
   final ProfileRepository profileRepository;
   final ProfileSettingsRepository profileSettingsRepository;
+
+  /// Si no hi és, «Tornar a fer el test d’interessos» queda pendent.
+  final InterestTestRepository? interestTestRepository;
 
   /// Categories per crear activitats. Si no hi és, el formulari fa servir la
   /// llista provisional.
@@ -253,6 +259,18 @@ class _MainShellState extends State<MainShell> {
           repository: widget.profileSettingsRepository,
           onSignOut: widget.onSignOut,
           onBack: () => Navigator.of(context).pop(),
+          onOpenInterestTest: switch (widget.interestTestRepository) {
+            final repository? => () => Navigator.of(context).push<void>(
+              MaterialPageRoute<void>(
+                settings: const RouteSettings(name: '/profile/interest-test'),
+                builder: (context) => InterestTestScreen(
+                  repository: repository,
+                  onBack: () => Navigator.of(context).pop(),
+                ),
+              ),
+            ),
+            null => null,
+          },
         ),
       ),
     );

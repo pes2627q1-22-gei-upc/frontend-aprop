@@ -11,7 +11,7 @@
 
 | Taiga | Tasca | Branca | Estat |
 |---|---|---|---|
-| #96 | Descobreix HTTP i cerca paginada | `feature/discovery-backend` | Implementada; 497 proves, analyze, APK/web i revisió correctes; sense commit/push |
+| #99 | Test d’interessos (lliscar dreta/esquerra) des de Configuració | `feature/test_interesos` | Implementat; 504 proves i analyze correctes; sense provar amb Render; sense commit (DP-042) |
 
 ## Base i abast
 
@@ -36,6 +36,6 @@
 
 1. Revisió humana, commit #96, PR a develop i CI; no fusionar automàticament.
 2. Provar Render amb comptes amb/sense gustos i persistència; contrastar desplegament dels endpoints nous.
-3. Frontend del test d’interessos i accés per repetir-lo: història separada, endpoints disponibles.
+3. Test d’interessos: revisar DP-042 (gust ≠ inscripció, test al primer accés) i provar-lo amb Render.
 4. Repàs global de les 5 seccions, dades/inscripcions/avisos/imatges i errors amb la versió real del servidor.
 5. Backend: ranking global, pesos incomplets, activitats futures i ordre estable (DP-041); revisar DP-039/040.
