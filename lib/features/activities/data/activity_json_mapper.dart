@@ -79,7 +79,7 @@ Activity activityFromJson(Map<String, Object?> json) {
 /// Converteix un [NewActivity] al cos JSON en `kebab-case` que espera `POST /events`.
 // TODO(DP-017): el preu, la imatge i l'hora no es desen al backend.
 Map<String, Object?> newActivityToJson(NewActivity activity) {
-  final isoDate = _wallClockAsUtc(activity.startsAt).toIso8601String();
+  final startDate = _wallClockAsUtc(activity.startsAt).toIso8601String();
   return <String, Object?>{
     'title': activity.title,
     'description': activity.description,
@@ -90,8 +90,12 @@ Map<String, Object?> newActivityToJson(NewActivity activity) {
     // En llegir-la, lloc i adreça s'ajunten com a indicacions: si totes dues
     // portessin el mateix text, sortiria repetit.
     'address': activity.directions ?? '',
-    'start-date': isoDate,
-    'end-date': isoDate,
+    'start-date': startDate,
+    // Sense data de fi, l'activitat acaba el mateix dia que comença.
+    'end-date': switch (activity.endsAt) {
+      final endsAt? => _wallClockAsUtc(endsAt).toIso8601String(),
+      null => startDate,
+    },
     // (0, 0) vol dir sense ubicació.
     'latitude': activity.location?.latitude ?? 0.0,
     'longitude': activity.location?.longitude ?? 0.0,

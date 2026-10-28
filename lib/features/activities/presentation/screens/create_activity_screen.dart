@@ -91,6 +91,23 @@ class _CreateActivityScreenState extends State<CreateActivityScreen> {
     if (startsAt != null) _viewModel.setStartsAt(startsAt);
   }
 
+  Future<void> _pickEndsAt() async {
+    final startsAt = _viewModel.startsAt;
+    if (startsAt == null) return;
+    FocusScope.of(context).unfocus();
+
+    final endsAt = _viewModel.endsAt;
+    final picked = await showEndDateTimeSheet(
+      context,
+      // Per defecte, dues hores després de l'inici.
+      initial: endsAt != null && endsAt.isAfter(startsAt)
+          ? endsAt
+          : startsAt.add(const Duration(hours: 2)),
+      startsAt: startsAt,
+    );
+    if (picked != null) _viewModel.setEndsAt(picked);
+  }
+
   String _locationCaption() {
     if (_viewModel.location == null) {
       return 'Escriu el municipi o toca el mapa per marcar el lloc.';
@@ -128,6 +145,7 @@ class _CreateActivityScreenState extends State<CreateActivityScreen> {
           builder: (context, child) {
             final errorMessage = _viewModel.errorMessage;
             final startsAt = _viewModel.startsAt;
+            final endsAt = _viewModel.endsAt;
 
             return ListView(
               padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
@@ -240,20 +258,49 @@ class _CreateActivityScreenState extends State<CreateActivityScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
+                InkWell(
+                  onTap: startsAt == null ? null : _pickEndsAt,
+                  borderRadius: BorderRadius.circular(14),
+                  child: InputDecorator(
+                    decoration: InputDecoration(
+                      labelText: 'Data i hora de fi (opcional)',
+                      prefixIcon: const Icon(Icons.event_available_outlined),
+                      suffixIcon: endsAt == null
+                          ? null
+                          : IconButton(
+                              onPressed: () => _viewModel.setEndsAt(null),
+                              tooltip: 'Treu la data de fi',
+                              icon: const Icon(Icons.close),
+                            ),
+                      enabled: startsAt != null,
+                      errorText: _viewModel.fieldError(
+                        CreateActivityField.endsAt,
+                      ),
+                    ),
+                    child: Text(
+                      switch ((startsAt, endsAt)) {
+                        (null, _) => 'Tria primer l’inici',
+                        (_, null) => 'Sense data de fi',
+                        (_, final endsAt?) => formatActivitySchedule(
+                          endsAt,
+                          includeDate: true,
+                        ),
+                      },
+                      style: endsAt == null
+                          ? TextStyle(color: colors.onSurfaceVariant)
+                          : null,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
                 TextField(
                   controller: _municipalityController,
                   textCapitalization: TextCapitalization.words,
                   textInputAction: TextInputAction.next,
-                  onChanged: (text) {
-                    _viewModel.onFieldChanged(CreateActivityField.municipality);
-                    _viewModel.locateMunicipality(text);
-                  },
-                  decoration: InputDecoration(
-                    labelText: 'Municipi',
-                    prefixIcon: const Icon(Icons.location_on_outlined),
-                    errorText: _viewModel.fieldError(
-                      CreateActivityField.municipality,
-                    ),
+                  onChanged: _viewModel.locateMunicipality,
+                  decoration: const InputDecoration(
+                    labelText: 'Municipi (opcional)',
+                    prefixIcon: Icon(Icons.location_on_outlined),
                   ),
                 ),
                 const SizedBox(height: 16),

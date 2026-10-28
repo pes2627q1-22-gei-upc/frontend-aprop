@@ -438,15 +438,16 @@ class _SamePlaceSheet extends StatelessWidget {
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
-              child: Text(
-                activities.first.municipality,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
+            if (activities.first.municipality.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
+                child: Text(
+                  activities.first.municipality,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
                 ),
               ),
-            ),
             Flexible(
               child: ListView.builder(
                 shrinkWrap: true,
@@ -539,11 +540,13 @@ class _MapActivityCard extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 6),
-                      ActivityInformationRow(
-                        icon: Icons.location_on_outlined,
-                        text: activity.municipality,
-                      ),
-                      const SizedBox(height: 4),
+                      if (activity.municipality.isNotEmpty) ...[
+                        ActivityInformationRow(
+                          icon: Icons.location_on_outlined,
+                          text: activity.municipality,
+                        ),
+                        const SizedBox(height: 4),
+                      ],
                       ActivityInformationRow(
                         icon: Icons.calendar_today_outlined,
                         text: formatActivitySchedule(activity.startsAt),

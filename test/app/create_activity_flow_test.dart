@@ -45,7 +45,10 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text('Fet'));
       await tester.pumpAndSettle();
-      await tester.enterText(find.widgetWithText(TextField, 'Municipi'), 'Vic');
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Municipi (opcional)'),
+        'Vic',
+      );
       // La portada per defecte ja és vàlida: no cal triar-ne cap.
       await tester.scrollUntilVisible(
         find.text('Publica'),

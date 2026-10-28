@@ -117,11 +117,13 @@ class ActivityCard extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      ActivityInformationRow(
-                        icon: Icons.location_on_outlined,
-                        text: activity.municipality,
-                      ),
-                      const SizedBox(height: 6),
+                      if (activity.municipality.isNotEmpty) ...[
+                        ActivityInformationRow(
+                          icon: Icons.location_on_outlined,
+                          text: activity.municipality,
+                        ),
+                        const SizedBox(height: 6),
+                      ],
                       ActivityInformationRow(
                         icon: Icons.calendar_today_outlined,
                         text: formatActivitySchedule(activity.startsAt),

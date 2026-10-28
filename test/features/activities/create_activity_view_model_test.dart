@@ -82,11 +82,58 @@ void main() {
       CreateActivityField.description,
       CreateActivityField.category,
       CreateActivityField.startsAt,
-      CreateActivityField.municipality,
     ]) {
       expect(viewModel.fieldError(field), isNotNull, reason: '$field');
     }
     expect(viewModel.fieldError(CreateActivityField.price), isNull);
+    expect(viewModel.fieldError(CreateActivityField.endsAt), isNull);
+  });
+
+  test('El municipi és opcional', () async {
+    viewModel
+      ..setCategory('Música')
+      ..setStartsAt(DateTime(2026, 11, 1, 19));
+
+    final activity = await viewModel.publish(
+      title: 'Concert',
+      description: 'Una nit',
+      municipality: '   ',
+      price: '',
+    );
+
+    expect(activity, isNotNull);
+    expect(repository.created.single.municipality, isEmpty);
+  });
+
+  group('Data de fi', () {
+    test('És opcional: sense indicar-la no se n’envia cap', () async {
+      await publishValid();
+
+      expect(repository.created.single.endsAt, isNull);
+    });
+
+    test('Desa la data de fi posterior a l’inici', () async {
+      viewModel.setEndsAt(DateTime(2026, 11, 1, 22));
+      await publishValid();
+
+      expect(repository.created.single.endsAt, DateTime(2026, 11, 1, 22));
+    });
+
+    test('Rebutja una fi que no és posterior a l’inici', () async {
+      viewModel.setEndsAt(DateTime(2026, 11, 1, 19));
+      await publishValid();
+
+      expect(
+        viewModel.fieldError(CreateActivityField.endsAt),
+        'La fi ha de ser posterior a l’inici.',
+      );
+      expect(repository.created, isEmpty);
+
+      viewModel.setEndsAt(null);
+      expect(viewModel.fieldError(CreateActivityField.endsAt), isNull);
+      await publishValid();
+      expect(repository.created.single.endsAt, isNull);
+    });
   });
 
   test('L’inici ha de ser posterior al moment de crear-la', () async {
