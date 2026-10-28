@@ -13,11 +13,13 @@ class ProfileSettingsScreen extends StatefulWidget {
     required this.repository,
     required this.onSignOut,
     required this.onBack,
+    this.onOpenInterestTest,
   });
   final AppUser user;
   final ProfileSettingsRepository repository;
   final Future<void> Function() onSignOut;
   final VoidCallback onBack;
+  final VoidCallback? onOpenInterestTest;
 
   @override
   State<ProfileSettingsScreen> createState() => _ProfileSettingsScreenState();
@@ -199,10 +201,20 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                     subtitle: 'Exportació disponible properament',
                     status: 'No connectat',
                   ),
-                  const PendingSettingsTile(
-                    title: 'Tornar a fer el test d’interessos',
-                    icon: Icons.sync,
-                  ),
+                  if (widget.onOpenInterestTest case final open?)
+                    ListTile(
+                      key: const ValueKey('profile-interest-test'),
+                      leading: const SettingsIcon(icon: Icons.sync),
+                      title: const Text('Tornar a fer el test d’interessos'),
+                      minVerticalPadding: 12,
+                      enabled: !model.isBusy,
+                      onTap: open,
+                    )
+                  else
+                    const PendingSettingsTile(
+                      title: 'Tornar a fer el test d’interessos',
+                      icon: Icons.sync,
+                    ),
                   ListTile(
                     key: const ValueKey('profile-sign-out'),
                     leading: const SettingsIcon(icon: Icons.logout),

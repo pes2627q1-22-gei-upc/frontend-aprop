@@ -18,6 +18,8 @@ import '../../features/auth/presentation/screens/choose_username_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/verify_email_screen.dart';
 import '../../features/auth/repositories/auth_repository.dart';
+import '../../features/interest_test/data/demo_interest_test_repository.dart';
+import '../../features/interest_test/repositories/interest_test_repository.dart';
 import '../../features/notifications/data/demo_notification_repository.dart';
 import '../../features/notifications/repositories/notification_repository.dart';
 import '../../features/profile/data/demo_profile_repository.dart';
@@ -41,6 +43,7 @@ class AuthGate extends StatefulWidget {
     this.activityMapRepository,
     this.profileRepository,
     this.profileSettingsRepository,
+    this.interestTestRepository,
     this.activityCategoryRepository,
   });
 
@@ -52,6 +55,7 @@ class AuthGate extends StatefulWidget {
   final DiscoveryRepository? discoveryRepository;
   final ProfileRepository? profileRepository;
   final ProfileSettingsRepository? profileSettingsRepository;
+  final InterestTestRepository? interestTestRepository;
   final ActivityCategoryRepository? activityCategoryRepository;
 
   /// Repositori opcional per al mapa d'Inici. Si és nul, el mapa mostra les
@@ -71,6 +75,7 @@ class _AuthGateState extends State<AuthGate> {
   late final ActivityMapRepository? _activityMapRepository;
   late final ProfileRepository _profileRepository;
   late final ProfileSettingsRepository _profileSettingsRepository;
+  late final InterestTestRepository _interestTestRepository;
   DemoEnrollmentRepository? _ownedEnrollmentRepository;
 
   @override
@@ -110,6 +115,9 @@ class _AuthGateState extends State<AuthGate> {
         DemoProfileRepository(activityRepository: _activityRepository);
     _profileSettingsRepository =
         widget.profileSettingsRepository ?? DemoProfileSettingsRepository();
+    _interestTestRepository =
+        widget.interestTestRepository ??
+        DemoInterestTestRepository(activityRepository: _activityRepository);
   }
 
   @override
@@ -168,6 +176,7 @@ class _AuthGateState extends State<AuthGate> {
           activityMapRepository: _activityMapRepository,
           profileRepository: _profileRepository,
           profileSettingsRepository: _profileSettingsRepository,
+          interestTestRepository: _interestTestRepository,
           activityCategoryRepository: widget.activityCategoryRepository,
         );
       },
