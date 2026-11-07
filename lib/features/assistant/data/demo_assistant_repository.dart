@@ -27,6 +27,20 @@ class DemoAssistantRepository implements AssistantRepository {
   ];
 
   @override
+  Future<List<String>> getSuggestions(String lang) async => const [
+    'Concerts a Girona aquest cap de setmana',
+    'Activitats per a nens a Barcelona',
+  ];
+
+  // Demo replies carry no backend timestamps, so they cannot be rated.
+  @override
+  Future<void> sendFeedback({
+    required String conversationStartedAt,
+    required String sentAt,
+    required bool helpful,
+  }) async {}
+
+  @override
   Future<AssistantMessage> sendMessage(String query) async {
     final catalogue = await _activityRepository.getActivities();
     final normalized = _normalize(query);

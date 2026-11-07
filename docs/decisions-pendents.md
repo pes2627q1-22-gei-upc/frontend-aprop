@@ -486,3 +486,17 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Provisionalment:** B (`TODO(DP-036)` a `lib/core/network/api_client.dart`), de manera que les peticions a Render amb `X-User-ID` funcionen tant amb UID de Firebase com amb comptes de demostració sense fallar per validació d'UUID.
 - **Qui decideix:** backend + frontend
 - **Resolució:** A, al backend. `fix/resolve-user-id` (PR #36 d'api-aprop, Tasca #237, Wen) i `feature/esdeveniment-no-ofi` (PR #35, Tasca #236, Arnau) tradueixen l'UID de Firebase del token a l'UUID de `users` (`requester.ID`, `EventService.ResolveUserID` amb `GetByFirebaseUID`) a inscripcions, crear esdeveniments, xatbot i preferències. `X-User-ID` només es llegeix quan el backend funciona sense Firebase. Al frontend (2026-10-26, Taiga #82) ja no s'envia `X-User-ID`: l'usuari surt només del token. `AppUser.serverId` (l'`id` de `POST /auth/sync`) es continua fent servir per a `GET /users/{id}/events` i com a clau de les inscripcions.
+
+### DP-043 · Xatbot: botó `interest-test` i entrada de veu
+- **Estat:** oberta 2026-11-07
+- **Context:** `AssistantScreenTarget.fromApi` (`assistant_message.dart`), `_openAssistantTarget` (`main_shell.dart`); contracte `api-aprop/api/openapi.yaml` (`AssistantAction`).
+- **Dubte:** el backend pot enviar `screen: interest-test`, però a `develop` no hi ha pantalla de test d'interessos (és a `feature/test_interesos`, PR #35, i a `develop` l'entrada de Configuració està inactiva). Entrada de veu: cal triar paquet de dictat.
+- **Provisionalment:** `interest-test` s'ignora (sense botó), com qualsevol valor desconegut. La veu continua desactivada. `TODO(DP-043)` a `assistant_message.dart`.
+- **Qui decideix:** equip frontend (després de fusionar #35, mapar-lo a Configuració › test) i l'usuari (paquet de veu).
+
+### DP-044 · Assistent: recomanacions amb fila compacta
+- **Estat:** oberta 2026-11-07
+- **Context:** `assistant_activity_tile.dart`; el mockup 10 (`docs/ai/50-ui-mockups.md`) diu «targeta estàndard».
+- **Dubte:** la targeta estàndard (~330 px) deixa veure només una activitat per pantalla al xat.
+- **Provisionalment:** fila compacta (miniatura 72 px, títol, municipi · data i la mateixa acció d'apuntar-se). Mateix estat d'inscripcions, mateix detall en tocar. Sense avatar del creador ni «Font». `TODO(DP-044)`: confirmar amb l'equip/mockup.
+- **Qui decideix:** equip frontend (UX)

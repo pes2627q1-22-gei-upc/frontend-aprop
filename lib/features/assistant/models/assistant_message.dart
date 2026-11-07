@@ -3,6 +3,28 @@ import '../../activities/models/activity.dart';
 /// Identifies who authored a message in an assistant conversation (`MissatgeXatbot.emissor`).
 enum AssistantMessageSender { user, assistant }
 
+/// App screen an assistant reply suggests opening (`AssistantAction.screen`).
+enum AssistantScreenTarget {
+  home,
+  agenda,
+  discover,
+  notifications,
+  profile,
+  settings;
+
+  /// Returns null for values this app does not handle, including
+  /// `interest-test` (TODO(DP-043): its screen is not in `develop` yet).
+  static AssistantScreenTarget? fromApi(Object? value) => switch (value) {
+    'home' => home,
+    'agenda' => agenda,
+    'discover' => discover,
+    'notifications' => notifications,
+    'profile' => profile,
+    'settings' => settings,
+    _ => null,
+  };
+}
+
 /// Structured search parameters extracted by the assistant from a natural-language query.
 class AssistantInterpretation {
   const AssistantInterpretation({
@@ -33,6 +55,9 @@ class AssistantMessage {
     this.isVoice = false,
     this.interpretation,
     List<Activity> recommendedActivities = const [],
+    this.action,
+    this.rawSentAt,
+    this.conversationStartedAt,
   }) : recommendedActivities = List.unmodifiable(recommendedActivities) {
     if (sender != AssistantMessageSender.assistant &&
         this.recommendedActivities.isNotEmpty) {
@@ -44,6 +69,9 @@ class AssistantMessage {
       throw ArgumentError(
         'Only assistant messages can include a query interpretation.',
       );
+    }
+    if (sender != AssistantMessageSender.assistant && action != null) {
+      throw ArgumentError('Only assistant messages can suggest a screen.');
     }
     if (sender != AssistantMessageSender.user && isVoice) {
       throw ArgumentError(
@@ -73,6 +101,9 @@ class AssistantMessage {
     required DateTime sentAt,
     AssistantInterpretation? interpretation,
     List<Activity> recommendedActivities = const [],
+    AssistantScreenTarget? action,
+    String? rawSentAt,
+    String? conversationStartedAt,
   }) {
     return AssistantMessage(
       id: id,
@@ -81,6 +112,9 @@ class AssistantMessage {
       sentAt: sentAt,
       interpretation: interpretation,
       recommendedActivities: recommendedActivities,
+      action: action,
+      rawSentAt: rawSentAt,
+      conversationStartedAt: conversationStartedAt,
     );
   }
 
@@ -91,4 +125,18 @@ class AssistantMessage {
   final bool isVoice;
   final AssistantInterpretation? interpretation;
   final List<Activity> recommendedActivities;
+
+  /// Screen the reply suggests opening; only on the reply just received.
+  final AssistantScreenTarget? action;
+
+  /// `sent-at` and conversation `started-at` exactly as the backend sent them.
+  /// Together they identify the message for feedback; null when the message
+  /// did not come from the backend (e.g. the local welcome text).
+  final String? rawSentAt;
+  final String? conversationStartedAt;
+
+  bool get canRate =>
+      sender == AssistantMessageSender.assistant &&
+      (rawSentAt?.isNotEmpty ?? false) &&
+      (conversationStartedAt?.isNotEmpty ?? false);
 }
