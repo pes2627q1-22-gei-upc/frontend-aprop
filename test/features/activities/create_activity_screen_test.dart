@@ -75,7 +75,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Dimarts 20 d’octubre de 2026 · 19.00 h'), findsOneWidget);
 
-    await fill(tester, 'Municipi', 'Vic');
+    await fill(tester, 'Municipi (opcional)', 'Vic');
     await fill(tester, 'Indicacions (opcional)', ' Entrada pel pati ');
     await fill(tester, 'Preu (opcional)', '5');
     await tapVisible(tester, find.text('Publica'));
@@ -121,7 +121,7 @@ void main() {
       findsOneWidget,
     );
 
-    await fill(tester, 'Municipi', 'Vic');
+    await fill(tester, 'Municipi (opcional)', 'Vic');
     await tester.pump();
     expect(map().markers.single.position, const LatLng(41.9301, 2.2549));
     expect(
@@ -212,6 +212,71 @@ void main() {
 
       expect(find.text('Tria la data i l’hora'), findsOneWidget);
     });
+  });
+
+  group('Data de fi', () {
+    testWidgets('Fins que no hi ha inici no es pot triar', (tester) async {
+      await pumpForm(tester);
+
+      await tapVisible(tester, find.text('Tria primer l’inici'));
+
+      expect(find.text('Data i hora de fi'), findsNothing);
+    });
+
+    testWidgets('Es tria, es publica i es pot treure', (tester) async {
+      await pumpForm(tester);
+      await tapVisible(tester, find.text('Tria la data i l’hora'));
+      await tester.tap(find.text('Fet'));
+      await tester.pumpAndSettle();
+
+      // Per defecte, dues hores després de l'inici (20 d'octubre, 19.00 h).
+      await tapVisible(tester, find.text('Sense data de fi'));
+      expect(find.text('Data i hora de fi'), findsOneWidget);
+      expect(find.text('21.00 h'), findsWidgets);
+      await tester.tap(find.text('Fet'));
+      await tester.pumpAndSettle();
+      expect(
+        find.text('Dimarts 20 d’octubre de 2026 · 21.00 h'),
+        findsOneWidget,
+      );
+
+      await tapVisible(tester, find.byTooltip('Treu la data de fi'));
+      expect(find.text('Sense data de fi'), findsOneWidget);
+    });
+
+    testWidgets('No deixa triar una fi anterior a l’inici', (tester) async {
+      await pumpForm(tester);
+      await tapVisible(tester, find.text('Tria la data i l’hora'));
+      await tester.tap(find.text('Fet'));
+      await tester.pumpAndSettle();
+      await tapVisible(tester, find.text('Sense data de fi'));
+
+      // De les 21.00 a les 18.00, abans de l'inici (19.00).
+      await tester.drag(find.byKey(const ValueKey('end-time')), Offset(0, 480));
+      await tester.pumpAndSettle();
+
+      expect(find.text('La fi ha de ser posterior a l’inici.'), findsOneWidget);
+      final done = tester.widget<FilledButton>(
+        find.widgetWithText(FilledButton, 'Fet'),
+      );
+      expect(done.onPressed, isNull);
+    });
+  });
+
+  testWidgets('Es pot publicar sense municipi', (tester) async {
+    await pumpForm(tester);
+    await fill(tester, 'Títol', 'Concert');
+    await fill(tester, 'Descripció', 'Una nit de música');
+    await tapVisible(tester, find.bySemanticsLabel('Teatre'));
+    await tapVisible(tester, find.text('Tria la data i l’hora'));
+    await tester.tap(find.text('Fet'));
+    await tester.pumpAndSettle();
+
+    await tapVisible(tester, find.text('Publica'));
+
+    expect(published, hasLength(1));
+    expect(repository.created.single.municipality, isEmpty);
+    expect(repository.created.single.endsAt, isNull);
   });
 
   testWidgets('Mostra què falta abans de publicar', (tester) async {

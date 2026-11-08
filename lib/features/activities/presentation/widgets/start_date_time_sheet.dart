@@ -11,11 +11,52 @@ Future<DateTime?> showStartDateTimeSheet(
   required DateTime initial,
   required DateTime now,
 }) {
+  return _showDateTimeSheet(
+    context,
+    title: 'Data i hora d’inici',
+    keyPrefix: 'start',
+    initial: initial,
+    after: now,
+    errorText: 'L’inici ha de ser posterior a ara.',
+  );
+}
+
+/// El mateix panell per a la data i l'hora de fi, que ha de ser posterior a
+/// [startsAt].
+Future<DateTime?> showEndDateTimeSheet(
+  BuildContext context, {
+  required DateTime initial,
+  required DateTime startsAt,
+}) {
+  return _showDateTimeSheet(
+    context,
+    title: 'Data i hora de fi',
+    keyPrefix: 'end',
+    initial: initial,
+    after: startsAt,
+    errorText: 'La fi ha de ser posterior a l’inici.',
+  );
+}
+
+Future<DateTime?> _showDateTimeSheet(
+  BuildContext context, {
+  required String title,
+  required String keyPrefix,
+  required DateTime initial,
+  required DateTime after,
+  required String errorText,
+}) {
   return showModalBottomSheet<DateTime>(
     context: context,
     showDragHandle: true,
     isScrollControlled: true,
-    builder: (context) => _StartDateTimeSheet(initial: initial, now: now),
+    builder: (context) => _DateTimeSheet(
+      title: title,
+      keyPrefix: keyPrefix,
+      initial: initial,
+      after: after,
+      errorText: errorText,
+    ),
   );
 }
 
@@ -23,17 +64,32 @@ const _minuteStep = 15;
 const _itemExtent = 40.0;
 const _wheelHeight = 160.0;
 
-class _StartDateTimeSheet extends StatefulWidget {
-  const _StartDateTimeSheet({required this.initial, required this.now});
+class _DateTimeSheet extends StatefulWidget {
+  const _DateTimeSheet({
+    required this.title,
+    required this.keyPrefix,
+    required this.initial,
+    required this.after,
+    required this.errorText,
+  });
 
+  final String title;
+
+  /// Prefix de les claus de les rodes (`start-day`, `end-day`…).
+  final String keyPrefix;
   final DateTime initial;
-  final DateTime now;
+
+  /// El moment triat ha de ser posterior a aquest.
+  final DateTime after;
+
+  /// Es mostra mentre el moment triat no és posterior a [after].
+  final String errorText;
 
   @override
-  State<_StartDateTimeSheet> createState() => _StartDateTimeSheetState();
+  State<_DateTimeSheet> createState() => _DateTimeSheetState();
 }
 
-class _StartDateTimeSheetState extends State<_StartDateTimeSheet> {
+class _DateTimeSheetState extends State<_DateTimeSheet> {
   late int _day = widget.initial.day;
   late int _month = widget.initial.month;
   late int _year = widget.initial.year;
@@ -57,13 +113,13 @@ class _StartDateTimeSheetState extends State<_StartDateTimeSheet> {
     initialItem: _minutes ~/ _minuteStep,
   );
 
-  int get _firstYear => widget.now.year;
+  int get _firstYear => widget.after.year;
   int get _daysInMonth => DateUtils.getDaysInMonth(_year, _month);
 
   DateTime get _selected =>
       DateTime(_year, _month, _day, _minutes ~/ 60, _minutes % 60);
 
-  bool get _isValid => _selected.isAfter(widget.now);
+  bool get _isValid => _selected.isAfter(widget.after);
 
   @override
   void dispose() {
@@ -101,7 +157,7 @@ class _StartDateTimeSheetState extends State<_StartDateTimeSheet> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              'Data i hora d’inici',
+              widget.title,
               style: theme.textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.w700,
               ),
@@ -148,7 +204,7 @@ class _StartDateTimeSheetState extends State<_StartDateTimeSheet> {
                   Expanded(
                     flex: 2,
                     child: _Wheel(
-                      key: const ValueKey('start-day'),
+                      key: ValueKey('${widget.keyPrefix}-day'),
                       label: 'Dia',
                       controller: _dayController,
                       itemCount: _daysInMonth,
@@ -159,7 +215,7 @@ class _StartDateTimeSheetState extends State<_StartDateTimeSheet> {
                   Expanded(
                     flex: 4,
                     child: _Wheel(
-                      key: const ValueKey('start-month'),
+                      key: ValueKey('${widget.keyPrefix}-month'),
                       label: 'Mes',
                       controller: _monthController,
                       itemCount: 12,
@@ -170,7 +226,7 @@ class _StartDateTimeSheetState extends State<_StartDateTimeSheet> {
                   Expanded(
                     flex: 3,
                     child: _Wheel(
-                      key: const ValueKey('start-year'),
+                      key: ValueKey('${widget.keyPrefix}-year'),
                       label: 'Any',
                       controller: _yearController,
                       itemCount: 3,
@@ -186,7 +242,7 @@ class _StartDateTimeSheetState extends State<_StartDateTimeSheet> {
             SizedBox(
               height: _wheelHeight,
               child: _Wheel(
-                key: const ValueKey('start-time'),
+                key: ValueKey('${widget.keyPrefix}-time'),
                 label: 'Hora',
                 controller: _timeController,
                 itemCount: 24 * 60 ~/ _minuteStep,
@@ -203,7 +259,7 @@ class _StartDateTimeSheetState extends State<_StartDateTimeSheet> {
             const SizedBox(height: 8),
             if (!_isValid)
               Text(
-                'L’inici ha de ser posterior a ara.',
+                widget.errorText,
                 textAlign: TextAlign.center,
                 style: TextStyle(color: colors.error),
               ),

@@ -9,9 +9,10 @@ class NewActivity {
     required this.description,
     required this.category,
     required this.startsAt,
-    required this.municipality,
     required this.imageAsset,
     required this.creator,
+    this.municipality = '',
+    this.endsAt,
     this.directions,
     this.location,
     this.price,
@@ -21,6 +22,11 @@ class NewActivity {
   final String description;
   final String category;
   final DateTime startsAt;
+
+  /// Fi de l'activitat, si s'ha indicat. És posterior a [startsAt].
+  final DateTime? endsAt;
+
+  /// Buit si no se n'ha indicat cap: el municipi és opcional.
   final String municipality;
   final String imageAsset;
   final ActivityCreator creator;

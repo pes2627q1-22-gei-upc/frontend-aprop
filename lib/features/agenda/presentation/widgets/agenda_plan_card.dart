@@ -88,22 +88,23 @@ class AgendaPlanCard extends StatelessWidget {
                       ),
                     ),
                   ),
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.location_on_outlined,
-                        size: 16,
-                        color: colors.onSurfaceVariant,
-                      ),
-                      const SizedBox(width: 4),
-                      Expanded(
-                        child: Text(
-                          activity.municipality,
-                          style: secondaryStyle,
+                  if (activity.municipality.isNotEmpty)
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.location_on_outlined,
+                          size: 16,
+                          color: colors.onSurfaceVariant,
                         ),
-                      ),
-                    ],
-                  ),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            activity.municipality,
+                            style: secondaryStyle,
+                          ),
+                        ),
+                      ],
+                    ),
                   const SizedBox(height: 4),
                   Text(_sourceLabel(activity), style: secondaryStyle),
                   const SizedBox(height: 8),

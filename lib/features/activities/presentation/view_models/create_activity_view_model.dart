@@ -14,7 +14,7 @@ enum CreateActivityField {
   description,
   category,
   startsAt,
-  municipality,
+  endsAt,
   price,
 }
 
@@ -52,6 +52,7 @@ class CreateActivityViewModel extends ChangeNotifier {
   final Map<CreateActivityField, String> _fieldErrors = {};
   String? _category;
   DateTime? _startsAt;
+  DateTime? _endsAt;
 
   /// Sempre n'hi ha una: per defecte, la primera plantilla.
   String _imageAsset = activityImageTemplates.first;
@@ -76,6 +77,7 @@ class CreateActivityViewModel extends ChangeNotifier {
   bool get isLoadingCategories => _isLoadingCategories;
   String? get categoriesError => _categoriesError;
   DateTime? get startsAt => _startsAt;
+  DateTime? get endsAt => _endsAt;
   String get imageAsset => _imageAsset;
   GeoPoint? get location => _location;
 
@@ -131,6 +133,14 @@ class CreateActivityViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// La data de fi és opcional: amb `null` es treu.
+  void setEndsAt(DateTime? endsAt) {
+    _endsAt = endsAt;
+    _fieldErrors.remove(CreateActivityField.endsAt);
+    _errorMessage = null;
+    notifyListeners();
+  }
+
   void setImageAsset(String imageAsset) {
     _imageAsset = imageAsset;
     notifyListeners();
@@ -178,12 +188,12 @@ class CreateActivityViewModel extends ChangeNotifier {
   }
 
   /// Retorna l'activitat creada, o `null` si el formulari no és vàlid o la
-  /// publicació ha fallat.
+  /// publicació ha fallat. El municipi i les indicacions són opcionals.
   Future<Activity?> publish({
     required String title,
     required String description,
-    required String municipality,
     required String price,
+    String municipality = '',
     String directions = '',
   }) async {
     if (_isPublishing || _isDisposed) return null;
@@ -191,6 +201,7 @@ class CreateActivityViewModel extends ChangeNotifier {
     final parsedPrice = parseActivityPrice(price);
     final category = _category;
     final startsAt = _startsAt;
+    final endsAt = _endsAt;
     _errorMessage = null;
     _fieldErrors
       ..clear()
@@ -202,9 +213,7 @@ class CreateActivityViewModel extends ChangeNotifier {
             ? 'Tria una categoria.'
             : null),
         CreateActivityField.startsAt: ?_validateStartsAt(startsAt),
-        CreateActivityField.municipality: ?(municipality.trim().isEmpty
-            ? 'Introdueix el municipi.'
-            : null),
+        CreateActivityField.endsAt: ?_validateEndsAt(startsAt, endsAt),
         CreateActivityField.price: ?(parsedPrice == null
             ? 'Introdueix un preu vàlid, per exemple 12,50.'
             : null),
@@ -225,6 +234,7 @@ class CreateActivityViewModel extends ChangeNotifier {
           description: description.trim(),
           category: category!,
           startsAt: startsAt!,
+          endsAt: endsAt,
           municipality: municipality.trim(),
           // Sense indicacions es desa nul, no un text buit.
           directions: directions.trim().isEmpty ? null : directions.trim(),
@@ -268,6 +278,15 @@ class CreateActivityViewModel extends ChangeNotifier {
     if (startsAt == null) return 'Tria la data i l’hora d’inici.';
     if (!startsAt.isAfter(_now())) return 'L’inici ha de ser posterior a ara.';
     return null;
+  }
+
+  /// R5: la fi no pot ser anterior a l'inici. Es demana que sigui posterior,
+  /// perquè si acaba quan comença no cal indicar-la.
+  String? _validateEndsAt(DateTime? startsAt, DateTime? endsAt) {
+    if (startsAt == null || endsAt == null || endsAt.isAfter(startsAt)) {
+      return null;
+    }
+    return 'La fi ha de ser posterior a l’inici.';
   }
 
   @override

@@ -113,7 +113,10 @@ class NotificationCard extends StatelessWidget {
                             if (notice.type ==
                                 NotificationType.recommendation) ...[
                               Text(
-                                '${activity.category} · ${activity.municipality}',
+                                [
+                                  activity.category,
+                                  activity.municipality,
+                                ].where((text) => text.isNotEmpty).join(' · '),
                                 style: theme.textTheme.bodyMedium,
                               ),
                               const SizedBox(height: 4),

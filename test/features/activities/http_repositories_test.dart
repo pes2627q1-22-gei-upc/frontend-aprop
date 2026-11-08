@@ -125,22 +125,26 @@ void main() {
         ),
       );
 
-      NewActivity newActivity({double? price, String? directions}) =>
-          NewActivity(
-            title: 'Taller de ceràmica',
-            description: 'Per a tots els nivells.',
-            category: 'agenda:categories/exposicions',
-            startsAt: DateTime(2026, 11, 7, 0, 30),
-            municipality: 'Sant Cugat del Vallès',
-            imageAsset: 'assets/images/jazz_al_parc.jpg',
-            creator: const ActivityCreator(
-              name: 'Pol Vidal',
-              userId: 'uid-1',
-              isFriend: false,
-            ),
-            directions: directions,
-            price: price,
-          );
+      NewActivity newActivity({
+        double? price,
+        String? directions,
+        DateTime? endsAt,
+      }) => NewActivity(
+        title: 'Taller de ceràmica',
+        description: 'Per a tots els nivells.',
+        category: 'agenda:categories/exposicions',
+        startsAt: DateTime(2026, 11, 7, 0, 30),
+        endsAt: endsAt,
+        municipality: 'Sant Cugat del Vallès',
+        imageAsset: 'assets/images/jazz_al_parc.jpg',
+        creator: const ActivityCreator(
+          name: 'Pol Vidal',
+          userId: 'uid-1',
+          isFriend: false,
+        ),
+        directions: directions,
+        price: price,
+      );
 
       test('Envia l’hora d’aquí sense canviar de dia i l’etiqueta', () async {
         await repository().createActivity(
@@ -161,6 +165,20 @@ void main() {
 
         expect(sent.containsKey('free'), isFalse);
         expect(sent['address'], '');
+      });
+
+      test('Sense data de fi, acaba el dia que comença', () async {
+        await repository().createActivity(newActivity());
+
+        expect(sent['end-date'], sent['start-date']);
+      });
+
+      test('Envia la data de fi amb l’hora d’aquí', () async {
+        await repository().createActivity(
+          newActivity(endsAt: DateTime(2026, 11, 8, 0, 15)),
+        );
+
+        expect(sent['end-date'], '2026-11-08T00:15:00.000Z');
       });
     });
 

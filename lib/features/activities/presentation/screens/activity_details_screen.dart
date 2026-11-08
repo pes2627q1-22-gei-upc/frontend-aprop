@@ -156,11 +156,14 @@ class _ActivityDetailsContent extends StatelessWidget {
           icon: Icons.calendar_month_outlined,
           text: formatActivitySchedule(activity.startsAt, includeDate: true),
         ),
-        const SizedBox(height: 10),
-        ActivityInformationRow(
-          icon: Icons.location_on_outlined,
-          text: activity.municipality,
-        ),
+        // El municipi és opcional a les activitats no oficials.
+        if (activity.municipality.isNotEmpty) ...[
+          const SizedBox(height: 10),
+          ActivityInformationRow(
+            icon: Icons.location_on_outlined,
+            text: activity.municipality,
+          ),
+        ],
         if (activity.directions case final directions?) ...[
           const SizedBox(height: 10),
           ActivityInformationRow(

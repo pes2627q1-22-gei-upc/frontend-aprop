@@ -211,6 +211,10 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
   - les indicacions van només a `address` (abans també a `place`, i en llegir-la sortien repetides);
   - `free` només s'envia si hi ha preu: sense preu no se sap si és gratuïta.
   No es desen al backend l'import del preu, la imatge triada (#94, DP-019) ni l'hora. El backend no apunta qui crea l'activitat: `MainShell` la continua apuntant (opció B). Després de crear-la, el mapa d'Inici torna a demanar la zona visible perquè hi surti. El backend treu el creador del token des de la PR #35 d'api-aprop (Tasca #236, Arnau), que també afegeix `PUT` i `DELETE /events/{id}` per editar i esborrar els esdeveniments no oficials (encara sense pantalla).
+- **Camps opcionals (2026-10-28, Claude Code (Opus 5.5), a petició de l'usuari, Taiga #93):** el municipi deixa de ser obligatori (el backend no l'exigeix; s'envia buit i les targetes, la fitxa, el mapa, l'Agenda i els avisos no en mostren la fila) i s'afegeix una data i hora de fi opcional. Queda per decidir:
+  - el formulari demana que la fi sigui **posterior** a l'inici; el backend (R5) també n'accepta una d'igual;
+  - sense data de fi s'envia `end-date` igual a `start-date`, com fins ara;
+  - el backend només desa el dia de la fi (DP-029) i l'app encara no llegeix ni mostra `end-date` (`Activity` no en té camp).
 - **Qui decideix:** frontend + backend
 - **Resolució:**
 
