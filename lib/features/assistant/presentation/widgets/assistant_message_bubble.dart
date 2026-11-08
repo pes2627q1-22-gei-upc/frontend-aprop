@@ -286,6 +286,7 @@ String _screenLabel(AssistantScreenTarget target) => switch (target) {
   AssistantScreenTarget.notifications => 'Obre Avisos',
   AssistantScreenTarget.profile => 'Obre Perfil',
   AssistantScreenTarget.settings => 'Obre Configuració',
+  AssistantScreenTarget.interestTest => 'Obre el test d’interessos',
 };
 
 /// Thumb with a 48x48 target. The selected state changes the icon (filled vs

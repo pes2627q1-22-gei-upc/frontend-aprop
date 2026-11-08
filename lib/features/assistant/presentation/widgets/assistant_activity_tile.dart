@@ -79,13 +79,17 @@ class AssistantActivityTile extends StatelessWidget {
                       ),
                     ),
                   ),
-                  Text(
-                    '${activity.municipality} · '
-                    '${formatActivitySchedule(activity.startsAt)}',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: colors.onSurfaceVariant,
+                  if ([
+                        activity.municipality,
+                        formatActivitySchedule(activity.startsAt),
+                      ].where((t) => t.isNotEmpty).join(' · ')
+                      case final details when details.isNotEmpty)
+                    Text(
+                      details,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: colors.onSurfaceVariant,
+                      ),
                     ),
-                  ),
                   if (participationAction != null) ...[
                     const SizedBox(height: 8),
                     participationAction!,

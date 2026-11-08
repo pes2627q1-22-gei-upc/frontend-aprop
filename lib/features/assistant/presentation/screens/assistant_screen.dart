@@ -33,6 +33,7 @@ class AssistantScreen extends StatefulWidget {
 class _AssistantScreenState extends State<AssistantScreen> {
   final _scrollController = ScrollController();
   int _lastMessageCount = 0;
+  bool _lastIsLoading = false;
   final _showJumpToEnd = ValueNotifier<bool>(false);
   // Messages already on screen when the page opened do not animate in.
   late final Set<String> _seen = {for (final m in _viewModel.messages) m.id};
@@ -43,6 +44,7 @@ class _AssistantScreenState extends State<AssistantScreen> {
   void initState() {
     super.initState();
     _lastMessageCount = _viewModel.messages.length;
+    _lastIsLoading = _viewModel.isLoading;
     _viewModel.addListener(_onViewModelChanged);
     _scrollController.addListener(_onScroll);
     _viewModel.loadSuggestions();
@@ -56,6 +58,7 @@ class _AssistantScreenState extends State<AssistantScreen> {
     if (oldWidget.viewModel != widget.viewModel) {
       oldWidget.viewModel.removeListener(_onViewModelChanged);
       _lastMessageCount = _viewModel.messages.length;
+      _lastIsLoading = _viewModel.isLoading;
       _viewModel.addListener(_onViewModelChanged);
       _viewModel.loadSuggestions();
     }
@@ -81,6 +84,7 @@ class _AssistantScreenState extends State<AssistantScreen> {
 
   void _onViewModelChanged() {
     final messages = _viewModel.messages;
+    final isLoading = _viewModel.isLoading;
     if (messages.length > _lastMessageCount &&
         messages.last.sender == AssistantMessageSender.assistant) {
       SemanticsService.sendAnnouncement(
@@ -89,7 +93,10 @@ class _AssistantScreenState extends State<AssistantScreen> {
         Directionality.of(context),
       );
     }
+    final messageCountChanged = messages.length != _lastMessageCount;
+    final loadingChanged = isLoading != _lastIsLoading;
     _lastMessageCount = messages.length;
+    _lastIsLoading = isLoading;
 
     if (_viewModel.feedbackError case final error?) {
       _viewModel.clearFeedbackError();
@@ -97,9 +104,12 @@ class _AssistantScreenState extends State<AssistantScreen> {
           .showSnackBar(SnackBar(content: Text(error)));
     }
 
-    // Always show the newest row. Comparing item counts is not enough: the
-    // reply replaces the loading row, so the count may not grow.
-    _scrollToBottom();
+    // Scroll to the newest row only when messages arrive or loading state changes.
+    // Rating an earlier answer, fetching suggestions or feedback errors must
+    // not jump to the bottom and interrupt the user's reading.
+    if (messageCountChanged || loadingChanged) {
+      _scrollToBottom();
+    }
   }
 
   void _onScroll() {

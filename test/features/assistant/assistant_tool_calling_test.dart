@@ -1,9 +1,11 @@
 import 'package:aprop/app/theme/app_theme.dart';
 import 'package:aprop/features/activities/data/demo_activity_repository.dart';
+import 'package:aprop/features/activities/models/activity.dart';
 import 'package:aprop/core/network/api_client.dart';
 import 'package:aprop/features/assistant/models/assistant_message.dart';
 import 'package:aprop/features/assistant/presentation/screens/assistant_screen.dart';
 import 'package:aprop/features/assistant/presentation/view_models/assistant_view_model.dart';
+import 'package:aprop/features/assistant/presentation/widgets/assistant_activity_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -113,11 +115,26 @@ void main() {
 
     await tester.tap(find.text('Obre Perfil'));
     expect(opened, [AssistantScreenTarget.profile]);
+
+    opened.clear();
+    repository.onSendMessage = (_) async =>
+        _reply('Fes el test', action: AssistantScreenTarget.interestTest);
+    await viewModel.sendMessage('com configuro interessos?');
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Obre el test d’interessos'));
+    expect(opened, [AssistantScreenTarget.interestTest]);
   });
 
-  test('unknown or unsupported screens produce no action', () {
-    expect(AssistantScreenTarget.fromApi('settings'), isNotNull);
-    expect(AssistantScreenTarget.fromApi('interest-test'), isNull);
+  test('parses screens and ignores unknown ones', () {
+    expect(
+      AssistantScreenTarget.fromApi('settings'),
+      AssistantScreenTarget.settings,
+    );
+    expect(
+      AssistantScreenTarget.fromApi('interest-test'),
+      AssistantScreenTarget.interestTest,
+    );
     expect(AssistantScreenTarget.fromApi('mars'), isNull);
   });
 
@@ -187,5 +204,68 @@ void main() {
       expect(tile, findsOneWidget);
       expect(tester.getSize(tile).height, lessThan(120));
     }
+  });
+
+  testWidgets('rating an earlier message does not jump to the bottom', (
+    tester,
+  ) async {
+    var counter = 0;
+    repository.onSendMessage = (q) async =>
+        _reply('Resposta llarga ' * 15, id: 'r${counter++}');
+    tester.view.physicalSize = const Size(400, 500);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    await pump(tester);
+    for (var i = 0; i < 3; i++) {
+      await viewModel.sendMessage('missatge $i');
+      await tester.pumpAndSettle();
+    }
+
+    final scrollable = find.byType(Scrollable).first;
+    // Scroll up to read earlier text.
+    await tester.drag(scrollable, const Offset(0, 300));
+    await tester.pumpAndSettle();
+
+    final offsetBeforeRating = tester
+        .state<ScrollableState>(scrollable)
+        .position
+        .pixels;
+
+    final thumb = find.byKey(const ValueKey('assistant-thumb-up-r1'));
+    expect(thumb, findsOneWidget);
+    await tester.tap(thumb);
+    await tester.pumpAndSettle();
+
+    final offsetAfterRating = tester
+        .state<ScrollableState>(scrollable)
+        .position
+        .pixels;
+    expect(offsetAfterRating, offsetBeforeRating);
+  });
+
+  testWidgets('activity tile without municipality omits bullet separator', (
+    tester,
+  ) async {
+    final activity = Activity(
+      id: 'no-muni',
+      title: 'Taller de ceràmica',
+      description: 'Descripció',
+      category: 'Arts escèniques',
+      municipality: '',
+      startsAt: DateTime(2026, 11, 7, 18, 0),
+      imageAsset: 'assets/images/activity1.jpg',
+      source: ActivitySource.culturalAgenda,
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.light,
+        home: Scaffold(
+          body: AssistantActivityTile(activity: activity, onTap: () {}),
+        ),
+      ),
+    );
+    expect(find.text('Dissabte · 18.00 h'), findsOneWidget);
+    expect(find.textContaining(' · Dissabte'), findsNothing);
   });
 }

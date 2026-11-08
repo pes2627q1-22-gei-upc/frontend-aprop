@@ -10,10 +10,10 @@ enum AssistantScreenTarget {
   discover,
   notifications,
   profile,
-  settings;
+  settings,
+  interestTest;
 
-  /// Returns null for values this app does not handle, including
-  /// `interest-test` (TODO(DP-043): its screen is not in `develop` yet).
+  /// Returns null for values this app does not handle.
   static AssistantScreenTarget? fromApi(Object? value) => switch (value) {
     'home' => home,
     'agenda' => agenda,
@@ -21,6 +21,7 @@ enum AssistantScreenTarget {
     'notifications' => notifications,
     'profile' => profile,
     'settings' => settings,
+    'interest-test' => interestTest,
     _ => null,
   };
 }
