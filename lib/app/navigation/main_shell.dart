@@ -19,6 +19,7 @@ import '../../features/activities/repositories/activity_repository.dart';
 import '../../features/activities/repositories/discovery_repository.dart';
 import '../../features/activities/repositories/enrollment_repository.dart';
 import '../../features/agenda/presentation/screens/agenda_screen.dart';
+import '../../features/assistant/models/assistant_message.dart';
 import '../../features/assistant/presentation/screens/assistant_screen.dart';
 import '../../features/assistant/presentation/view_models/assistant_view_model.dart';
 import '../../features/assistant/repositories/assistant_repository.dart';
@@ -170,14 +171,71 @@ class _MainShellState extends State<MainShell> {
     );
   }
 
+  /// Leaves the assistant and shows the screen one of its replies suggested.
+  void _openAssistantTarget(AssistantScreenTarget target) {
+    _sectionNavigatorKeys[0].currentState!.popUntil((r) => r.isFirst);
+    final index = switch (target) {
+      AssistantScreenTarget.home => 0,
+      AssistantScreenTarget.agenda => 1,
+      AssistantScreenTarget.discover => 2,
+      AssistantScreenTarget.notifications => 3,
+      AssistantScreenTarget.profile ||
+      AssistantScreenTarget.settings ||
+      AssistantScreenTarget.interestTest => 4,
+    };
+    _selectDestination(index);
+    if (target == AssistantScreenTarget.settings) {
+      _sectionNavigatorKeys[4].currentState!.popUntil((r) => r.isFirst);
+      _openProfileSettings();
+    } else if (target == AssistantScreenTarget.interestTest) {
+      _sectionNavigatorKeys[4].currentState!.popUntil((r) => r.isFirst);
+      _openInterestTest();
+    }
+  }
+
+  void _openInterestTest() {
+    final repository = widget.interestTestRepository;
+    final navigator = _sectionNavigatorKeys[4].currentState;
+    if (repository == null || navigator == null) return;
+    navigator.push<void>(
+      MaterialPageRoute<void>(
+        settings: const RouteSettings(name: '/profile/interest-test'),
+        builder: (context) => InterestTestScreen(
+          repository: repository,
+          onBack: () => Navigator.of(context).pop(),
+        ),
+      ),
+    );
+  }
+
   void _openAssistant() {
     final navigator = _sectionNavigatorKeys[0].currentState!;
     if (navigator.canPop()) return;
     navigator.push<void>(
-      MaterialPageRoute<void>(
+      PageRouteBuilder<void>(
         settings: const RouteSettings(name: '/assistant'),
-        builder: (context) => AssistantScreen(
+        transitionDuration: const Duration(milliseconds: 300),
+        reverseTransitionDuration: const Duration(milliseconds: 220),
+        transitionsBuilder: (context, animation, secondary, child) {
+          final curve = CurvedAnimation(
+            parent: animation,
+            curve: Curves.easeOutCubic,
+            reverseCurve: Curves.easeInCubic,
+          );
+          return FadeTransition(
+            opacity: curve,
+            child: SlideTransition(
+              position: Tween(
+                begin: const Offset(0, 0.06),
+                end: Offset.zero,
+              ).animate(curve),
+              child: child,
+            ),
+          );
+        },
+        pageBuilder: (context, animation, secondary) => AssistantScreen(
           viewModel: _assistantViewModel,
+          onOpenScreen: _openAssistantTarget,
           onActivitySelected: (activityId) {
             if (!(ModalRoute.of(context)?.isCurrent ?? true)) return;
             Navigator.of(context).push<void>(

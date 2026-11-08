@@ -34,12 +34,47 @@ class HttpAssistantRepository implements AssistantRepository {
     return _messageFromJson(
       assistantJson,
       defaultSender: AssistantMessageSender.assistant,
+      conversationStartedAt: decoded['conversation-started-at'] as String?,
+    );
+  }
+
+  @override
+  Future<List<String>> getSuggestions(String lang) async {
+    final decoded = await apiClient.getJson(
+      'assistant/suggestions',
+      queryParameters: {'lang': lang},
+    );
+    return switch (decoded) {
+      {'suggestions': final List<Object?> list} => [
+        for (final item in list)
+          if (item is String && item.trim().isNotEmpty) item.trim(),
+      ],
+      _ => const <String>[],
+    };
+  }
+
+  @override
+  Future<void> sendFeedback({
+    required String conversationStartedAt,
+    required String sentAt,
+    required bool helpful,
+  }) async {
+    await apiClient.postJson(
+      'assistant/feedback',
+      body: <String, Object?>{
+        'conversation-started-at': conversationStartedAt,
+        'sent-at': sentAt,
+        'helpful': helpful,
+      },
     );
   }
 
   /// Recupera tot l'historial de conversa de l'usuari (`GET /assistant/conversation`).
   Future<List<AssistantMessage>> getConversation() async {
     final decoded = await apiClient.getJson('assistant/conversation');
+    final startedAt = decoded is Map<String, Object?>
+        ? decoded['started-at'] as String?
+        : null;
     final rawMessages = switch (decoded) {
       {'messages': final List<Object?> list} => list,
       final List<Object?> list => list,
@@ -48,13 +83,15 @@ class HttpAssistantRepository implements AssistantRepository {
 
     return List.unmodifiable([
       for (final item in rawMessages)
-        if (item is Map<String, Object?>) _messageFromJson(item),
+        if (item is Map<String, Object?>)
+          _messageFromJson(item, conversationStartedAt: startedAt),
     ]);
   }
 
   AssistantMessage _messageFromJson(
     Map<String, Object?> json, {
     AssistantMessageSender defaultSender = AssistantMessageSender.assistant,
+    String? conversationStartedAt,
   }) {
     _counter += 1;
     final id = json['id'] != null ? '${json['id']}' : 'assistant-msg-$_counter';
@@ -109,6 +146,14 @@ class HttpAssistantRepository implements AssistantRepository {
       sentAt: sentAt,
       interpretation: interpretation,
       recommendedActivities: recommended,
+      action: switch (json['action']) {
+        {'screen': final Object? screen} => AssistantScreenTarget.fromApi(
+          screen,
+        ),
+        _ => null,
+      },
+      rawSentAt: sentAtStr,
+      conversationStartedAt: conversationStartedAt,
     );
   }
 

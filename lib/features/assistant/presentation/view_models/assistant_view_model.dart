@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import '../../../../core/network/api_client.dart';
 import '../../models/assistant_message.dart';
 import '../../repositories/assistant_repository.dart';
 
@@ -29,10 +30,28 @@ class AssistantViewModel extends ChangeNotifier {
   String? _errorMessage;
   String? _failedQuery;
   int _userMessageCounter = 0;
+  List<String> _suggestions = const [];
+  bool _suggestionsRequested = false;
+  final Map<String, bool> _ratings = {};
+  final Set<String> _unratable = {};
+  final Set<String> _rating = {};
+  String? _feedbackError;
 
   List<AssistantMessage> get messages => _messages;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
+
+  /// Quick replies, available during the whole conversation.
+  List<String> get suggestions => _suggestions;
+  String? get feedbackError => _feedbackError;
+
+  /// Selected rating of [message]: true = useful, false = not useful.
+  bool? ratingOf(AssistantMessage message) => _ratings[message.id];
+
+  /// False when the message cannot be rated (local text or backend said 404).
+  bool canRate(AssistantMessage message) =>
+      message.canRate && !_unratable.contains(message.id);
+
   bool get canRetry => !_isLoading && _failedQuery != null;
 
   Future<void> sendMessage(String rawQuery) async {
@@ -50,6 +69,50 @@ class AssistantViewModel extends ChangeNotifier {
     await _requestAssistantReply(query);
   }
 
+  /// Loads the quick replies once; failure just means no chips.
+  Future<void> loadSuggestions({String lang = 'ca'}) async {
+    if (_suggestionsRequested || _isDisposed) return;
+    _suggestionsRequested = true;
+    try {
+      final loaded = await _repository.getSuggestions(lang);
+      if (_isDisposed) return;
+      _suggestions = List.unmodifiable(loaded);
+      notifyListeners();
+    } catch (_) {}
+  }
+
+  Future<void> rate(AssistantMessage message, {required bool helpful}) async {
+    if (!canRate(message) ||
+        _rating.contains(message.id) ||
+        _ratings[message.id] == helpful ||
+        _isDisposed) {
+      return;
+    }
+    _rating.add(message.id);
+    _feedbackError = null;
+    try {
+      await _repository.sendFeedback(
+        conversationStartedAt: message.conversationStartedAt!,
+        sentAt: message.rawSentAt!,
+        helpful: helpful,
+      );
+      _ratings[message.id] = helpful;
+    } on ApiException catch (error) {
+      if (error.statusCode == 404) {
+        _unratable.add(message.id);
+      } else {
+        _feedbackError = 'No hem pogut desar la valoració. Torna-ho a provar.';
+      }
+    } catch (_) {
+      _feedbackError = 'No hem pogut desar la valoració. Torna-ho a provar.';
+    } finally {
+      _rating.remove(message.id);
+      if (!_isDisposed) notifyListeners();
+    }
+  }
+
+  void clearFeedbackError() => _feedbackError = null;
+
   Future<void> retryLastMessage() async {
     final query = _failedQuery;
     if (query == null || _isLoading || _isDisposed) return;
@@ -66,10 +129,12 @@ class AssistantViewModel extends ChangeNotifier {
       if (_isDisposed) return;
       _failedQuery = null;
       _messages = List.unmodifiable([..._messages, reply]);
-    } catch (_) {
+    } catch (error) {
       if (_isDisposed) return;
       _failedQuery = query;
-      _errorMessage = 'No hem pogut obtenir les recomanacions de l’assistent. Torna-ho a provar.';
+      _errorMessage = error is ApiException && error.statusCode == 429
+          ? 'Massa missatges, espera un minut'
+          : 'No hem pogut obtenir les recomanacions de l’assistent. Torna-ho a provar.';
     } finally {
       if (!_isDisposed) {
         _isLoading = false;

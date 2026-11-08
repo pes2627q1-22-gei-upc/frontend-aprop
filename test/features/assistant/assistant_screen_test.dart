@@ -93,7 +93,7 @@ void main() {
       await tester.tap(find.widgetWithText(FilledButton, 'Enviar'));
       await tester.pump();
 
-      expect(find.text('Cercant recomanacions…'), findsOneWidget);
+      expect(find.byKey(const ValueKey('assistant-typing')), findsOneWidget);
 
       completer.complete(
         AssistantMessage.assistant(
