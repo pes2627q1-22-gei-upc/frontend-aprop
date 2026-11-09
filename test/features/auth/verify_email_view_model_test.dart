@@ -91,43 +91,4 @@ void main() {
 
     expect(viewModel.errorMessage, unexpectedAuthErrorMessage);
   });
-
-  test("Demana l'enllaç si està buit i no crida el repositori", () async {
-    await viewModel.verifyWithLink('   ');
-
-    expect(viewModel.linkError, emptyVerificationLinkMessage);
-    expect(repository.lastCall, isNull);
-  });
-
-  test("Verifica amb l'enllaç enganxat, sense espais", () async {
-    await viewModel.verifyWithLink('  https://exemple/?oobCode=abc  ');
-
-    expect(repository.lastCall, {'link': 'https://exemple/?oobCode=abc'});
-    expect(viewModel.linkError, isNull);
-    expect(viewModel.isApplyingLink, isFalse);
-  });
-
-  test("Explica que l'enllaç no és vàlid", () async {
-    repository.error = AuthFailure.invalidVerificationLink;
-
-    await viewModel.verifyWithLink('https://exemple/?oobCode=vell');
-
-    expect(viewModel.linkError, AuthFailure.invalidVerificationLink.message);
-
-    viewModel.onLinkChanged();
-    expect(viewModel.linkError, isNull);
-  });
-
-  test("No fa res més mentre verifica l'enllaç", () async {
-    repository.pending = Completer<void>();
-    final pending = viewModel.verifyWithLink('https://exemple/?oobCode=abc');
-
-    expect(viewModel.isApplyingLink, isTrue);
-    expect(viewModel.isBusy, isTrue);
-    await viewModel.checkVerification();
-    expect(repository.lastCall, {'link': 'https://exemple/?oobCode=abc'});
-
-    repository.pending!.complete();
-    await pending;
-  });
 }

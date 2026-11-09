@@ -16,8 +16,4 @@ enum AuthFailure implements Exception {
 
   /// El navegador ha bloquejat la finestra emergent de Google (només web).
   popupBlocked,
-
-  /// L'enllaç de verificació enganxat no és vàlid, ha caducat o ja s'ha fet
-  /// servir.
-  invalidVerificationLink,
 }

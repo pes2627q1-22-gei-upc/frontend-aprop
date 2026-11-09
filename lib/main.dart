@@ -15,7 +15,6 @@ import 'features/auth/data/demo_auth_repository.dart';
 import 'features/auth/data/demo_user_sync_repository.dart';
 import 'features/auth/data/firebase_auth_repository.dart';
 import 'features/auth/data/http_user_sync_repository.dart';
-import 'features/auth/models/email_action.dart';
 import 'features/auth/repositories/auth_repository.dart';
 import 'features/auth/repositories/user_sync_repository.dart';
 import 'features/interest_test/data/http_interest_test_repository.dart';
@@ -34,12 +33,8 @@ Future<void> main() async {
 Future<APropApp> createConfiguredApp() async {
   final authRepository = await _createAuthRepository();
 
-  // A la web, els enllaços dels correus obren l'app amb l'acció a l'adreça
-  // (`?mode=verifyEmail&oobCode=…`, DP-031). Al mòbil, `Uri.base` no en porta.
-  final emailAction = kIsWeb ? EmailAction.fromUri(Uri.base) : null;
-
   if (!ApiConfig.isConfigured) {
-    return APropApp(authRepository: authRepository, emailAction: emailAction);
+    return APropApp(authRepository: authRepository);
   }
 
   final apiClient = ApiClient(
@@ -51,7 +46,6 @@ Future<APropApp> createConfiguredApp() async {
 
   return APropApp(
     authRepository: authRepository,
-    emailAction: emailAction,
     activityRepository: activityRepository,
     activityCategoryRepository: activityRepository,
     activityMapRepository: HttpActivityMapRepository(apiClient: apiClient),

@@ -361,23 +361,6 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Qui decideix:** frontend + backend
 - **Resolució:**
 
-### DP-031 · Enllaços de verificació amb la clau d'API antiga
-- **Estat:** oberta
-- **Obert per:** 2026-10-25 · Claude Code (Opus 5.5) amb confirmació de l'usuari · Taiga #73
-- **Context:** `VerifyEmailScreen`, `VerifyEmailViewModel`, `AuthRepository.verifyEmailWithLink`, `verificationCodeFromLink`. Relacionada amb DP-004. Els números DP-027, DP-029 i DP-030 són a altres branques sense fusionar.
-- **Dubte:** en renovar la clau (DP-004) es va esborrar la «Browser key» original, però Firebase Authentication la continua posant als enllaços dels correus (`client.apiKey` de la configuració, de només lectura: ni la consola ni l'API la deixen canviar). La pàgina de Firebase que obre l'enllaç falla i diu «ha caducat o ja s'ha fet servir»: ningú no pot verificar el correu fent clic a l'enllaç.
-- **Opcions:** A) demanar al suport de Firebase que hi associïn la clau nova · B) projecte de Firebase nou · C) recuperar la clau antiga restringida a `aprop-919ec.firebaseapp.com` · D) enganxar l'enllaç a l'app (com ara) · E) pàgina pròpia per als enllaços a Firebase Hosting.
-- **Provisionalment:** D, triada per l'usuari (descarta C i E): a «Verifica el teu correu» es pot enganxar l'enllaç del correu; l'app en treu el codi (`oobCode`) i el confirma amb `applyActionCode` i la clau de l'app. Fer clic a l'enllaç continua fallant. `TODO(DP-031)` al repositori i a la pantalla.
-- **Opció E en curs (2026-10-27, Claude Code (Opus 5.5) amb confirmació de l'usuari, Taiga #73):** l'usuari descarta pegar l'enllaç perquè queda lleig i prova una pàgina pròpia per als enllaços:
-  - si la web s'obre amb `?mode=…&oobCode=…`, `main.dart` en treu l'`EmailAction` i `APropApp` mostra `EmailActionScreen` en lloc de l'inici de sessió;
-  - `AuthRepository.confirmEmailVerification` confirma el codi amb `applyActionCode` i la clau de l'app, **sense sessió** (l'enllaç sovint s'obre al navegador del mòbil); si la web ja tenia la sessió del compte, també entra;
-  - «Continua a AProp!» passa a l'app normal. Altres tipus d'enllaç (p. ex. `resetPassword`) mostren que no es poden obrir aquí;
-  - no es neteja l'adreça: si es recarrega la pàgina, el codi ja s'ha fet servir i surt l'avís de caducat;
-  - textos i disseny sense mockup (`TODO(DP-031)`).
-  Falta, en aquest ordre: publicar la web amb el canvi a `frontend-aprop.onrender.com`; afegir-hi el domini a *Authorized domains* de Firebase; posar `https://frontend-aprop.onrender.com/` a *Templates → Personalitza l'URL d'acció* (vegeu `docs/firebase-auth.md`); provar-ho amb un compte nou. Quan funcioni, treure l'opció d'enganxar l'enllaç (D) i resoldre aquesta DP amb E.
-- **Qui decideix:** equip
-- **Resolució:**
-
 ### DP-032 · Perfil propi, edició, autoria i gamificació de demostració
 - **Estat:** oberta
 - **Obert per:** 2026-10-21 · Codex · Taiga #230 Frontend perfil
@@ -489,6 +472,24 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Resolució:**
 
 ## Resoltes
+
+### DP-031 · Enllaços de verificació amb la clau d'API antiga
+- **Estat:** resolta 2026-11-09
+- **Obert per:** 2026-10-25 · Claude Code (Opus 5.5) amb confirmació de l'usuari · Taiga #73
+- **Context:** `VerifyEmailScreen`, `VerifyEmailViewModel`, `AuthRepository.verifyEmailWithLink`, `verificationCodeFromLink`. Relacionada amb DP-004. Els números DP-027, DP-029 i DP-030 són a altres branques sense fusionar.
+- **Dubte:** en renovar la clau (DP-004) es va esborrar la «Browser key» original, però Firebase Authentication la continua posant als enllaços dels correus (`client.apiKey` de la configuració, de només lectura: ni la consola ni l'API la deixen canviar). La pàgina de Firebase que obre l'enllaç falla i diu «ha caducat o ja s'ha fet servir»: ningú no pot verificar el correu fent clic a l'enllaç.
+- **Opcions:** A) demanar al suport de Firebase que hi associïn la clau nova · B) projecte de Firebase nou · C) recuperar la clau antiga restringida a `aprop-919ec.firebaseapp.com` · D) enganxar l'enllaç a l'app (com ara) · E) pàgina pròpia per als enllaços a Firebase Hosting.
+- **Provisionalment:** D, triada per l'usuari (descarta C i E): a «Verifica el teu correu» es pot enganxar l'enllaç del correu; l'app en treu el codi (`oobCode`) i el confirma amb `applyActionCode` i la clau de l'app. Fer clic a l'enllaç continua fallant. `TODO(DP-031)` al repositori i a la pantalla.
+- **Opció E en curs (2026-10-27, Claude Code (Opus 5.5) amb confirmació de l'usuari, Taiga #73):** l'usuari descarta pegar l'enllaç perquè queda lleig i prova una pàgina pròpia per als enllaços:
+  - si la web s'obre amb `?mode=…&oobCode=…`, `main.dart` en treu l'`EmailAction` i `APropApp` mostra `EmailActionScreen` en lloc de l'inici de sessió;
+  - `AuthRepository.confirmEmailVerification` confirma el codi amb `applyActionCode` i la clau de l'app, **sense sessió** (l'enllaç sovint s'obre al navegador del mòbil); si la web ja tenia la sessió del compte, també entra;
+  - «Continua a AProp!» passa a l'app normal. Altres tipus d'enllaç (p. ex. `resetPassword`) mostren que no es poden obrir aquí;
+  - no es neteja l'adreça: si es recarrega la pàgina, el codi ja s'ha fet servir i surt l'avís de caducat;
+  - textos i disseny sense mockup (`TODO(DP-031)`).
+  Falta, en aquest ordre: publicar la web amb el canvi a `frontend-aprop.onrender.com`; afegir-hi el domini a *Authorized domains* de Firebase; posar `https://frontend-aprop.onrender.com/` a *Templates → Personalitza l'URL d'acció* (vegeu `docs/firebase-auth.md`); provar-ho amb un compte nou. Quan funcioni, treure l'opció d'enganxar l'enllaç (D) i resoldre aquesta DP amb E.
+- **Qui decideix:** equip
+- **Resolució:** C, a Google Cloud (2026-11-07, l'usuari). S'ha restaurat la clau antiga, la que Firebase posa als enllaços, i s'ha restringit a llocs web (`aprop-919ec.firebaseapp.com`, `aprop-919ec.web.app`, `frontend-aprop.onrender.com`) i a les API Identity Toolkit i Token Service. Ara la pàgina de Firebase verifica el correu en fer clic a l'enllaç. També s'ha configurat un SMTP propi amb un Gmail de l'equip, però no desbloqueja l'URL d'acció (`EMAIL_TEMPLATE_UPDATE_NOT_ALLOWED`, pla Spark): E no és possible. El 2026-11-09 (Taiga #73) s'esborren l'opció d'enganxar l'enllaç (D) i la pàgina pròpia (E): `EmailActionScreen`, `EmailAction`, `AuthRepository.verifyEmailWithLink`, `confirmEmailVerification`, `verificationCodeFromLink` i `AuthFailure.invalidVerificationLink`. **No esborreu la clau restaurada:** sense ella, els enllaços tornarien a fallar.
+
 
 ### DP-036 · Format UUID de `X-User-ID` i sincronització d'UID de Firebase a Render
 - **Estat:** resolta 2026-10-26
