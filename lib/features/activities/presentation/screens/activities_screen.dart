@@ -14,7 +14,6 @@ import '../widgets/activity_date_filter_sheet.dart';
 import '../widgets/activity_filter_feedback.dart';
 import '../widgets/activity_list_pagination.dart';
 import '../widgets/enrollment_action.dart';
-import '../widgets/enrollment_badge.dart';
 
 class ActivitiesScreen extends StatefulWidget {
   const ActivitiesScreen({
@@ -184,10 +183,11 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
   ActivitiesViewModel get viewModel => widget.viewModel;
   EnrollmentViewModel get enrollmentViewModel => widget.enrollmentViewModel;
 
-  /// «Apuntat» a la targeta del marcador del mapa.
-  Widget _enrollmentStatus(Activity activity) => EnrollmentStatusBadge(
+  /// «Apuntat» i el botó per apuntar-se a la targeta del marcador del mapa.
+  Widget _mapEnrollmentAction(Activity activity) => EnrollmentAction(
     viewModel: enrollmentViewModel,
     activityId: activity.id,
+    activityTitle: activity.title,
   );
   ValueChanged<String> get onActivitySelected => widget.onActivitySelected;
 
@@ -285,7 +285,7 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
                     activities: activities,
                     onActivitySelected: onActivitySelected,
                     onOverlayHeightChanged: widget.onMapOverlayChanged,
-                    statusBuilder: _enrollmentStatus,
+                    participationActionBuilder: _mapEnrollmentAction,
                   ),
                 ),
                 if (viewModel.filters.isActive &&
@@ -415,7 +415,7 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
                       widget.onMapActivitySelected ?? onActivitySelected,
                   onOverlayHeightChanged: widget.onMapOverlayChanged,
                   onVisibleAreaChanged: mapViewModel.loadArea,
-                  statusBuilder: _enrollmentStatus,
+                  participationActionBuilder: _mapEnrollmentAction,
                 ),
               ),
               if (mapViewModel.isLoading)

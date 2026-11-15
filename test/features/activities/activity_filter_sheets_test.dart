@@ -444,17 +444,17 @@ void main() {
           .singleWhere((m) => m.markerId.value == 'demo-theatre')
           .onTap!();
       await tester.pumpAndSettle();
-      expect(find.text('Veure activitat'), findsOneWidget);
+      expect(find.byTooltip('Tancar'), findsOneWidget);
       expect(overlays.last, greaterThan(0));
       await open(tester, 'categories');
       await tester.tap(category('Música'));
       await apply(tester);
-      expect(find.text('Veure activitat'), findsNothing);
+      expect(find.byTooltip('Tancar'), findsNothing);
       expect(overlays.last, 0);
       await tester.tap(find.byTooltip('Netejar tots els filtres'));
       await tester.pumpAndSettle();
       expect(map(tester).markers, hasLength(3));
-      expect(find.text('Veure activitat'), findsNothing);
+      expect(find.byTooltip('Tancar'), findsNothing);
     },
   );
 

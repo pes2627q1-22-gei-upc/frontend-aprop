@@ -266,6 +266,7 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Dubte:** el mockup (fig. 7) obre Inici amb el mapa; el CA3 demana carregar per zona visible en < 3 s, i no hi ha endpoint per zona; el número dels grups surt amb l'estil per defecte de Google, no amb el verd del mockup.
 - **Opcions:** A) vista inicial mapa · B) vista inicial llista (com ara); per a la zona: endpoint amb els límits del mapa o carregar-ho tot; per als grups: acceptar l'estil de Google o fer l'agrupació a Dart amb icones pròpies.
 - **Provisionalment:** la llista és la vista inicial (si Google Maps falla o no hi ha clau, Inici funciona igual); es mostren totes les activitats carregades; grups amb l'estil de Google (`TODO(DP-022)`).
+- **Targeta del marcador (2026-11-15, Claude Code (Opus 5.5) a petició de l'usuari):** tocar qualsevol lloc de la targeta obre la fitxa (com ja passa a les targetes de llista, l'assistent i l'Agenda), i el botó «Veure activitat» del mockup (fig. 7) es canvia pel d'apuntar-se («M’hi apunto» / «✓ Apuntat · Desapunta’m»). Desviació del mockup per confirmar amb l'equip.
 - **Qui decideix:** frontend + backend
 - **Resolució:**
 
@@ -488,6 +489,16 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Opcions:** A) només registrar el gust (fet) · B) a més, inscriure a les activitats que agraden · C) oferir «Apuntar-m’hi» a la targeta, separat del gust.
 - **Provisionalment:** A. Les respostes s’envien totes juntes en acabar (el backend només accepta el lot sencer); si falla, es conserven i es pot reintentar. Accés des de Configuració › «Tornar a fer el test d’interessos». `TODO(DP-042)` a `interest_test_screen.dart`.
 - **Qui decideix:** equip / PO
+- **Resolució:**
+
+### DP-045 · Mapa a la web: els clics sobre la targeta arriben al mapa
+- **Estat:** oberta
+- **Obert per:** 2026-11-15 · Claude Code (Opus 5.5) a petició de l'usuari · Taiga #255 / #258
+- **Context:** `ActivitiesMap._onMapTap` (`activities_map.dart`).
+- **Dubte:** a la web, el mapa de Google queda per sota de Flutter i rep també els clics fets sobre la targeta, els panells i els calendaris. En prémer «M’hi apunto» a la targeta del marcador, el mapa ho prenia com un toc al mapa i la tancava. A Android no passa.
+- **Opcions:** A) ignorar el toc al mapa que arriba just després d'un clic sobre qualsevol cosa de Flutter que el tapi: targeta, avís de «Desfer», diàlegs (fet) · B) el paquet oficial `pointer_interceptor`, que talla els clics damunt del mapa; serviria també per als panells i calendaris (#255), però és una dependència nova.
+- **Provisionalment:** A, amb un marge de 500 ms (`_cardClickEcho`). Sense paquets nous (`TODO(DP-045)`). El mapa encara pot rebre l'arrossegament fet sobre la targeta.
+- **Qui decideix:** equip (paquet nou)
 - **Resolució:**
 
 ## Resoltes

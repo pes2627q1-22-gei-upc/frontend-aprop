@@ -37,88 +37,95 @@ class AgendaPlanCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(color: colors.outlineVariant),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: InkWell(
-                onTap: onTap,
-                child: Image.asset(
-                  activity.imageAsset,
-                  width: 72,
-                  height: 72,
-                  fit: BoxFit.cover,
-                  semanticLabel: 'Veure activitat: ${activity.title}',
-                  errorBuilder: (context, error, stackTrace) {
-                    return ColoredBox(
-                      color: colors.surfaceContainerHighest,
-                      child: const SizedBox(
-                        width: 72,
-                        height: 72,
-                        child: Icon(Icons.image_outlined),
-                      ),
-                    );
-                  },
+      // Tocar qualsevol lloc obre l'activitat; els botons de dins fan la
+      // seva acció. Per al lector de pantalla, la imatge i el títol ja són
+      // els botons per obrir-la.
+      child: InkWell(
+        onTap: onTap,
+        excludeFromSemantics: true,
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: InkWell(
+                  onTap: onTap,
+                  child: Image.asset(
+                    activity.imageAsset,
+                    width: 72,
+                    height: 72,
+                    fit: BoxFit.cover,
+                    semanticLabel: 'Veure activitat: ${activity.title}',
+                    errorBuilder: (context, error, stackTrace) {
+                      return ColoredBox(
+                        color: colors.surfaceContainerHighest,
+                        child: const SizedBox(
+                          width: 72,
+                          height: 72,
+                          child: Icon(Icons.image_outlined),
+                        ),
+                      );
+                    },
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '${formatAgendaTime(activity.startsAt)} · '
-                    '${activity.category}',
-                    style: secondaryStyle,
-                  ),
-                  InkWell(
-                    onTap: onTap,
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(minHeight: 48),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              activity.title,
-                              style: theme.textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '${formatAgendaTime(activity.startsAt)} · '
+                      '${activity.category}',
+                      style: secondaryStyle,
+                    ),
+                    InkWell(
+                      onTap: onTap,
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(minHeight: 48),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                activity.title,
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
-                          ),
-                          const Icon(Icons.chevron_right, size: 20),
-                        ],
+                            const Icon(Icons.chevron_right, size: 20),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                  if (activity.municipality.isNotEmpty)
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.location_on_outlined,
-                          size: 16,
-                          color: colors.onSurfaceVariant,
-                        ),
-                        const SizedBox(width: 4),
-                        Expanded(
-                          child: Text(
-                            activity.municipality,
-                            style: secondaryStyle,
+                    if (activity.municipality.isNotEmpty)
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.location_on_outlined,
+                            size: 16,
+                            color: colors.onSurfaceVariant,
                           ),
-                        ),
-                      ],
-                    ),
-                  const SizedBox(height: 4),
-                  Text(_sourceLabel(activity), style: secondaryStyle),
-                  const SizedBox(height: 8),
-                  participationAction ?? const EnrolledBadge(),
-                ],
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(
+                              activity.municipality,
+                              style: secondaryStyle,
+                            ),
+                          ),
+                        ],
+                      ),
+                    const SizedBox(height: 4),
+                    Text(_sourceLabel(activity), style: secondaryStyle),
+                    const SizedBox(height: 8),
+                    participationAction ?? const EnrolledBadge(),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

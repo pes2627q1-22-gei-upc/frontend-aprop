@@ -123,54 +123,64 @@ class EnrollmentAction extends StatelessWidget {
           );
         }
 
-        return Semantics(
-          liveRegion: true,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Només per al lector de pantalla: un globus visible en passar
-              // per sobre del botó molestava.
-              Semantics(
-                tooltip: enrolled
-                    ? 'Desapuntar-me de $activityTitle'
-                    : readFailed
-                    ? 'Tornar a consultar els teus plans'
-                    : 'Apuntar-me a $activityTitle',
-                child: primary
-                    ? button
-                    // A les targetes, el distintiu al costat del botó; amb
-                    // poc espai o text gran, el botó baixa a la línia següent.
-                    : Wrap(
-                        alignment: WrapAlignment.end,
-                        crossAxisAlignment: WrapCrossAlignment.center,
-                        spacing: 12,
-                        runSpacing: 8,
-                        children: [if (enrolled) const EnrolledBadge(), button],
-                      ),
-              ),
-              if (error != null) ...[
-                const SizedBox(height: 8),
-                Text(
-                  error,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: colors.error,
-                  ),
+        // The cards open the activity when tapped anywhere: taps on this
+        // area, even on a disabled button or around it, must not do that.
+        return GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          excludeFromSemantics: true,
+          onTap: () {},
+          child: Semantics(
+            liveRegion: true,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Només per al lector de pantalla: un globus visible en passar
+                // per sobre del botó molestava.
+                Semantics(
+                  tooltip: enrolled
+                      ? 'Desapuntar-me de $activityTitle'
+                      : readFailed
+                      ? 'Tornar a consultar els teus plans'
+                      : 'Apuntar-me a $activityTitle',
+                  child: primary
+                      ? button
+                      // A les targetes, el distintiu al costat del botó; amb
+                      // poc espai o text gran, el botó baixa a la línia següent.
+                      : Wrap(
+                          alignment: WrapAlignment.end,
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          spacing: 12,
+                          runSpacing: 8,
+                          children: [
+                            if (enrolled) const EnrolledBadge(),
+                            button,
+                          ],
+                        ),
                 ),
-              ],
-              if (showHelper) ...[
-                const SizedBox(height: 8),
-                Text(
-                  enrolled
-                      ? 'Aquest pla ja és a la teva agenda.'
-                      : 'Afegeix aquest pla a la teva agenda.',
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: colors.onSurface,
+                if (error != null) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    error,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: colors.error,
+                    ),
                   ),
-                ),
+                ],
+                if (showHelper) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    enrolled
+                        ? 'Aquest pla ja és a la teva agenda.'
+                        : 'Afegeix aquest pla a la teva agenda.',
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: colors.onSurface,
+                    ),
+                  ),
+                ],
               ],
-            ],
+            ),
           ),
         );
       },
