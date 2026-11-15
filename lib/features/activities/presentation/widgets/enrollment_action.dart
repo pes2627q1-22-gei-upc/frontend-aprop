@@ -7,7 +7,9 @@ import 'enrollment_badge.dart';
 ///
 /// The button says what it does («M’hi apunto» or «Desapunta’m»); being
 /// enrolled is shown apart, with [EnrolledBadge]. Unenrolling asks for
-/// confirmation, so an accidental tap does not remove the plan.
+/// confirmation, so an accidental tap does not remove the plan, unless
+/// [undoableUnenroll] is set: then the plan goes at once and «Desfer» brings
+/// it back for a few seconds.
 class EnrollmentAction extends StatelessWidget {
   const EnrollmentAction({
     super.key,
@@ -16,6 +18,7 @@ class EnrollmentAction extends StatelessWidget {
     required this.activityTitle,
     this.primary = false,
     this.showHelper = false,
+    this.undoableUnenroll = false,
   });
 
   final EnrollmentViewModel viewModel;
@@ -23,6 +26,9 @@ class EnrollmentAction extends StatelessWidget {
   final String activityTitle;
   final bool primary;
   final bool showHelper;
+
+  /// Unenroll without asking and offer «Desfer» instead (activity lists).
+  final bool undoableUnenroll;
 
   @override
   Widget build(BuildContext context) {
@@ -58,7 +64,11 @@ class EnrollmentAction extends StatelessWidget {
             : enrolled
             // Unenrolling needs the current plans: after a read failure the
             // confirmed state stays visible but cannot be changed.
-            ? (readFailed ? null : () => _confirmUnenroll(context))
+            ? (readFailed
+                  ? null
+                  : undoableUnenroll
+                  ? () => _unenrollWithUndo(context)
+                  : () => _confirmUnenroll(context))
             : readFailed
             ? viewModel.load
             : () => viewModel.enroll(activityId);
@@ -165,6 +175,29 @@ class EnrollmentAction extends StatelessWidget {
         );
       },
     );
+  }
+
+  void _unenrollWithUndo(BuildContext context) {
+    viewModel.unenrollLater(activityId);
+    // TODO(DP-027): text i durada sense mockup.
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text('T’has desapuntat de «$activityTitle».'),
+          // It starts counting once it has slid in: it ends a little before
+          // the removal is sent, so «Desfer» never shows when it no longer
+          // works.
+          duration: unenrollUndoDelay - const Duration(milliseconds: 750),
+          // With an action the bar would stay until closed; it has to go
+          // when «Desfer» is no longer possible.
+          persist: false,
+          action: SnackBarAction(
+            label: 'Desfer',
+            onPressed: () => viewModel.undoUnenroll(activityId),
+          ),
+        ),
+      );
   }
 
   Future<void> _confirmUnenroll(BuildContext context) async {

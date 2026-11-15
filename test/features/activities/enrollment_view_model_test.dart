@@ -200,4 +200,94 @@ void main() {
       expect(disposable.enrolledActivityIds, isEmpty);
     },
   );
+
+  group('Unenrolling with «Desfer»', () {
+    const shortDelay = Duration(milliseconds: 10);
+    Future<void> afterDelay() =>
+        Future<void>.delayed(const Duration(milliseconds: 40));
+
+    test('Undo keeps the plan and tells the backend nothing', () async {
+      repository.emit('user-a', {'demo-jazz'});
+      await load();
+
+      viewModel.unenrollLater('demo-jazz', delay: shortDelay);
+      expect(viewModel.isEnrolled('demo-jazz'), isFalse);
+      expect(viewModel.enrolledActivityIds, isEmpty);
+
+      viewModel.undoUnenroll('demo-jazz');
+      expect(viewModel.isEnrolled('demo-jazz'), isTrue);
+      await afterDelay();
+      expect(repository.unenrolledRequests, isEmpty);
+      expect(viewModel.isEnrolled('demo-jazz'), isTrue);
+    });
+
+    test('Joining again before the delay is the same as undoing', () async {
+      repository.emit('user-a', {'demo-jazz'});
+      await load();
+
+      viewModel.unenrollLater('demo-jazz', delay: shortDelay);
+      await viewModel.enroll('demo-jazz');
+
+      expect(viewModel.isEnrolled('demo-jazz'), isTrue);
+      await afterDelay();
+      expect(repository.enrolledRequests, isEmpty);
+      expect(repository.unenrolledRequests, isEmpty);
+    });
+
+    test('Unenrolls after the delay; a failure brings the plan back', () async {
+      repository.emit('user-a', {'demo-jazz'});
+      await load();
+      repository.onUnenroll = (_, _) async => throw StateError('Offline');
+
+      viewModel.unenrollLater('demo-jazz', delay: shortDelay);
+      await afterDelay();
+      expect(viewModel.isEnrolled('demo-jazz'), isTrue);
+      expect(viewModel.isUnenrollDeferred('demo-jazz'), isFalse);
+      expect(
+        viewModel.errorFor('demo-jazz'),
+        'No t’hem pogut desapuntar. Torna-ho a provar.',
+      );
+
+      repository.onUnenroll = null;
+      viewModel.unenrollLater('demo-jazz', delay: shortDelay);
+      await afterDelay();
+      await flushEvents();
+      expect(viewModel.isEnrolled('demo-jazz'), isFalse);
+      expect(viewModel.errorFor('demo-jazz'), isNull);
+      expect(repository.unenrolledRequests, hasLength(2));
+    });
+
+    test('It is too late to undo once the request is sent', () async {
+      repository.emit('user-a', {'demo-jazz'});
+      await load();
+      final confirmation = Completer<void>();
+      repository.onUnenroll = (_, _) => confirmation.future;
+
+      viewModel.unenrollLater('demo-jazz', delay: shortDelay);
+      await afterDelay();
+      viewModel.undoUnenroll('demo-jazz');
+      expect(viewModel.isEnrolled('demo-jazz'), isFalse);
+
+      confirmation.complete();
+      await flushEvents();
+      expect(viewModel.isEnrolled('demo-jazz'), isFalse);
+      expect(viewModel.isUnenrollDeferred('demo-jazz'), isFalse);
+    });
+
+    test('Closing the screen sends removals still waiting', () async {
+      repository.emit('user-b', {'demo-jazz'});
+      final closing = EnrollmentViewModel(
+        userId: 'user-b',
+        repository: repository,
+      );
+      await closing.load();
+      await flushEvents();
+
+      closing.unenrollLater('demo-jazz', delay: const Duration(minutes: 1));
+      closing.dispose();
+      await flushEvents();
+
+      expect(repository.unenrolledRequests, ['user-b/demo-jazz']);
+    });
+  });
 }

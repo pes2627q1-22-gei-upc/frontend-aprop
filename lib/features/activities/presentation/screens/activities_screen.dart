@@ -378,6 +378,7 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
                         viewModel: enrollmentViewModel,
                         activityId: activity.id,
                         activityTitle: activity.title,
+                        undoableUnenroll: true,
                       ),
                     );
                   },
