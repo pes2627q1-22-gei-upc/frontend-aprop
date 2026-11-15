@@ -266,6 +266,7 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Dubte:** el mockup (fig. 7) obre Inici amb el mapa; el CA3 demana carregar per zona visible en < 3 s, i no hi ha endpoint per zona; el número dels grups surt amb l'estil per defecte de Google, no amb el verd del mockup.
 - **Opcions:** A) vista inicial mapa · B) vista inicial llista (com ara); per a la zona: endpoint amb els límits del mapa o carregar-ho tot; per als grups: acceptar l'estil de Google o fer l'agrupació a Dart amb icones pròpies.
 - **Provisionalment:** la llista és la vista inicial (si Google Maps falla o no hi ha clau, Inici funciona igual); es mostren totes les activitats carregades; grups amb l'estil de Google (`TODO(DP-022)`).
+- **Targeta del marcador (2026-11-15, Claude Code (Opus 5.5) a petició de l'usuari):** tocar qualsevol lloc de la targeta obre la fitxa (com ja passa a les targetes de llista, l'assistent i l'Agenda), i el botó «Veure activitat» del mockup (fig. 7) es canvia pel d'apuntar-se («M’hi apunto» / «✓ Apuntat · Desapunta’m»). Desviació del mockup per confirmar amb l'equip.
 - **Qui decideix:** frontend + backend
 - **Resolució:**
 
@@ -320,6 +321,9 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Dubte:** el backend no té cap endpoint per desapuntar-se (només `POST /events/{id}/signup`) i no hi ha mockup de com es desapunta ni del diàleg de confirmació.
 - **Opcions:** endpoint: A) `DELETE /events/{id}/signup` (simètric al d'apuntar-se) · B) un altre que acordi el backend. Interfície: A) tocar «Apuntat» obre una confirmació (com ara) · B) un botó «Desapunta'm» separat a la fitxa.
 - **Provisionalment:** contracte `unenroll` idempotent amb el repositori de demostració; a la interfície, tocar «Apuntat» obre el diàleg «Vols desapuntar-te?» amb «Mantén el pla» i «Desapunta’m», perquè un toc sense voler no tregui el pla. Textos sense mockup (`TODO(DP-027)` al repositori i al diàleg).
+- **Interfície B (2026-11-15, Claude Code (Opus 5.5) amb confirmació de l'usuari, Taiga #258):** l'estat i l'acció se separen. El distintiu «✓ Apuntat» (`EnrollmentStatusBadge`) surt a les targetes de llista (Inici, Descobreix, cerca, assistent), a la targeta del marcador del mapa i a la fitxa, al costat de la categoria. El botó diu què fa: «M’hi apunto» o «Desapunta’m». Disseny del distintiu sense mockup. A l'Agenda (Taiga #259), cada pla té el mateix distintiu i el botó «Desapunta’m» (`AgendaScreen.participationActionBuilder`, amb l'`EnrollmentViewModel` compartit).
+- **«Desfer» a la llista (2026-11-15, Claude Code (Opus 5.5) amb confirmació de l'usuari, Taiga #257):** a la llista d'Inici, «Desapunta’m» no pregunta: el pla marxa de seguida i surt l'avís «T’has desapuntat de «…».» amb «Desfer» durant 5 segons (`unenrollUndoDelay`). El backend no rep res fins que s'acaba el temps; «Desfer» o tornar a prémer «M’hi apunto» abans no fan cap petició. Si en acabar falla, el pla torna amb l'error. Si es tanca la sessió abans, la baixa s'envia igualment. El títol de la tasca diu «anul·lar reserva», però a la interfície no es parla de reserves (`AGENTS.md`). Amb el lector de pantalla actiu, Flutter pot deixar l'avís obert més estona: passat el temps, «Desfer» ja no fa res.
+- **Només «Desfer», a tot arreu (2026-11-15, decisió de l'usuari, Taiga #257 / #259):** no hi ha cap diàleg de confirmació: a la llista, Descobreix, la cerca, l'assistent, el mapa, la fitxa i l'Agenda, «Desapunta’m» treu el pla i ofereix «Desfer» durant 5 segons. Ser coherent pesa més que tenir dues maneres de desapuntar-se; desapuntar-se es pot desfer, així que no cal preguntar. Substitueix la confirmació que demanava la #259. A l'Agenda, el pla no desapareix fins que s'envia la baixa (mentrestant hi surt «M’hi apunto»).
 - **Qui decideix:** equip (interfície) · backend (endpoint)
 - **Resolució:**
 
@@ -469,6 +473,16 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Opcions:** A) només registrar el gust (fet) · B) a més, inscriure a les activitats que agraden · C) oferir «Apuntar-m’hi» a la targeta, separat del gust.
 - **Provisionalment:** A. Les respostes s’envien totes juntes en acabar (el backend només accepta el lot sencer); si falla, es conserven i es pot reintentar. Accés des de Configuració › «Tornar a fer el test d’interessos». `TODO(DP-042)` a `interest_test_screen.dart`.
 - **Qui decideix:** equip / PO
+- **Resolució:**
+
+### DP-045 · Mapa a la web: els clics sobre la targeta arriben al mapa
+- **Estat:** oberta
+- **Obert per:** 2026-11-15 · Claude Code (Opus 5.5) a petició de l'usuari · Taiga #255 / #258
+- **Context:** `ActivitiesMap._onMapTap` (`activities_map.dart`).
+- **Dubte:** a la web, el mapa de Google queda per sota de Flutter i rep també els clics fets sobre la targeta, els panells i els calendaris. En prémer «M’hi apunto» a la targeta del marcador, el mapa ho prenia com un toc al mapa i la tancava. A Android no passa.
+- **Opcions:** A) ignorar el toc al mapa que arriba just després d'un clic sobre qualsevol cosa de Flutter que el tapi: targeta, avís de «Desfer», diàlegs (fet) · B) el paquet oficial `pointer_interceptor`, que talla els clics damunt del mapa; serviria també per als panells i calendaris (#255), però és una dependència nova.
+- **Provisionalment:** A, amb un marge de 500 ms (`_cardClickEcho`). Sense paquets nous (`TODO(DP-045)`). El mapa encara pot rebre l'arrossegament fet sobre la targeta.
+- **Qui decideix:** equip (paquet nou)
 - **Resolució:**
 
 ## Resoltes

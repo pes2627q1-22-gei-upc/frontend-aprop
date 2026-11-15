@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../models/activity.dart';
 import '../../models/activity_filters.dart';
 import '../formatters/activity_filter_formatter.dart';
 import '../view_models/activities_map_view_model.dart';
@@ -181,6 +182,13 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
 
   ActivitiesViewModel get viewModel => widget.viewModel;
   EnrollmentViewModel get enrollmentViewModel => widget.enrollmentViewModel;
+
+  /// «Apuntat» i el botó per apuntar-se a la targeta del marcador del mapa.
+  Widget _mapEnrollmentAction(Activity activity) => EnrollmentAction(
+    viewModel: enrollmentViewModel,
+    activityId: activity.id,
+    activityTitle: activity.title,
+  );
   ValueChanged<String> get onActivitySelected => widget.onActivitySelected;
 
   void _show(ActivitiesView view) {
@@ -277,6 +285,7 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
                     activities: activities,
                     onActivitySelected: onActivitySelected,
                     onOverlayHeightChanged: widget.onMapOverlayChanged,
+                    participationActionBuilder: _mapEnrollmentAction,
                   ),
                 ),
                 if (viewModel.filters.isActive &&
@@ -405,6 +414,7 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
                       widget.onMapActivitySelected ?? onActivitySelected,
                   onOverlayHeightChanged: widget.onMapOverlayChanged,
                   onVisibleAreaChanged: mapViewModel.loadArea,
+                  participationActionBuilder: _mapEnrollmentAction,
                 ),
               ),
               if (mapViewModel.isLoading)

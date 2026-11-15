@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../activities/models/activity.dart';
 import '../../../activities/repositories/activity_repository.dart';
 import '../../../activities/repositories/enrollment_repository.dart';
 import '../formatters/agenda_date_formatter.dart';
@@ -14,6 +15,7 @@ class AgendaScreen extends StatefulWidget {
     required this.enrollmentRepository,
     required this.activityRepository,
     required this.onActivitySelected,
+    this.participationActionBuilder,
     this.now,
   });
 
@@ -21,6 +23,10 @@ class AgendaScreen extends StatefulWidget {
   final EnrollmentRepository enrollmentRepository;
   final ActivityRepository activityRepository;
   final ValueChanged<String> onActivitySelected;
+
+  /// Enrollment action for each plan, shared with the activity cards, so
+  /// unenrolling works and looks the same everywhere.
+  final Widget Function(Activity activity)? participationActionBuilder;
   final DateTime Function()? now;
 
   @override
@@ -151,6 +157,9 @@ class _AgendaScreenState extends State<AgendaScreen> {
           key: ValueKey(activity.id),
           activity: activity,
           onTap: () => widget.onActivitySelected(activity.id),
+          participationAction: widget.participationActionBuilder?.call(
+            activity,
+          ),
         ),
         const SizedBox(height: 12),
       ],

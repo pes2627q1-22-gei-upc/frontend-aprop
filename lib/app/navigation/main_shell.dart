@@ -508,6 +508,11 @@ class _MainShellState extends State<MainShell> {
                   enrollmentRepository: widget.enrollmentRepository,
                   activityRepository: _activityRepository,
                   onActivitySelected: _openActivityDetails,
+                  participationActionBuilder: (activity) => EnrollmentAction(
+                    viewModel: _enrollmentViewModel,
+                    activityId: activity.id,
+                    activityTitle: activity.title,
+                  ),
                 ),
               ),
             ),
