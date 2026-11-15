@@ -7,7 +7,7 @@ class ActivitiesHeader extends StatelessWidget {
   const ActivitiesHeader({
     super.key,
     required this.selectedView,
-    this.onAssistantPressed,
+    this.onCreatePressed,
     this.onLocationPressed,
     this.onDatesPressed,
     this.onCategoriesPressed,
@@ -20,7 +20,7 @@ class ActivitiesHeader extends StatelessWidget {
   });
 
   final ActivitiesView selectedView;
-  final VoidCallback? onAssistantPressed;
+  final VoidCallback? onCreatePressed;
   final VoidCallback? onLocationPressed;
   final VoidCallback? onDatesPressed;
   final VoidCallback? onCategoriesPressed;
@@ -40,7 +40,7 @@ class ActivitiesHeader extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _ActivitiesBrand(onAssistantPressed: onAssistantPressed),
+          _ActivitiesBrand(onCreatePressed: onCreatePressed),
           const SizedBox(height: 8),
           LayoutBuilder(
             builder: (context, constraints) {
@@ -133,8 +133,8 @@ class ActivitiesHeader extends StatelessWidget {
 }
 
 class _ActivitiesBrand extends StatelessWidget {
-  const _ActivitiesBrand({required this.onAssistantPressed});
-  final VoidCallback? onAssistantPressed;
+  const _ActivitiesBrand({required this.onCreatePressed});
+  final VoidCallback? onCreatePressed;
 
   @override
   Widget build(BuildContext context) {
@@ -146,33 +146,24 @@ class _ActivitiesBrand extends StatelessWidget {
       alignment: Alignment.centerLeft,
       semanticLabel: 'AProp!',
     );
-    final assistant = Tooltip(
-      message: onAssistantPressed == null
-          ? 'Assistent disponible properament'
-          : 'Obrir l’assistent',
-      child: FilledButton.tonalIcon(
-        onPressed: onAssistantPressed,
-        icon: const Icon(Icons.smart_toy_outlined, size: 20),
-        label: const Text('Assistent'),
-        style: FilledButton.styleFrom(
-          minimumSize: const Size(0, 48),
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          disabledBackgroundColor: colors.primaryContainer,
-          disabledForegroundColor: colors.onSurfaceVariant,
-        ),
+    // Només el «+»: el nom surt al consell i el llegeix el lector de pantalla.
+    final create = IconButton.filledTonal(
+      onPressed: onCreatePressed,
+      tooltip: onCreatePressed == null
+          ? 'Crear activitat disponible properament'
+          : 'Crear activitat',
+      constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+      style: IconButton.styleFrom(
+        disabledBackgroundColor: colors.primaryContainer,
+        disabledForegroundColor: colors.onSurfaceVariant,
       ),
+      icon: const Icon(Icons.add),
     );
-    if (MediaQuery.textScalerOf(context).scale(14) > 18) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [logo, const SizedBox(height: 8), assistant],
-      );
-    }
     return Row(
       children: [
         Expanded(child: logo),
         const SizedBox(width: 8),
-        assistant,
+        create,
       ],
     );
   }

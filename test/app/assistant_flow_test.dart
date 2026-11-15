@@ -21,8 +21,8 @@ void main() {
       await tester.pumpWidget(await signedInApp());
       await tester.pumpAndSettle();
 
-      // Open Assistant from Inici header
-      await tester.tap(find.widgetWithText(FilledButton, 'Assistent'));
+      // Open Assistant from the Inici floating button
+      await tester.tap(find.widgetWithText(FloatingActionButton, 'Assistent'));
       await tester.pumpAndSettle();
 
       expect(find.widgetWithText(AppBar, 'Assistent'), findsOneWidget);

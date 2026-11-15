@@ -21,7 +21,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Crear activitat'));
+      await tester.tap(find.byTooltip('Crear activitat'));
       await tester.pumpAndSettle();
       expect(find.widgetWithText(AppBar, 'Crea una activitat'), findsOneWidget);
 

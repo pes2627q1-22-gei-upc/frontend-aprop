@@ -86,8 +86,9 @@ class _MainShellState extends State<MainShell> {
   /// servir el mateix, perquè comparteixen les inscripcions.
   String get _enrollmentUserId => widget.user.serverId ?? widget.user.id;
 
-  /// Quant ha de pujar «Crear activitat» perquè no el tapi la targeta del mapa.
-  final _createButtonLift = ValueNotifier<double>(0);
+  /// Quant ha de pujar el botó de l'assistent perquè no el tapi la targeta
+  /// del mapa.
+  final _assistantButtonLift = ValueNotifier<double>(0);
   final _sectionNavigatorKeys = List.generate(
     5,
     (_) => GlobalKey<NavigatorState>(),
@@ -135,7 +136,7 @@ class _MainShellState extends State<MainShell> {
 
   @override
   void dispose() {
-    _createButtonLift.dispose();
+    _assistantButtonLift.dispose();
     _activitiesViewModel.dispose();
     _activitiesMapViewModel?.dispose();
     _enrollmentViewModel.dispose();
@@ -451,7 +452,7 @@ class _MainShellState extends State<MainShell> {
       body: child,
       floatingActionButton: index == 0
           ? ValueListenableBuilder<double>(
-              valueListenable: _createButtonLift,
+              valueListenable: _assistantButtonLift,
               // Puja suaument fins a sobre de la targeta, en lloc de saltar.
               builder: (context, lift, child) => AnimatedPadding(
                 duration: mapOverlayAnimationDuration,
@@ -460,9 +461,10 @@ class _MainShellState extends State<MainShell> {
                 child: child,
               ),
               child: FloatingActionButton.extended(
-                onPressed: _openCreateActivity,
-                icon: const Icon(Icons.add, size: 20),
-                label: const Text('Crear activitat'),
+                onPressed: _openAssistant,
+                tooltip: 'Obrir l’assistent',
+                icon: const Icon(Icons.smart_toy_outlined, size: 20),
+                label: const Text('Assistent'),
               ),
             )
           : null,
@@ -491,11 +493,11 @@ class _MainShellState extends State<MainShell> {
                     activityId,
                     repository: widget.activityMapRepository,
                   ),
-                  onAssistantPressed: _openAssistant,
+                  onCreatePressed: _openCreateActivity,
                   // El botó ja té 16 de marge: amb 12 menys queda a 12 de la
                   // targeta, com la llegenda.
-                  onMapOverlayChanged: (overlay) =>
-                      _createButtonLift.value = overlay == 0 ? 0 : overlay - 4,
+                  onMapOverlayChanged: (overlay) => _assistantButtonLift.value =
+                      overlay == 0 ? 0 : overlay - 4,
                 ),
               ),
             ),
