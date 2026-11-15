@@ -65,6 +65,7 @@ class ActivitiesMap extends StatefulWidget {
     required this.onActivitySelected,
     this.onOverlayHeightChanged,
     this.onVisibleAreaChanged,
+    this.interactive = true,
   });
 
   final List<Activity> activities;
@@ -77,6 +78,11 @@ class ActivitiesMap extends StatefulWidget {
   /// Zona visible en obrir el mapa i cada cop que s'acaba de moure, per
   /// carregar-ne les activitats.
   final ValueChanged<GeoBounds>? onVisibleAreaChanged;
+
+  /// Fals mentre hi ha un panell a sobre del mapa (filtres de dates o
+  /// categories). A la web, el mapa de Google és per sota de Flutter i, si
+  /// no, continuaria rebent arrossegaments, la roda del ratolí i clics.
+  final bool interactive;
 
   @override
   State<ActivitiesMap> createState() => _ActivitiesMapState();
@@ -139,6 +145,33 @@ class _ActivitiesMapState extends State<ActivitiesMap> {
     }
   }
 
+  /// Panells que obre el mateix mapa (llegenda, activitats d'un mateix
+  /// lloc) i que encara són oberts.
+  int _openSheets = 0;
+
+  /// El mapa només respon quan no té res a sobre.
+  bool get _isInteractive => widget.interactive && _openSheets == 0;
+
+  Future<void> _showSheet(WidgetBuilder builder, {bool tall = false}) async {
+    setState(() => _openSheets++);
+    try {
+      await showModalBottomSheet<void>(
+        context: context,
+        showDragHandle: true,
+        isScrollControlled: tall,
+        builder: builder,
+      );
+    } finally {
+      // A la web, el clic que tanca el panell també arriba al mapa: torna a
+      // respondre al fotograma següent, quan aquest clic ja ha passat.
+      WidgetsBinding.instance
+        ..addPostFrameCallback((_) {
+          if (mounted) setState(() => _openSheets--);
+        })
+        ..scheduleFrame();
+    }
+  }
+
   void _clearSelection() {
     if (_selectedId == null) return;
     setState(() => _selectedId = null);
@@ -148,6 +181,7 @@ class _ActivitiesMapState extends State<ActivitiesMap> {
   /// Tocar un grup hi apropa el mapa fins que hi caben tots els marcadors, que
   /// així es van separant. Si són tots al mateix lloc, se'n mostra la llista.
   void _onClusterTap(Cluster cluster) {
+    if (!_isInteractive) return;
     _clearSelection();
     if (isSamePlace(cluster.bounds)) {
       final ids = {for (final id in cluster.markerIds) id.value};
@@ -165,6 +199,7 @@ class _ActivitiesMapState extends State<ActivitiesMap> {
   /// Molt a prop, Google deixa d'agrupar i els marcadors d'un mateix lloc
   /// queden l'un sobre l'altre: només se'n podria tocar el de dalt.
   void _onMarkerTap(Activity activity, List<Activity> located) {
+    if (!_isInteractive) return;
     final point = activity.location!;
     final samePlace = [
       for (final other in located)
@@ -185,11 +220,9 @@ class _ActivitiesMapState extends State<ActivitiesMap> {
   void _showSamePlace(List<Activity> activities) {
     if (activities.isEmpty) return;
     activities.sort((a, b) => a.startsAt.compareTo(b.startsAt));
-    showModalBottomSheet<void>(
-      context: context,
-      showDragHandle: true,
-      isScrollControlled: true,
-      builder: (context) => _SamePlaceSheet(
+    _showSheet(
+      tall: true,
+      (context) => _SamePlaceSheet(
         activities: activities,
         onSelected: (id) {
           Navigator.of(context).pop();
@@ -238,7 +271,15 @@ class _ActivitiesMapState extends State<ActivitiesMap> {
                 _reportVisibleArea();
               },
               onCameraIdle: _reportVisibleArea,
-              onTap: (_) => _clearSelection(),
+              onTap: (_) {
+                if (_isInteractive) _clearSelection();
+              },
+              // Amb un panell a sobre, el mapa no es mou: a la web, si no,
+              // la roda i els arrossegaments hi arribarien igualment.
+              scrollGesturesEnabled: _isInteractive,
+              zoomGesturesEnabled: _isInteractive,
+              rotateGesturesEnabled: _isInteractive,
+              tiltGesturesEnabled: _isInteractive,
               clusterManagers: {
                 ClusterManager(
                   clusterManagerId: _clusterManagerId,
@@ -274,7 +315,11 @@ class _ActivitiesMapState extends State<ActivitiesMap> {
           curve: _overlayCurve,
           left: 12,
           bottom: overlay == 0 ? 24 : overlay + _cardMargin,
-          child: _LegendChip(withoutLocation: withoutLocation),
+          child: _LegendChip(
+            onPressed: () => _showSheet(
+              (context) => _LegendSheet(withoutLocation: withoutLocation),
+            ),
+          ),
         ),
         Positioned(
           left: _cardMargin,
@@ -320,24 +365,16 @@ class _ActivitiesMapState extends State<ActivitiesMap> {
 }
 
 class _LegendChip extends StatelessWidget {
-  const _LegendChip({required this.withoutLocation});
+  const _LegendChip({required this.onPressed});
 
-  final int withoutLocation;
-
-  void _show(BuildContext context) {
-    showModalBottomSheet<void>(
-      context: context,
-      showDragHandle: true,
-      builder: (context) => _LegendSheet(withoutLocation: withoutLocation),
-    );
-  }
+  final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
 
     return ActionChip(
-      onPressed: () => _show(context),
+      onPressed: onPressed,
       avatar: Icon(Icons.info_outline, size: 18, color: colors.primary),
       label: const Text('Llegenda'),
       backgroundColor: colors.surface,

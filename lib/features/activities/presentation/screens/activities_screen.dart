@@ -99,11 +99,14 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       barrierLabel: 'Tancar el filtre',
     );
-    _activeFilterRoute = route;
+    // Mentre el panell és obert, el mapa de sota no respon (#255).
+    setState(() => _activeFilterRoute = route);
     try {
       return await navigator.push<T>(route);
     } finally {
-      if (identical(_activeFilterRoute, route)) _activeFilterRoute = null;
+      if (identical(_activeFilterRoute, route) && mounted) {
+        setState(() => _activeFilterRoute = null);
+      }
     }
   }
 
@@ -277,6 +280,7 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
                     activities: activities,
                     onActivitySelected: onActivitySelected,
                     onOverlayHeightChanged: widget.onMapOverlayChanged,
+                    interactive: _activeFilterRoute == null,
                   ),
                 ),
                 if (viewModel.filters.isActive &&
@@ -404,6 +408,7 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
                   onActivitySelected:
                       widget.onMapActivitySelected ?? onActivitySelected,
                   onOverlayHeightChanged: widget.onMapOverlayChanged,
+                  interactive: _activeFilterRoute == null,
                   onVisibleAreaChanged: mapViewModel.loadArea,
                 ),
               ),

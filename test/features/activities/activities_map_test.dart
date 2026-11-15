@@ -148,6 +148,49 @@ void main() {
     expect(overlays.last, 0);
   });
 
+  testWidgets('Amb un panell a sobre, el mapa no es mou ni respon', (
+    tester,
+  ) async {
+    await pumpInici(tester);
+    await openMap(tester);
+    bool locked() => !map(tester).scrollGesturesEnabled;
+    expect(locked(), isFalse);
+
+    // Panell de dates (l'obre Inici).
+    await tester.tap(find.byKey(const ValueKey('activities-filter-dates')));
+    await tester.pumpAndSettle();
+    expect(locked(), isTrue);
+    expect(map(tester).zoomGesturesEnabled, isFalse);
+    marker(tester, 'demo-theatre').onTap!();
+    await tester.pumpAndSettle();
+    expect(find.text('Teatre sota les estrelles'), findsNothing);
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    expect(locked(), isFalse);
+
+    // Panell de categories.
+    await tester.tap(
+      find.byKey(const ValueKey('activities-filter-categories')),
+    );
+    await tester.pumpAndSettle();
+    expect(locked(), isTrue);
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    expect(locked(), isFalse);
+
+    // Llegenda (l'obre el mapa).
+    await tester.tap(find.text('Llegenda'));
+    await tester.pumpAndSettle();
+    expect(locked(), isTrue);
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    expect(locked(), isFalse);
+
+    marker(tester, 'demo-theatre').onTap!();
+    await tester.pumpAndSettle();
+    expect(find.text('Teatre sota les estrelles'), findsOneWidget);
+  });
+
   testWidgets('Tocar el mapa tanca la targeta', (tester) async {
     await pumpInici(tester);
     await openMap(tester);
