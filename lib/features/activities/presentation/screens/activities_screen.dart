@@ -20,7 +20,7 @@ class ActivitiesScreen extends StatefulWidget {
     required this.viewModel,
     required this.enrollmentViewModel,
     required this.onActivitySelected,
-    this.onAssistantPressed,
+    this.onCreatePressed,
     this.onMapOverlayChanged,
     this.mapViewModel,
     this.onMapActivitySelected,
@@ -30,7 +30,7 @@ class ActivitiesScreen extends StatefulWidget {
   final ActivitiesViewModel viewModel;
   final EnrollmentViewModel enrollmentViewModel;
   final ValueChanged<String> onActivitySelected;
-  final VoidCallback? onAssistantPressed;
+  final VoidCallback? onCreatePressed;
   final DateTime Function() now;
 
   /// Si hi és, el mapa carrega les activitats per zona visible (backend) en
@@ -196,7 +196,7 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
       listenable: viewModel,
       builder: (context, child) => ActivitiesHeader(
         selectedView: _view,
-        onAssistantPressed: widget.onAssistantPressed,
+        onCreatePressed: widget.onCreatePressed,
         onMapPressed: () => _show(ActivitiesView.map),
         onListPressed: () => _show(ActivitiesView.list),
         onDatesPressed: _openDates,
