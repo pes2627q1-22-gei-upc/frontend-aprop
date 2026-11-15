@@ -90,10 +90,11 @@ void main() {
 
     await tester.tap(find.widgetWithText(OutlinedButton, 'Desapunta’m'));
     await tester.pumpAndSettle();
-    expect(find.text('Vols desapuntar-te?'), findsOneWidget);
-    await tester.tap(find.widgetWithText(FilledButton, 'Desapunta’m'));
-    await tester.pumpAndSettle();
+    expect(find.text('Vols desapuntar-te?'), findsNothing);
     expect(find.text('M’hi apunto'), findsOneWidget);
+    // Sense «Desfer», la baixa s'envia passat el temps.
+    await tester.pump(const Duration(seconds: 5));
+    await tester.pumpAndSettle();
 
     await tester.binding.handlePopRoute();
     await tester.pumpAndSettle();
@@ -103,7 +104,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('Unenrolling from the Agenda asks first, then removes the plan', (
+  testWidgets('Unenrolling from the Agenda can be undone, then removes it', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(390, 844);
@@ -144,17 +145,20 @@ void main() {
       matching: find.widgetWithText(OutlinedButton, 'Desapunta’m'),
     );
 
-    // Cancelling keeps the plan.
+    // No question: «Desfer» keeps the plan.
     await tester.tap(unenroll);
     await tester.pumpAndSettle();
-    expect(find.text('Vols desapuntar-te?'), findsOneWidget);
-    await tester.tap(find.text('Mantén el pla'));
+    expect(find.text('Vols desapuntar-te?'), findsNothing);
+    await tester.tap(find.text('Desfer'));
     await tester.pumpAndSettle();
-    expect(find.text('Jazz al parc').hitTestable(), findsOneWidget);
+    expect(
+      find.descendant(of: plan, matching: find.text('Apuntat')),
+      findsOneWidget,
+    );
 
+    // Without it, the plan goes once the time is over.
     await tester.tap(unenroll);
-    await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(FilledButton, 'Desapunta’m'));
+    await tester.pump(const Duration(seconds: 5));
     await tester.pumpAndSettle();
 
     expect(find.text('No tens cap pla per a aquest dia.'), findsOneWidget);

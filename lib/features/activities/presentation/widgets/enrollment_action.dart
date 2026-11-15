@@ -6,10 +6,9 @@ import 'enrollment_badge.dart';
 /// The same enrollment states for compact cards and the detail's primary action.
 ///
 /// The button says what it does («M’hi apunto» or «Desapunta’m»); being
-/// enrolled is shown apart, with [EnrolledBadge]. Unenrolling asks for
-/// confirmation, so an accidental tap does not remove the plan, unless
-/// [undoableUnenroll] is set: then the plan goes at once and «Desfer» brings
-/// it back for a few seconds.
+/// enrolled is shown apart, with [EnrolledBadge]. Unenrolling does not ask:
+/// the plan goes at once and «Desfer» brings it back for a few seconds, so an
+/// accidental tap is easy to fix.
 class EnrollmentAction extends StatelessWidget {
   const EnrollmentAction({
     super.key,
@@ -18,7 +17,6 @@ class EnrollmentAction extends StatelessWidget {
     required this.activityTitle,
     this.primary = false,
     this.showHelper = false,
-    this.undoableUnenroll = false,
   });
 
   final EnrollmentViewModel viewModel;
@@ -26,9 +24,6 @@ class EnrollmentAction extends StatelessWidget {
   final String activityTitle;
   final bool primary;
   final bool showHelper;
-
-  /// Unenroll without asking and offer «Desfer» instead (activity lists).
-  final bool undoableUnenroll;
 
   @override
   Widget build(BuildContext context) {
@@ -64,11 +59,7 @@ class EnrollmentAction extends StatelessWidget {
             : enrolled
             // Unenrolling needs the current plans: after a read failure the
             // confirmed state stays visible but cannot be changed.
-            ? (readFailed
-                  ? null
-                  : undoableUnenroll
-                  ? () => _unenrollWithUndo(context)
-                  : () => _confirmUnenroll(context))
+            ? (readFailed ? null : () => _unenrollWithUndo(context))
             : readFailed
             ? viewModel.load
             : () => viewModel.enroll(activityId);
@@ -208,30 +199,5 @@ class EnrollmentAction extends StatelessWidget {
           ),
         ),
       );
-  }
-
-  Future<void> _confirmUnenroll(BuildContext context) async {
-    // TODO(DP-027): text i disseny del diàleg sense mockup.
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Vols desapuntar-te?'),
-        content: Text(
-          'Treurem «$activityTitle» de la teva agenda. Hi podràs tornar a '
-          'apuntar quan vulguis.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Mantén el pla'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Desapunta’m'),
-          ),
-        ],
-      ),
-    );
-    if (confirmed ?? false) await viewModel.unenroll(activityId);
   }
 }
