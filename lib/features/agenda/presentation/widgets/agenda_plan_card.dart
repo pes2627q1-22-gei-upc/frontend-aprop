@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../activities/models/activity.dart';
+import '../../../activities/presentation/widgets/enrollment_badge.dart';
 import '../formatters/agenda_date_formatter.dart';
 
 /// Compact plan of the selected day. The image and the title open the event.
@@ -9,10 +10,15 @@ class AgendaPlanCard extends StatelessWidget {
     super.key,
     required this.activity,
     required this.onTap,
+    this.participationAction,
   });
 
   final Activity activity;
   final VoidCallback onTap;
+
+  /// The shared enrollment action («Apuntat» and «Desapunta’m»), as in the
+  /// activity cards. Without it, only the «Apuntat» badge is shown.
+  final Widget? participationAction;
 
   @override
   Widget build(BuildContext context) {
@@ -108,25 +114,7 @@ class AgendaPlanCard extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(_sourceLabel(activity), style: secondaryStyle),
                   const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.check_circle_outline,
-                        size: 18,
-                        color: colors.primary,
-                      ),
-                      const SizedBox(width: 4),
-                      Flexible(
-                        child: Text(
-                          'Apuntat',
-                          style: theme.textTheme.labelLarge?.copyWith(
-                            color: colors.primary,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                  participationAction ?? const EnrolledBadge(),
                 ],
               ),
             ),
