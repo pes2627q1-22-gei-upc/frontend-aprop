@@ -13,8 +13,6 @@ AuthFailure? authFailureFromFirebaseCode(String code) {
     'network-request-failed' => AuthFailure.network,
     'too-many-requests' => AuthFailure.tooManyRequests,
     'popup-blocked' => AuthFailure.popupBlocked,
-    'invalid-action-code' ||
-    'expired-action-code' => AuthFailure.invalidVerificationLink,
     _ => null,
   };
 }
@@ -42,35 +40,4 @@ AuthFailure? signInFailureFromFirebaseCode(String code) {
   final space = name.indexOf(' ');
   if (space == -1) return (name, '');
   return (name.substring(0, space), name.substring(space + 1).trim());
-}
-
-/// Treu el codi d'un enllaç de verificació de Firebase
-/// (`…/__/auth/action?mode=verifyEmail&oobCode=…`). Accepta també el codi sol i
-/// enllaços que algun client de correu embolcalla dins d'un altre (`?q=…`).
-/// Retorna `null` si no n'hi troba cap o si l'enllaç és d'una altra acció.
-String? verificationCodeFromLink(String text) {
-  final link = text.trim();
-  if (link.isEmpty) return null;
-
-  final uri = Uri.tryParse(link);
-  if (uri == null || !uri.hasScheme) {
-    // Sense esquema: el codi sol (no porta espais ni caràcters d'URL).
-    return RegExp(r'^[A-Za-z0-9_-]{20,}$').hasMatch(link) ? link : null;
-  }
-
-  final params = uri.queryParameters;
-  final code = params['oobCode'];
-  if (code != null && code.isNotEmpty) {
-    final mode = params['mode'];
-    return mode == null || mode == 'verifyEmail' ? code : null;
-  }
-
-  // Enllaç embolcallat (p. ex. https://www.google.com/url?q=<enllaç>).
-  for (final wrapped in [params['q'], params['url'], params['link']]) {
-    if (wrapped != null && wrapped != link) {
-      final inner = verificationCodeFromLink(wrapped);
-      if (inner != null) return inner;
-    }
-  }
-  return null;
 }

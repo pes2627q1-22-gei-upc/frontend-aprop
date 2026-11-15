@@ -54,47 +54,4 @@ void main() {
     expect(splitDisplayName(null), ('', ''));
     expect(splitDisplayName('   '), ('', ''));
   });
-
-  group("Codi de l'enllaç de verificació", () {
-    const code = 'Eg85jLnBHWtW65F3lfpzlXjgrET_vr-Au4SG6GMY6hUAAAGhcnnlcg';
-    const link =
-        'https://aprop-919ec.firebaseapp.com/__/auth/action?mode=verifyEmail'
-        '&oobCode=$code&apiKey=AIzaClauAntiga&lang=ca';
-
-    test("El treu de l'enllaç del correu", () {
-      expect(verificationCodeFromLink(link), code);
-      expect(verificationCodeFromLink('  $link\n'), code);
-    });
-
-    test('Accepta el codi sol i enllaços embolcallats', () {
-      expect(verificationCodeFromLink(code), code);
-      final wrapped = Uri.parse('https://www.google.com/url')
-          .replace(queryParameters: {'q': link})
-          .toString();
-      expect(verificationCodeFromLink(wrapped), code);
-    });
-
-    test("Rebutja enllaços d'altres accions i text que no és un enllaç", () {
-      expect(
-        verificationCodeFromLink(
-          link.replaceFirst('verifyEmail', 'resetPassword'),
-        ),
-        isNull,
-      );
-      expect(verificationCodeFromLink('https://aprop-919ec.web.app/'), isNull);
-      expect(verificationCodeFromLink('hola, què tal'), isNull);
-      expect(verificationCodeFromLink(''), isNull);
-    });
-
-    test("Un codi caducat o ja fet servir és un enllaç no vàlid", () {
-      expect(
-        authFailureFromFirebaseCode('invalid-action-code'),
-        AuthFailure.invalidVerificationLink,
-      );
-      expect(
-        authFailureFromFirebaseCode('expired-action-code'),
-        AuthFailure.invalidVerificationLink,
-      );
-    });
-  });
 }

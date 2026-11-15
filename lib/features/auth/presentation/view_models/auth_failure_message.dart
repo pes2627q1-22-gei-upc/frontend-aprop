@@ -16,9 +16,6 @@ extension AuthFailureMessage on AuthFailure {
       'Massa intents seguits. Espera una mica i torna-ho a provar.',
     AuthFailure.emailRequired =>
       'De moment només pots entrar amb el correu electrònic.',
-    AuthFailure.invalidVerificationLink =>
-      "Aquest enllaç no és vàlid o ja s'ha fet servir. Torna a enviar el "
-          "correu i enganxa l'enllaç del més recent.",
     AuthFailure.popupBlocked =>
       "El navegador ha bloquejat la finestra de Google. Permet les finestres "
           'emergents i torna-ho a provar.',

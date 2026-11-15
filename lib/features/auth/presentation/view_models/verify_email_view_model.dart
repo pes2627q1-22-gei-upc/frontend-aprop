@@ -10,7 +10,6 @@ const emailNotVerifiedMessage =
     "Encara no consta que hagis verificat el correu. Obre l'enllaç que t'hem "
     'enviat i torna-ho a provar.';
 const verificationEmailSentMessage = "T'hem tornat a enviar el correu.";
-const emptyVerificationLinkMessage = "Enganxa l'enllaç del correu.";
 
 class VerifyEmailViewModel extends ChangeNotifier {
   /// La pantalla s'obre just després d'enviar el correu (o d'entrar amb un
@@ -33,17 +32,13 @@ class VerifyEmailViewModel extends ChangeNotifier {
   int _cooldownSecondsLeft = 0;
   bool _isChecking = false;
   bool _isResending = false;
-  bool _isApplyingLink = false;
   bool _isDisposed = false;
   String? _errorMessage;
   String? _infoMessage;
-  String? _linkError;
 
   bool get isChecking => _isChecking;
   bool get isResending => _isResending;
-  bool get isApplyingLink => _isApplyingLink;
-  bool get isBusy => _isChecking || _isResending || _isApplyingLink;
-  String? get linkError => _linkError;
+  bool get isBusy => _isChecking || _isResending;
   int get cooldownSecondsLeft => _cooldownSecondsLeft;
   bool get canResend => !isBusy && _cooldownSecondsLeft == 0;
   String? get errorMessage => _errorMessage;
@@ -68,40 +63,6 @@ class VerifyEmailViewModel extends ChangeNotifier {
       _isChecking = false;
       _finishAction();
     }
-  }
-
-  /// Verifica el correu amb l'enllaç enganxat. Si va bé no cal fer res més:
-  /// el canvi arriba per `AuthRepository.authStateChanges`.
-  Future<void> verifyWithLink(String link) async {
-    if (isBusy || _isDisposed) return;
-
-    if (link.trim().isEmpty) {
-      _linkError = emptyVerificationLinkMessage;
-      notifyListeners();
-      return;
-    }
-
-    _isApplyingLink = true;
-    _linkError = null;
-    _startAction();
-
-    try {
-      await _repository.verifyEmailWithLink(link.trim());
-    } on AuthFailure catch (failure) {
-      _linkError = failure.message;
-    } catch (_) {
-      _linkError = unexpectedAuthErrorMessage;
-    } finally {
-      _isApplyingLink = false;
-      _finishAction();
-    }
-  }
-
-  /// L'usuari ha canviat l'enllaç: l'error anterior ja no hi correspon.
-  void onLinkChanged() {
-    if (_linkError == null) return;
-    _linkError = null;
-    notifyListeners();
   }
 
   Future<void> resendEmail() async {

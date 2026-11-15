@@ -59,21 +59,19 @@ registrada a l'app Android de Firebase. Si no hi és, el selector de comptes fal
 3. Torna a executar `flutterfire configure`: `google-services.json` ha d'incloure els clients OAuth que es
    creen en afegir la SHA-1.
 
-## Enllaços dels correus a la web de l'app (DP-031)
+## Enllaços dels correus (DP-031)
 
-Els enllaços de verificació que genera Firebase porten la clau d'API antiga i la pàgina de Firebase falla. Per
-evitar-ho, els enllaços obren la web de l'app, que confirma el codi amb la clau bona (`EmailActionScreen`).
+Els enllaços dels correus (verificació i contrasenya) obren la pàgina de Firebase
+(`aprop-919ec.firebaseapp.com/__/auth/action`), que fa servir la clau d'API que Firebase té associada al
+projecte. Aquesta clau no és la de l'app i no es pot canviar: si s'esborra, la pàgina diu que l'enllaç «ha
+caducat o ja s'ha fet servir».
 
-1. Publica la web amb aquest canvi a `https://frontend-aprop.onrender.com/` (ha de ser abans del pas 3: si no,
-   l'enllaç obriria l'inici de sessió sense verificar).
-2. *Authentication → Settings → Authorized domains → Add domain*: `frontend-aprop.onrender.com` (només el nom).
-3. *Authentication → Templates → Verificació de l'adreça electrònica →* llapis *→ Personalitza l'URL d'acció*:
-   `https://frontend-aprop.onrender.com/`. El text del correu no es pot editar (Firebase ho impedeix per evitar
-   correu brossa), però l'URL d'acció sí, i val per a totes les plantilles.
-
-Per provar-ho en local sense canviar res a Firebase: obre el correu, copia el valor sencer d'`oobCode` (fins al
-següent `&`) i obre `http://localhost:5000/?mode=verifyEmail&oobCode=<codi>` amb l'app web en marxa. Cada codi
-només serveix un cop.
+- **No esborreu aquesta clau** a Google Cloud → *APIs i serveis → Credencials*. Està restringida a llocs web
+  (`aprop-919ec.firebaseapp.com`, `aprop-919ec.web.app`, `frontend-aprop.onrender.com`) i a les API
+  Identity Toolkit i Token Service.
+- Els correus surten d'un Gmail de l'equip (*Authentication → Templates → SMTP settings*).
+- L'URL d'acció no es pot personalitzar amb el pla Spark (`EMAIL_TEMPLATE_UPDATE_NOT_ALLOWED`), ni tan sols
+  amb SMTP propi.
 
 ## Backend: nom d'usuari (`POST /auth/sync`)
 
