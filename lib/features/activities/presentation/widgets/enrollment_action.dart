@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 
 import '../view_models/enrollment_view_model.dart';
+import 'enrollment_badge.dart';
 
 /// The same enrollment states for compact cards and the detail's primary action.
 ///
-/// Tapping «Apuntat» asks for confirmation before unenrolling, so an
-/// accidental tap does not remove the plan.
+/// The button says what it does («M’hi apunto» or «Desapunta’m»); being
+/// enrolled is shown apart, with [EnrolledBadge]. Unenrolling asks for
+/// confirmation, so an accidental tap does not remove the plan.
 class EnrollmentAction extends StatelessWidget {
   const EnrollmentAction({
     super.key,
@@ -42,7 +44,7 @@ class EnrollmentAction extends StatelessWidget {
         final label = leaving
             ? 'Desapuntant…'
             : enrolled
-            ? 'Apuntat'
+            ? 'Desapunta’m'
             : saving
             ? 'Apuntant…'
             : loading
@@ -78,9 +80,6 @@ class EnrollmentAction extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-            ] else if (enrolled) ...[
-              const Icon(Icons.check_circle_outline, size: 20),
-              const SizedBox(width: 8),
             ],
             Flexible(child: Text(label)),
           ],
@@ -93,9 +92,7 @@ class EnrollmentAction extends StatelessWidget {
               minimumSize: const Size(144, 48),
               foregroundColor: colors.primary,
               disabledForegroundColor: colors.primary,
-              backgroundColor: enrolled
-                  ? colors.primary.withValues(alpha: 0.08)
-                  : colors.surface,
+              backgroundColor: colors.surface,
               side: BorderSide(color: colors.primary),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(14),
@@ -132,7 +129,15 @@ class EnrollmentAction extends StatelessWidget {
                     : 'Apuntar-me a $activityTitle',
                 child: primary
                     ? button
-                    : Align(alignment: Alignment.centerRight, child: button),
+                    // A les targetes, el distintiu al costat del botó; amb
+                    // poc espai o text gran, el botó baixa a la línia següent.
+                    : Wrap(
+                        alignment: WrapAlignment.end,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        spacing: 12,
+                        runSpacing: 8,
+                        children: [if (enrolled) const EnrolledBadge(), button],
+                      ),
               ),
               if (error != null) ...[
                 const SizedBox(height: 8),
@@ -147,8 +152,7 @@ class EnrollmentAction extends StatelessWidget {
                 const SizedBox(height: 8),
                 Text(
                   enrolled
-                      ? 'Aquest pla ja és a la teva agenda. Toca «Apuntat» '
-                            'si vols desapuntar-te.'
+                      ? 'Aquest pla ja és a la teva agenda.'
                       : 'Afegeix aquest pla a la teva agenda.',
                   textAlign: TextAlign.center,
                   style: theme.textTheme.bodySmall?.copyWith(

@@ -65,10 +65,15 @@ class ActivitiesMap extends StatefulWidget {
     required this.onActivitySelected,
     this.onOverlayHeightChanged,
     this.onVisibleAreaChanged,
+    this.statusBuilder,
   });
 
   final List<Activity> activities;
   final ValueChanged<String> onActivitySelected;
+
+  /// Distintiu d'estat de l'activitat a la targeta del marcador, com
+  /// «Apuntat». Qui conté el mapa decideix què hi va.
+  final Widget Function(Activity activity)? statusBuilder;
 
   /// Espai que ocupa la targeta del marcador des de baix (0 si no n'hi ha),
   /// perquè qui conté el mapa pugui apartar-hi els seus botons.
@@ -302,6 +307,7 @@ class _ActivitiesMapState extends State<ActivitiesMap> {
                     onChanged: _onCardSize,
                     child: _MapActivityCard(
                       activity: selected,
+                      status: widget.statusBuilder?.call(selected),
                       onClose: _clearSelection,
                       onOpen: () => widget.onActivitySelected(selected.id),
                     ),
@@ -487,9 +493,11 @@ class _MapActivityCard extends StatelessWidget {
     required this.activity,
     required this.onClose,
     required this.onOpen,
+    this.status,
   });
 
   final Activity activity;
+  final Widget? status;
   final VoidCallback onClose;
   final VoidCallback onOpen;
 
@@ -531,7 +539,15 @@ class _MapActivityCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      ActivityCategoryBadge(category: activity.category),
+                      Wrap(
+                        spacing: 6,
+                        runSpacing: 6,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: [
+                          ActivityCategoryBadge(category: activity.category),
+                          ?status,
+                        ],
+                      ),
                       const SizedBox(height: 6),
                       Text(
                         activity.title,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../models/activity.dart';
 import '../../models/activity_filters.dart';
 import '../formatters/activity_filter_formatter.dart';
 import '../view_models/activities_map_view_model.dart';
@@ -13,6 +14,7 @@ import '../widgets/activity_date_filter_sheet.dart';
 import '../widgets/activity_filter_feedback.dart';
 import '../widgets/activity_list_pagination.dart';
 import '../widgets/enrollment_action.dart';
+import '../widgets/enrollment_badge.dart';
 
 class ActivitiesScreen extends StatefulWidget {
   const ActivitiesScreen({
@@ -181,6 +183,12 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
 
   ActivitiesViewModel get viewModel => widget.viewModel;
   EnrollmentViewModel get enrollmentViewModel => widget.enrollmentViewModel;
+
+  /// «Apuntat» a la targeta del marcador del mapa.
+  Widget _enrollmentStatus(Activity activity) => EnrollmentStatusBadge(
+    viewModel: enrollmentViewModel,
+    activityId: activity.id,
+  );
   ValueChanged<String> get onActivitySelected => widget.onActivitySelected;
 
   void _show(ActivitiesView view) {
@@ -277,6 +285,7 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
                     activities: activities,
                     onActivitySelected: onActivitySelected,
                     onOverlayHeightChanged: widget.onMapOverlayChanged,
+                    statusBuilder: _enrollmentStatus,
                   ),
                 ),
                 if (viewModel.filters.isActive &&
@@ -405,6 +414,7 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
                       widget.onMapActivitySelected ?? onActivitySelected,
                   onOverlayHeightChanged: widget.onMapOverlayChanged,
                   onVisibleAreaChanged: mapViewModel.loadArea,
+                  statusBuilder: _enrollmentStatus,
                 ),
               ),
               if (mapViewModel.isLoading)

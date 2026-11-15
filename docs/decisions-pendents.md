@@ -320,6 +320,7 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Dubte:** el backend no té cap endpoint per desapuntar-se (només `POST /events/{id}/signup`) i no hi ha mockup de com es desapunta ni del diàleg de confirmació.
 - **Opcions:** endpoint: A) `DELETE /events/{id}/signup` (simètric al d'apuntar-se) · B) un altre que acordi el backend. Interfície: A) tocar «Apuntat» obre una confirmació (com ara) · B) un botó «Desapunta'm» separat a la fitxa.
 - **Provisionalment:** contracte `unenroll` idempotent amb el repositori de demostració; a la interfície, tocar «Apuntat» obre el diàleg «Vols desapuntar-te?» amb «Mantén el pla» i «Desapunta’m», perquè un toc sense voler no tregui el pla. Textos sense mockup (`TODO(DP-027)` al repositori i al diàleg).
+- **Interfície B (2026-11-15, Claude Code (Opus 5.5) amb confirmació de l'usuari, Taiga #258):** l'estat i l'acció se separen. El distintiu «✓ Apuntat» (`EnrollmentStatusBadge`) surt a les targetes de llista (Inici, Descobreix, cerca, assistent), a la targeta del marcador del mapa i a la fitxa, al costat de la categoria. El botó diu què fa: «M’hi apunto» o «Desapunta’m», i desapuntar-se continua demanant confirmació. Disseny del distintiu sense mockup.
 - **Qui decideix:** equip (interfície) · backend (endpoint)
 - **Resolució:**
 

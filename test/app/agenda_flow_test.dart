@@ -88,10 +88,10 @@ void main() {
     await tester.tap(find.text('Jazz al parc'));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Apuntat'));
+    await tester.tap(find.widgetWithText(OutlinedButton, 'Desapunta’m'));
     await tester.pumpAndSettle();
     expect(find.text('Vols desapuntar-te?'), findsOneWidget);
-    await tester.tap(find.text('Desapunta’m'));
+    await tester.tap(find.widgetWithText(FilledButton, 'Desapunta’m'));
     await tester.pumpAndSettle();
     expect(find.text('M’hi apunto'), findsOneWidget);
 

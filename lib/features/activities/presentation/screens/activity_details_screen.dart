@@ -10,6 +10,7 @@ import '../widgets/activity_badges.dart';
 import '../widgets/activity_information_row.dart';
 import '../widgets/activity_image.dart';
 import '../widgets/enrollment_action.dart';
+import '../widgets/enrollment_badge.dart';
 
 class ActivityDetailsScreen extends StatefulWidget {
   const ActivityDetailsScreen({
@@ -100,7 +101,12 @@ class _ActivityDetailsScreenState extends State<ActivityDetailsScreen> {
 
             return Column(
               children: [
-                Expanded(child: _ActivityDetailsContent(activity: activity)),
+                Expanded(
+                  child: _ActivityDetailsContent(
+                    activity: activity,
+                    enrollmentViewModel: widget.enrollmentViewModel,
+                  ),
+                ),
                 _ParticipationAction(
                   activity: activity,
                   viewModel: widget.enrollmentViewModel,
@@ -115,9 +121,13 @@ class _ActivityDetailsScreenState extends State<ActivityDetailsScreen> {
 }
 
 class _ActivityDetailsContent extends StatelessWidget {
-  const _ActivityDetailsContent({required this.activity});
+  const _ActivityDetailsContent({
+    required this.activity,
+    required this.enrollmentViewModel,
+  });
 
   final Activity activity;
+  final EnrollmentViewModel enrollmentViewModel;
 
   @override
   Widget build(BuildContext context) {
@@ -140,9 +150,17 @@ class _ActivityDetailsContent extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 16),
-        Align(
-          alignment: Alignment.centerLeft,
-          child: ActivityCategoryBadge(category: activity.category),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            ActivityCategoryBadge(category: activity.category),
+            EnrollmentStatusBadge(
+              viewModel: enrollmentViewModel,
+              activityId: activity.id,
+            ),
+          ],
         ),
         const SizedBox(height: 8),
         Text(

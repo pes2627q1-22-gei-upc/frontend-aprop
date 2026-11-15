@@ -25,6 +25,7 @@ void main() {
     WidgetTester tester, {
     List<Activity>? activities,
     ActivitiesMapViewModel? mapViewModel,
+    Set<String> enrolled = const {},
   }) async {
     tester.view.physicalSize = const Size(390, 844);
     tester.view.devicePixelRatio = 1;
@@ -40,7 +41,7 @@ void main() {
     final viewModel = ActivitiesViewModel(repository: repository)..load();
     final enrollments = EnrollmentViewModel(
       userId: 'test-user',
-      repository: FakeEnrollmentRepository(),
+      repository: FakeEnrollmentRepository()..emit('test-user', enrolled),
     )..load();
     addTearDown(viewModel.dispose);
     addTearDown(enrollments.dispose);
@@ -146,6 +147,34 @@ void main() {
     expect(find.text('Veure activitat'), findsNothing);
     // En tancar-la, els botons tornen a baix.
     expect(overlays.last, 0);
+  });
+
+  testWidgets('La targeta del marcador diu si ja hi estàs apuntat', (
+    tester,
+  ) async {
+    await pumpInici(tester, enrolled: {'demo-theatre'});
+    await openMap(tester);
+
+    marker(tester, 'demo-theatre').onTap!();
+    await tester.pumpAndSettle();
+    expect(
+      find.descendant(
+        of: find.byType(Card).last,
+        matching: find.text('Apuntat'),
+      ),
+      findsOneWidget,
+    );
+
+    marker(tester, 'demo-jazz').onTap!();
+    await tester.pumpAndSettle();
+    expect(find.text('Jazz al parc'), findsWidgets);
+    expect(
+      find.descendant(
+        of: find.byType(Card).last,
+        matching: find.text('Apuntat'),
+      ),
+      findsNothing,
+    );
   });
 
   testWidgets('Tocar el mapa tanca la targeta', (tester) async {
