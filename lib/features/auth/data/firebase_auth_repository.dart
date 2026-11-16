@@ -190,6 +190,21 @@ class FirebaseAuthRepository implements AuthRepository {
   }
 
   @override
+  Future<void> sendPasswordResetEmail(String email) async {
+    try {
+      await _run(() async {
+        await _auth.setLanguageCode(_emailLanguage);
+        await _auth.sendPasswordResetEmail(email: email);
+      });
+    } on FirebaseAuthException catch (e) {
+      // Sense compte amb aquest correu, com si s'hagués enviat: no es pot
+      // revelar quins correus estan registrats.
+      if (e.code == 'user-not-found') return;
+      rethrow;
+    }
+  }
+
+  @override
   Future<bool> checkEmailVerified() async {
     await _run(_requireCurrentUser().reload);
 

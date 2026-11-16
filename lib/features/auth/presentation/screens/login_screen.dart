@@ -7,6 +7,7 @@ import '../widgets/auth_status_message.dart';
 import '../widgets/auth_submit_button.dart';
 import '../widgets/google_sign_in_button.dart';
 import '../widgets/password_field.dart';
+import 'forgot_password_screen.dart';
 import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -52,6 +53,19 @@ class _LoginScreenState extends State<LoginScreen> {
 
     // Com amb el formulari: si va bé, AuthGate mostra el que toqui.
     await _viewModel.signInWithGoogle();
+  }
+
+  void _openForgotPassword() {
+    // Si al camp ja hi ha un correu (i no un nom d'usuari), ja ve escrit.
+    final typed = _usernameOrEmailController.text.trim();
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (context) => ForgotPasswordScreen(
+          repository: widget.repository,
+          initialEmail: typed.contains('@') ? typed : '',
+        ),
+      ),
+    );
   }
 
   void _openRegister() {
@@ -132,7 +146,16 @@ class _LoginScreenState extends State<LoginScreen> {
                         textInputAction: TextInputAction.done,
                         onSubmitted: (_) => _submit(),
                       ),
-                      const SizedBox(height: 24),
+                      Align(
+                        alignment: AlignmentDirectional.centerEnd,
+                        child: TextButton(
+                          onPressed: _viewModel.isBusy
+                              ? null
+                              : _openForgotPassword,
+                          child: const Text('Has oblidat la contrasenya?'),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
                       if (errorMessage != null) ...[
                         AuthStatusMessage.error(errorMessage),
                         const SizedBox(height: 12),

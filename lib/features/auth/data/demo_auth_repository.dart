@@ -129,6 +129,11 @@ class DemoAuthRepository implements AuthRepository {
     _verificationEmailsSent.add(_requireCurrentUser().email);
   }
 
+  /// Sense correus de veritat: acaba bé tant si el compte existeix com si
+  /// no, igual que Firebase.
+  @override
+  Future<void> sendPasswordResetEmail(String email) async {}
+
   @override
   Future<bool> checkEmailVerified() async {
     final user = _requireCurrentUser();

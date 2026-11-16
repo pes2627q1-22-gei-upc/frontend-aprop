@@ -497,6 +497,15 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Qui decideix:** frontend/backend per a la neteja de dades i el contracte de categories del mapa. Guia `docs/inici-server-filters.md`.
 - **Resolució:**
 
+### DP-047 · Recuperar la contrasenya: disseny i textos sense mockup
+- **Estat:** oberta
+- **Obert per:** 2026-11-16 · Claude Code (Opus 5.5) amb confirmació de l'usuari · Taiga #263 (US #11)
+- **Context:** `ForgotPasswordScreen`, `ForgotPasswordViewModel`, enllaç «Has oblidat la contrasenya?» de `LoginScreen`, `AuthRepository.sendPasswordResetEmail`.
+- **Dubte:** no hi ha mockup de la pantalla. La tasca #118 (Arnau) descrivia el mateix frontend; l'usuari ho fa tot a la #263 i avisa l'Arnau.
+- **Provisionalment:** pantalla pròpia amb el mateix estil que «Verifica el teu correu». Si al login hi ha escrit un correu, ja hi ve. Després d'enviar, sempre es mostra el mateix missatge («Si hi ha un compte amb aquest correu…»), sense revelar si el compte existeix (CA2): si Firebase respon `user-not-found`, es tracta com un enviament correcte. Espera de 60 s entre enviaments, com a la verificació. La contrasenya nova es tria a la pàgina de Firebase que obre l'enllaç (correu en català). `TODO(DP-047)` a la pantalla.
+- **Qui decideix:** equip (disseny)
+- **Resolució:**
+
 ## Resoltes
 
 ### DP-031 · Enllaços de verificació amb la clau d'API antiga

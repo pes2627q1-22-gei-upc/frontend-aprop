@@ -7,6 +7,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:aprop/features/auth/models/auth_failure.dart';
 import 'package:aprop/features/auth/presentation/view_models/auth_failure_message.dart';
 import 'package:aprop/features/auth/presentation/screens/choose_username_screen.dart';
+import 'package:aprop/features/auth/presentation/screens/forgot_password_screen.dart';
+import 'package:aprop/features/auth/presentation/view_models/forgot_password_view_model.dart';
 import 'package:aprop/features/auth/presentation/screens/login_screen.dart';
 import 'package:aprop/features/auth/presentation/screens/register_screen.dart';
 import 'package:aprop/features/auth/presentation/screens/verify_email_screen.dart';
@@ -259,5 +261,95 @@ void main() {
     );
 
     expect(find.textContaining("ja és d'una altra persona"), findsNothing);
+  });
+
+  group('Recuperar la contrasenya', () {
+    testWidgets('El login hi porta amb el correu que ja hi havia escrit', (
+      tester,
+    ) async {
+      await pumpScreen(tester, LoginScreen(repository: repository));
+      await tester.enterText(
+        find.widgetWithText(TextField, "Nom d'usuari o correu"),
+        ' laia@aprop.cat ',
+      );
+
+      await tester.tap(find.text('Has oblidat la contrasenya?'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ForgotPasswordScreen), findsOneWidget);
+      final email = tester.widget<TextField>(
+        find.widgetWithText(TextField, 'Correu'),
+      );
+      expect(email.controller!.text, 'laia@aprop.cat');
+
+      // «Torna a l'inici de sessió» hi torna.
+      await tester.tap(find.text("Torna a l'inici de sessió"));
+      await tester.pumpAndSettle();
+      expect(find.byType(ForgotPasswordScreen), findsNothing);
+      expect(find.text('Inicia sessió'), findsOneWidget);
+    });
+
+    testWidgets("Un nom d'usuari no s'hi copia com a correu", (tester) async {
+      await pumpScreen(tester, LoginScreen(repository: repository));
+      await tester.enterText(
+        find.widgetWithText(TextField, "Nom d'usuari o correu"),
+        'laiasoler',
+      );
+
+      await tester.tap(find.text('Has oblidat la contrasenya?'));
+      await tester.pumpAndSettle();
+
+      final email = tester.widget<TextField>(
+        find.widgetWithText(TextField, 'Correu'),
+      );
+      expect(email.controller!.text, isEmpty);
+    });
+
+    testWidgets('Envia l\'enllaç i espera 60 segons per tornar-lo a enviar', (
+      tester,
+    ) async {
+      await pumpScreen(tester, ForgotPasswordScreen(repository: repository));
+
+      await tester.tap(find.text("Envia l'enllaç"));
+      await tester.pump();
+      expect(find.text('Introdueix el correu.'), findsOneWidget);
+      expect(repository.passwordResetEmails, isEmpty);
+
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Correu'),
+        'laia@aprop.cat',
+      );
+      await tester.tap(find.text("Envia l'enllaç"));
+      await tester.pump();
+
+      expect(repository.passwordResetEmails, ['laia@aprop.cat']);
+      expect(find.text(passwordResetSentMessage), findsOneWidget);
+      expect(find.text("Torna a enviar l'enllaç (60 s)"), findsOneWidget);
+
+      await tester.pump(const Duration(seconds: 60));
+      await tester.tap(find.text("Torna a enviar l'enllaç"));
+      await tester.pump();
+      expect(repository.passwordResetEmails, hasLength(2));
+    });
+
+    testWidgets('Amb la lletra gran la pantalla es pot fer servir', (
+      tester,
+    ) async {
+      await pumpScreen(
+        tester,
+        ForgotPasswordScreen(
+          repository: repository,
+          initialEmail: 'laia@aprop.cat',
+        ),
+        textScale: 2,
+      );
+
+      await tester.ensureVisible(find.text("Envia l'enllaç"));
+      await tester.tap(find.text("Envia l'enllaç"));
+      await tester.pump();
+
+      expect(tester.takeException(), isNull);
+      expect(repository.passwordResetEmails, ['laia@aprop.cat']);
+    });
   });
 }

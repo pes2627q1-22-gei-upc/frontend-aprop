@@ -37,6 +37,11 @@ abstract interface class AuthRepository {
   /// Torna a enviar el correu de verificació a l'usuari de la sessió.
   Future<void> sendEmailVerification();
 
+  /// Envia a [email] un enllaç per triar una contrasenya nova. No cal sessió.
+  /// Acaba igual tant si hi ha un compte amb aquest correu com si no, perquè
+  /// ningú no pugui saber quins correus estan registrats.
+  Future<void> sendPasswordResetEmail(String email);
+
   /// Torna a consultar si l'usuari de la sessió ha verificat el correu.
   /// Retorna `true` si ja l'ha verificat; llavors el canvi també arriba per
   /// [authStateChanges].
