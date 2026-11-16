@@ -1,41 +1,44 @@
 # Estat viu
 
-> Llegir a l’inici; només el present (~40 línies). Detalls a les guies de cada funcionalitat.
+> Llegir a l’inici; només el present. Detalls a les guies de cada funcionalitat.
 
 ## Sprint
 
-- Sprint 1 · només frontend. Social fora d’aquest sprint segons l’usuari.
-- Prioritat: integrar Descobreix i després revisar el recorregut real de l’MVP.
+- Sprint 2 · canvis només al frontend. Backend consultat com a contracte.
+- L’usuari ha concretat #253: les categories no apareixen a Mapa i Inici.
 
 ## En curs
 
 | Taiga | Tasca | Branca | Estat |
 |---|---|---|---|
-| #99 | Test d’interessos (lliscar dreta/esquerra) des de Configuració | `feature/test_interesos` | Implementat; 504 proves i analyze correctes; sense provar amb Render; sense commit (DP-042) |
+| #253 | [FE] Corregir que no es mostren les categories | `feature/fix-253-categories` | Implementada; 532 proves, analyze i revisió correctes; pendent de prova autenticada i PR; sense commit/push |
 
 ## Base i abast
 
-- Frontend `origin/develop@60fbebc`; Perfil (PR #32), Avisos (#31), creació (#30) i verificació web (#33) fusionats.
-- Backend actualitzat a `develop@be6c25e`, sense canvis locals ni execució del servidor/BD.
-- «Per a tu» → `/events/recommended`; «Destacats» → `/events/popular`; preferències → `/preferences`.
-- Cerca → `/events/search`, pàgina 0, total real, continuació/reintent i deduplicació per ID.
-- Preferències absents són un estat propi; un error de secció no amaga la resta ni elimina dades confirmades.
-- Mateixes targetes, detall, navegadors i inscripcions compartides; sense paquets nous ni dades demo en HTTP.
-- Models/contractes purs i ViewModels sense transport; Demo adapta el mateix contracte paginat.
-- Límits de ranking/dates/cerca: DP-041 actualitza DP-024; guia `docs/discovery-backend.md`.
+- Frontend `origin/develop@5b0c95c`; backend `develop@6f4979e`, PR #54 fusionada; contracte revisat el 2026-11-16.
+- La base ja incorpora Descobreix HTTP, test d’interessos i millores de l’assistent i de creació.
+- `/categories`: una fila amb ID vàlid i nom sense etiqueta visible no bloqueja les altres opcions.
+- Es conserven els noms/IDs del servidor; estructura, ID o tipus invàlids continuen generant error.
+- Catàleg no buit en memòria i peticions simultànies compartides; catàleg buit amb reintent.
+- Mateix panell i selecció provisional per Mapa/Llista; sense paquets, endpoints ni dades demo nous.
+- No es modifica el formulari de creació ni la seva política de categories de DP-018.
+- El mapa ja retorna categories: el mapper compartit descarta noms sense etiqueta visible abans d’escollir el distintiu.
+- Es filtren totes les categories rebudes de cada marcador a la zona carregada; no hi ha peticions de detall addicionals.
+- DP-045 documenta noms buits i recuperació; actualitza els límits de categories del mapa de DP-038.
 
-## Verificació (2026-10-27)
+## Verificació (2026-11-16)
 
-- Format: 237 fitxers, cap canvi pendent; analitzador sense incidències; 497 proves (base: 481).
-- Flux HTTP provat: feed → apuntar-se → cerca → pàgina 1 → detall → retorn → Apuntat a Inici.
-- APK debug i web compilats; revisió tècnica sense bloquejos.
-- Captures reals de Flutter revisades: `PES/output/frontend/discovery-backend-{feed,search,page-1}.png`.
-- Cap commit/push ni canvi al backend; Firebase local ignorat, no versionar credencials/configuració.
+- 5 regressions reproduïdes abans de corregir: catàleg invàlid per nom buit, opcions ocultes a Mapa/Llista i resposta buida sense recuperació.
+- 3 regressions addicionals reproduïdes abans de corregir etiquetes sense nom en activitats del mapa.
+- 41 proves de repositoris de mapa/filtres i panells superades; inclou el recorregut llista → mapa → targeta → categoria secundària → llista → mapa.
+- Format de 246 fitxers sense canvis pendents; analitzador sense incidències; suite completa: 532 proves superades (524 de base i 8 regressions noves).
+- Revisió tècnica independent i de decisions sense bloquejos; corregida la petició de categories del mapa que havia quedat obsoleta a la guia. Cap commit/push.
+- Render sense sessió respon 401; encara no es confirma la causa amb el catàleg de producció.
+- Backend només llegit; no s’ha iniciat servidor, BD, migracions ni cap operació d’escriptura.
 
 ## Pendents / següents passos
 
-1. Revisió humana, commit #96, PR a develop i CI; no fusionar automàticament.
-2. Provar Render amb comptes amb/sense gustos i persistència; contrastar desplegament dels endpoints nous.
-3. Test d’interessos: revisar DP-042 (gust ≠ inscripció, test al primer accés) i provar-lo amb Render.
-4. Repàs global de les 5 seccions, dades/inscripcions/avisos/imatges i errors amb la versió real del servidor.
-5. Backend: ranking global, pesos incomplets, activitats futures i ordre estable (DP-041); revisar DP-039/040.
+1. Revisió humana, commit de #253, PR a develop i CI; cap publicació automàtica.
+2. Provar «Categories» amb una sessió real a Inici i Mapa.
+3. Confirmar que Render inclou la PR #54. Per activitats sense categoria usable es manté l’avís i «Veure llista».
+4. Guia: `docs/inici-server-filters.md`, DP-038/045. Filtratge global del mapa i font compartida fora d’aquesta correcció.

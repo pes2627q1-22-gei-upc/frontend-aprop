@@ -68,7 +68,7 @@ class ActivitiesViewModel extends ChangeNotifier {
       final categories = await _repository.getFilterCategories();
       if (_isDisposed) return;
       _filterCategories = List.unmodifiable(categories);
-      _hasLoadedCategories = true;
+      _hasLoadedCategories = categories.isNotEmpty;
     } catch (_) {
       if (_isDisposed) return;
       _categoriesError = 'No hem pogut carregar les categories.';

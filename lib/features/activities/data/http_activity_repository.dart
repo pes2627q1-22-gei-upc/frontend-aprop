@@ -190,10 +190,16 @@ class HttpActivityRepository
 
   /// Obté la llista de categories del catàleg (`GET /categories`).
   Future<List<({int id, String name})>> getCategories() =>
-      _categoriesRequest ??= _fetchCategories().catchError((Object error) {
-        _categoriesRequest = null;
-        throw error;
-      });
+      _categoriesRequest ??= _fetchCategories()
+          .then((categories) {
+            // TODO(DP-045): An empty catalogue must remain retryable in this session.
+            if (categories.isEmpty) _categoriesRequest = null;
+            return categories;
+          })
+          .catchError((Object error) {
+            _categoriesRequest = null;
+            throw error;
+          });
 
   Future<List<({int id, String name})>> _fetchCategories() async {
     final decoded = await apiClient.getJson('categories');
@@ -203,8 +209,11 @@ class HttpActivityRepository
     final categories = <({int id, String name})>[];
     for (final item in decoded) {
       if (item case {'id': final int id, 'name': final String name}
-          when id > 0 && activityCategoryLabel(name).isNotEmpty) {
-        categories.add((id: id, name: name));
+          when id > 0) {
+        // TODO(DP-045): Ignore unnamed entries, keeping every usable server ID.
+        if (activityCategoryLabel(name).trim().isNotEmpty) {
+          categories.add((id: id, name: name));
+        }
       } else {
         throw const FormatException('Expected a category ID and name');
       }
