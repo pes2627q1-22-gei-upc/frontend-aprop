@@ -212,16 +212,19 @@ class _ActivitiesMapState extends State<ActivitiesMap> {
     }
   }
 
-  /// Un toc al mapa just després d'un clic sobre una cosa que el tapa és el
-  /// mateix clic i s'ignora.
+  /// El mapa respon a un toc (al mapa, a un marcador o a un grup) només si no
+  /// té res a sobre i el toc no és el mateix clic fet just abans sobre una
+  /// cosa que el tapa, com la targeta.
   // TODO(DP-045): treure-ho si es fa servir `pointer_interceptor`.
-  void _onMapTap() {
+  bool get _acceptsTap {
+    if (!_isInteractive) return false;
     final released = _overlayReleasedAt;
-    if (released != null &&
-        DateTime.now().difference(released) < _cardClickEcho) {
-      return;
-    }
-    _clearSelection();
+    return released == null ||
+        DateTime.now().difference(released) >= _cardClickEcho;
+  }
+
+  void _onMapTap() {
+    if (_acceptsTap) _clearSelection();
   }
 
   void _clearSelection() {
@@ -233,7 +236,7 @@ class _ActivitiesMapState extends State<ActivitiesMap> {
   /// Tocar un grup hi apropa el mapa fins que hi caben tots els marcadors, que
   /// així es van separant. Si són tots al mateix lloc, se'n mostra la llista.
   void _onClusterTap(Cluster cluster) {
-    if (!_isInteractive) return;
+    if (!_acceptsTap) return;
     _clearSelection();
     if (isSamePlace(cluster.bounds)) {
       final ids = {for (final id in cluster.markerIds) id.value};
@@ -251,7 +254,7 @@ class _ActivitiesMapState extends State<ActivitiesMap> {
   /// Molt a prop, Google deixa d'agrupar i els marcadors d'un mateix lloc
   /// queden l'un sobre l'altre: només se'n podria tocar el de dalt.
   void _onMarkerTap(Activity activity, List<Activity> located) {
-    if (!_isInteractive) return;
+    if (!_acceptsTap) return;
     final point = activity.location!;
     final samePlace = [
       for (final other in located)
@@ -324,7 +327,7 @@ class _ActivitiesMapState extends State<ActivitiesMap> {
               },
               onCameraIdle: _reportVisibleArea,
               onTap: (_) {
-                if (_isInteractive) _onMapTap();
+                _onMapTap();
               },
               // Amb un panell a sobre, el mapa no es mou: a la web, si no,
               // la roda i els arrossegaments hi arribarien igualment.

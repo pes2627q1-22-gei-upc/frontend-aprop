@@ -165,6 +165,11 @@ void main() {
     map(tester).onTap!(const LatLng(41.4, 2.1));
     await tester.pumpAndSettle();
     expect(find.byTooltip('Tancar'), findsOneWidget);
+    // Tampoc obre el marcador que hi hagi just darrere de la targeta.
+    marker(tester, 'demo-jazz').onTap!();
+    await tester.pumpAndSettle();
+    expect(find.text('Teatre sota les estrelles'), findsOneWidget);
+    expect(find.text('Jazz al parc'), findsNothing);
 
     await tester.tap(find.byTooltip('Tancar'));
     await tester.pumpAndSettle();
@@ -211,6 +216,11 @@ void main() {
     await tester.pumpAndSettle();
     expect(locked(), isFalse);
 
+    // Un toc al mapa just després d'un clic a sobre seu es pren pel mateix
+    // clic (DP-045): la persona no toca tan de pressa.
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 600)),
+    );
     marker(tester, 'demo-theatre').onTap!();
     await tester.pumpAndSettle();
     expect(find.text('Teatre sota les estrelles'), findsOneWidget);
@@ -366,6 +376,11 @@ void main() {
       expect(opened, ['orgue']);
 
       // Un marcador sol continua mostrant la seva targeta.
+      // Un toc al mapa just després d'un clic a sobre seu es pren pel mateix
+      // clic (DP-045): la persona no toca tan de pressa.
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 600)),
+      );
       marker(tester, 'lluny').onTap!();
       await tester.pumpAndSettle();
       expect(find.byTooltip('Tancar'), findsOneWidget);
