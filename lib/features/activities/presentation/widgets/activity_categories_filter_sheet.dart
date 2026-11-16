@@ -67,8 +67,17 @@ class _ActivityCategoriesFilterSheetState
               ],
             )
           else if (widget.categories.isEmpty)
-            const Text(
-              'No hi ha categories disponibles. Pots consultar totes les activitats.',
+            Column(
+              children: [
+                const Text(
+                  'No hi ha categories disponibles. Pots consultar totes les activitats.',
+                ),
+                if (widget.onRetry != null)
+                  TextButton(
+                    onPressed: widget.onRetry,
+                    child: const Text('Tornar-ho a provar'),
+                  ),
+              ],
             ),
           for (final category in widget.categories)
             Padding(

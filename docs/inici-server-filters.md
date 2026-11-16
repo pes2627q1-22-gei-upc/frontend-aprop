@@ -12,7 +12,8 @@ S’ha consultat el contracte de `api-aprop@c94ab70`, sense modificar-lo:
 - `GET /events`: `pageNum`, `pageSize`, `filterCategory` (un únic ID), `startAfter`, `startBefore`.
 - `GET /categories`: llista d’objectes amb `id` positiu i `name`.
 - El parser Go espera dates amb mil·lisegons i sense zona; SQL compara `startdate >=` i `<=` com dates.
-- `GET /events/map`: només límits geogràfics; el mapping actual no emplena categories.
+- `GET /events/map`: consulta per límits geogràfics. A la base inicial no emplenava categories;
+  el contracte nou de `6f4979e` s’integra a la correcció #253 descrita més avall.
 
 ## Què passa quan l’usuari filtra
 
@@ -40,6 +41,37 @@ No es converteix la mitjanit a UTC ni s’exclou el dia final. La comparació co
 com al filtre aprovat; no s’inventa la durada d’una activitat.
 
 ## Categories múltiples amb l’API actual
+
+### Correcció #253 — 15–16/11/2026
+
+Una entrada de `/categories` amb ID vàlid i nom buit, només espais o una etiqueta sense segment final
+ja no impedeix mostrar les categories vàlides del catàleg. La validació de l’estructura i dels IDs
+es conserva; no es substitueixen errors de xarxa o JSON incorrecte per opcions de demostració.
+Els noms originals i els IDs es mantenen per consultar el servidor.
+
+Les peticions simultànies comparteixen la mateixa càrrega i el catàleg no buit es conserva a la sessió.
+Una resposta buida es pot tornar a consultar: el panell mostra «Tornar-ho a provar» i permet continuar
+sense restricció. El mateix component serveix per a Mapa i Llista. Decisió registrada a DP-046.
+
+El backend `6f4979e` (PR #54) ja retorna `categories` com a llista de noms canònics a `/events/map`,
+igual que el catàleg i el detall. El mapper compartit conserva totes les etiquetes vàlides i elimina
+les que no tenen nom visible abans d’escollir el distintiu. Una categoria buida al principi no tapa
+la següent: `["agenda:categories/", "agenda:categories/musica"]` mostra «Musica».
+
+Els filtres es continuen aplicant localment sobre les activitats retornades per a la zona del mapa.
+Es comprova qualsevol categoria de l’activitat; no només la primera que es veu al distintiu. La llista
+consulta el servidor amb els IDs reals de les mateixes opcions. Canviar de vista conserva la selecció.
+No es fan peticions de detall per marcador ni es passen filtres a un endpoint que no els admet.
+Si una activitat no té cap categoria usable, es conserva «Activitat» i l’avís de metadades absents.
+No es modifica el backend ni es pressuposa que la versió fusionada ja estigui desplegada a Render.
+
+Verificació específica: prova HTTP de categories múltiples i buides, i recorregut amb transport simulat
+llista → mapa → targeta → filtre d’una categoria secundària → llista → mapa. Confirma IDs, marcadors,
+distintius i absència de peticions de detall addicionals. La comprovació autenticada de producció és manual.
+Resultat del 16/11/2026 després de sincronitzar amb `develop@cf99a0f`: 523 proves superades,
+analitzador i format correctes, revisió independent sense bloquejos. Les 8 regressions de #253 es
+conserven; la base anterior tenia 532 proves abans de la neteja dels fluxos de verificació de correu.
+Branca `feature/fix-253-categories`, sense commit ni push automàtics del merge.
 
 Les opcions HTTP venen de `/categories`. Els noms de taxonomia es presenten amb el seu últim segment,
 sense guions, com ja feien les targetes. No es dedueix que «Concerts» equivalgui a «Música» ni s’inventen
@@ -93,7 +125,7 @@ la causa és falta de categories. La llista oberta conserva la selecció i consu
 
 Per completar la mateixa experiència a totes dues vistes, demanar als companys:
 
-- Filtres de dates/categories i categories informades a `/events/map`.
+- Filtres de dates/categories al servidor a `/events/map`; les categories de la resposta ja estan disponibles des de `6f4979e`.
 - Multiselecció OR al servidor per tenir una sola paginació i ordre global estable amb desempat per ID.
 - Confirmació de la taxonomia visible; no convertir semànticament etiquetes diferents al client.
 - Disponibilitat de Render i CORS/OPTIONS per verificar el recorregut web autenticat.

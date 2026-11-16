@@ -19,13 +19,16 @@ Activity activityFromJson(Map<String, Object?> json) {
   if (date == null) throw const FormatException('Invalid event start date');
   final image = _cover(json['image-url']) ?? _cover(json['images']);
   final rawCategories = json['categories'] ?? json['category'];
-  final categories = List<String>.unmodifiable({
-    for (final tag
-        in rawCategories is List
-            ? rawCategories.whereType<String>()
-            : [if (rawCategories is String) rawCategories])
-      if (tag.trim().isNotEmpty) activityCategoryLabel(tag),
-  });
+  final tags = rawCategories is List
+      ? rawCategories.whereType<String>()
+      : [if (rawCategories is String) rawCategories];
+  // TODO(DP-046): Choose the badge only after removing labels without a name.
+  final categories = List<String>.unmodifiable(
+    tags
+        .map(activityCategoryLabel)
+        .where((label) => label.trim().isNotEmpty)
+        .toSet(),
+  );
   final isOfficial =
       json['is-official'] as bool? ?? (json['code'] as num? ?? 0) != 0;
   final latitude = (json['latitude'] as num?)?.toDouble() ?? 0;
