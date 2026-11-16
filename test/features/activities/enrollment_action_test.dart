@@ -58,8 +58,10 @@ void main() {
         expect(tester.takeException(), isNull);
         confirmation.complete();
         await tester.pumpAndSettle();
-        expect(find.text('Apuntat'), findsOneWidget);
-        expect(find.byIcon(Icons.check_circle_outline), findsOneWidget);
+        // The button says what it does; the card variant also shows the
+        // «Apuntat» badge (the detail shows it next to the title).
+        expect(find.text('Desapunta’m'), findsOneWidget);
+        expect(find.text('Apuntat'), primary ? findsNothing : findsOneWidget);
         expect(tester.takeException(), isNull);
       },
     );
@@ -94,10 +96,11 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Apuntat'));
+    await tester.tap(find.widgetWithText(OutlinedButton, 'Desapunta’m'));
     await tester.pumpAndSettle();
-    expect(find.textContaining('Treurem «Jazz al parc»'), findsOneWidget);
-    await tester.tap(find.text('Desapunta’m'));
+    expect(find.text('T’has desapuntat de «Jazz al parc».'), findsOneWidget);
+    // The removal is sent when «Desfer» is no longer offered, and fails.
+    await tester.pump(const Duration(seconds: 5));
     await tester.pumpAndSettle();
 
     expect(find.text('Apuntat'), findsOneWidget);

@@ -112,7 +112,7 @@ void main() {
       ]);
       await tester.tap(destination('Inici'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Crear activitat'));
+      await tester.tap(find.byTooltip('Crear activitat'));
       await tester.pumpAndSettle();
       expect(
         tester

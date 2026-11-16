@@ -4,6 +4,9 @@ import 'package:flutter/foundation.dart';
 
 import '../../repositories/enrollment_repository.dart';
 
+/// How long a plan removed from a list can still be recovered with «Desfer».
+const unenrollUndoDelay = Duration(seconds: 5);
+
 /// One presentation state per signed-in user, shared by list and details.
 class EnrollmentViewModel extends ChangeNotifier {
   EnrollmentViewModel({required this.userId, required this._repository});
@@ -16,17 +19,30 @@ class EnrollmentViewModel extends ChangeNotifier {
   final Set<String> _unenrollingActivityIds = {};
   final Map<String, String> _errors = {};
   final Map<String, String> _unenrollErrors = {};
+
+  /// Plans removed with [unenrollLater]: they already look removed, but the
+  /// backend is only told when the timer ends. The timer is no longer active
+  /// while that request is being sent.
+  final Map<String, Timer> _deferredUnenrolls = {};
   bool _isLoading = false;
   bool _hasLoaded = false;
   bool _isDisposed = false;
   int _subscriptionVersion = 0;
   String? _loadError;
 
-  Set<String> get enrolledActivityIds => _enrolledActivityIds;
+  Set<String> get enrolledActivityIds => _deferredUnenrolls.isEmpty
+      ? _enrolledActivityIds
+      : Set.unmodifiable(
+          _enrolledActivityIds.where((id) => !isUnenrollDeferred(id)),
+        );
   bool get isLoading => _isLoading;
   bool get hasLoaded => _hasLoaded;
   String? get loadError => _loadError;
-  bool isEnrolled(String id) => _enrolledActivityIds.contains(id);
+  bool isEnrolled(String id) =>
+      _enrolledActivityIds.contains(id) && !isUnenrollDeferred(id);
+
+  /// True from [unenrollLater] until the backend has answered.
+  bool isUnenrollDeferred(String id) => _deferredUnenrolls.containsKey(id);
   bool isEnrolling(String id) => _pendingActivityIds.contains(id);
   bool isUnenrolling(String id) => _unenrollingActivityIds.contains(id);
   String? errorFor(String id) => _errors[id] ?? _unenrollErrors[id];
@@ -73,6 +89,12 @@ class EnrollmentViewModel extends ChangeNotifier {
   }
 
   Future<void> enroll(String activityId) async {
+    // Joining again while «Desfer» is still possible is the same as undoing:
+    // the backend never heard about the removal.
+    if (isUnenrollDeferred(activityId)) {
+      undoUnenroll(activityId);
+      return;
+    }
     if (_isDisposed ||
         !_hasLoaded ||
         _isLoading ||
@@ -108,19 +130,60 @@ class EnrollmentViewModel extends ChangeNotifier {
   /// Removes a confirmed plan. The screen asks the user first, so an
   /// accidental tap does not remove it.
   Future<void> unenroll(String activityId) async {
-    if (_isDisposed ||
-        !_hasLoaded ||
-        _isLoading ||
-        _loadError != null ||
-        !isEnrolled(activityId) ||
-        isEnrolling(activityId) ||
-        isUnenrolling(activityId)) {
-      return;
-    }
+    if (!_canUnenroll(activityId)) return;
 
     _unenrollingActivityIds.add(activityId);
     _unenrollErrors.remove(activityId);
     notifyListeners();
+    try {
+      await _sendUnenroll(activityId);
+    } finally {
+      if (!_isDisposed) {
+        _unenrollingActivityIds.remove(activityId);
+        notifyListeners();
+      }
+    }
+  }
+
+  /// Removes a plan from the lists at once, without asking, and tells the
+  /// backend after [delay] unless [undoUnenroll] is called first.
+  void unenrollLater(String activityId, {Duration delay = unenrollUndoDelay}) {
+    if (!_canUnenroll(activityId)) return;
+
+    _unenrollErrors.remove(activityId);
+    _deferredUnenrolls[activityId] = Timer(delay, () async {
+      try {
+        await _sendUnenroll(activityId);
+      } finally {
+        if (!_isDisposed) {
+          _deferredUnenrolls.remove(activityId);
+          notifyListeners();
+        }
+      }
+    });
+    notifyListeners();
+  }
+
+  /// Keeps a plan removed with [unenrollLater]. Too late once the request has
+  /// been sent.
+  void undoUnenroll(String activityId) {
+    final timer = _deferredUnenrolls[activityId];
+    if (_isDisposed || timer == null || !timer.isActive) return;
+    timer.cancel();
+    _deferredUnenrolls.remove(activityId);
+    notifyListeners();
+  }
+
+  bool _canUnenroll(String activityId) =>
+      !_isDisposed &&
+      _hasLoaded &&
+      !_isLoading &&
+      _loadError == null &&
+      isEnrolled(activityId) &&
+      !isEnrolling(activityId) &&
+      !isUnenrolling(activityId);
+
+  Future<void> _sendUnenroll(String activityId) async {
     try {
       await _repository.unenroll(userId: userId, activityId: activityId);
       if (_isDisposed) return;
@@ -131,16 +194,23 @@ class EnrollmentViewModel extends ChangeNotifier {
       if (_isDisposed) return;
       _unenrollErrors[activityId] =
           'No t’hem pogut desapuntar. Torna-ho a provar.';
-    } finally {
-      if (!_isDisposed) {
-        _unenrollingActivityIds.remove(activityId);
-        notifyListeners();
-      }
     }
   }
 
   @override
   void dispose() {
+    // Removals still waiting for «Desfer» go ahead: the user already saw the
+    // plan disappear (for example, before signing out).
+    for (final MapEntry(key: activityId, value: timer)
+        in _deferredUnenrolls.entries) {
+      if (!timer.isActive) continue;
+      timer.cancel();
+      unawaited(
+        _repository
+            .unenroll(userId: userId, activityId: activityId)
+            .catchError((Object _) {}),
+      );
+    }
     _isDisposed = true;
     _subscriptionVersion++;
     unawaited(_subscription?.cancel());

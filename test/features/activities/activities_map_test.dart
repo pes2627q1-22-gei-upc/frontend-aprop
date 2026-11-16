@@ -25,6 +25,7 @@ void main() {
     WidgetTester tester, {
     List<Activity>? activities,
     ActivitiesMapViewModel? mapViewModel,
+    Set<String> enrolled = const {},
   }) async {
     tester.view.physicalSize = const Size(390, 844);
     tester.view.devicePixelRatio = 1;
@@ -40,7 +41,7 @@ void main() {
     final viewModel = ActivitiesViewModel(repository: repository)..load();
     final enrollments = EnrollmentViewModel(
       userId: 'test-user',
-      repository: FakeEnrollmentRepository(),
+      repository: FakeEnrollmentRepository()..emit('test-user', enrolled),
     )..load();
     addTearDown(viewModel.dispose);
     addTearDown(enrollments.dispose);
@@ -118,7 +119,7 @@ void main() {
     expect(asset('demo-theatre'), 'assets/icons/marker_friend.png');
   });
 
-  testWidgets('Tocar un marcador mostra la targeta i «Veure activitat»', (
+  testWidgets('Tocar un marcador mostra la targeta, que obre la fitxa', (
     tester,
   ) async {
     await pumpInici(tester);
@@ -138,12 +139,36 @@ void main() {
     expect(overlays.last, closeTo(mapBottom - cardTop, 1));
     expect(tester.getBottomLeft(find.text('Llegenda')).dy, lessThan(cardTop));
 
-    await tester.tap(find.text('Veure activitat'));
+    // Qualsevol lloc de la targeta obre la fitxa, no només el títol.
+    await tester.tap(find.text('Publicat per Laia Soler'));
     expect(opened, ['demo-theatre']);
+    await tester.tap(find.text('Teatre sota les estrelles'));
+    expect(opened, ['demo-theatre', 'demo-theatre']);
+
+    // Des de la targeta es pot apuntar sense obrir la fitxa.
+    final card = find.byType(Card).last;
+    await tester.tap(
+      find.descendant(of: card, matching: find.text('M’hi apunto')),
+    );
+    await tester.pumpAndSettle();
+    expect(
+      find.descendant(of: card, matching: find.text('Apuntat')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: card, matching: find.text('Desapunta’m')),
+      findsOneWidget,
+    );
+    expect(opened, hasLength(2));
+
+    // A la web, el mapa també rep el clic fet a la targeta: no l'ha de tancar.
+    map(tester).onTap!(const LatLng(41.4, 2.1));
+    await tester.pumpAndSettle();
+    expect(find.byTooltip('Tancar'), findsOneWidget);
 
     await tester.tap(find.byTooltip('Tancar'));
     await tester.pumpAndSettle();
-    expect(find.text('Veure activitat'), findsNothing);
+    expect(find.byTooltip('Tancar'), findsNothing);
     // En tancar-la, els botons tornen a baix.
     expect(overlays.last, 0);
   });
@@ -191,17 +216,45 @@ void main() {
     expect(find.text('Teatre sota les estrelles'), findsOneWidget);
   });
 
+  testWidgets('La targeta del marcador diu si ja hi estàs apuntat', (
+    tester,
+  ) async {
+    await pumpInici(tester, enrolled: {'demo-theatre'});
+    await openMap(tester);
+
+    marker(tester, 'demo-theatre').onTap!();
+    await tester.pumpAndSettle();
+    expect(
+      find.descendant(
+        of: find.byType(Card).last,
+        matching: find.text('Apuntat'),
+      ),
+      findsOneWidget,
+    );
+
+    marker(tester, 'demo-jazz').onTap!();
+    await tester.pumpAndSettle();
+    expect(find.text('Jazz al parc'), findsWidgets);
+    expect(
+      find.descendant(
+        of: find.byType(Card).last,
+        matching: find.text('Apuntat'),
+      ),
+      findsNothing,
+    );
+  });
+
   testWidgets('Tocar el mapa tanca la targeta', (tester) async {
     await pumpInici(tester);
     await openMap(tester);
 
     marker(tester, 'demo-jazz').onTap!();
     await tester.pumpAndSettle();
-    expect(find.text('Veure activitat'), findsOneWidget);
+    expect(find.byTooltip('Tancar'), findsOneWidget);
 
     map(tester).onTap!(const LatLng(41.5, 2.0));
     await tester.pumpAndSettle();
-    expect(find.text('Veure activitat'), findsNothing);
+    expect(find.byTooltip('Tancar'), findsNothing);
   });
 
   group('Tocar un grup', () {
@@ -258,7 +311,7 @@ void main() {
       await openMap(tester);
       marker(tester, 'demo-jazz').onTap!();
       await tester.pumpAndSettle();
-      expect(find.text('Veure activitat'), findsOneWidget);
+      expect(find.byTooltip('Tancar'), findsOneWidget);
 
       // Barcelona i Tarragona: s'hi apropa el mapa (a les proves no n'hi ha).
       tapCluster(
@@ -274,7 +327,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.textContaining('activitats en aquest lloc'), findsNothing);
-      expect(find.text('Veure activitat'), findsNothing);
+      expect(find.byTooltip('Tancar'), findsNothing);
     });
   });
 
@@ -307,7 +360,7 @@ void main() {
       marker(tester, 'cor').onTap!();
       await tester.pumpAndSettle();
       expect(find.text('2 activitats en aquest lloc'), findsOneWidget);
-      expect(find.text('Veure activitat'), findsNothing);
+      expect(find.byTooltip('Tancar'), findsNothing);
       await tester.tap(find.text('Concert d’orgue'));
       await tester.pumpAndSettle();
       expect(opened, ['orgue']);
@@ -315,7 +368,7 @@ void main() {
       // Un marcador sol continua mostrant la seva targeta.
       marker(tester, 'lluny').onTap!();
       await tester.pumpAndSettle();
-      expect(find.text('Veure activitat'), findsOneWidget);
+      expect(find.byTooltip('Tancar'), findsOneWidget);
     },
   );
 
@@ -402,7 +455,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Font: Agenda Cultural · Generalitat'), findsOneWidget);
 
-      await tester.tap(find.text('Veure activitat'));
+      await tester.tap(find.text('Font: Agenda Cultural · Generalitat'));
       expect(openedFromMap, ['1282']);
       expect(opened, isEmpty);
     });

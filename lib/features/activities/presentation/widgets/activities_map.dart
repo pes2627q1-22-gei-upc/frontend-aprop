@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -20,6 +21,10 @@ const _initialZoom = 7.0;
 
 /// Marge, en píxels lògics, que queda al voltant d'un grup en apropar-s'hi.
 const _clusterPadding = 64.0;
+
+/// Temps durant el qual un toc al mapa es considera el mateix clic que s'ha
+/// fet sobre una cosa que el tapa (vegeu `_onMapTap`).
+const _cardClickEcho = Duration(milliseconds: 500);
 
 /// Diferència de latitud o longitud (uns 30 m) per sota de la qual les
 /// activitats d'un grup es consideren al mateix lloc.
@@ -66,10 +71,15 @@ class ActivitiesMap extends StatefulWidget {
     this.onOverlayHeightChanged,
     this.onVisibleAreaChanged,
     this.interactive = true,
+    this.participationActionBuilder,
   });
 
   final List<Activity> activities;
   final ValueChanged<String> onActivitySelected;
+
+  /// Acció per apuntar-se des de la targeta del marcador. Qui conté el mapa
+  /// decideix què hi va; sense, la targeta porta «Veure activitat».
+  final Widget Function(Activity activity)? participationActionBuilder;
 
   /// Espai que ocupa la targeta del marcador des de baix (0 si no n'hi ha),
   /// perquè qui conté el mapa pugui apartar-hi els seus botons.
@@ -129,7 +139,14 @@ class _ActivitiesMapState extends State<ActivitiesMap> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    GestureBinding.instance.pointerRouter.addGlobalRoute(_onPointer);
+  }
+
+  @override
   void dispose() {
+    GestureBinding.instance.pointerRouter.removeGlobalRoute(_onPointer);
     _controller?.dispose();
     super.dispose();
   }
@@ -170,6 +187,41 @@ class _ActivitiesMapState extends State<ActivitiesMap> {
         })
         ..scheduleFrame();
     }
+  }
+
+  /// Últim clic acabat sobre alguna cosa de Flutter que tapa el mapa: la
+  /// targeta, l'avís de «Desfer», un diàleg...
+  DateTime? _overlayReleasedAt;
+
+  /// A la web, el mapa de Google és per sota de Flutter i també rep els
+  /// clics fets sobre el que hi ha a sobre: en prémer «M’hi apunto» o
+  /// «Desfer», tancaria la targeta. Per això es mira cada clic que acaba
+  /// dins del mapa: si el que hi ha a sobre no és el mapa, és d'una altra
+  /// cosa.
+  void _onPointer(PointerEvent event) {
+    if (event is! PointerUpEvent || !mounted) return;
+    final box = context.findRenderObject();
+    if (box is! RenderBox || !box.hasSize) return;
+    final local = box.globalToLocal(event.position);
+    if (!(Offset.zero & box.size).contains(local)) return;
+
+    final result = HitTestResult();
+    WidgetsBinding.instance.hitTestInView(result, event.position, event.viewId);
+    if (result.path.firstOrNull?.target is! PlatformViewRenderBox) {
+      _overlayReleasedAt = DateTime.now();
+    }
+  }
+
+  /// Un toc al mapa just després d'un clic sobre una cosa que el tapa és el
+  /// mateix clic i s'ignora.
+  // TODO(DP-045): treure-ho si es fa servir `pointer_interceptor`.
+  void _onMapTap() {
+    final released = _overlayReleasedAt;
+    if (released != null &&
+        DateTime.now().difference(released) < _cardClickEcho) {
+      return;
+    }
+    _clearSelection();
   }
 
   void _clearSelection() {
@@ -272,7 +324,7 @@ class _ActivitiesMapState extends State<ActivitiesMap> {
               },
               onCameraIdle: _reportVisibleArea,
               onTap: (_) {
-                if (_isInteractive) _clearSelection();
+                if (_isInteractive) _onMapTap();
               },
               // Amb un panell a sobre, el mapa no es mou: a la web, si no,
               // la roda i els arrossegaments hi arribarien igualment.
@@ -347,6 +399,8 @@ class _ActivitiesMapState extends State<ActivitiesMap> {
                     onChanged: _onCardSize,
                     child: _MapActivityCard(
                       activity: selected,
+                      participationAction: widget.participationActionBuilder
+                          ?.call(selected),
                       onClose: _clearSelection,
                       onOpen: () => widget.onActivitySelected(selected.id),
                     ),
@@ -518,15 +572,20 @@ class _SamePlaceSheet extends StatelessWidget {
   }
 }
 
-/// Targeta inferior del marcador seleccionat (fig. 7).
+/// Targeta inferior del marcador seleccionat (fig. 7). Tocar-la a qualsevol
+/// lloc obre l'activitat.
 class _MapActivityCard extends StatelessWidget {
   const _MapActivityCard({
     required this.activity,
     required this.onClose,
     required this.onOpen,
+    this.participationAction,
   });
 
   final Activity activity;
+
+  /// Per apuntar-s'hi des del mapa. Sense, la targeta porta «Veure activitat».
+  final Widget? participationAction;
   final VoidCallback onClose;
   final VoidCallback onOpen;
 
@@ -535,6 +594,28 @@ class _MapActivityCard extends StatelessWidget {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
     final creator = activity.creator;
+    final source = creator != null
+        ? Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Flexible(
+                child: Text(
+                  'Publicat per ${creator.name}',
+                  style: theme.textTheme.bodySmall,
+                ),
+              ),
+              if (creator.isFriend) ...[
+                const SizedBox(width: 6),
+                const FriendshipBadge(),
+              ],
+            ],
+          )
+        : Text(
+            'Font: Agenda Cultural · Generalitat',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: colors.onSurfaceVariant,
+            ),
+          );
 
     return Card(
       margin: EdgeInsets.zero,
@@ -545,101 +626,101 @@ class _MapActivityCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         side: BorderSide(color: colors.outlineVariant),
       ),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(12, 12, 4, 12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: ActivityImage(
-                    activity: activity,
-                    width: 88,
-                    height: 88,
-                    excludeFromSemantics: true,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      ActivityCategoryBadge(category: activity.category),
-                      const SizedBox(height: 6),
-                      Text(
-                        activity.title,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      if (activity.municipality.isNotEmpty) ...[
-                        ActivityInformationRow(
-                          icon: Icons.location_on_outlined,
-                          text: activity.municipality,
-                        ),
-                        const SizedBox(height: 4),
-                      ],
-                      ActivityInformationRow(
-                        icon: Icons.calendar_today_outlined,
-                        text: formatActivitySchedule(activity.startsAt),
-                      ),
-                    ],
-                  ),
-                ),
-                IconButton(
-                  onPressed: onClose,
-                  tooltip: 'Tancar',
-                  icon: const Icon(Icons.close),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Padding(
-              padding: const EdgeInsets.only(right: 8),
-              child: Wrap(
-                alignment: WrapAlignment.spaceBetween,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                spacing: 8,
-                runSpacing: 8,
+      // Els botons de dins (tancar, apuntar-s'hi) fan la seva acció. Per al
+      // lector de pantalla, el títol és el botó per obrir-la.
+      child: InkWell(
+        onTap: onOpen,
+        excludeFromSemantics: true,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(12, 12, 4, 12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (creator != null)
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: ActivityImage(
+                      activity: activity,
+                      width: 88,
+                      height: 88,
+                      excludeFromSemantics: true,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Flexible(
-                          child: Text(
-                            'Publicat per ${creator.name}',
-                            style: theme.textTheme.bodySmall,
+                        ActivityCategoryBadge(category: activity.category),
+                        InkWell(
+                          onTap: onOpen,
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(minHeight: 48),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    activity.title,
+                                    style: theme.textTheme.titleMedium
+                                        ?.copyWith(fontWeight: FontWeight.bold),
+                                  ),
+                                ),
+                                const Icon(Icons.chevron_right, size: 20),
+                              ],
+                            ),
                           ),
                         ),
-                        if (creator.isFriend) ...[
-                          const SizedBox(width: 6),
-                          const FriendshipBadge(),
+                        if (activity.municipality.isNotEmpty) ...[
+                          ActivityInformationRow(
+                            icon: Icons.location_on_outlined,
+                            text: activity.municipality,
+                          ),
+                          const SizedBox(height: 4),
                         ],
+                        ActivityInformationRow(
+                          icon: Icons.calendar_today_outlined,
+                          text: formatActivitySchedule(activity.startsAt),
+                        ),
                       ],
-                    )
-                  else
-                    Text(
-                      'Font: Agenda Cultural · Generalitat',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: colors.onSurfaceVariant,
-                      ),
                     ),
-                  FilledButton.icon(
-                    onPressed: onOpen,
-                    iconAlignment: IconAlignment.end,
-                    icon: const Icon(Icons.chevron_right, size: 20),
-                    label: const Text('Veure activitat'),
+                  ),
+                  IconButton(
+                    onPressed: onClose,
+                    tooltip: 'Tancar',
+                    icon: const Icon(Icons.close),
                   ),
                 ],
               ),
-            ),
-          ],
+              const SizedBox(height: 12),
+              Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: switch (participationAction) {
+                  final action? => Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [source, const SizedBox(height: 8), action],
+                  ),
+                  null => Wrap(
+                    alignment: WrapAlignment.spaceBetween,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      source,
+                      FilledButton.icon(
+                        onPressed: onOpen,
+                        iconAlignment: IconAlignment.end,
+                        icon: const Icon(Icons.chevron_right, size: 20),
+                        label: const Text('Veure activitat'),
+                      ),
+                    ],
+                  ),
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );

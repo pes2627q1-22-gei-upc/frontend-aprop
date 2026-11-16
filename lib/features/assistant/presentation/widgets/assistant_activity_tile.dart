@@ -34,70 +34,77 @@ class AssistantActivityTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(color: colors.outlineVariant),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(
-              width: 72,
-              height: 72,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: InkWell(
-                  onTap: onTap,
-                  child: ActivityImage(
-                    activity: activity,
-                    semanticLabel: 'Veure activitat: ${activity.title}',
+      // Tocar qualsevol lloc obre l'activitat; els botons de dins fan la
+      // seva acció. Per al lector de pantalla, la imatge i el títol ja són
+      // els botons per obrir-la.
+      child: InkWell(
+        onTap: onTap,
+        excludeFromSemantics: true,
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(
+                width: 72,
+                height: 72,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: InkWell(
+                    onTap: onTap,
+                    child: ActivityImage(
+                      activity: activity,
+                      semanticLabel: 'Veure activitat: ${activity.title}',
+                    ),
                   ),
                 ),
               ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  InkWell(
-                    onTap: onTap,
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(minHeight: 48),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              activity.title,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: theme.textTheme.titleSmall?.copyWith(
-                                fontWeight: FontWeight.bold,
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    InkWell(
+                      onTap: onTap,
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(minHeight: 48),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                activity.title,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: theme.textTheme.titleSmall?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
-                          ),
-                          const Icon(Icons.chevron_right, size: 20),
-                        ],
+                            const Icon(Icons.chevron_right, size: 20),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                  if ([
-                        activity.municipality,
-                        formatActivitySchedule(activity.startsAt),
-                      ].where((t) => t.isNotEmpty).join(' · ')
-                      case final details when details.isNotEmpty)
-                    Text(
-                      details,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: colors.onSurfaceVariant,
+                    if ([
+                          activity.municipality,
+                          formatActivitySchedule(activity.startsAt),
+                        ].where((t) => t.isNotEmpty).join(' · ')
+                        case final details when details.isNotEmpty)
+                      Text(
+                        details,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: colors.onSurfaceVariant,
+                        ),
                       ),
-                    ),
-                  if (participationAction != null) ...[
-                    const SizedBox(height: 8),
-                    participationAction!,
+                    if (participationAction != null) ...[
+                      const SizedBox(height: 8),
+                      participationAction!,
+                    ],
                   ],
-                ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
