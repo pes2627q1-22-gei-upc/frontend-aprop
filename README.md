@@ -4,6 +4,10 @@ Aplicació mòbil per descobrir i planificar activitats culturals a Catalunya. P
 
 ## Estat actual
 
+Logotip (**Taiga #262**): Inici i l’accés comparteixen `APropLogo`, amb un PNG transparent que s’integra
+amb el fons crema, conserva la composició de la marca i evita el rectangle de la imatge original.
+Detalls i comprovacions a [la guia de marca](docs/branding.md).
+
 Base Flutter amb tema compartit, accés amb compte i navegació inferior entre Inici, Agenda, Descobreix, Avisos i Perfil. L'aplicació s'obre amb l'inici de sessió, que permet entrar o crear un compte (a Firebase, amb correu o Google; al mode demo, també amb nom d'usuari). Fins que no es verifica el correu, l'aplicació mostra la pantalla de verificació en lloc del contingut. Un cop dins, Inici mostra una capçalera fixa amb el logotip, els controls i la vista «Llista» seleccionada, seguida d'una llista paginada d'activitats del backend, o del repositori de demostració quan s'injecta. Inclou estats de càrrega, error amb reintent i llista buida. Perfil mostra el perfil propi i dona accés a Configuració.
 
 A Android i web l'accés utilitza Firebase Auth, amb correu i Google; cal generar els fitxers locals de configuració abans de compilar (vegeu [la guia de Firebase](docs/firebase-auth.md)). El primer accés amb Google demana un nom d'usuari. A iOS i a les proves injectades amb `DemoAuthRepository`, l'accés és de demostració en memòria: `laiasoler` o `laia@aprop.cat`, contrasenya `Aprop2026!`. Aquest compte és fictici i no és una credencial de Firebase. La sincronització amb el backend necessita `API_BASE_URL`; sense URL es fa servir l'adaptador local descrit a la guia.
