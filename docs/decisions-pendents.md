@@ -266,6 +266,7 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Dubte:** el mockup (fig. 7) obre Inici amb el mapa; el CA3 demana carregar per zona visible en < 3 s, i no hi ha endpoint per zona; el número dels grups surt amb l'estil per defecte de Google, no amb el verd del mockup.
 - **Opcions:** A) vista inicial mapa · B) vista inicial llista (com ara); per a la zona: endpoint amb els límits del mapa o carregar-ho tot; per als grups: acceptar l'estil de Google o fer l'agrupació a Dart amb icones pròpies.
 - **Provisionalment:** la llista és la vista inicial (si Google Maps falla o no hi ha clau, Inici funciona igual); es mostren totes les activitats carregades; grups amb l'estil de Google (`TODO(DP-022)`).
+- **Targeta del marcador (2026-11-15, Claude Code (Opus 5.5) a petició de l'usuari):** tocar qualsevol lloc de la targeta obre la fitxa (com ja passa a les targetes de llista, l'assistent i l'Agenda), i el botó «Veure activitat» del mockup (fig. 7) es canvia pel d'apuntar-se («M’hi apunto» / «✓ Apuntat · Desapunta’m»). Desviació del mockup per confirmar amb l'equip.
 - **Qui decideix:** frontend + backend
 - **Resolució:**
 
@@ -320,6 +321,9 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Dubte:** el backend no té cap endpoint per desapuntar-se (només `POST /events/{id}/signup`) i no hi ha mockup de com es desapunta ni del diàleg de confirmació.
 - **Opcions:** endpoint: A) `DELETE /events/{id}/signup` (simètric al d'apuntar-se) · B) un altre que acordi el backend. Interfície: A) tocar «Apuntat» obre una confirmació (com ara) · B) un botó «Desapunta'm» separat a la fitxa.
 - **Provisionalment:** contracte `unenroll` idempotent amb el repositori de demostració; a la interfície, tocar «Apuntat» obre el diàleg «Vols desapuntar-te?» amb «Mantén el pla» i «Desapunta’m», perquè un toc sense voler no tregui el pla. Textos sense mockup (`TODO(DP-027)` al repositori i al diàleg).
+- **Interfície B (2026-11-15, Claude Code (Opus 5.5) amb confirmació de l'usuari, Taiga #258):** l'estat i l'acció se separen. El distintiu «✓ Apuntat» (`EnrollmentStatusBadge`) surt a les targetes de llista (Inici, Descobreix, cerca, assistent), a la targeta del marcador del mapa i a la fitxa, al costat de la categoria. El botó diu què fa: «M’hi apunto» o «Desapunta’m». Disseny del distintiu sense mockup. A l'Agenda (Taiga #259), cada pla té el mateix distintiu i el botó «Desapunta’m» (`AgendaScreen.participationActionBuilder`, amb l'`EnrollmentViewModel` compartit).
+- **«Desfer» a la llista (2026-11-15, Claude Code (Opus 5.5) amb confirmació de l'usuari, Taiga #257):** a la llista d'Inici, «Desapunta’m» no pregunta: el pla marxa de seguida i surt l'avís «T’has desapuntat de «…».» amb «Desfer» durant 5 segons (`unenrollUndoDelay`). El backend no rep res fins que s'acaba el temps; «Desfer» o tornar a prémer «M’hi apunto» abans no fan cap petició. Si en acabar falla, el pla torna amb l'error. Si es tanca la sessió abans, la baixa s'envia igualment. El títol de la tasca diu «anul·lar reserva», però a la interfície no es parla de reserves (`AGENTS.md`). Amb el lector de pantalla actiu, Flutter pot deixar l'avís obert més estona: passat el temps, «Desfer» ja no fa res.
+- **Només «Desfer», a tot arreu (2026-11-15, decisió de l'usuari, Taiga #257 / #259):** no hi ha cap diàleg de confirmació: a la llista, Descobreix, la cerca, l'assistent, el mapa, la fitxa i l'Agenda, «Desapunta’m» treu el pla i ofereix «Desfer» durant 5 segons. Ser coherent pesa més que tenir dues maneres de desapuntar-se; desapuntar-se es pot desfer, així que no cal preguntar. Substitueix la confirmació que demanava la #259. A l'Agenda, el pla no desapareix fins que s'envia la baixa (mentrestant hi surt «M’hi apunto»).
 - **Qui decideix:** equip (interfície) · backend (endpoint)
 - **Resolució:**
 
@@ -359,23 +363,6 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Token (2026-10-25):** el backend ja exigeix `Authorization: Bearer` a totes les rutes (`feature/auth` fusionada). `HttpActivityMapRepository` l'envia si `AuthRepository.currentIdToken()` en retorna un; amb els comptes de demostració és nul i no s'envia. En ajuntar-ho amb el login de Firebase (`feature/autenticacio`, ja a `develop`), `FirebaseAuthRepository.currentIdToken()` retorna el token de Firebase de la sessió (`_auth.currentUser?.getIdToken()`), que Firebase renova sol.
 - **Apuntar-se des del mapa (2026-10-25):** la inscripció i l'Agenda buscaven l'activitat només al catàleg de demostració i fallaven amb les del backend. Amb `API_BASE_URL`, `CombinedActivityRepository` busca al backend els ID numèrics i al catàleg els `demo-…`.
 - **Qui decideix:** frontend + backend
-- **Resolució:**
-
-### DP-031 · Enllaços de verificació amb la clau d'API antiga
-- **Estat:** oberta
-- **Obert per:** 2026-10-25 · Claude Code (Opus 5.5) amb confirmació de l'usuari · Taiga #73
-- **Context:** `VerifyEmailScreen`, `VerifyEmailViewModel`, `AuthRepository.verifyEmailWithLink`, `verificationCodeFromLink`. Relacionada amb DP-004. Els números DP-027, DP-029 i DP-030 són a altres branques sense fusionar.
-- **Dubte:** en renovar la clau (DP-004) es va esborrar la «Browser key» original, però Firebase Authentication la continua posant als enllaços dels correus (`client.apiKey` de la configuració, de només lectura: ni la consola ni l'API la deixen canviar). La pàgina de Firebase que obre l'enllaç falla i diu «ha caducat o ja s'ha fet servir»: ningú no pot verificar el correu fent clic a l'enllaç.
-- **Opcions:** A) demanar al suport de Firebase que hi associïn la clau nova · B) projecte de Firebase nou · C) recuperar la clau antiga restringida a `aprop-919ec.firebaseapp.com` · D) enganxar l'enllaç a l'app (com ara) · E) pàgina pròpia per als enllaços a Firebase Hosting.
-- **Provisionalment:** D, triada per l'usuari (descarta C i E): a «Verifica el teu correu» es pot enganxar l'enllaç del correu; l'app en treu el codi (`oobCode`) i el confirma amb `applyActionCode` i la clau de l'app. Fer clic a l'enllaç continua fallant. `TODO(DP-031)` al repositori i a la pantalla.
-- **Opció E en curs (2026-10-27, Claude Code (Opus 5.5) amb confirmació de l'usuari, Taiga #73):** l'usuari descarta pegar l'enllaç perquè queda lleig i prova una pàgina pròpia per als enllaços:
-  - si la web s'obre amb `?mode=…&oobCode=…`, `main.dart` en treu l'`EmailAction` i `APropApp` mostra `EmailActionScreen` en lloc de l'inici de sessió;
-  - `AuthRepository.confirmEmailVerification` confirma el codi amb `applyActionCode` i la clau de l'app, **sense sessió** (l'enllaç sovint s'obre al navegador del mòbil); si la web ja tenia la sessió del compte, també entra;
-  - «Continua a AProp!» passa a l'app normal. Altres tipus d'enllaç (p. ex. `resetPassword`) mostren que no es poden obrir aquí;
-  - no es neteja l'adreça: si es recarrega la pàgina, el codi ja s'ha fet servir i surt l'avís de caducat;
-  - textos i disseny sense mockup (`TODO(DP-031)`).
-  Falta, en aquest ordre: publicar la web amb el canvi a `frontend-aprop.onrender.com`; afegir-hi el domini a *Authorized domains* de Firebase; posar `https://frontend-aprop.onrender.com/` a *Templates → Personalitza l'URL d'acció* (vegeu `docs/firebase-auth.md`); provar-ho amb un compte nou. Quan funcioni, treure l'opció d'enganxar l'enllaç (D) i resoldre aquesta DP amb E.
-- **Qui decideix:** equip
 - **Resolució:**
 
 ### DP-032 · Perfil propi, edició, autoria i gamificació de demostració
@@ -420,7 +407,7 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Provisionalment:** B per a Dates/Categories. Un únic valor immutable a `ActivitiesViewModel` s'aplica al catàleg i a la zona carregada; sense endpoints/paràmetres nous. Interval inclusiu de dies civils basat en l'inici; categories OR i dates AND; vuit etiquetes dels mockups, coincidència tolerant a accents i sense equivalències deduïdes. Cap categoria = sense restricció. Categories no informades excloses quan se'n tria una, amb recompte visible. Cap de setmana = dissabte/diumenge actual si ja és cap de setmana, o el següent en dies laborables. Esborrany local, Aplicar confirma, tancar descarta; filtres per sessió i només d'Inici. Zona/municipi pendent. `TODO(DP-035)` al model; detalls a `docs/activity-filters.md`.
 - **Qui decideix:** frontend + backend + equip (criteris i categories)
 - **Actualització 2026-10-26:** la llista consulta el servidor amb dates i categories reals abans de paginar. Les opcions deixen de ser les vuit de demostració quan s’injecta HTTP. El mapa continua limitat al filtratge local i metadades absents. Detalls a DP-038; la decisió continua oberta per font compartida i abast global.
-- **Actualització 2026-11-16 · #253:** el backend `6f4979e` incorpora les categories al mapa. El filtre local ja pot comprovar totes les categories rebudes i el distintiu mostra la primera etiqueta usable. Les metadades absents es continuen tractant explícitament (DP-045). La font compartida i els filtres globals de servidor segueixen pendents.
+- **Actualització 2026-11-16 · #253:** el backend `6f4979e` incorpora les categories al mapa. El filtre local ja pot comprovar totes les categories rebudes i el distintiu mostra la primera etiqueta usable. Les metadades absents es continuen tractant explícitament (DP-046). La font compartida i els filtres globals de servidor segueixen pendents.
 - **Resolució:**
 
 ### DP-037 · Llista real d'Inici: paginació i metadades disponibles
@@ -490,16 +477,45 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Qui decideix:** equip / PO
 - **Resolució:**
 
-### DP-045 · Categories d’Inici: entrades sense nom i catàleg buit
+### DP-045 · Mapa a la web: els clics sobre la targeta arriben al mapa
+- **Estat:** oberta
+- **Obert per:** 2026-11-15 · Claude Code (Opus 5.5) a petició de l'usuari · Taiga #255 / #258
+- **Context:** `ActivitiesMap._onMapTap` (`activities_map.dart`).
+- **Dubte:** a la web, el mapa de Google queda per sota de Flutter i rep també els clics fets sobre la targeta, els panells i els calendaris. En prémer «M’hi apunto» a la targeta del marcador, el mapa ho prenia com un toc al mapa i la tancava. A Android no passa.
+- **Opcions:** A) ignorar el toc al mapa que arriba just després d'un clic sobre qualsevol cosa de Flutter que el tapi: targeta, avís de «Desfer», diàlegs (fet) · B) el paquet oficial `pointer_interceptor`, que talla els clics damunt del mapa; serviria també per als panells i calendaris (#255), però és una dependència nova.
+- **Provisionalment:** A, amb un marge de 500 ms (`_cardClickEcho`). Sense paquets nous (`TODO(DP-045)`). El mapa encara pot rebre l'arrossegament fet sobre la targeta.
+- **Qui decideix:** equip (paquet nou)
+- **Resolució:**
+
+### DP-046 · Categories d’Inici: entrades sense nom i catàleg buit
 - **Estat:** oberta · 2026-11-15 · Taiga #253 [FE] Corregir que no es mostren les categories.
+- **Identificador:** renumerada de DP-045 a DP-046 en integrar develop per conservar la decisió publicada de clics sobre el mapa.
 - **Context:** filtre «Categories» compartit per Mapa/Llista a `frontend-aprop@5b0c95c`; backend consultat a `api-aprop@0fdba4f`, sense modificar-lo. El catàleg de proves existent ja inclou una fila amb nom buit, mentre que el carregador del filtre rebutjava tota la resposta quan en trobava una. Un catàleg buit també quedava en memòria durant tota la sessió i el panell no oferia reintent.
-- **Provisionalment:** ometre únicament entrades amb ID vàlid i nom sense etiqueta visible; conservar noms i IDs reals de totes les altres categories, inclosos els àmbits. Un objecte invàlid, un ID invàlid, un nom que no és text o un error HTTP continuen sent errors amb reintent. Compartir peticions simultànies, conservar en memòria el catàleg no buit i permetre tornar a consultar una resposta buida des del mateix panell. `TODO(DP-045)` al repositori HTTP.
+- **Provisionalment:** ometre únicament entrades amb ID vàlid i nom sense etiqueta visible; conservar noms i IDs reals de totes les altres categories, inclosos els àmbits. Un objecte invàlid, un ID invàlid, un nom que no és text o un error HTTP continuen sent errors amb reintent. Compartir peticions simultànies, conservar en memòria el catàleg no buit i permetre tornar a consultar una resposta buida des del mateix panell. `TODO(DP-046)` al repositori HTTP.
 - **Mapa (actualització 2026-11-16):** PR #54 del backend fusionada a `6f4979e`, amb categories a `/events/map`. El mapper compartit elimina etiquetes sense nom visible abans de triar el distintiu i conserva totes les vàlides per filtrar. Es comproven categories secundàries i canvi de vista amb el mateix filtre, sense peticions de detall per marcador. Es manté l’avís només per activitats genuïnament sense categoria usable.
 - **Verificació:** regressions de repositori i de panell HTTP des de Mapa/Llista, amb una entrada sense nom al costat de categories vàlides; reintent de catàleg buit. Tres regressions addicionals reproduïdes abans de corregir la conversió, inclòs el recorregut complet de categories del mapa. La consulta a Render sense sessió retorna 401: manca comprovació autenticada de producció; la presència del codi fusionat no acredita desplegament.
 - **Qui decideix:** frontend/backend per a la neteja de dades i el contracte de categories del mapa. Guia `docs/inici-server-filters.md`.
 - **Resolució:**
 
 ## Resoltes
+
+### DP-031 · Enllaços de verificació amb la clau d'API antiga
+- **Estat:** resolta 2026-11-09
+- **Obert per:** 2026-10-25 · Claude Code (Opus 5.5) amb confirmació de l'usuari · Taiga #73
+- **Context:** `VerifyEmailScreen`, `VerifyEmailViewModel`, `AuthRepository.verifyEmailWithLink`, `verificationCodeFromLink`. Relacionada amb DP-004. Els números DP-027, DP-029 i DP-030 són a altres branques sense fusionar.
+- **Dubte:** en renovar la clau (DP-004) es va esborrar la «Browser key» original, però Firebase Authentication la continua posant als enllaços dels correus (`client.apiKey` de la configuració, de només lectura: ni la consola ni l'API la deixen canviar). La pàgina de Firebase que obre l'enllaç falla i diu «ha caducat o ja s'ha fet servir»: ningú no pot verificar el correu fent clic a l'enllaç.
+- **Opcions:** A) demanar al suport de Firebase que hi associïn la clau nova · B) projecte de Firebase nou · C) recuperar la clau antiga restringida a `aprop-919ec.firebaseapp.com` · D) enganxar l'enllaç a l'app (com ara) · E) pàgina pròpia per als enllaços a Firebase Hosting.
+- **Provisionalment:** D, triada per l'usuari (descarta C i E): a «Verifica el teu correu» es pot enganxar l'enllaç del correu; l'app en treu el codi (`oobCode`) i el confirma amb `applyActionCode` i la clau de l'app. Fer clic a l'enllaç continua fallant. `TODO(DP-031)` al repositori i a la pantalla.
+- **Opció E en curs (2026-10-27, Claude Code (Opus 5.5) amb confirmació de l'usuari, Taiga #73):** l'usuari descarta pegar l'enllaç perquè queda lleig i prova una pàgina pròpia per als enllaços:
+  - si la web s'obre amb `?mode=…&oobCode=…`, `main.dart` en treu l'`EmailAction` i `APropApp` mostra `EmailActionScreen` en lloc de l'inici de sessió;
+  - `AuthRepository.confirmEmailVerification` confirma el codi amb `applyActionCode` i la clau de l'app, **sense sessió** (l'enllaç sovint s'obre al navegador del mòbil); si la web ja tenia la sessió del compte, també entra;
+  - «Continua a AProp!» passa a l'app normal. Altres tipus d'enllaç (p. ex. `resetPassword`) mostren que no es poden obrir aquí;
+  - no es neteja l'adreça: si es recarrega la pàgina, el codi ja s'ha fet servir i surt l'avís de caducat;
+  - textos i disseny sense mockup (`TODO(DP-031)`).
+  Falta, en aquest ordre: publicar la web amb el canvi a `frontend-aprop.onrender.com`; afegir-hi el domini a *Authorized domains* de Firebase; posar `https://frontend-aprop.onrender.com/` a *Templates → Personalitza l'URL d'acció* (vegeu `docs/firebase-auth.md`); provar-ho amb un compte nou. Quan funcioni, treure l'opció d'enganxar l'enllaç (D) i resoldre aquesta DP amb E.
+- **Qui decideix:** equip
+- **Resolució:** C, a Google Cloud (2026-11-07, l'usuari). S'ha restaurat la clau antiga, la que Firebase posa als enllaços, i s'ha restringit a llocs web (`aprop-919ec.firebaseapp.com`, `aprop-919ec.web.app`, `frontend-aprop.onrender.com`) i a les API Identity Toolkit i Token Service. Ara la pàgina de Firebase verifica el correu en fer clic a l'enllaç. També s'ha configurat un SMTP propi amb un Gmail de l'equip, però no desbloqueja l'URL d'acció (`EMAIL_TEMPLATE_UPDATE_NOT_ALLOWED`, pla Spark): E no és possible. El 2026-11-09 (Taiga #73) s'esborren l'opció d'enganxar l'enllaç (D) i la pàgina pròpia (E): `EmailActionScreen`, `EmailAction`, `AuthRepository.verifyEmailWithLink`, `confirmEmailVerification`, `verificationCodeFromLink` i `AuthFailure.invalidVerificationLink`. **No esborreu la clau restaurada:** sense ella, els enllaços tornarien a fallar.
+
 
 ### DP-036 · Format UUID de `X-User-ID` i sincronització d'UID de Firebase a Render
 - **Estat:** resolta 2026-10-26

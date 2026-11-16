@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 
 import '../view_models/enrollment_view_model.dart';
+import 'enrollment_badge.dart';
 
 /// The same enrollment states for compact cards and the detail's primary action.
 ///
-/// Tapping «Apuntat» asks for confirmation before unenrolling, so an
-/// accidental tap does not remove the plan.
+/// The button says what it does («M’hi apunto» or «Desapunta’m»); being
+/// enrolled is shown apart, with [EnrolledBadge]. Unenrolling does not ask:
+/// the plan goes at once and «Desfer» brings it back for a few seconds, so an
+/// accidental tap is easy to fix.
 class EnrollmentAction extends StatelessWidget {
   const EnrollmentAction({
     super.key,
@@ -42,7 +45,7 @@ class EnrollmentAction extends StatelessWidget {
         final label = leaving
             ? 'Desapuntant…'
             : enrolled
-            ? 'Apuntat'
+            ? 'Desapunta’m'
             : saving
             ? 'Apuntant…'
             : loading
@@ -56,7 +59,7 @@ class EnrollmentAction extends StatelessWidget {
             : enrolled
             // Unenrolling needs the current plans: after a read failure the
             // confirmed state stays visible but cannot be changed.
-            ? (readFailed ? null : () => _confirmUnenroll(context))
+            ? (readFailed ? null : () => _unenrollWithUndo(context))
             : readFailed
             ? viewModel.load
             : () => viewModel.enroll(activityId);
@@ -78,9 +81,6 @@ class EnrollmentAction extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-            ] else if (enrolled) ...[
-              const Icon(Icons.check_circle_outline, size: 20),
-              const SizedBox(width: 8),
             ],
             Flexible(child: Text(label)),
           ],
@@ -93,9 +93,7 @@ class EnrollmentAction extends StatelessWidget {
               minimumSize: const Size(144, 48),
               foregroundColor: colors.primary,
               disabledForegroundColor: colors.primary,
-              backgroundColor: enrolled
-                  ? colors.primary.withValues(alpha: 0.08)
-                  : colors.surface,
+              backgroundColor: colors.surface,
               side: BorderSide(color: colors.primary),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(14),
@@ -116,75 +114,90 @@ class EnrollmentAction extends StatelessWidget {
           );
         }
 
-        return Semantics(
-          liveRegion: true,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Només per al lector de pantalla: un globus visible en passar
-              // per sobre del botó molestava.
-              Semantics(
-                tooltip: enrolled
-                    ? 'Desapuntar-me de $activityTitle'
-                    : readFailed
-                    ? 'Tornar a consultar els teus plans'
-                    : 'Apuntar-me a $activityTitle',
-                child: primary
-                    ? button
-                    : Align(alignment: Alignment.centerRight, child: button),
-              ),
-              if (error != null) ...[
-                const SizedBox(height: 8),
-                Text(
-                  error,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: colors.error,
-                  ),
+        // The cards open the activity when tapped anywhere: taps on this
+        // area, even on a disabled button or around it, must not do that.
+        return GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          excludeFromSemantics: true,
+          onTap: () {},
+          child: Semantics(
+            liveRegion: true,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Només per al lector de pantalla: un globus visible en passar
+                // per sobre del botó molestava.
+                Semantics(
+                  tooltip: enrolled
+                      ? 'Desapuntar-me de $activityTitle'
+                      : readFailed
+                      ? 'Tornar a consultar els teus plans'
+                      : 'Apuntar-me a $activityTitle',
+                  child: primary
+                      ? button
+                      // A les targetes, el distintiu al costat del botó; amb
+                      // poc espai o text gran, el botó baixa a la línia següent.
+                      : Wrap(
+                          alignment: WrapAlignment.end,
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          spacing: 12,
+                          runSpacing: 8,
+                          children: [
+                            if (enrolled) const EnrolledBadge(),
+                            button,
+                          ],
+                        ),
                 ),
-              ],
-              if (showHelper) ...[
-                const SizedBox(height: 8),
-                Text(
-                  enrolled
-                      ? 'Aquest pla ja és a la teva agenda. Toca «Apuntat» '
-                            'si vols desapuntar-te.'
-                      : 'Afegeix aquest pla a la teva agenda.',
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: colors.onSurface,
+                if (error != null) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    error,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: colors.error,
+                    ),
                   ),
-                ),
+                ],
+                if (showHelper) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    enrolled
+                        ? 'Aquest pla ja és a la teva agenda.'
+                        : 'Afegeix aquest pla a la teva agenda.',
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: colors.onSurface,
+                    ),
+                  ),
+                ],
               ],
-            ],
+            ),
           ),
         );
       },
     );
   }
 
-  Future<void> _confirmUnenroll(BuildContext context) async {
-    // TODO(DP-027): text i disseny del diàleg sense mockup.
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Vols desapuntar-te?'),
-        content: Text(
-          'Treurem «$activityTitle» de la teva agenda. Hi podràs tornar a '
-          'apuntar quan vulguis.',
+  void _unenrollWithUndo(BuildContext context) {
+    viewModel.unenrollLater(activityId);
+    // TODO(DP-027): text i durada sense mockup.
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text('T’has desapuntat de «$activityTitle».'),
+          // It starts counting once it has slid in: it ends a little before
+          // the removal is sent, so «Desfer» never shows when it no longer
+          // works.
+          duration: unenrollUndoDelay - const Duration(milliseconds: 750),
+          // With an action the bar would stay until closed; it has to go
+          // when «Desfer» is no longer possible.
+          persist: false,
+          action: SnackBarAction(
+            label: 'Desfer',
+            onPressed: () => viewModel.undoUnenroll(activityId),
+          ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Mantén el pla'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Desapunta’m'),
-          ),
-        ],
-      ),
-    );
-    if (confirmed ?? false) await viewModel.unenroll(activityId);
+      );
   }
 }

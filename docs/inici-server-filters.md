@@ -51,7 +51,7 @@ Els noms originals i els IDs es mantenen per consultar el servidor.
 
 Les peticions simultànies comparteixen la mateixa càrrega i el catàleg no buit es conserva a la sessió.
 Una resposta buida es pot tornar a consultar: el panell mostra «Tornar-ho a provar» i permet continuar
-sense restricció. El mateix component serveix per a Mapa i Llista. Decisió registrada a DP-045.
+sense restricció. El mateix component serveix per a Mapa i Llista. Decisió registrada a DP-046.
 
 El backend `6f4979e` (PR #54) ja retorna `categories` com a llista de noms canònics a `/events/map`,
 igual que el catàleg i el detall. El mapper compartit conserva totes les etiquetes vàlides i elimina
@@ -68,8 +68,10 @@ No es modifica el backend ni es pressuposa que la versió fusionada ja estigui d
 Verificació específica: prova HTTP de categories múltiples i buides, i recorregut amb transport simulat
 llista → mapa → targeta → filtre d’una categoria secundària → llista → mapa. Confirma IDs, marcadors,
 distintius i absència de peticions de detall addicionals. La comprovació autenticada de producció és manual.
-Resultat final del 16/11/2026: 532 proves superades, analitzador i format correctes, revisió independent
-sense bloquejos. Branca `feature/fix-253-categories`, sense commit ni push automàtics.
+Resultat del 16/11/2026 després de sincronitzar amb `develop@cf99a0f`: 523 proves superades,
+analitzador i format correctes, revisió independent sense bloquejos. Les 8 regressions de #253 es
+conserven; la base anterior tenia 532 proves abans de la neteja dels fluxos de verificació de correu.
+Branca `feature/fix-253-categories`, sense commit ni push automàtics del merge.
 
 Les opcions HTTP venen de `/categories`. Els noms de taxonomia es presenten amb el seu últim segment,
 sense guions, com ja feien les targetes. No es dedueix que «Concerts» equivalgui a «Música» ni s’inventen

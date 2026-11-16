@@ -33,120 +33,126 @@ class ActivityCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         side: BorderSide(color: colors.outlineVariant),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (creator != null) ...[
-              Row(
-                children: [
-                  ClipOval(
-                    // Sense foto (qui crea una activitat no en té) es mostra
-                    // la mateixa icona que si la foto no es pot carregar.
-                    child: switch (creator.avatarAsset) {
-                      final avatar? => Image.asset(
-                        avatar,
-                        width: 32,
-                        height: 32,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) =>
-                            const _AvatarPlaceholder(),
-                      ),
-                      null => const _AvatarPlaceholder(),
-                    },
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'Publicat per ${creator.name}',
-                      style: theme.textTheme.bodyMedium,
-                    ),
-                  ),
-                  if (creator.isFriend) ...[
-                    const SizedBox(width: 8),
-                    const FriendshipBadge(),
-                  ],
-                ],
-              ),
-              const SizedBox(height: 12),
-            ],
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(
-                  width: 112,
-                  child: AspectRatio(
-                    aspectRatio: 1,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: InkWell(
-                        onTap: onTap,
-                        child: ActivityImage(
-                          activity: activity,
-                          semanticLabel: 'Veure activitat: ${activity.title}',
+      // Tocar qualsevol lloc obre l'activitat; els botons de dins fan la
+      // seva acció. Per al lector de pantalla, la imatge i el títol ja són
+      // els botons per obrir-la.
+      child: InkWell(
+        onTap: onTap,
+        excludeFromSemantics: true,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (creator != null) ...[
+                Row(
+                  children: [
+                    ClipOval(
+                      // Sense foto (qui crea una activitat no en té) es mostra
+                      // la mateixa icona que si la foto no es pot carregar.
+                      child: switch (creator.avatarAsset) {
+                        final avatar? => Image.asset(
+                          avatar,
+                          width: 32,
+                          height: 32,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) =>
+                              const _AvatarPlaceholder(),
                         ),
+                        null => const _AvatarPlaceholder(),
+                      },
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Publicat per ${creator.name}',
+                        style: theme.textTheme.bodyMedium,
                       ),
                     ),
-                  ),
+                    if (creator.isFriend) ...[
+                      const SizedBox(width: 8),
+                      const FriendshipBadge(),
+                    ],
+                  ],
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      ActivityCategoryBadge(category: activity.category),
-                      const SizedBox(height: 6),
-                      InkWell(
-                        onTap: onTap,
-                        child: ConstrainedBox(
-                          constraints: const BoxConstraints(minHeight: 48),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  activity.title,
-                                  style: theme.textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                              const Icon(Icons.chevron_right, size: 20),
-                            ],
+                const SizedBox(height: 12),
+              ],
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    width: 112,
+                    child: AspectRatio(
+                      aspectRatio: 1,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: InkWell(
+                          onTap: onTap,
+                          child: ActivityImage(
+                            activity: activity,
+                            semanticLabel: 'Veure activitat: ${activity.title}',
                           ),
                         ),
                       ),
-                      const SizedBox(height: 8),
-                      if (activity.municipality.isNotEmpty) ...[
-                        ActivityInformationRow(
-                          icon: Icons.location_on_outlined,
-                          text: activity.municipality,
-                        ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        ActivityCategoryBadge(category: activity.category),
                         const SizedBox(height: 6),
+                        InkWell(
+                          onTap: onTap,
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(minHeight: 48),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    activity.title,
+                                    style: theme.textTheme.titleMedium
+                                        ?.copyWith(fontWeight: FontWeight.bold),
+                                  ),
+                                ),
+                                const Icon(Icons.chevron_right, size: 20),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        if (activity.municipality.isNotEmpty) ...[
+                          ActivityInformationRow(
+                            icon: Icons.location_on_outlined,
+                            text: activity.municipality,
+                          ),
+                          const SizedBox(height: 6),
+                        ],
+                        ActivityInformationRow(
+                          icon: Icons.calendar_today_outlined,
+                          text: formatActivitySchedule(activity.startsAt),
+                        ),
                       ],
-                      ActivityInformationRow(
-                        icon: Icons.calendar_today_outlined,
-                        text: formatActivitySchedule(activity.startsAt),
-                      ),
-                    ],
+                    ),
+                  ),
+                ],
+              ),
+              if (activity.source == ActivitySource.culturalAgenda) ...[
+                const SizedBox(height: 12),
+                Text(
+                  'Font: Agenda Cultural · Generalitat',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: colors.onSurfaceVariant,
                   ),
                 ),
               ],
-            ),
-            if (activity.source == ActivitySource.culturalAgenda) ...[
-              const SizedBox(height: 12),
-              Text(
-                'Font: Agenda Cultural · Generalitat',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: colors.onSurfaceVariant,
-                ),
-              ),
+              if (participationAction != null) ...[
+                const SizedBox(height: 12),
+                participationAction!,
+              ],
             ],
-            if (participationAction != null) ...[
-              const SizedBox(height: 12),
-              participationAction!,
-            ],
-          ],
+          ),
         ),
       ),
     );

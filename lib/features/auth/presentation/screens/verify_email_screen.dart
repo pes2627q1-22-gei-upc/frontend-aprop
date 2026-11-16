@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../../repositories/auth_repository.dart';
 import '../view_models/verify_email_view_model.dart';
@@ -24,7 +23,6 @@ class VerifyEmailScreen extends StatefulWidget {
 }
 
 class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
-  final _linkController = TextEditingController();
   late final VerifyEmailViewModel _viewModel;
 
   @override
@@ -36,21 +34,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
   @override
   void dispose() {
     _viewModel.dispose();
-    _linkController.dispose();
     super.dispose();
-  }
-
-  Future<void> _pasteLink() async {
-    final data = await Clipboard.getData(Clipboard.kTextPlain);
-    final text = data?.text?.trim();
-    if (!mounted || text == null || text.isEmpty) return;
-    _linkController.text = text;
-    _viewModel.onLinkChanged();
-  }
-
-  void _verifyWithLink() {
-    FocusScope.of(context).unfocus();
-    _viewModel.verifyWithLink(_linkController.text);
   }
 
   @override
@@ -139,60 +123,6 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                               : 'Torna a enviar el correu',
                           textAlign: TextAlign.center,
                         ),
-                      ),
-                      const SizedBox(height: 32),
-                      // TODO(DP-031): sobrarà quan l'enllaç del correu funcioni
-                      // directament; textos sense mockup.
-                      Text(
-                        "L'enllaç et diu que ha caducat?",
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        "Copia l'enllaç del correu (mantén-lo premut i tria "
-                        "«Copia l'adreça de l'enllaç») i enganxa'l aquí.",
-                        style: TextStyle(
-                          color: theme.colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      TextField(
-                        controller: _linkController,
-                        keyboardType: TextInputType.url,
-                        autocorrect: false,
-                        textInputAction: TextInputAction.done,
-                        onChanged: (_) => _viewModel.onLinkChanged(),
-                        onSubmitted: (_) => _verifyWithLink(),
-                        decoration: InputDecoration(
-                          labelText: 'Enllaç del correu',
-                          errorText: _viewModel.linkError,
-                          errorMaxLines: 4,
-                          prefixIcon: const Icon(Icons.link),
-                          suffixIcon: IconButton(
-                            tooltip: "Enganxa l'enllaç",
-                            icon: const Icon(Icons.content_paste),
-                            onPressed: _pasteLink,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      OutlinedButton(
-                        onPressed: _viewModel.isBusy ? null : _verifyWithLink,
-                        style: OutlinedButton.styleFrom(
-                          minimumSize: const Size.fromHeight(52),
-                        ),
-                        child: _viewModel.isApplyingLink
-                            ? SizedBox.square(
-                                dimension: 22,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2.5,
-                                  semanticsLabel: 'Verificant',
-                                  color: theme.colorScheme.onSurfaceVariant,
-                                ),
-                              )
-                            : const Text("Verifica amb l'enllaç"),
                       ),
                       const SizedBox(height: 24),
                       AuthLinkPrompt(

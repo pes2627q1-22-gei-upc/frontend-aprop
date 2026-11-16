@@ -192,7 +192,7 @@ class HttpActivityRepository
   Future<List<({int id, String name})>> getCategories() =>
       _categoriesRequest ??= _fetchCategories()
           .then((categories) {
-            // TODO(DP-045): An empty catalogue must remain retryable in this session.
+            // TODO(DP-046): An empty catalogue must remain retryable in this session.
             if (categories.isEmpty) _categoriesRequest = null;
             return categories;
           })
@@ -210,7 +210,7 @@ class HttpActivityRepository
     for (final item in decoded) {
       if (item case {'id': final int id, 'name': final String name}
           when id > 0) {
-        // TODO(DP-045): Ignore unnamed entries, keeping every usable server ID.
+        // TODO(DP-046): Ignore unnamed entries, keeping every usable server ID.
         if (activityCategoryLabel(name).trim().isNotEmpty) {
           categories.add((id: id, name: name));
         }

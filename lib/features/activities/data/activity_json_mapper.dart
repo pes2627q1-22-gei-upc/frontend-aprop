@@ -22,7 +22,7 @@ Activity activityFromJson(Map<String, Object?> json) {
   final tags = rawCategories is List
       ? rawCategories.whereType<String>()
       : [if (rawCategories is String) rawCategories];
-  // TODO(DP-045): Choose the badge only after removing labels without a name.
+  // TODO(DP-046): Choose the badge only after removing labels without a name.
   final categories = List<String>.unmodifiable(
     tags
         .map(activityCategoryLabel)
