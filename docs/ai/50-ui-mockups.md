@@ -19,6 +19,11 @@ Barra inferior fixa amb 5 seccions: **Inici · Agenda · Descobreix · Avisos ·
 el seu historial; tornar d'una fitxa o perfil conserva els filtres, la cerca i la posició del desplaçament.
 Accés amb Google; en el primer accés es completa el perfil i es fa el test d'interessos.
 
+**Actualització #261 (2026-11-16):** en obrir el xat de l’Assistent s’amaga la barra inferior. La fletxa,
+el retorn del sistema i les dreceres recuperen la navegació habitual sense perdre l’estat de les seccions.
+La conversa es conserva en tornar d’una fitxa o reobrir l’Assistent. Les fitxes obertes des del xat també
+mantenen el flux sense barra, pendent de validar aquest detall de disseny a DP-048.
+
 ## Comportaments compartits
 
 - **Targeta d'activitat:** fotografia, categoria, títol, municipi, horari i procedència («Agenda Cultural» o
