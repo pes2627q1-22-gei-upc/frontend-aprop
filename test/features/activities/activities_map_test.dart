@@ -165,12 +165,65 @@ void main() {
     map(tester).onTap!(const LatLng(41.4, 2.1));
     await tester.pumpAndSettle();
     expect(find.byTooltip('Tancar'), findsOneWidget);
+    // Tampoc obre el marcador que hi hagi just darrere de la targeta.
+    marker(tester, 'demo-jazz').onTap!();
+    await tester.pumpAndSettle();
+    expect(find.text('Teatre sota les estrelles'), findsOneWidget);
+    expect(find.text('Jazz al parc'), findsNothing);
 
     await tester.tap(find.byTooltip('Tancar'));
     await tester.pumpAndSettle();
     expect(find.byTooltip('Tancar'), findsNothing);
     // En tancar-la, els botons tornen a baix.
     expect(overlays.last, 0);
+  });
+
+  testWidgets('Amb un panell a sobre, el mapa no es mou ni respon', (
+    tester,
+  ) async {
+    await pumpInici(tester);
+    await openMap(tester);
+    bool locked() => !map(tester).scrollGesturesEnabled;
+    expect(locked(), isFalse);
+
+    // Panell de dates (l'obre Inici).
+    await tester.tap(find.byKey(const ValueKey('activities-filter-dates')));
+    await tester.pumpAndSettle();
+    expect(locked(), isTrue);
+    expect(map(tester).zoomGesturesEnabled, isFalse);
+    marker(tester, 'demo-theatre').onTap!();
+    await tester.pumpAndSettle();
+    expect(find.text('Teatre sota les estrelles'), findsNothing);
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    expect(locked(), isFalse);
+
+    // Panell de categories.
+    await tester.tap(
+      find.byKey(const ValueKey('activities-filter-categories')),
+    );
+    await tester.pumpAndSettle();
+    expect(locked(), isTrue);
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    expect(locked(), isFalse);
+
+    // Llegenda (l'obre el mapa).
+    await tester.tap(find.text('Llegenda'));
+    await tester.pumpAndSettle();
+    expect(locked(), isTrue);
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    expect(locked(), isFalse);
+
+    // Un toc al mapa just després d'un clic a sobre seu es pren pel mateix
+    // clic (DP-045): la persona no toca tan de pressa.
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 600)),
+    );
+    marker(tester, 'demo-theatre').onTap!();
+    await tester.pumpAndSettle();
+    expect(find.text('Teatre sota les estrelles'), findsOneWidget);
   });
 
   testWidgets('La targeta del marcador diu si ja hi estàs apuntat', (
@@ -323,6 +376,11 @@ void main() {
       expect(opened, ['orgue']);
 
       // Un marcador sol continua mostrant la seva targeta.
+      // Un toc al mapa just després d'un clic a sobre seu es pren pel mateix
+      // clic (DP-045): la persona no toca tan de pressa.
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 600)),
+      );
       marker(tester, 'lluny').onTap!();
       await tester.pumpAndSettle();
       expect(find.byTooltip('Tancar'), findsOneWidget);

@@ -5,7 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 void main() {
-  testWidgets('«Crear activitat» puja per sobre de la targeta del mapa', (
+  testWidgets('El botó flotant puja per sobre de la targeta del mapa', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(390, 844);
@@ -35,6 +35,11 @@ void main() {
     expect(tester.getTopLeft(button).dy, restingTop);
 
     // Tornar a obrir la mateixa targeta també el fa pujar.
+    // Un toc al mapa just després d'un clic a sobre seu es pren pel mateix
+    // clic (DP-045): la persona no toca tan de pressa.
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 600)),
+    );
     tester
         .widget<GoogleMap>(find.byType(GoogleMap))
         .markers
