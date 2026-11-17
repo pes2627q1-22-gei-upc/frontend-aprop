@@ -12,6 +12,7 @@
   `border #E3DED5`, `selectedBackground #E6EEE7`. Mostassa i tema fosc: `TODO` (encara no existeixen).
 - **NFR:** un únic `ThemeData` amb tokens de color, tipografia i espaiat; mode clar i fosc conforme a WCAG 2.1 AA.
 - **Interfície en català.** No hi ha vocabulari transaccional («comprar», «reservar») ni publicitat.
+- **Logotip (#262):** `APropLogo` compartit a Inici i Login, amb fons transparent i sense deformar-lo. Es conserva la composició Catalunya + tres marcadors + «AProp!», amb verd bosc, coral, mostassa i crema. Original conservat; detall i verificació a `docs/branding.md` (DP-047).
 
 ## Navegació
 
