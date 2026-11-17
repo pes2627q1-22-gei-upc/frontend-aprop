@@ -72,6 +72,11 @@ class FakeActivityRepository implements ActivityRepository {
       directions: activity.directions,
       location: activity.location,
       price: activity.price,
+      categories: activity.categories,
+      schedule: activity.schedule,
+      modality: activity.modality,
+      isPermanent: activity.isPermanent,
+      onlineUrl: activity.onlineUrl,
     );
   }
 
@@ -99,6 +104,11 @@ class FakeActivityRepository implements ActivityRepository {
       directions: activity.directions,
       location: activity.location,
       price: activity.price,
+      categories: activity.categories,
+      schedule: activity.schedule,
+      modality: activity.modality,
+      isPermanent: activity.isPermanent,
+      onlineUrl: activity.onlineUrl,
     );
   }
 }

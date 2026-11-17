@@ -115,6 +115,11 @@ class DemoActivityRepository implements ActivityRepository {
       directions: activity.directions,
       location: activity.location,
       price: activity.price,
+      categories: activity.categories,
+      schedule: activity.schedule,
+      modality: activity.modality,
+      isPermanent: activity.isPermanent,
+      onlineUrl: activity.onlineUrl,
     );
     _activities.add(created);
     return created;
@@ -140,6 +145,11 @@ class DemoActivityRepository implements ActivityRepository {
       directions: activity.directions,
       location: activity.location,
       price: activity.price,
+      categories: activity.categories,
+      schedule: activity.schedule,
+      modality: activity.modality,
+      isPermanent: activity.isPermanent,
+      onlineUrl: activity.onlineUrl,
     );
     _activities[index] = updated;
     return updated;

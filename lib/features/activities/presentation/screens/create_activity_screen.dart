@@ -62,6 +62,12 @@ class _CreateActivityScreenState extends State<CreateActivityScreen> {
   late final _directionsController = TextEditingController(
     text: widget.activity?.directions,
   );
+  late final _scheduleNoteController = TextEditingController(
+    text: _viewModel.initialScheduleNote,
+  );
+  late final _onlineUrlController = TextEditingController(
+    text: widget.activity?.onlineUrl,
+  );
   late final _priceController = TextEditingController(
     text: _priceText(widget.activity?.price),
   );
@@ -96,6 +102,8 @@ class _CreateActivityScreenState extends State<CreateActivityScreen> {
     _municipalityController.dispose();
     _directionsController.dispose();
     _priceController.dispose();
+    _scheduleNoteController.dispose();
+    _onlineUrlController.dispose();
     super.dispose();
   }
 
@@ -151,6 +159,8 @@ class _CreateActivityScreenState extends State<CreateActivityScreen> {
       municipality: _municipalityController.text,
       directions: _directionsController.text,
       price: _priceController.text,
+      scheduleNote: _scheduleNoteController.text,
+      onlineUrl: _onlineUrlController.text,
     );
     if (activity != null && mounted) widget.onCreated(activity);
   }
@@ -214,7 +224,14 @@ class _CreateActivityScreenState extends State<CreateActivityScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                Text('Categoria', style: theme.textTheme.titleMedium),
+                Text('Categories', style: theme.textTheme.titleMedium),
+                Text(
+                  'Tria’n fins a $maxActivityCategories. La primera és la que '
+                  'es veu a les targetes.',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: colors.onSurfaceVariant,
+                  ),
+                ),
                 const SizedBox(height: 8),
                 if (_viewModel.isLoadingCategories)
                   const SizedBox(
@@ -250,8 +267,8 @@ class _CreateActivityScreenState extends State<CreateActivityScreen> {
                 else
                   _CategorySelector(
                     categories: _viewModel.categories,
-                    selected: _viewModel.category,
-                    onSelected: _viewModel.setCategory,
+                    selected: _viewModel.selectedCategories,
+                    onSelected: _viewModel.toggleCategory,
                   ),
                 if (_viewModel.fieldError(CreateActivityField.category)
                     case final categoryError?) ...[
@@ -322,6 +339,19 @@ class _CreateActivityScreenState extends State<CreateActivityScreen> {
                 ),
                 const SizedBox(height: 16),
                 TextField(
+                  controller: _scheduleNoteController,
+                  textCapitalization: TextCapitalization.sentences,
+                  textInputAction: TextInputAction.next,
+                  maxLength: maxActivityScheduleNoteLength,
+                  decoration: const InputDecoration(
+                    labelText: 'Més sobre l’horari (opcional)',
+                    prefixIcon: Icon(Icons.schedule),
+                    hintText: 'Per exemple: durada aproximada d’1 hora',
+                    helperText: 'L’hora d’inici i de fi ja s’hi afegeix sola.',
+                  ),
+                ),
+                const SizedBox(height: 8),
+                TextField(
                   controller: _municipalityController,
                   textCapitalization: TextCapitalization.words,
                   textInputAction: TextInputAction.next,
@@ -376,6 +406,57 @@ class _CreateActivityScreenState extends State<CreateActivityScreen> {
                     errorText: _viewModel.fieldError(CreateActivityField.price),
                   ),
                 ),
+                const SizedBox(height: 16),
+                Text('Modalitat', style: theme.textTheme.titleMedium),
+                const SizedBox(height: 8),
+                SegmentedButton<ActivityModality>(
+                  showSelectedIcon: false,
+                  segments: const [
+                    ButtonSegment(
+                      value: ActivityModality.inPerson,
+                      label: Text('Presencial'),
+                    ),
+                    ButtonSegment(
+                      value: ActivityModality.online,
+                      label: Text('En línia'),
+                    ),
+                    ButtonSegment(
+                      value: ActivityModality.mixed,
+                      label: Text('Les dues'),
+                      tooltip: 'Presencial i en línia',
+                    ),
+                  ],
+                  selected: {_viewModel.modality},
+                  onSelectionChanged: (selection) =>
+                      _viewModel.setModality(selection.single),
+                ),
+                if (_viewModel.modality != ActivityModality.inPerson) ...[
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: _onlineUrlController,
+                    keyboardType: TextInputType.url,
+                    autocorrect: false,
+                    onChanged: (_) => _viewModel.onFieldChanged(
+                      CreateActivityField.onlineUrl,
+                    ),
+                    decoration: InputDecoration(
+                      labelText: 'Enllaç per connectar-s’hi (opcional)',
+                      prefixIcon: const Icon(Icons.link),
+                      hintText: 'https://',
+                      errorText: _viewModel.fieldError(
+                        CreateActivityField.onlineUrl,
+                      ),
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 8),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Activitat permanent'),
+                  subtitle: const Text('Per exemple, una exposició fixa.'),
+                  value: _viewModel.isPermanent,
+                  onChanged: _viewModel.setPermanent,
+                ),
                 const SizedBox(height: 24),
                 if (errorMessage != null) ...[
                   Semantics(
@@ -423,7 +504,7 @@ IconData _categoryIcon(String category) =>
     _categoryIcons[category] ?? Icons.local_activity_outlined;
 
 /// Fila horitzontal de categories que es pot desplaçar. Cada una té els
-/// colors de la seva insígnia; només se'n pot triar una.
+/// colors de la seva insígnia; se'n poden triar fins a [maxActivityCategories].
 class _CategorySelector extends StatelessWidget {
   const _CategorySelector({
     required this.categories,
@@ -433,8 +514,8 @@ class _CategorySelector extends StatelessWidget {
 
   final List<ActivityCategory> categories;
 
-  /// `ActivityCategory.value` de la triada.
-  final String? selected;
+  /// `ActivityCategory.value` de les triades.
+  final List<String> selected;
   final ValueChanged<String> onSelected;
 
   @override
@@ -453,7 +534,7 @@ class _CategorySelector extends StatelessWidget {
             label: category.label,
             icon: _categoryIcon(category.label),
             colors: ActivityCategoryBadge.colorsFor(category.label, colors),
-            isSelected: selected == category.value,
+            isSelected: selected.contains(category.value),
             onTap: () => onSelected(category.value),
           );
         },

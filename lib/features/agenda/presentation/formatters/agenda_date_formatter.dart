@@ -41,10 +41,3 @@ String formatAgendaMonth(DateTime month) {
 String formatAgendaDay(DateTime day) =>
     '${_weekdays[day.weekday - 1]}, ${day.day} '
     '${_withPreposition(_monthName(day.month))}';
-
-/// «19.00 h», without changing the time zone of the supplied date.
-String formatAgendaTime(DateTime date) {
-  final hour = date.hour.toString().padLeft(2, '0');
-  final minute = date.minute.toString().padLeft(2, '0');
-  return '$hour.$minute h';
-}

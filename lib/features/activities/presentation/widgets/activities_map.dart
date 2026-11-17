@@ -556,10 +556,7 @@ class _SamePlaceSheet extends StatelessWidget {
                     ),
                     title: Text(activity.title),
                     subtitle: Text(
-                      formatActivitySchedule(
-                        activity.startsAt,
-                        includeDate: true,
-                      ),
+                      formatActivityWhen(activity, includeDate: true),
                     ),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () => onSelected(activity.id),
@@ -657,7 +654,9 @@ class _MapActivityCard extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        ActivityCategoryBadge(category: activity.category),
+                        ActivityCategoriesSummary(
+                          categories: activity.categories,
+                        ),
                         InkWell(
                           onTap: onOpen,
                           child: ConstrainedBox(
@@ -685,7 +684,7 @@ class _MapActivityCard extends StatelessWidget {
                         ],
                         ActivityInformationRow(
                           icon: Icons.calendar_today_outlined,
-                          text: formatActivitySchedule(activity.startsAt),
+                          text: formatActivityWhen(activity),
                         ),
                       ],
                     ),

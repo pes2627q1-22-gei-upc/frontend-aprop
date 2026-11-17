@@ -101,7 +101,9 @@ class ActivityCard extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        ActivityCategoryBadge(category: activity.category),
+                        ActivityCategoriesSummary(
+                          categories: activity.categories,
+                        ),
                         const SizedBox(height: 6),
                         InkWell(
                           onTap: onTap,
@@ -131,7 +133,7 @@ class ActivityCard extends StatelessWidget {
                         ],
                         ActivityInformationRow(
                           icon: Icons.calendar_today_outlined,
-                          text: formatActivitySchedule(activity.startsAt),
+                          text: formatActivityWhen(activity),
                         ),
                       ],
                     ),

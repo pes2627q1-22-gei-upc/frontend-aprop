@@ -172,7 +172,7 @@ class HttpActivityRepository
           : activity.category,
       categories: parsed.category != 'Activitat'
           ? parsed.categories
-          : [activity.category],
+          : [for (final tag in activity.categories) activityCategoryLabel(tag)],
       municipality: parsed.municipality.isNotEmpty
           ? parsed.municipality
           : activity.municipality,
@@ -188,6 +188,14 @@ class HttpActivityRepository
       directions: parsed.directions ?? activity.directions,
       location: parsed.location ?? activity.location,
       price: parsed.price ?? activity.price,
+      schedule: parsed.schedule ?? activity.schedule,
+      modality: parsed.modality ?? activity.modality,
+      isPermanent: parsed.isPermanent || activity.isPermanent,
+      onlineUrl: parsed.onlineUrl ?? activity.onlineUrl,
+      website: parsed.website,
+      links: parsed.links,
+      tickets: parsed.tickets,
+      ticketsUrl: parsed.ticketsUrl,
     );
   }
 

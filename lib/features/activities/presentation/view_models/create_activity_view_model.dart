@@ -16,11 +16,14 @@ enum CreateActivityField {
   startsAt,
   endsAt,
   price,
+  onlineUrl,
 }
 
 const maxActivityTitleLength = 80;
 const maxActivityDescriptionLength = 1000;
 const maxActivityDirectionsLength = 200;
+const maxActivityCategories = 3;
+const maxActivityScheduleNoteLength = 120;
 const createActivityErrorMessage =
     'No hem pogut publicar l’activitat. Torna-ho a provar.';
 const updateActivityErrorMessage =
@@ -45,9 +48,11 @@ class CreateActivityViewModel extends ChangeNotifier {
            : const [] {
     final activity = editing;
     if (activity == null) return;
-    // Fins que no arriben les categories, es guarda el nom que es veu.
-    _category = activity.category;
-    _matchEditedCategory();
+    // Fins que no arriben les categories, es guarden els noms que es veuen.
+    _selectedCategories = List.of(activity.categories);
+    _matchEditedCategories();
+    _modality = activity.modality ?? ActivityModality.inPerson;
+    _isPermanent = activity.isPermanent;
     _startsAt = activity.startsAt;
     _endsAt = activity.endsAt;
     if (activityImageTemplates.contains(activity.imageAsset)) {
@@ -72,7 +77,12 @@ class CreateActivityViewModel extends ChangeNotifier {
   final DateTime Function() _now;
 
   final Map<CreateActivityField, String> _fieldErrors = {};
-  String? _category;
+
+  /// Valors de les categories triades, en l'ordre en què s'han triat: la
+  /// primera fa de distintiu.
+  List<String> _selectedCategories = [];
+  ActivityModality _modality = ActivityModality.inPerson;
+  bool _isPermanent = false;
   DateTime? _startsAt;
   DateTime? _endsAt;
 
@@ -93,8 +103,29 @@ class CreateActivityViewModel extends ChangeNotifier {
   bool _isLoadingCategories = false;
   String? _categoriesError;
 
-  /// Valor de la categoria triada (`ActivityCategory.value`).
-  String? get category => _category;
+  /// Valors (`ActivityCategory.value`) de les categories triades.
+  List<String> get selectedCategories => List.unmodifiable(_selectedCategories);
+
+  /// La primera categoria triada, la que fa de distintiu.
+  String? get category => _selectedCategories.firstOrNull;
+  ActivityModality get modality => _modality;
+  bool get isPermanent => _isPermanent;
+
+  /// En editar, el text que s'havia afegit a l'horari generat («Durada: 1
+  /// h»), perquè el formulari el torni a mostrar.
+  String get initialScheduleNote {
+    final activity = editing;
+    final schedule = activity?.schedule?.trim();
+    if (activity == null || schedule == null) return '';
+    final generated = activityScheduleTime(activity.startsAt, activity.endsAt);
+    if (schedule == generated) return '';
+    final prefix = '$generated$_scheduleSeparator';
+    // Un horari escrit d'una altra manera es conserva sencer com a nota.
+    return schedule.startsWith(prefix)
+        ? schedule.substring(prefix.length)
+        : schedule;
+  }
+
   List<ActivityCategory> get categories => _categories;
   bool get isLoadingCategories => _isLoadingCategories;
   String? get categoriesError => _categoriesError;
@@ -130,7 +161,7 @@ class CreateActivityViewModel extends ChangeNotifier {
       final categories = await repository.getCreationCategories();
       if (_isDisposed) return;
       _categories = List.unmodifiable(categories);
-      _matchEditedCategory();
+      _matchEditedCategories();
     } catch (_) {
       if (_isDisposed) return;
       _categoriesError = 'No hem pogut carregar les categories.';
@@ -142,23 +173,61 @@ class CreateActivityViewModel extends ChangeNotifier {
     }
   }
 
-  /// L'activitat editada només en sap el nom que es veu («Teatre»); el
-  /// formulari desa el valor («agenda:categories/teatre»). Si cap categoria
-  /// no hi correspon, no se'n tria cap: enviar el nom en crearia una de nova.
-  void _matchEditedCategory() {
-    final name = editing?.category;
-    if (name == null || _categories.isEmpty) return;
-    if (_categories.any((c) => c.value == _category)) return;
-    _category = _categories
-        .where((c) => c.label.toLowerCase() == name.toLowerCase())
-        .firstOrNull
-        ?.value;
+  /// L'activitat editada només en sap els noms que es veuen («Teatre»); el
+  /// formulari desa els valors («agenda:categories/teatre»). Les que no hi
+  /// corresponen es treuen: enviar el nom en crearia una categoria nova.
+  void _matchEditedCategories() {
+    if (editing == null || _categories.isEmpty) return;
+    _selectedCategories = {
+      for (final name in _selectedCategories)
+        ?_categories
+            .where(
+              (c) =>
+                  c.value == name ||
+                  c.label.toLowerCase() == name.toLowerCase(),
+            )
+            .firstOrNull
+            ?.value,
+    }.take(maxActivityCategories).toList();
   }
 
+  /// Tria només [category] (o cap, si és nul).
   void setCategory(String? category) {
-    _category = category;
+    _selectedCategories = [?category];
     _fieldErrors.remove(CreateActivityField.category);
     _errorMessage = null;
+    notifyListeners();
+  }
+
+  /// Afegeix o treu [category]. N'hi pot haver fins a [maxActivityCategories].
+  void toggleCategory(String category) {
+    _errorMessage = null;
+    if (_selectedCategories.contains(category)) {
+      _selectedCategories = [
+        for (final selected in _selectedCategories)
+          if (selected != category) selected,
+      ];
+      _fieldErrors.remove(CreateActivityField.category);
+    } else if (_selectedCategories.length >= maxActivityCategories) {
+      _fieldErrors[CreateActivityField.category] =
+          'Pots triar fins a $maxActivityCategories categories.';
+    } else {
+      _selectedCategories = [..._selectedCategories, category];
+      _fieldErrors.remove(CreateActivityField.category);
+    }
+    notifyListeners();
+  }
+
+  void setModality(ActivityModality modality) {
+    _modality = modality;
+    if (modality == ActivityModality.inPerson) {
+      _fieldErrors.remove(CreateActivityField.onlineUrl);
+    }
+    notifyListeners();
+  }
+
+  void setPermanent(bool isPermanent) {
+    _isPermanent = isPermanent;
     notifyListeners();
   }
 
@@ -231,6 +300,8 @@ class CreateActivityViewModel extends ChangeNotifier {
     required String price,
     String municipality = '',
     String directions = '',
+    String scheduleNote = '',
+    String onlineUrl = '',
   }) async {
     if (_isPublishing || _isDisposed) return null;
 
@@ -239,7 +310,9 @@ class CreateActivityViewModel extends ChangeNotifier {
     final keepsUnknownPrice =
         isEditing && editing!.price == null && price.trim().isEmpty;
     final parsedPrice = keepsUnknownPrice ? null : parseActivityPrice(price);
-    final category = _category;
+    final categories = _selectedCategories;
+    final isOnline = _modality != ActivityModality.inPerson;
+    final link = onlineUrl.trim();
     final startsAt = _startsAt;
     final endsAt = _endsAt;
     _errorMessage = null;
@@ -249,8 +322,11 @@ class CreateActivityViewModel extends ChangeNotifier {
       ..addAll({
         CreateActivityField.title: ?_validateTitle(title),
         CreateActivityField.description: ?_validateDescription(description),
-        CreateActivityField.category: ?(category == null
+        CreateActivityField.category: ?(categories.isEmpty
             ? 'Tria una categoria.'
+            : null),
+        CreateActivityField.onlineUrl: ?(isOnline && link.isNotEmpty
+            ? _validateOnlineUrl(link)
             : null),
         CreateActivityField.startsAt: ?_validateStartsAt(startsAt),
         CreateActivityField.endsAt: ?_validateEndsAt(startsAt, endsAt),
@@ -271,7 +347,7 @@ class CreateActivityViewModel extends ChangeNotifier {
       final activity = NewActivity(
         title: title.trim(),
         description: description.trim(),
-        category: category!,
+        categories: categories,
         startsAt: startsAt!,
         endsAt: endsAt,
         municipality: municipality.trim(),
@@ -281,6 +357,10 @@ class CreateActivityViewModel extends ChangeNotifier {
         location: _location,
         creator: _creator,
         price: parsedPrice,
+        schedule: _scheduleFor(startsAt, endsAt, scheduleNote),
+        modality: _modality,
+        isPermanent: _isPermanent,
+        onlineUrl: isOnline && link.isNotEmpty ? link : null,
       );
       return await switch (editing) {
         final edited? => _repository.updateActivity(edited.id, activity),
@@ -333,11 +413,44 @@ class CreateActivityViewModel extends ChangeNotifier {
     return 'La fi ha de ser posterior a l’inici.';
   }
 
+  String? _validateOnlineUrl(String link) {
+    final uri = Uri.tryParse(link);
+    final valid =
+        uri != null &&
+        (uri.scheme == 'https' || uri.scheme == 'http') &&
+        uri.host.isNotEmpty;
+    return valid ? null : 'Introdueix un enllaç que comenci per https://.';
+  }
+
+  /// L'«Horari» que es desa: l'hora de les rodes i, si n'hi ha, la nota.
+  /// El backend no desa l'hora de l'inici (DP-029).
+  // TODO(DP-051): l'hora es guarda dins de l'«Horari» en text.
+  static String _scheduleFor(DateTime start, DateTime? end, String note) {
+    final time = activityScheduleTime(start, end);
+    final extra = note.trim();
+    return extra.isEmpty ? time : '$time$_scheduleSeparator$extra';
+  }
+
   @override
   void dispose() {
     _isDisposed = true;
     super.dispose();
   }
+}
+
+const _scheduleSeparator = ' · ';
+
+/// «19.00 h», o «19.00 – 21.00 h» si acaba el mateix dia.
+String activityScheduleTime(DateTime start, DateTime? end) {
+  String clock(DateTime date) =>
+      '${date.hour.toString().padLeft(2, '0')}.'
+      '${date.minute.toString().padLeft(2, '0')}';
+  final sameDay =
+      end != null &&
+      end.year == start.year &&
+      end.month == start.month &&
+      end.day == start.day;
+  return sameDay ? '${clock(start)} – ${clock(end)} h' : '${clock(start)} h';
 }
 
 final _pricePattern = RegExp(r'^\d+([.,]\d{1,2})?$');

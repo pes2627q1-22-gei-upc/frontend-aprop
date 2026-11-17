@@ -227,6 +227,7 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Opcions:** A) una sola categoria (com ara) · B) diverses categories (cal canviar `Activity.category` i la llista, la fitxa i l'agenda).
 - **Provisionalment:** una sola categoria triada d'una llista provisional (Música, Teatre, Exposicions) (`TODO(DP-018)`). L'usuari ho ha decidit així de moment per no canviar el model.
 - **Amb el backend (2026-10-26, Claude Code (Opus 5.5) amb confirmació de l'usuari):** amb backend, el formulari carrega `GET /categories` (`HttpActivityRepository.getCategories`) i només ofereix les de l'Agenda Cultural (`agenda:categories/…`), ordenades pel nom. No ofereix els àmbits (`agenda:ambits/…`) ni les que s'han creat escrivint un nom nou. S'envia l'etiqueta (p. ex. `agenda:categories/teatre`), perquè `POST /events` crea una categoria nova amb qualsevol nom que no existeixi. El nom que es veu surt de l'etiqueta i no porta accents («Conferencies», DP-029). Sense backend, continua la llista provisional. Els filtres d'Inici també carreguen `GET /categories` (DP-038) i filtren al servidor per l'ID de la categoria, així que una activitat creada amb una categoria de l'Agenda Cultural surt en filtrar per aquesta categoria.
+- **Diverses categories (2026-11-17, amb confirmació de l’usuari):** el formulari en deixa triar fins a 3; la primera és la que fa de distintiu a les targetes, que hi afegeixen «+N». La fitxa les mostra totes (DP-051).
 - **Qui decideix:** equip
 - **Resolució:**
 
@@ -362,6 +363,7 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
   - Apuntar-se des d'una fitxa del backend falla, perquè la inscripció de demostració no troba l'activitat (DP-010).
   - `TODO(DP-029)` marca aquestes adaptacions.
 - **Token (2026-10-25):** el backend ja exigeix `Authorization: Bearer` a totes les rutes (`feature/auth` fusionada). `HttpActivityMapRepository` l'envia si `AuthRepository.currentIdToken()` en retorna un; amb els comptes de demostració és nul i no s'envia. En ajuntar-ho amb el login de Firebase (`feature/autenticacio`, ja a `develop`), `FirebaseAuthRepository.currentIdToken()` retorna el token de Firebase de la sessió (`_auth.currentUser?.getIdToken()`), que Firebase renova sol.
+- **Hora (2026-11-17):** la fitxa, les targetes i l’Agenda ja no mostren «00.00 h»: llegeixen l’«Horari» (`schedule`), que el formulari omple amb l’hora triada (DP-051).
 - **Apuntar-se des del mapa (2026-10-25):** la inscripció i l'Agenda buscaven l'activitat només al catàleg de demostració i fallaven amb les del backend. Amb `API_BASE_URL`, `CombinedActivityRepository` busca al backend els ID numèrics i al catàleg els `demo-…`.
 - **Qui decideix:** frontend + backend
 - **Resolució:**
@@ -498,7 +500,33 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Qui decideix:** frontend/backend per a la neteja de dades i el contracte de categories del mapa. Guia `docs/inici-server-filters.md`.
 - **Resolució:**
 
+### DP-051 · Horari i informació extra de les activitats no oficials
+- **Estat:** oberta · 2026-11-17 · Claude Code (Opus 5.5) amb confirmació de l’usuari · Taiga #189
+- **Context:** formulari «Crea una activitat» / «Edita l’activitat» (`CreateActivityViewModel`), `activity_json_mapper.dart`, targetes, Agenda i fitxa. Backend consultat a `api-aprop@develop` sense modificar-lo: `POST /events` i `PUT /events/{id}` desen `schedule`, `modality`, `permanent` i `activity-url`.
+- **Decisions de l’usuari:**
+  - **Hora:** `start-date` només desa el dia (DP-029), i l’app mostrava sempre «00.00 h». Ara es mostra l’«Horari» (`schedule`); si no n’hi ha i l’hora és 00.00, només surt el dia. En crear o editar, l’horari es genera amb les rodes («19.00 h», o «19.00 – 21.00 h» si acaba el mateix dia) i s’hi pot afegir un text opcional («19.00 h · Durada: 1 h», màxim 120 caràcters).
+  - **Categories:** fins a 3 per activitat (DP-018). Les targetes i l’Agenda mostren la primera i «+N»; la fitxa, totes.
+  - **Formulari:** «Modalitat» (Presencial / En línia / Les dues), amb un enllaç opcional per connectar-s’hi si no és presencial, i «Activitat permanent».
+  - **Només es mostren (no al formulari):** web, enllaços relacionats, entrades, correu i telèfon. Correu i telèfon no es demanen a les activitats no oficials per privadesa.
+- **Dubtes:**
+  - La modalitat s’envia amb els valors de l’`enum` de la BD (`Face-to-Face`, `Online`, `Online and Face-to-Face`); no hi ha contracte escrit.
+  - En editar, el text opcional es recupera traient del principi de l’horari l’hora generada. Si l’horari s’ha escrit d’una altra manera, es mostra sencer com a text.
+  - Les activitats de l’Agenda Cultural tenen l’horari en text lliure i pot ser llarg: a les targetes se’n mostra la primera línia (màxim 40 caràcters).
+- **Codi:** `TODO(DP-051)` al mapper (valors de `modality`) i a la generació de l’horari.
+- **Qui decideix:** frontend + backend (valors de `modality`)
+- **Resolució:**
+
 ## Resoltes
+
+### DP-050 · Enllaços de la fitxa: obrir-los amb `url_launcher`
+- **Estat:** resolta · 2026-11-17 · Claude Code (Opus 5.5) · Taiga #189 (feedback de l’edició d’esdeveniments)
+- **Identificador:** DP-047 (logo) ja és a `develop`, DP-048 el fan servir dues PR obertes i DP-049 queda reservada per a `feature/recuperar-contrasenya`.
+- **Context:** `activity_details_screen.dart` (`_ActivityLinkRow`). La fitxa mostra la secció «Enllaços»: l’enllaç per connectar-s’hi, la web de l’activitat (`url`), les entrades (`tickets-url`) i els enllaços relacionats (`related-urls` amb els noms d’`url-names`), sense repetir cap adreça.
+- **Dubte:** per obrir un enllaç al navegador cal el paquet `url_launcher`, i l’equip no hi ha afegit paquets sense una necessitat concreta.
+- **Opcions:** A) afegir `url_launcher` i obrir-los · B) només copiar-los al porta-retalls.
+- **Provisionalment (primer):** B, amb `TODO(DP-050)`.
+- **Qui decideix:** equip
+- **Resolució:** A, per decisió de l’usuari (2026-11-17). S’afegeix `url_launcher` (`lib/core/links/open_external_link.dart`, injectat a `ActivityDetailsScreen` com a `openLink`). Tocar un enllaç l’obre fora de l’app (navegador o app que li correspon); si no es pot, surt «No s’ha pogut obrir l’enllaç.». El botó del costat el continua copiant. A Android s’hi declaren els `<queries>` d’`http`/`https`. Desapareix el botó desactivat «Consultar informació original»: la font continua a la fitxa com a text.
 
 ### DP-031 · Enllaços de verificació amb la clau d'API antiga
 - **Estat:** resolta 2026-11-09
