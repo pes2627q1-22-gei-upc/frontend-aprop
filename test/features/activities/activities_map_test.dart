@@ -3,10 +3,13 @@ import 'package:aprop/features/activities/data/demo_activity_repository.dart';
 import 'package:aprop/features/activities/models/activity.dart';
 import 'package:aprop/features/activities/models/geo_bounds.dart';
 import 'package:aprop/features/activities/models/geo_point.dart';
+import 'package:aprop/features/activities/models/user_position.dart';
 import 'package:aprop/features/activities/presentation/screens/activities_screen.dart';
 import 'package:aprop/features/activities/presentation/view_models/activities_map_view_model.dart';
 import 'package:aprop/features/activities/presentation/view_models/activities_view_model.dart';
 import 'package:aprop/features/activities/presentation/view_models/enrollment_view_model.dart';
+import 'package:aprop/features/activities/presentation/view_models/user_location_view_model.dart';
+import 'package:aprop/features/activities/repositories/user_location_repository.dart';
 import 'package:aprop/features/activities/presentation/widgets/activities_map.dart';
 import 'package:aprop/features/activities/presentation/widgets/activity_map_groups.dart';
 import 'package:flutter/material.dart';
@@ -16,6 +19,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'fake_activity_map_repository.dart';
 import 'fake_activity_repository.dart';
 import 'fake_enrollment_repository.dart';
+import 'fake_user_location_repository.dart';
 
 void main() {
   late List<String> opened;
@@ -26,6 +30,7 @@ void main() {
     WidgetTester tester, {
     List<Activity>? activities,
     ActivitiesMapViewModel? mapViewModel,
+    UserLocationViewModel? userLocation,
     Set<String> enrolled = const {},
   }) async {
     tester.view.physicalSize = const Size(390, 844);
@@ -58,6 +63,7 @@ void main() {
             onMapOverlayChanged: overlays.add,
             mapViewModel: mapViewModel,
             onMapActivitySelected: openedFromMap.add,
+            userLocationViewModel: userLocation,
           ),
         ),
       ),
@@ -524,6 +530,146 @@ void main() {
 
       expect(find.text('Tornar-ho a provar'), findsNothing);
       expect(map(tester).markers.map((m) => m.markerId.value), ['1282']);
+    });
+  });
+
+  group('La meva ubicació', () {
+    const here = UserPosition(
+      point: GeoPoint(latitude: 41.3874, longitude: 2.1686),
+      accuracyMeters: 30,
+    );
+
+    late FakeUserLocationRepository repository;
+
+    Future<UserLocationViewModel> pumpWithLocation(
+      WidgetTester tester, {
+      LocationAccess access = LocationAccess.denied,
+    }) async {
+      repository = FakeUserLocationRepository(access: access);
+      final userLocation = UserLocationViewModel(repository: repository);
+      addTearDown(userLocation.dispose);
+      await pumpInici(tester, userLocation: userLocation);
+      await openMap(tester);
+      return userLocation;
+    }
+
+    Future<void> tapLocate(WidgetTester tester) async {
+      await tester.tap(find.byTooltip('La meva ubicació'));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('Sense ubicació, el mapa no té el botó', (tester) async {
+      await pumpInici(tester);
+      await openMap(tester);
+
+      expect(find.byTooltip('La meva ubicació'), findsNothing);
+    });
+
+    testWidgets('Amb el permís, el mapa mostra on ets amb la precisió', (
+      tester,
+    ) async {
+      await pumpWithLocation(tester, access: LocationAccess.granted);
+      repository.positions.add(here);
+      await tester.pumpAndSettle();
+
+      final circle = map(tester).circles.single;
+      expect(circle.circleId.value, userLocationMarkerId);
+      expect(circle.center, const LatLng(41.3874, 2.1686));
+      expect(circle.radius, 30);
+
+      // El punt és una imatge dibuixada per l'app, també a la web.
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 50)),
+      );
+      await tester.pump();
+      expect(
+        map(tester).markers.map((m) => m.markerId.value),
+        contains(userLocationMarkerId),
+      );
+
+      await tester.tap(find.text('Llegenda'));
+      await tester.pumpAndSettle();
+      expect(find.text('On ets tu'), findsOneWidget);
+    });
+
+    testWidgets('El botó demana el permís i, si es dona, troba on ets', (
+      tester,
+    ) async {
+      await pumpWithLocation(tester);
+      repository.answer = LocationAccess.granted;
+      expect(repository.requests, 0);
+
+      await tester.tap(find.byTooltip('La meva ubicació'));
+      await tester.pump();
+      repository.positions.add(here);
+      await tester.pumpAndSettle();
+
+      expect(repository.requests, 1);
+      expect(map(tester).circles.single.center, const LatLng(41.3874, 2.1686));
+      expect(find.byType(SnackBar), findsNothing);
+    });
+
+    testWidgets('Si el permís es denega, ho explica', (tester) async {
+      await pumpWithLocation(tester);
+      repository.answer = LocationAccess.denied;
+
+      await tapLocate(tester);
+
+      expect(
+        find.text(
+          'Per veure on ets, cal que permetis que AProp! faci servir la teva '
+          'ubicació.',
+        ),
+        findsOneWidget,
+      );
+      expect(map(tester).circles, isEmpty);
+    });
+
+    testWidgets('Denegat per sempre, porta a la configuració', (tester) async {
+      await pumpWithLocation(tester, access: LocationAccess.deniedForever);
+
+      await tapLocate(tester);
+      expect(
+        find.text(
+          'Has denegat l’accés a la ubicació. Pots activar-lo a la '
+          'configuració.',
+        ),
+        findsOneWidget,
+      );
+      await tester.tap(find.text('Configuració'));
+      expect(repository.appSettingsOpened, 1);
+    });
+
+    testWidgets('A la web, explica com permetre-ho al navegador', (
+      tester,
+    ) async {
+      await pumpWithLocation(tester, access: LocationAccess.deniedForever);
+      repository.canOpenSettings = false;
+
+      await tapLocate(tester);
+
+      expect(
+        find.text(
+          'El navegador no deixa veure on ets. Pots permetre-ho des de la '
+          'icona del costat de l’adreça.',
+        ),
+        findsOneWidget,
+      );
+      expect(find.text('Configuració'), findsNothing);
+    });
+
+    testWidgets('Amb la ubicació del mòbil desactivada, ofereix activar-la', (
+      tester,
+    ) async {
+      await pumpWithLocation(tester, access: LocationAccess.serviceDisabled);
+
+      await tapLocate(tester);
+      expect(
+        find.text('La ubicació del dispositiu està desactivada.'),
+        findsOneWidget,
+      );
+      await tester.tap(find.text('Activar'));
+      expect(repository.locationSettingsOpened, 1);
     });
   });
 

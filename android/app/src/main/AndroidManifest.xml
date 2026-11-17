@@ -2,6 +2,11 @@
     <!-- Firebase, el backend i els mapes necessiten internet també a la versió
          de llançament (abans només arribava a través de google_sign_in). -->
     <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- Ubicació per mostrar on és la persona al mapa d'Inici, només mentre
+         l'app és oberta. Amb les dues, Android deixa triar entre la ubicació
+         exacta i l'aproximada. -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <application
         android:label="AProp!"
         android:name="${applicationName}"

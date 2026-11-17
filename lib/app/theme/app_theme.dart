@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../features/activities/presentation/widgets/user_location_marker.dart';
 import '../../features/notifications/presentation/widgets/notification_badge_theme.dart';
 import '../../features/profile/presentation/widgets/profile_palette.dart';
 
@@ -38,6 +39,10 @@ class AppTheme {
         reminderForeground: Color(0xFF205B83),
         unreadBackground: selectedBackground,
       ),
+      // Blau com el punt de Google Maps, que la gent ja reconeix i que no es
+      // confon amb els grups verds ni amb els marcadors.
+      // TODO(DP-049): color sense mockup.
+      UserLocationTheme(dot: Color(0xFF1A73E8)),
     ],
     colorScheme: ColorScheme.fromSeed(
       seedColor: forest,

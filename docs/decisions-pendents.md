@@ -486,6 +486,27 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Qui decideix:** equip (paquet nou)
 - **Resolució:**
 
+### DP-049 · Geolocalització al mapa d'Inici: paquet, permís i disseny
+- **Estat:** oberta
+- **Obert per:** 2026-11-17 · Claude Code (Opus 5.5) a petició de l'usuari · Taiga #266
+- **Identificador:** DP-046 a DP-048 ja són a altres branques sense fusionar; es fa servir DP-049 per no col·lidir-hi.
+- **Context:** `UserLocationRepository`, `GeolocatorUserLocationRepository`, `UserLocationViewModel`, `ActivitiesMap` (punt «ets aquí» i botó «La meva ubicació»), `AndroidManifest.xml`, `Info.plist`, `UserLocationTheme` a `app_theme.dart`.
+- **Dubte:**
+  - Cal un paquet nou per al permís i la posició (`geolocator`).
+  - El mockup (fig. 7) té el botó, però no se'n coneix la posició, l'aspecte ni quan s'ha de demanar el permís.
+  - A la web, Google Maps no dibuixa el punt blau (`myLocationEnabled` no hi funciona).
+- **Opcions:** A) demanar el permís en prémer el botó · B) demanar-lo en obrir el mapa, com Google Maps.
+- **Provisionalment:** A.
+  - `geolocator` 14 per al permís i la posició a Android, iOS i web.
+  - El permís només es demana en prémer el botó. Si ja s'havia donat, en obrir el mapa surt on és la persona sense preguntar res, però el mapa no s'hi mou.
+  - Punt i cercle de precisió dibuixats per l'app (iguals a la web i al mòbil), en blau `#1A73E8` com Google Maps.
+  - Botó rodó a baix a la dreta, per sobre d'«Assistent», que puja amb la targeta. En prémer-lo, el mapa hi va amb zoom 14.
+  - Si no es pot, un avís explica per què: permís denegat; denegat per sempre (amb «Configuració» al mòbil, o com fer-ho al navegador a la web); ubicació del dispositiu desactivada (amb «Activar»).
+  - Només s'escolta la posició mentre el mapa és visible, cada 10 m.
+  - Textos sense mockup. `TODO(DP-049)` marca aquestes adaptacions.
+- **Qui decideix:** equip (paquet nou) + disseny
+- **Resolució:**
+
 ## Resoltes
 
 ### DP-031 · Enllaços de verificació amb la clau d'API antiga

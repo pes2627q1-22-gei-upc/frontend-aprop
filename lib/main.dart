@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'app/aprop_app.dart';
 import 'core/config/api_config.dart';
 import 'core/network/api_client.dart';
+import 'features/activities/data/geolocator_user_location_repository.dart';
 import 'features/activities/data/http_activity_map_repository.dart';
 import 'features/activities/data/http_activity_repository.dart';
 import 'features/activities/data/http_discovery_repository.dart';
@@ -32,9 +33,14 @@ Future<void> main() async {
 /// quan [ApiConfig.isConfigured] és cert, o els de demostració altrament.
 Future<APropApp> createConfiguredApp() async {
   final authRepository = await _createAuthRepository();
+  // La ubicació no depèn del backend: també funciona amb les demostracions.
+  const userLocationRepository = GeolocatorUserLocationRepository();
 
   if (!ApiConfig.isConfigured) {
-    return APropApp(authRepository: authRepository);
+    return APropApp(
+      authRepository: authRepository,
+      userLocationRepository: userLocationRepository,
+    );
   }
 
   final apiClient = ApiClient(
@@ -61,6 +67,7 @@ Future<APropApp> createConfiguredApp() async {
       apiClient: apiClient,
     ),
     interestTestRepository: HttpInterestTestRepository(apiClient: apiClient),
+    userLocationRepository: userLocationRepository,
   );
 }
 

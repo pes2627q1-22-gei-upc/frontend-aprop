@@ -15,6 +15,8 @@ import '../../features/activities/presentation/widgets/enrollment_action.dart';
 import '../../features/activities/repositories/activity_category_repository.dart';
 import '../../features/activities/repositories/activity_details_repository.dart';
 import '../../features/activities/repositories/activity_map_repository.dart';
+import '../../features/activities/repositories/user_location_repository.dart';
+import '../../features/activities/presentation/view_models/user_location_view_model.dart';
 import '../../features/activities/repositories/activity_repository.dart';
 import '../../features/activities/repositories/discovery_repository.dart';
 import '../../features/activities/repositories/enrollment_repository.dart';
@@ -51,9 +53,13 @@ class MainShell extends StatefulWidget {
     required this.profileSettingsRepository,
     this.interestTestRepository,
     this.activityCategoryRepository,
+    this.userLocationRepository,
   });
 
   final AppUser user;
+
+  /// On és la persona, per al mapa d'Inici. Sense, el mapa no la mostra.
+  final UserLocationRepository? userLocationRepository;
   final Future<void> Function() onSignOut;
   final ActivityRepository activityRepository;
   final EnrollmentRepository enrollmentRepository;
@@ -96,6 +102,7 @@ class _MainShellState extends State<MainShell> {
   late final ActivityRepository _activityRepository;
   late final ActivitiesViewModel _activitiesViewModel;
   ActivitiesMapViewModel? _activitiesMapViewModel;
+  UserLocationViewModel? _userLocationViewModel;
   late final EnrollmentViewModel _enrollmentViewModel;
   late final AssistantViewModel _assistantViewModel;
   late final ProfileViewModel _profileViewModel;
@@ -112,6 +119,11 @@ class _MainShellState extends State<MainShell> {
     if (widget.activityMapRepository case final mapRepository?) {
       _activitiesMapViewModel = ActivitiesMapViewModel(
         repository: mapRepository,
+      );
+    }
+    if (widget.userLocationRepository case final locationRepository?) {
+      _userLocationViewModel = UserLocationViewModel(
+        repository: locationRepository,
       );
     }
     _enrollmentViewModel = EnrollmentViewModel(
@@ -139,6 +151,7 @@ class _MainShellState extends State<MainShell> {
     _assistantButtonLift.dispose();
     _activitiesViewModel.dispose();
     _activitiesMapViewModel?.dispose();
+    _userLocationViewModel?.dispose();
     _enrollmentViewModel.dispose();
     _assistantViewModel.dispose();
     _profileViewModel.dispose();
@@ -489,6 +502,7 @@ class _MainShellState extends State<MainShell> {
                   enrollmentViewModel: _enrollmentViewModel,
                   onActivitySelected: _openActivityDetails,
                   mapViewModel: _activitiesMapViewModel,
+                  userLocationViewModel: _userLocationViewModel,
                   onMapActivitySelected: (activityId) => _openActivityDetails(
                     activityId,
                     repository: widget.activityMapRepository,

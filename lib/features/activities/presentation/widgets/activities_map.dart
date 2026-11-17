@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -7,11 +9,13 @@ import '../../models/activity.dart';
 import '../../models/geo_bounds.dart';
 import '../../models/geo_point.dart';
 import '../formatters/activity_date_formatter.dart';
+import '../view_models/user_location_view_model.dart';
 import 'activity_badges.dart';
 import 'activity_information_row.dart';
 import 'activity_image.dart';
 import 'activity_map_groups.dart';
 import 'map_group_icon.dart';
+import 'user_location_marker.dart';
 
 /// Durada de les transicions de la targeta i dels botons que s'hi aparten.
 const mapOverlayAnimationDuration = Duration(milliseconds: 280);
@@ -25,6 +29,19 @@ const _clusterPadding = 64.0;
 /// Temps durant el qual un toc al mapa es considera el mateix clic que s'ha
 /// fet sobre una cosa que el tapa (vegeu `_onMapTap`).
 const _cardClickEcho = Duration(milliseconds: 500);
+
+/// Zoom mínim en anar on és la persona: el barri, amb les activitats del
+/// voltant.
+const _locateZoom = 14.0;
+
+/// Distància des de baix del botó «La meva ubicació»: queda just per sobre del
+/// botó «Assistent» (`FloatingActionButton.extended` de 56 amb 16 de marge,
+/// a MainShell), que també puja amb la targeta.
+// TODO(DP-049): posició sense mockup.
+const _locationButtonBottom = 16.0 + 56.0 + 12.0;
+
+/// Identificador del punt «ets aquí» i del seu cercle de precisió.
+const userLocationMarkerId = 'user-location';
 
 /// Tipus de marcador: oficial (Agenda Cultural), d'un usuari o d'una amistat.
 enum ActivityMarkerKind { official, community, friend }
@@ -56,9 +73,13 @@ class ActivitiesMap extends StatefulWidget {
     this.onVisibleAreaChanged,
     this.interactive = true,
     this.participationActionBuilder,
+    this.userLocation,
   });
 
   final List<Activity> activities;
+
+  /// On és la persona. Sense, el mapa no mostra el punt ni el botó.
+  final UserLocationViewModel? userLocation;
   final ValueChanged<String> onActivitySelected;
 
   /// Acció per apuntar-se des de la targeta del marcador. Qui conté el mapa
@@ -135,6 +156,10 @@ class _ActivitiesMapState extends State<ActivitiesMap> {
   @override
   void didUpdateWidget(covariant ActivitiesMap oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.userLocation != widget.userLocation) {
+      _stopUserLocation(oldWidget.userLocation);
+      _startUserLocation(widget.userLocation);
+    }
     if (_selectedId != null &&
         !widget.activities.any(
           (activity) => activity.id == _selectedId && activity.location != null,
@@ -150,13 +175,121 @@ class _ActivitiesMapState extends State<ActivitiesMap> {
   void initState() {
     super.initState();
     GestureBinding.instance.pointerRouter.addGlobalRoute(_onPointer);
+    // En tornar a l'app (p. ex. de donar el permís a la configuració), es
+    // torna a mirar si es pot mostrar on és la persona.
+    _lifecycle = AppLifecycleListener(
+      onResume: () => widget.userLocation?.show(),
+    );
+    _startUserLocation(widget.userLocation);
   }
 
   @override
   void dispose() {
     GestureBinding.instance.pointerRouter.removeGlobalRoute(_onPointer);
+    _stopUserLocation(widget.userLocation);
+    _lifecycle.dispose();
     _controller?.dispose();
     super.dispose();
+  }
+
+  late final AppLifecycleListener _lifecycle;
+
+  BitmapDescriptor? _userLocationIcon;
+  bool _drawingUserLocationIcon = false;
+
+  void _startUserLocation(UserLocationViewModel? location) {
+    if (location == null) return;
+    location
+      ..addListener(_onUserLocationChanged)
+      ..show();
+  }
+
+  void _stopUserLocation(UserLocationViewModel? location) {
+    location
+      ?..removeListener(_onUserLocationChanged)
+      ..hide();
+  }
+
+  void _onUserLocationChanged() {
+    if (mounted) setState(() {});
+  }
+
+  BitmapDescriptor? _userLocationIconFor(Color fill, Color border) {
+    if (_userLocationIcon == null && !_drawingUserLocationIcon) {
+      _drawingUserLocationIcon = true;
+      drawUserLocationIcon(
+        fill: fill,
+        border: border,
+        devicePixelRatio: MediaQuery.devicePixelRatioOf(context),
+      ).then(
+        (icon) {
+          if (mounted) setState(() => _userLocationIcon = icon);
+        },
+        // Si no es pot dibuixar, es torna a provar en el proper redibuix.
+        onError: (Object _) {
+          _drawingUserLocationIcon = false;
+        },
+      );
+    }
+    return _userLocationIcon;
+  }
+
+  /// «La meva ubicació»: demana el permís si cal i porta el mapa on és la
+  /// persona. Si no es pot, explica per què i, si es pot, com arreglar-ho.
+  Future<void> _locate() async {
+    final location = widget.userLocation;
+    if (location == null) return;
+    final result = await location.locate();
+    if (!mounted) return;
+
+    final position = location.position;
+    if (result == LocateResult.located && position != null) {
+      _controller?.animateCamera(
+        CameraUpdate.newLatLngZoom(
+          _toLatLng(position.point),
+          math.max(_cameraZoom, _locateZoom),
+        ),
+      );
+      return;
+    }
+
+    // TODO(DP-049): textos sense mockup.
+    final (message, action) = switch (result) {
+      LocateResult.located || LocateResult.unavailable => (
+        'No hem pogut trobar on ets. Torna-ho a provar.',
+        null,
+      ),
+      LocateResult.denied => (
+        'Per veure on ets, cal que permetis que AProp! faci servir la teva '
+            'ubicació.',
+        null,
+      ),
+      LocateResult.deniedForever when location.canOpenSettings => (
+        'Has denegat l’accés a la ubicació. Pots activar-lo a la '
+            'configuració.',
+        SnackBarAction(
+          label: 'Configuració',
+          onPressed: location.openAppSettings,
+        ),
+      ),
+      LocateResult.deniedForever => (
+        'El navegador no deixa veure on ets. Pots permetre-ho des de la '
+            'icona del costat de l’adreça.',
+        null,
+      ),
+      LocateResult.serviceDisabled => (
+        'La ubicació del dispositiu està desactivada.',
+        location.canOpenSettings
+            ? SnackBarAction(
+                label: 'Activar',
+                onPressed: location.openLocationSettings,
+              )
+            : null,
+      ),
+    };
+    ScaffoldMessenger.maybeOf(context)
+      ?..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(message), action: action));
   }
 
   void _select(Activity activity) {
@@ -333,8 +466,15 @@ class _ActivitiesMapState extends State<ActivitiesMap> {
     final withoutLocation = widget.activities.length - located.length;
     final selected = located.where((a) => a.id == _selectedId).firstOrNull;
     final groups = _groupsFor(widget.activities);
-    final colors = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
     final overlay = selected == null ? 0.0 : _cardHeight + _cardMargin;
+    final location = widget.userLocation;
+    final userPosition = location?.position;
+    final userDot = theme.extension<UserLocationTheme>()?.dot ?? colors.primary;
+    final userIcon = userPosition == null
+        ? null
+        : _userLocationIconFor(userDot, colors.surface);
 
     return Stack(
       children: [
@@ -398,6 +538,29 @@ class _ActivitiesMapState extends State<ActivitiesMap> {
                       ),
                       onTap: () => _onGroupTap(group),
                     ),
+                // L'app dibuixa on és la persona en lloc de Google, perquè a
+                // la web Google no ho fa.
+                if (userPosition != null && userIcon != null)
+                  Marker(
+                    markerId: const MarkerId(userLocationMarkerId),
+                    position: _toLatLng(userPosition.point),
+                    anchor: const Offset(0.5, 0.5),
+                    // Per sobre dels marcadors i dels grups.
+                    zIndexInt: 2,
+                    consumeTapEvents: true,
+                    icon: userIcon,
+                  ),
+              },
+              circles: {
+                if (userPosition != null)
+                  Circle(
+                    circleId: const CircleId(userLocationMarkerId),
+                    center: _toLatLng(userPosition.point),
+                    radius: userPosition.accuracyMeters,
+                    fillColor: userDot.withValues(alpha: 0.15),
+                    strokeColor: userDot.withValues(alpha: 0.4),
+                    strokeWidth: 1,
+                  ),
               },
               myLocationButtonEnabled: false,
               mapToolbarEnabled: false,
@@ -416,10 +579,27 @@ class _ActivitiesMapState extends State<ActivitiesMap> {
           bottom: overlay == 0 ? 24 : overlay + _cardMargin,
           child: _LegendChip(
             onPressed: () => _showSheet(
-              (context) => _LegendSheet(withoutLocation: withoutLocation),
+              (context) => _LegendSheet(
+                withoutLocation: withoutLocation,
+                userDot: location == null ? null : userDot,
+              ),
             ),
           ),
         ),
+        if (location != null)
+          AnimatedPositioned(
+            duration: mapOverlayAnimationDuration,
+            curve: _overlayCurve,
+            right: 16,
+            // Puja amb «Assistent» quan hi ha la targeta (MainShell el puja 4
+            // menys que la targeta).
+            bottom: _locationButtonBottom + (overlay == 0 ? 0 : overlay - 4),
+            child: _MyLocationButton(
+              isLocating: location.isLocating,
+              isLocated: userPosition != null,
+              onPressed: _locate,
+            ),
+          ),
         Positioned(
           left: _cardMargin,
           right: _cardMargin,
@@ -485,10 +665,52 @@ class _LegendChip extends StatelessWidget {
   }
 }
 
+/// Botó rodó per anar on és la persona, com el de Google Maps. Mentre la
+/// busca, mostra que hi està treballant.
+class _MyLocationButton extends StatelessWidget {
+  const _MyLocationButton({
+    required this.isLocating,
+    required this.isLocated,
+    required this.onPressed,
+  });
+
+  final bool isLocating;
+  final bool isLocated;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+
+    return Material(
+      color: colors.surface,
+      shape: CircleBorder(side: BorderSide(color: colors.outlineVariant)),
+      elevation: 3,
+      child: IconButton(
+        onPressed: isLocating ? null : onPressed,
+        tooltip: 'La meva ubicació',
+        iconSize: 24,
+        padding: const EdgeInsets.all(12),
+        color: colors.primary,
+        disabledColor: colors.primary,
+        icon: isLocating
+            ? const SizedBox.square(
+                dimension: 24,
+                child: CircularProgressIndicator(strokeWidth: 2.5),
+              )
+            : Icon(isLocated ? Icons.my_location : Icons.location_searching),
+      ),
+    );
+  }
+}
+
 class _LegendSheet extends StatelessWidget {
-  const _LegendSheet({required this.withoutLocation});
+  const _LegendSheet({required this.withoutLocation, this.userDot});
 
   final int withoutLocation;
+
+  /// Color del punt «ets aquí», si el mapa el pot mostrar.
+  final Color? userDot;
 
   @override
   Widget build(BuildContext context) {
@@ -525,6 +747,27 @@ class _LegendSheet extends StatelessWidget {
             ),
             title: const Text('Diverses activitats a prop: toca per veure-les'),
           ),
+          if (userDot case final dot?)
+            ListTile(
+              leading: SizedBox(
+                width: 28,
+                child: Center(
+                  child: Container(
+                    width: 18,
+                    height: 18,
+                    decoration: BoxDecoration(
+                      color: dot,
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: theme.colorScheme.surface,
+                        width: 3,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              title: const Text('On ets tu'),
+            ),
           if (withoutLocation > 0)
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 8, 24, 0),
