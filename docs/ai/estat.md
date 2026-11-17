@@ -10,6 +10,7 @@
 
 | Taiga | Tasca | Branca | Estat |
 |---|---|---|---|
+| #185 | [FE] Valoració d'1–5 estrelles a la fitxa i a l'Agenda | `feature/valorar-esdeveniment` | Implementada amb Demo; sense assistència ni #184 (DP-048); pendent revisió |
 | #262 | [FE] Ajustar contrast i color del logotip respecte al fons | `feature/fix-262-logo-contrast` | Implementada; preparació de PR autoritzada; pendent CI i revisió humana |
 
 ## Base i abast

@@ -16,6 +16,7 @@ class AgendaScreen extends StatefulWidget {
     required this.activityRepository,
     required this.onActivitySelected,
     this.participationActionBuilder,
+    this.ratingBuilder,
     this.now,
   });
 
@@ -27,6 +28,9 @@ class AgendaScreen extends StatefulWidget {
   /// Enrollment action for each plan, shared with the activity cards, so
   /// unenrolling works and looks the same everywhere.
   final Widget Function(Activity activity)? participationActionBuilder;
+
+  /// Rating block for each plan; the app decides when it can be rated.
+  final Widget Function(Activity activity)? ratingBuilder;
   final DateTime Function()? now;
 
   @override
@@ -160,6 +164,7 @@ class _AgendaScreenState extends State<AgendaScreen> {
           participationAction: widget.participationActionBuilder?.call(
             activity,
           ),
+          rating: widget.ratingBuilder?.call(activity),
         ),
         const SizedBox(height: 12),
       ],
