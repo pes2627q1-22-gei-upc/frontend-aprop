@@ -143,6 +143,26 @@ class HttpActivityRepository
     if (decoded is! Map<String, Object?>) {
       throw ApiException('Resposta invàlida en crear l’activitat.');
     }
+    return _fromResponse(decoded, activity);
+  }
+
+  /// `PUT /events/{id}`: el backend comprova que qui ho demana és qui
+  /// l'ha creada i que no és oficial. Sense imatge nova, conserva la d'abans.
+  @override
+  Future<Activity> updateActivity(String id, NewActivity activity) async {
+    final decoded = await apiClient.putJson(
+      'events/$id',
+      body: newActivityToJson(activity),
+    );
+    if (decoded is! Map<String, Object?>) {
+      throw ApiException('Resposta invàlida en desar l’activitat.');
+    }
+    return _fromResponse(decoded, activity);
+  }
+
+  /// L'activitat que torna el backend, completada amb el que s'ha enviat si
+  /// la resposta no ho porta.
+  Activity _fromResponse(Map<String, Object?> decoded, NewActivity activity) {
     final parsed = activityFromJson(decoded);
     return Activity(
       id: parsed.id,
@@ -157,6 +177,7 @@ class HttpActivityRepository
           ? parsed.municipality
           : activity.municipality,
       startsAt: parsed.startsAt,
+      endsAt: parsed.endsAt,
       imageAsset: parsed.imageAsset.isNotEmpty
           ? parsed.imageAsset
           : activity.imageAsset,

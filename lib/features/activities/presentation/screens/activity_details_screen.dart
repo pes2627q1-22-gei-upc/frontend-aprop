@@ -18,11 +18,20 @@ class ActivityDetailsScreen extends StatefulWidget {
     required this.activityId,
     required this.repository,
     required this.enrollmentViewModel,
+    this.canEdit,
+    this.onEdit,
   });
 
   final String activityId;
   final ActivityDetailsRepository repository;
   final EnrollmentViewModel enrollmentViewModel;
+
+  /// Si qui mira la fitxa pot editar l'activitat (n'és qui l'ha creada).
+  final bool Function(Activity activity)? canEdit;
+
+  /// Obre el formulari d'edició; acaba amb `true` si s'han desat canvis, i
+  /// llavors la fitxa es torna a carregar.
+  final Future<bool> Function(Activity activity)? onEdit;
 
   @override
   State<ActivityDetailsScreen> createState() => _ActivityDetailsScreenState();
@@ -55,6 +64,11 @@ class _ActivityDetailsScreenState extends State<ActivityDetailsScreen> {
     }
   }
 
+  Future<void> _edit(Activity activity) async {
+    final saved = await widget.onEdit?.call(activity) ?? false;
+    if (saved && mounted) _viewModel.load();
+  }
+
   @override
   void dispose() {
     _viewModel.dispose();
@@ -72,6 +86,25 @@ class _ActivityDetailsScreenState extends State<ActivityDetailsScreen> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.of(context).maybePop(),
         ),
+        actions: [
+          // Només per a qui l'ha creada, quan ja s'ha carregat.
+          ListenableBuilder(
+            listenable: _viewModel,
+            builder: (context, child) {
+              final activity = _viewModel.activity;
+              if (activity == null ||
+                  widget.onEdit == null ||
+                  !(widget.canEdit?.call(activity) ?? false)) {
+                return const SizedBox.shrink();
+              }
+              return IconButton(
+                tooltip: 'Edita l’activitat',
+                icon: const Icon(Icons.edit_outlined),
+                onPressed: () => _edit(activity),
+              );
+            },
+          ),
+        ],
       ),
       body: SafeArea(
         top: false,

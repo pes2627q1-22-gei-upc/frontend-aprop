@@ -23,10 +23,12 @@ const maxActivityDescriptionLength = 1000;
 const maxActivityDirectionsLength = 200;
 const createActivityErrorMessage =
     'No hem pogut publicar l’activitat. Torna-ho a provar.';
+const updateActivityErrorMessage =
+    'No hem pogut desar els canvis. Torna-ho a provar.';
 
-/// Formulari per publicar una activitat no oficial. Els textos arriben en
-/// enviar el formulari; la categoria, la data i la imatge es trien amb
-/// controls i es guarden aquí.
+/// Formulari per publicar una activitat no oficial, o per editar-ne una amb
+/// [editing]. Els textos arriben en enviar el formulari; la categoria, la
+/// data i la imatge es trien amb controls i es guarden aquí.
 class CreateActivityViewModel extends ChangeNotifier {
   CreateActivityViewModel({
     required this._repository,
@@ -34,12 +36,32 @@ class CreateActivityViewModel extends ChangeNotifier {
     required this._creator,
     this._categoryRepository,
     this._now = DateTime.now,
+    this.editing,
   }) : _categories = _categoryRepository == null
            ? [
                for (final name in activityCategories)
                  ActivityCategory.plain(name),
              ]
-           : const [];
+           : const [] {
+    final activity = editing;
+    if (activity == null) return;
+    // Fins que no arriben les categories, es guarda el nom que es veu.
+    _category = activity.category;
+    _matchEditedCategory();
+    _startsAt = activity.startsAt;
+    _endsAt = activity.endsAt;
+    if (activityImageTemplates.contains(activity.imageAsset)) {
+      _imageAsset = activity.imageAsset;
+    }
+    _location = activity.location;
+    // El lloc ja estava triat: escriure el municipi no el mou.
+    _locationAdjusted = activity.location != null;
+  }
+
+  /// L'activitat que s'edita; nul si se'n crea una de nova.
+  final Activity? editing;
+
+  bool get isEditing => editing != null;
 
   final ActivityRepository _repository;
 
@@ -108,6 +130,7 @@ class CreateActivityViewModel extends ChangeNotifier {
       final categories = await repository.getCreationCategories();
       if (_isDisposed) return;
       _categories = List.unmodifiable(categories);
+      _matchEditedCategory();
     } catch (_) {
       if (_isDisposed) return;
       _categoriesError = 'No hem pogut carregar les categories.';
@@ -117,6 +140,19 @@ class CreateActivityViewModel extends ChangeNotifier {
         notifyListeners();
       }
     }
+  }
+
+  /// L'activitat editada només en sap el nom que es veu («Teatre»); el
+  /// formulari desa el valor («agenda:categories/teatre»). Si cap categoria
+  /// no hi correspon, no se'n tria cap: enviar el nom en crearia una de nova.
+  void _matchEditedCategory() {
+    final name = editing?.category;
+    if (name == null || _categories.isEmpty) return;
+    if (_categories.any((c) => c.value == _category)) return;
+    _category = _categories
+        .where((c) => c.label.toLowerCase() == name.toLowerCase())
+        .firstOrNull
+        ?.value;
   }
 
   void setCategory(String? category) {
@@ -187,8 +223,8 @@ class CreateActivityViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Retorna l'activitat creada, o `null` si el formulari no és vàlid o la
-  /// publicació ha fallat. El municipi i les indicacions són opcionals.
+  /// Retorna l'activitat creada o editada, o `null` si el formulari no és
+  /// vàlid o no s'ha pogut desar. El municipi i les indicacions són opcionals.
   Future<Activity?> publish({
     required String title,
     required String description,
@@ -198,7 +234,11 @@ class CreateActivityViewModel extends ChangeNotifier {
   }) async {
     if (_isPublishing || _isDisposed) return null;
 
-    final parsedPrice = parseActivityPrice(price);
+    // El backend no desa l'import: d'una activitat de pagament no se'n sap.
+    // Si el camp es deixa buit, no es converteix en gratuïta.
+    final keepsUnknownPrice =
+        isEditing && editing!.price == null && price.trim().isEmpty;
+    final parsedPrice = keepsUnknownPrice ? null : parseActivityPrice(price);
     final category = _category;
     final startsAt = _startsAt;
     final endsAt = _endsAt;
@@ -214,7 +254,7 @@ class CreateActivityViewModel extends ChangeNotifier {
             : null),
         CreateActivityField.startsAt: ?_validateStartsAt(startsAt),
         CreateActivityField.endsAt: ?_validateEndsAt(startsAt, endsAt),
-        CreateActivityField.price: ?(parsedPrice == null
+        CreateActivityField.price: ?(parsedPrice == null && !keepsUnknownPrice
             ? 'Introdueix un preu vàlid, per exemple 12,50.'
             : null),
       });
@@ -228,24 +268,28 @@ class CreateActivityViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      return await _repository.createActivity(
-        NewActivity(
-          title: title.trim(),
-          description: description.trim(),
-          category: category!,
-          startsAt: startsAt!,
-          endsAt: endsAt,
-          municipality: municipality.trim(),
-          // Sense indicacions es desa nul, no un text buit.
-          directions: directions.trim().isEmpty ? null : directions.trim(),
-          imageAsset: _imageAsset,
-          location: _location,
-          creator: _creator,
-          price: parsedPrice,
-        ),
+      final activity = NewActivity(
+        title: title.trim(),
+        description: description.trim(),
+        category: category!,
+        startsAt: startsAt!,
+        endsAt: endsAt,
+        municipality: municipality.trim(),
+        // Sense indicacions es desa nul, no un text buit.
+        directions: directions.trim().isEmpty ? null : directions.trim(),
+        imageAsset: _imageAsset,
+        location: _location,
+        creator: _creator,
+        price: parsedPrice,
       );
+      return await switch (editing) {
+        final edited? => _repository.updateActivity(edited.id, activity),
+        null => _repository.createActivity(activity),
+      };
     } catch (_) {
-      _errorMessage = createActivityErrorMessage;
+      _errorMessage = isEditing
+          ? updateActivityErrorMessage
+          : createActivityErrorMessage;
       return null;
     } finally {
       if (!_isDisposed) {
