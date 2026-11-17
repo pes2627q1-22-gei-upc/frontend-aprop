@@ -34,6 +34,9 @@ import '../../features/profile/presentation/view_models/profile_view_model.dart'
 import '../../features/profile/data/gallery_profile_image_picker.dart';
 import '../../features/profile/repositories/profile_repository.dart';
 import '../../features/profile/repositories/profile_settings_repository.dart';
+import '../../features/ratings/presentation/view_models/rating_view_model.dart';
+import '../../features/ratings/presentation/widgets/activity_rating.dart';
+import '../../features/ratings/repositories/rating_repository.dart';
 import 'activity_details_route.dart';
 
 class MainShell extends StatefulWidget {
@@ -44,6 +47,7 @@ class MainShell extends StatefulWidget {
     required this.activityRepository,
     required this.enrollmentRepository,
     required this.assistantRepository,
+    required this.ratingRepository,
     required this.notificationRepository,
     required this.discoveryRepository,
     this.activityMapRepository,
@@ -51,6 +55,7 @@ class MainShell extends StatefulWidget {
     required this.profileSettingsRepository,
     this.interestTestRepository,
     this.activityCategoryRepository,
+    this.now,
   });
 
   final AppUser user;
@@ -58,6 +63,7 @@ class MainShell extends StatefulWidget {
   final ActivityRepository activityRepository;
   final EnrollmentRepository enrollmentRepository;
   final AssistantRepository assistantRepository;
+  final RatingRepository ratingRepository;
   final NotificationRepository notificationRepository;
   final DiscoveryRepository discoveryRepository;
   final ProfileRepository profileRepository;
@@ -73,6 +79,9 @@ class MainShell extends StatefulWidget {
   /// Si hi és, el mapa d'Inici carrega per zona des d'aquí. Si no, mostra les
   /// activitats de la llista.
   final ActivityMapRepository? activityMapRepository;
+
+  /// Clock for the Agenda and for when an activity can be rated; tests inject it.
+  final DateTime Function()? now;
 
   @override
   State<MainShell> createState() => _MainShellState();
@@ -97,6 +106,7 @@ class _MainShellState extends State<MainShell> {
   late final ActivitiesViewModel _activitiesViewModel;
   ActivitiesMapViewModel? _activitiesMapViewModel;
   late final EnrollmentViewModel _enrollmentViewModel;
+  late final RatingViewModel _ratingViewModel;
   late final AssistantViewModel _assistantViewModel;
   late final ProfileViewModel _profileViewModel;
 
@@ -117,6 +127,10 @@ class _MainShellState extends State<MainShell> {
     _enrollmentViewModel = EnrollmentViewModel(
       userId: _enrollmentUserId,
       repository: widget.enrollmentRepository,
+    );
+    _ratingViewModel = RatingViewModel(
+      userId: _enrollmentUserId,
+      repository: widget.ratingRepository,
     );
     _assistantViewModel = AssistantViewModel(
       repository: widget.assistantRepository,
@@ -140,6 +154,7 @@ class _MainShellState extends State<MainShell> {
     _activitiesViewModel.dispose();
     _activitiesMapViewModel?.dispose();
     _enrollmentViewModel.dispose();
+    _ratingViewModel.dispose();
     _assistantViewModel.dispose();
     _profileViewModel.dispose();
     super.dispose();
@@ -168,7 +183,27 @@ class _MainShellState extends State<MainShell> {
         activityId: activityId,
         repository: repository ?? _activityRepository,
         enrollmentViewModel: _enrollmentViewModel,
+        ratingBuilder: _buildRating,
       ),
+    );
+  }
+
+  /// Rating stars for plans the user joined and that already started.
+  // TODO(DP-048): attendance («Com va anar?») is not modelled; once it is,
+  // require a confirmed attendance instead of an enrollment.
+  Widget _buildRating(Activity activity) {
+    return ListenableBuilder(
+      listenable: _enrollmentViewModel,
+      builder: (context, child) {
+        if (!_enrollmentViewModel.isEnrolled(activity.id) ||
+            activity.startsAt.isAfter((widget.now ?? DateTime.now)())) {
+          return const SizedBox.shrink();
+        }
+        return ActivityRating(
+          viewModel: _ratingViewModel,
+          activityId: activity.id,
+        );
+      },
     );
   }
 
@@ -244,6 +279,7 @@ class _MainShellState extends State<MainShell> {
                 activityId: activityId,
                 repository: _activityRepository,
                 enrollmentViewModel: _enrollmentViewModel,
+                ratingBuilder: _buildRating,
               ),
             );
           },
@@ -277,6 +313,7 @@ class _MainShellState extends State<MainShell> {
                 activityId: activityId,
                 repository: _activityRepository,
                 enrollmentViewModel: _enrollmentViewModel,
+                ratingBuilder: _buildRating,
               ),
             );
           },
@@ -419,6 +456,7 @@ class _MainShellState extends State<MainShell> {
         activityId: activity.id,
         repository: _activityRepository,
         enrollmentViewModel: _enrollmentViewModel,
+        ratingBuilder: _buildRating,
       ),
     );
   }
@@ -515,6 +553,8 @@ class _MainShellState extends State<MainShell> {
                     activityId: activity.id,
                     activityTitle: activity.title,
                   ),
+                  ratingBuilder: _buildRating,
+                  now: widget.now,
                 ),
               ),
             ),

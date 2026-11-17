@@ -18,11 +18,15 @@ class ActivityDetailsScreen extends StatefulWidget {
     required this.activityId,
     required this.repository,
     required this.enrollmentViewModel,
+    this.ratingBuilder,
   });
 
   final String activityId;
   final ActivityDetailsRepository repository;
   final EnrollmentViewModel enrollmentViewModel;
+
+  /// Rating block for the activity; the app decides when it can be rated.
+  final Widget Function(Activity activity)? ratingBuilder;
 
   @override
   State<ActivityDetailsScreen> createState() => _ActivityDetailsScreenState();
@@ -105,6 +109,7 @@ class _ActivityDetailsScreenState extends State<ActivityDetailsScreen> {
                   child: _ActivityDetailsContent(
                     activity: activity,
                     enrollmentViewModel: widget.enrollmentViewModel,
+                    ratingBuilder: widget.ratingBuilder,
                   ),
                 ),
                 _ParticipationAction(
@@ -124,10 +129,12 @@ class _ActivityDetailsContent extends StatelessWidget {
   const _ActivityDetailsContent({
     required this.activity,
     required this.enrollmentViewModel,
+    this.ratingBuilder,
   });
 
   final Activity activity;
   final EnrollmentViewModel enrollmentViewModel;
+  final Widget Function(Activity activity)? ratingBuilder;
 
   @override
   Widget build(BuildContext context) {
@@ -169,6 +176,7 @@ class _ActivityDetailsContent extends StatelessWidget {
             fontWeight: FontWeight.w700,
           ),
         ),
+        if (ratingBuilder != null) ratingBuilder!(activity),
         const SizedBox(height: 16),
         ActivityInformationRow(
           icon: Icons.calendar_month_outlined,

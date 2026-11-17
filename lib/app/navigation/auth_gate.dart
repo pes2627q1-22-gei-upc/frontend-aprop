@@ -26,6 +26,8 @@ import '../../features/profile/data/demo_profile_repository.dart';
 import '../../features/profile/data/demo_profile_settings_repository.dart';
 import '../../features/profile/repositories/profile_repository.dart';
 import '../../features/profile/repositories/profile_settings_repository.dart';
+import '../../features/ratings/data/demo_rating_repository.dart';
+import '../../features/ratings/repositories/rating_repository.dart';
 import 'main_shell.dart';
 
 /// Mostra el login si no hi ha sessió, la verificació del correu si encara no
@@ -38,6 +40,7 @@ class AuthGate extends StatefulWidget {
     this.activityRepository,
     this.enrollmentRepository,
     this.assistantRepository,
+    this.ratingRepository,
     this.notificationRepository,
     this.discoveryRepository,
     this.activityMapRepository,
@@ -51,6 +54,7 @@ class AuthGate extends StatefulWidget {
   final ActivityRepository? activityRepository;
   final EnrollmentRepository? enrollmentRepository;
   final AssistantRepository? assistantRepository;
+  final RatingRepository? ratingRepository;
   final NotificationRepository? notificationRepository;
   final DiscoveryRepository? discoveryRepository;
   final ProfileRepository? profileRepository;
@@ -70,6 +74,7 @@ class _AuthGateState extends State<AuthGate> {
   late final ActivityRepository _activityRepository;
   late final EnrollmentRepository _enrollmentRepository;
   late final AssistantRepository _assistantRepository;
+  late final RatingRepository _ratingRepository;
   late final NotificationRepository _notificationRepository;
   late final DiscoveryRepository _discoveryRepository;
   late final ActivityMapRepository? _activityMapRepository;
@@ -104,6 +109,7 @@ class _AuthGateState extends State<AuthGate> {
     _assistantRepository =
         widget.assistantRepository ??
         DemoAssistantRepository(activityRepository: _activityRepository);
+    _ratingRepository = widget.ratingRepository ?? DemoRatingRepository();
     _notificationRepository =
         widget.notificationRepository ??
         DemoNotificationRepository(activityRepository: _activityRepository);
@@ -171,6 +177,7 @@ class _AuthGateState extends State<AuthGate> {
           activityRepository: _activityRepository,
           enrollmentRepository: _enrollmentRepository,
           assistantRepository: _assistantRepository,
+          ratingRepository: _ratingRepository,
           notificationRepository: _notificationRepository,
           discoveryRepository: _discoveryRepository,
           activityMapRepository: _activityMapRepository,
