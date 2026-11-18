@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/formatters/reliability_formatter.dart';
+
 import '../../models/activity.dart';
 import '../../repositories/activity_details_repository.dart';
 import '../formatters/activity_date_formatter.dart';
@@ -320,6 +322,31 @@ class _CreatorSection extends StatelessWidget {
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
                 if (creator.isFriend) const FriendshipBadge(),
+                Semantics(
+                  label: creator.reliability == null
+                      ? 'Fiabilitat de l’organitzador: sense valoracions'
+                      : 'Fiabilitat de l’organitzador: '
+                            '${formatReliability(creator.reliability)} sobre 5',
+                  excludeSemantics: true,
+                  child: Text.rich(
+                    TextSpan(
+                      text:
+                          'Fiabilitat ${formatReliability(creator.reliability)}',
+                      children: [
+                        if (creator.reliability != null)
+                          WidgetSpan(
+                            alignment: PlaceholderAlignment.middle,
+                            child: Icon(
+                              Icons.star,
+                              size: 18,
+                              color: theme.colorScheme.primary,
+                            ),
+                          ),
+                      ],
+                    ),
+                    style: theme.textTheme.labelLarge,
+                  ),
+                ),
                 Tooltip(
                   message: 'Perfil disponible properament',
                   child: TextButton.icon(

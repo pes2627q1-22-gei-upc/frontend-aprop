@@ -126,6 +126,51 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('Creator block shows the organizer reliability or a dash', (
+    tester,
+  ) async {
+    final semantics = tester.ensureSemantics();
+    await pumpDetails(tester, id: 'demo-theatre');
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(find.text('Laia Soler'), 150);
+    expect(
+      find.textContaining('Fiabilitat 4,7', findRichText: true),
+      findsOneWidget,
+    );
+    expect(
+      find.bySemanticsLabel(
+        RegExp('Fiabilitat de l’organitzador: 4,7 sobre 5'),
+      ),
+      findsOneWidget,
+    );
+
+    final unrated = (await DemoActivityRepository().getActivityById(
+      'demo-theatre',
+    ))!;
+    final repository = FakeActivityRepository()
+      ..findActivity = (_) async => Activity(
+        id: unrated.id,
+        title: unrated.title,
+        category: unrated.category,
+        municipality: unrated.municipality,
+        startsAt: unrated.startsAt,
+        imageAsset: unrated.imageAsset,
+        source: ActivitySource.community,
+        creator: const ActivityCreator(name: 'Pol', isFriend: false),
+      );
+    await pumpDetails(tester, id: 'demo-theatre', repository: repository);
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(find.text('Pol'), 150);
+    expect(find.text('Fiabilitat —', findRichText: true), findsOneWidget);
+    expect(
+      find.bySemanticsLabel(
+        RegExp('Fiabilitat de l’organitzador: sense valoracions'),
+      ),
+      findsOneWidget,
+    );
+    semantics.dispose();
+  });
+
   testWidgets('Unknown ID shows an honest not-found state', (tester) async {
     await pumpDetails(tester, id: 'missing');
     await tester.pumpAndSettle();

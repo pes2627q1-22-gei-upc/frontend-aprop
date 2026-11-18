@@ -42,6 +42,15 @@ Activity activityFromJson(Map<String, Object?> json) {
 
   final creatorUuid = _text(json['creator']);
   final creatorName = _text(json['creator-name']) ?? 'un usuari';
+  // TODO(DP-050): `creator-reliability` is an agreed contract, not yet verified.
+  final rawReliability = json['creator-reliability'];
+  if (rawReliability != null &&
+      (rawReliability is! num ||
+          !rawReliability.isFinite ||
+          rawReliability < 0 ||
+          rawReliability > 5)) {
+    throw const FormatException('Invalid creator reliability');
+  }
   final hasFriends = json['has-friends'] as bool? ?? false;
 
   final rawPrice = json['price'];
@@ -68,6 +77,10 @@ Activity activityFromJson(Map<String, Object?> json) {
         : ActivityCreator(
             name: creatorName,
             userId: creatorUuid,
+            // Zero mirrors profileFromJson: no ratings yet, not a 0,0 score.
+            reliability: rawReliability is num && rawReliability > 0
+                ? rawReliability.toDouble()
+                : null,
             isFriend: hasFriends,
           ),
     description: _text(json['description']),

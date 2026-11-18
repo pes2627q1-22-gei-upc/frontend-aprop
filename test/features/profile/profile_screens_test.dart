@@ -86,6 +86,43 @@ void main() {
     await tester.pumpAndSettle();
   }
 
+  testWidgets('Header shows the organizer reliability as third counter', (
+    tester,
+  ) async {
+    final semantics = tester.ensureSemantics();
+    await pumpScreen(tester);
+    await tester.pumpAndSettle();
+    expect(find.text('4,7'), findsOneWidget);
+    expect(find.text('Valoració'), findsOneWidget);
+    expect(
+      find.bySemanticsLabel('Fiabilitat com a organitzador: 4,7 sobre 5'),
+      findsOneWidget,
+    );
+    semantics.dispose();
+  });
+
+  testWidgets('Header shows a dash when the organizer has no ratings', (
+    tester,
+  ) async {
+    final semantics = tester.ensureSemantics();
+    profiles.profile = UserProfile(
+      userId: profileUser.id,
+      displayName: 'Adam Ziani',
+      username: 'adam',
+      biography: '',
+      progress: const ProfileProgress(level: null, experience: 0),
+    );
+    await pumpScreen(tester);
+    await tester.pumpAndSettle();
+    expect(find.text('—'), findsOneWidget);
+    expect(find.byIcon(Icons.star), findsNothing);
+    expect(
+      find.bySemanticsLabel('Fiabilitat com a organitzador: sense valoracions'),
+      findsOneWidget,
+    );
+    semantics.dispose();
+  });
+
   testWidgets(
     'Backend identity is editable and updates only after confirmation without invented progression',
     (tester) async {
