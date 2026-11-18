@@ -8,4 +8,19 @@ abstract interface class RatingRepository {
     required String activityId,
     required int score,
   });
+
+  /// Changes the user's own rating. Throws `RatingNotFoundException` if
+  /// [userId] has not rated [activityId].
+  Future<void> updateRating({
+    required String userId,
+    required String activityId,
+    required int score,
+  });
+
+  /// Deletes the user's own rating. Throws `RatingNotFoundException` if
+  /// [userId] has not rated [activityId].
+  Future<void> deleteRating({
+    required String userId,
+    required String activityId,
+  });
 }
