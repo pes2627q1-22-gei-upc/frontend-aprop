@@ -24,6 +24,7 @@ class CreateActivityScreen extends StatefulWidget {
     required this.onCreated,
     this.categoryRepository,
     this.now = DateTime.now,
+    this.activity,
   });
 
   final ActivityRepository repository;
@@ -33,9 +34,12 @@ class CreateActivityScreen extends StatefulWidget {
   final LocationRepository locationRepository;
   final ActivityCreator creator;
 
-  /// Rep l'activitat publicada. Qui obre la pantalla decideix què es mostra
-  /// després (la fitxa de l'activitat nova).
+  /// Rep l'activitat publicada o desada. Qui obre la pantalla decideix què es
+  /// mostra després (la fitxa de l'activitat).
   final ValueChanged<Activity> onCreated;
+
+  /// L'activitat que s'edita. Si és nul, se'n crea una de nova.
+  final Activity? activity;
 
   /// Rellotge per validar la data d'inici; les proves el fixen.
   final DateTime Function() now;
@@ -45,11 +49,22 @@ class CreateActivityScreen extends StatefulWidget {
 }
 
 class _CreateActivityScreenState extends State<CreateActivityScreen> {
-  final _titleController = TextEditingController();
-  final _descriptionController = TextEditingController();
-  final _municipalityController = TextEditingController();
-  final _directionsController = TextEditingController();
-  final _priceController = TextEditingController();
+  // En editar, els camps comencen amb el que ja tenia l'activitat.
+  late final _titleController = TextEditingController(
+    text: widget.activity?.title,
+  );
+  late final _descriptionController = TextEditingController(
+    text: widget.activity?.description,
+  );
+  late final _municipalityController = TextEditingController(
+    text: widget.activity?.municipality,
+  );
+  late final _directionsController = TextEditingController(
+    text: widget.activity?.directions,
+  );
+  late final _priceController = TextEditingController(
+    text: _priceText(widget.activity?.price),
+  );
   late final CreateActivityViewModel _viewModel;
 
   @override
@@ -61,7 +76,16 @@ class _CreateActivityScreenState extends State<CreateActivityScreen> {
       creator: widget.creator,
       categoryRepository: widget.categoryRepository,
       now: widget.now,
+      editing: widget.activity,
     )..loadCategories();
+  }
+
+  /// Preu per al camp: buit si és gratuïta o no se sap, i amb coma decimal.
+  static String _priceText(double? price) {
+    if (price == null || price == 0) return '';
+    return price == price.roundToDouble()
+        ? '${price.round()}'
+        : price.toStringAsFixed(2).replaceAll('.', ',');
   }
 
   @override
@@ -137,7 +161,11 @@ class _CreateActivityScreenState extends State<CreateActivityScreen> {
     final colors = theme.colorScheme;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Crea una activitat')),
+      appBar: AppBar(
+        title: Text(
+          _viewModel.isEditing ? 'Edita l’activitat' : 'Crea una activitat',
+        ),
+      ),
       body: SafeArea(
         top: false,
         child: ListenableBuilder(
@@ -344,7 +372,10 @@ class _CreateActivityScreenState extends State<CreateActivityScreen> {
                     labelText: 'Preu (opcional)',
                     prefixIcon: const Icon(Icons.sell_outlined),
                     suffixText: '€',
-                    helperText: 'Deixa-ho buit si és gratuïta.',
+                    helperText: _viewModel.hasUnknownPrice
+                        ? 'Si el deixes buit, no es canvia. Escriu 0 si és '
+                              'gratuïta.'
+                        : 'Deixa-ho buit si és gratuïta.',
                     errorText: _viewModel.fieldError(CreateActivityField.price),
                   ),
                 ),
@@ -372,7 +403,9 @@ class _CreateActivityScreenState extends State<CreateActivityScreen> {
                             semanticsLabel: 'Publicant',
                           ),
                         )
-                      : const Text('Publica'),
+                      : Text(
+                          _viewModel.isEditing ? 'Desa els canvis' : 'Publica',
+                        ),
                 ),
               ],
             );

@@ -15,6 +15,7 @@ class AgendaScreen extends StatefulWidget {
     required this.enrollmentRepository,
     required this.activityRepository,
     required this.onActivitySelected,
+    this.activitiesChanged,
     this.participationActionBuilder,
     this.now,
   });
@@ -23,6 +24,10 @@ class AgendaScreen extends StatefulWidget {
   final EnrollmentRepository enrollmentRepository;
   final ActivityRepository activityRepository;
   final ValueChanged<String> onActivitySelected;
+
+  /// Avisa que alguna activitat ha canviat (p. ex. se n'han desat canvis):
+  /// l'Agenda torna a carregar els plans.
+  final Listenable? activitiesChanged;
 
   /// Enrollment action for each plan, shared with the activity cards, so
   /// unenrolling works and looks the same everywhere.
@@ -40,11 +45,18 @@ class _AgendaScreenState extends State<AgendaScreen> {
   void initState() {
     super.initState();
     _viewModel = _createViewModel();
+    widget.activitiesChanged?.addListener(_reload);
   }
+
+  void _reload() => _viewModel.refreshActivities();
 
   @override
   void didUpdateWidget(AgendaScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.activitiesChanged != widget.activitiesChanged) {
+      oldWidget.activitiesChanged?.removeListener(_reload);
+      widget.activitiesChanged?.addListener(_reload);
+    }
     if (oldWidget.userId != widget.userId ||
         oldWidget.enrollmentRepository != widget.enrollmentRepository ||
         oldWidget.activityRepository != widget.activityRepository) {
@@ -64,6 +76,7 @@ class _AgendaScreenState extends State<AgendaScreen> {
 
   @override
   void dispose() {
+    widget.activitiesChanged?.removeListener(_reload);
     _viewModel.dispose();
     super.dispose();
   }

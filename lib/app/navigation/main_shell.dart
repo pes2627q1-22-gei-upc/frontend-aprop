@@ -90,6 +90,10 @@ class _MainShellState extends State<MainShell> {
   /// Quant ha de pujar el botó de l'assistent perquè no el tapi la targeta
   /// del mapa.
   final _assistantButtonLift = ValueNotifier<double>(0);
+
+  /// Avisa que una activitat ha canviat (s'ha editat), perquè les pantalles
+  /// que en guarden una còpia, com l'Agenda, la tornin a carregar.
+  final _activitiesChanged = ValueNotifier<int>(0);
   final _sectionNavigatorKeys = List.generate(
     5,
     (_) => GlobalKey<NavigatorState>(),
@@ -138,6 +142,7 @@ class _MainShellState extends State<MainShell> {
   @override
   void dispose() {
     _assistantButtonLift.dispose();
+    _activitiesChanged.dispose();
     _activitiesViewModel.dispose();
     _activitiesMapViewModel?.dispose();
     _enrollmentViewModel.dispose();
@@ -169,6 +174,8 @@ class _MainShellState extends State<MainShell> {
         activityId: activityId,
         repository: repository ?? _activityRepository,
         enrollmentViewModel: _enrollmentViewModel,
+        canEdit: _canEdit,
+        onEdit: _editActivity,
       ),
     );
   }
@@ -249,6 +256,8 @@ class _MainShellState extends State<MainShell> {
                   activityId: activityId,
                   repository: _activityRepository,
                   enrollmentViewModel: _enrollmentViewModel,
+                  canEdit: _canEdit,
+                  onEdit: _editActivity,
                 ),
               );
             },
@@ -285,6 +294,8 @@ class _MainShellState extends State<MainShell> {
                 activityId: activityId,
                 repository: _activityRepository,
                 enrollmentViewModel: _enrollmentViewModel,
+                canEdit: _canEdit,
+                onEdit: _editActivity,
               ),
             );
           },
@@ -292,6 +303,13 @@ class _MainShellState extends State<MainShell> {
       ),
     );
   }
+
+  /// Qui publica o edita una activitat des de l'app.
+  ActivityCreator get _currentCreator => ActivityCreator(
+    name: _profileViewModel.profile?.displayName ?? widget.user.fullName,
+    userId: widget.user.id,
+    isFriend: false,
+  );
 
   void _openCreateActivity() {
     final navigator = _sectionNavigatorKeys[0].currentState!;
@@ -303,16 +321,47 @@ class _MainShellState extends State<MainShell> {
           repository: _activityRepository,
           locationRepository: const DemoLocationRepository(),
           categoryRepository: widget.activityCategoryRepository,
-          creator: ActivityCreator(
-            name:
-                _profileViewModel.profile?.displayName ?? widget.user.fullName,
-            userId: widget.user.id,
-            isFriend: false,
-          ),
+          creator: _currentCreator,
           onCreated: (activity) => _showCreatedActivity(navigator, activity),
         ),
       ),
     );
+  }
+
+  /// Només qui ha creat una activitat no oficial la pot editar, i només
+  /// abans que comenci (CA1 i CA2 de la #50).
+  bool _canEdit(Activity activity) {
+    final creatorId = activity.creator?.userId;
+    return activity.source == ActivitySource.community &&
+        creatorId != null &&
+        (creatorId == widget.user.serverId || creatorId == widget.user.id) &&
+        activity.startsAt.isAfter(DateTime.now());
+  }
+
+  /// Obre el formulari amb l'activitat i, si es desa, posa al dia la llista,
+  /// el mapa i l'Agenda. La fitxa es torna a carregar sola.
+  Future<bool> _editActivity(Activity activity) async {
+    final navigator = _sectionNavigatorKeys[_selectedIndex].currentState!;
+    final saved = await navigator.push<Activity>(
+      MaterialPageRoute<Activity>(
+        settings: RouteSettings(
+          name: '/activities/${Uri.encodeComponent(activity.id)}/edit',
+        ),
+        builder: (context) => CreateActivityScreen(
+          repository: _activityRepository,
+          locationRepository: const DemoLocationRepository(),
+          categoryRepository: widget.activityCategoryRepository,
+          creator: _currentCreator,
+          activity: activity,
+          onCreated: (updated) => Navigator.of(context).pop(updated),
+        ),
+      ),
+    );
+    if (saved == null) return false;
+    _activitiesMapViewModel?.refresh();
+    _activitiesViewModel.load();
+    _activitiesChanged.value++;
+    return true;
   }
 
   void _openProfileSettings() {
@@ -427,6 +476,8 @@ class _MainShellState extends State<MainShell> {
         activityId: activity.id,
         repository: _activityRepository,
         enrollmentViewModel: _enrollmentViewModel,
+        canEdit: _canEdit,
+        onEdit: _editActivity,
       ),
     );
   }
@@ -518,6 +569,7 @@ class _MainShellState extends State<MainShell> {
                   enrollmentRepository: widget.enrollmentRepository,
                   activityRepository: _activityRepository,
                   onActivitySelected: _openActivityDetails,
+                  activitiesChanged: _activitiesChanged,
                   participationActionBuilder: (activity) => EnrollmentAction(
                     viewModel: _enrollmentViewModel,
                     activityId: activity.id,

@@ -215,6 +215,7 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
   - el formulari demana que la fi sigui **posterior** a l'inici; el backend (R5) també n'accepta una d'igual;
   - sense data de fi s'envia `end-date` igual a `start-date`, com fins ara;
   - el backend només desa el dia de la fi (DP-029) i l'app encara no llegeix ni mostra `end-date` (`Activity` no en té camp).
+- **Editar (2026-11-16, Claude Code (Opus 5.5) amb confirmació de l'usuari, Taiga #189 / US #50):** el llapis «Edita l’activitat» de la fitxa només surt a qui l'ha creada (l'UUID del backend o l'UID de la sessió), si no és oficial i si encara no ha començat («activa» = no començada). Obre el mateix formulari amb les dades i «Desa els canvis», que envia `PUT /events/{id}` amb el mateix JSON que crear; el backend torna a comprovar l'autoria i R5. Ara l'app llegeix `end-date` (`Activity.endsAt`) perquè editar no la perdi. El backend no desa l'import del preu: d'una activitat de pagament no se'n sap, i si el camp es deixa buit no es converteix en gratuïta. La portada triada tampoc no es desa (DP-019). Després de desar, la fitxa es torna a carregar i la llista i el mapa es posen al dia.
 - **Qui decideix:** frontend + backend
 - **Resolució:**
 
