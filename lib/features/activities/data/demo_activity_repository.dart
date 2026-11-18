@@ -54,6 +54,8 @@ class DemoActivityRepository implements ActivityRepository {
       creator: const ActivityCreator(
         name: 'Laia Soler',
         userId: 'demo-laiasoler',
+        // Same seed as the example profile (DemoProfileRepository).
+        reliability: 4.7,
         avatarAsset: 'assets/images/laia_soler.jpg',
         isFriend: true,
       ),
