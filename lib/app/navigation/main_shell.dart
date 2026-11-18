@@ -89,6 +89,7 @@ class MainShell extends StatefulWidget {
 
 class _MainShellState extends State<MainShell> {
   int _selectedIndex = 0;
+  bool _isAssistantOpen = false;
 
   /// Identificador de les inscripcions: el backend les desa amb l'UUID de
   /// l'usuari, no amb l'UID de Firebase. Apuntar-se i l'Agenda han de fer
@@ -98,6 +99,10 @@ class _MainShellState extends State<MainShell> {
   /// Quant ha de pujar el botó de l'assistent perquè no el tapi la targeta
   /// del mapa.
   final _assistantButtonLift = ValueNotifier<double>(0);
+
+  /// Avisa que una activitat ha canviat (s'ha editat), perquè les pantalles
+  /// que en guarden una còpia, com l'Agenda, la tornin a carregar.
+  final _activitiesChanged = ValueNotifier<int>(0);
   final _sectionNavigatorKeys = List.generate(
     5,
     (_) => GlobalKey<NavigatorState>(),
@@ -151,6 +156,7 @@ class _MainShellState extends State<MainShell> {
   @override
   void dispose() {
     _assistantButtonLift.dispose();
+    _activitiesChanged.dispose();
     _activitiesViewModel.dispose();
     _activitiesMapViewModel?.dispose();
     _enrollmentViewModel.dispose();
@@ -184,24 +190,37 @@ class _MainShellState extends State<MainShell> {
         repository: repository ?? _activityRepository,
         enrollmentViewModel: _enrollmentViewModel,
         ratingBuilder: _buildRating,
+        canEdit: _canEdit,
+        onEdit: _editActivity,
       ),
     );
   }
 
   /// Rating stars for plans the user joined and that already started.
-  // TODO(DP-048): attendance («Com va anar?») is not modelled; once it is,
+  // TODO(DP-053): attendance («Com va anar?») is not modelled; once it is,
   // require a confirmed attendance instead of an enrollment.
   Widget _buildRating(Activity activity) {
     return ListenableBuilder(
       listenable: _enrollmentViewModel,
       builder: (context, child) {
-        if (!_enrollmentViewModel.isEnrolled(activity.id) ||
+        final creatorId = activity.creator?.userId;
+        // The organizer cannot rate their own event (it would feed their own
+        // reliability); the creator may carry either the Firebase or server id.
+        final isOwn =
+            creatorId != null &&
+            (creatorId == widget.user.id || creatorId == widget.user.serverId);
+        if (isOwn ||
+            !_enrollmentViewModel.isEnrolled(activity.id) ||
             activity.startsAt.isAfter((widget.now ?? DateTime.now)())) {
           return const SizedBox.shrink();
         }
         return ActivityRating(
           viewModel: _ratingViewModel,
           activityId: activity.id,
+          organizer:
+              activity.source == ActivitySource.community && creatorId != null
+              ? activity.creator
+              : null,
         );
       },
     );
@@ -244,53 +263,62 @@ class _MainShellState extends State<MainShell> {
     );
   }
 
-  void _openAssistant() {
+  Future<void> _openAssistant() async {
     final navigator = _sectionNavigatorKeys[0].currentState!;
-    if (navigator.canPop()) return;
-    navigator.push<void>(
-      PageRouteBuilder<void>(
-        settings: const RouteSettings(name: '/assistant'),
-        transitionDuration: const Duration(milliseconds: 300),
-        reverseTransitionDuration: const Duration(milliseconds: 220),
-        transitionsBuilder: (context, animation, secondary, child) {
-          final curve = CurvedAnimation(
-            parent: animation,
-            curve: Curves.easeOutCubic,
-            reverseCurve: Curves.easeInCubic,
-          );
-          return FadeTransition(
-            opacity: curve,
-            child: SlideTransition(
-              position: Tween(
-                begin: const Offset(0, 0.06),
-                end: Offset.zero,
-              ).animate(curve),
-              child: child,
-            ),
-          );
-        },
-        pageBuilder: (context, animation, secondary) => AssistantScreen(
-          viewModel: _assistantViewModel,
-          onOpenScreen: _openAssistantTarget,
-          onActivitySelected: (activityId) {
-            if (!(ModalRoute.of(context)?.isCurrent ?? true)) return;
-            Navigator.of(context).push<void>(
-              activityDetailsRoute(
-                activityId: activityId,
-                repository: _activityRepository,
-                enrollmentViewModel: _enrollmentViewModel,
-                ratingBuilder: _buildRating,
+    if (_isAssistantOpen || navigator.canPop()) return;
+    // TODO(DP-048): Confirm that details opened from chat keep this full-body
+    // flow. The section's history and shared ViewModels remain mounted.
+    setState(() => _isAssistantOpen = true);
+    try {
+      await navigator.push<void>(
+        PageRouteBuilder<void>(
+          settings: const RouteSettings(name: '/assistant'),
+          transitionDuration: const Duration(milliseconds: 300),
+          reverseTransitionDuration: const Duration(milliseconds: 220),
+          transitionsBuilder: (context, animation, secondary, child) {
+            final curve = CurvedAnimation(
+              parent: animation,
+              curve: Curves.easeOutCubic,
+              reverseCurve: Curves.easeInCubic,
+            );
+            return FadeTransition(
+              opacity: curve,
+              child: SlideTransition(
+                position: Tween(
+                  begin: const Offset(0, 0.06),
+                  end: Offset.zero,
+                ).animate(curve),
+                child: child,
               ),
             );
           },
-          participationActionBuilder: (activity) => EnrollmentAction(
-            viewModel: _enrollmentViewModel,
-            activityId: activity.id,
-            activityTitle: activity.title,
+          pageBuilder: (context, animation, secondary) => AssistantScreen(
+            viewModel: _assistantViewModel,
+            onOpenScreen: _openAssistantTarget,
+            onActivitySelected: (activityId) {
+              if (!(ModalRoute.of(context)?.isCurrent ?? true)) return;
+              Navigator.of(context).push<void>(
+                activityDetailsRoute(
+                  activityId: activityId,
+                  repository: _activityRepository,
+                  enrollmentViewModel: _enrollmentViewModel,
+                  ratingBuilder: _buildRating,
+                  canEdit: _canEdit,
+                  onEdit: _editActivity,
+                ),
+              );
+            },
+            participationActionBuilder: (activity) => EnrollmentAction(
+              viewModel: _enrollmentViewModel,
+              activityId: activity.id,
+              activityTitle: activity.title,
+            ),
           ),
         ),
-      ),
-    );
+      );
+    } finally {
+      if (mounted) setState(() => _isAssistantOpen = false);
+    }
   }
 
   void _openDiscoverySearch() {
@@ -314,6 +342,8 @@ class _MainShellState extends State<MainShell> {
                 repository: _activityRepository,
                 enrollmentViewModel: _enrollmentViewModel,
                 ratingBuilder: _buildRating,
+                canEdit: _canEdit,
+                onEdit: _editActivity,
               ),
             );
           },
@@ -321,6 +351,13 @@ class _MainShellState extends State<MainShell> {
       ),
     );
   }
+
+  /// Qui publica o edita una activitat des de l'app.
+  ActivityCreator get _currentCreator => ActivityCreator(
+    name: _profileViewModel.profile?.displayName ?? widget.user.fullName,
+    userId: widget.user.id,
+    isFriend: false,
+  );
 
   void _openCreateActivity() {
     final navigator = _sectionNavigatorKeys[0].currentState!;
@@ -332,16 +369,47 @@ class _MainShellState extends State<MainShell> {
           repository: _activityRepository,
           locationRepository: const DemoLocationRepository(),
           categoryRepository: widget.activityCategoryRepository,
-          creator: ActivityCreator(
-            name:
-                _profileViewModel.profile?.displayName ?? widget.user.fullName,
-            userId: widget.user.id,
-            isFriend: false,
-          ),
+          creator: _currentCreator,
           onCreated: (activity) => _showCreatedActivity(navigator, activity),
         ),
       ),
     );
+  }
+
+  /// Només qui ha creat una activitat no oficial la pot editar, i només
+  /// abans que comenci (CA1 i CA2 de la #50).
+  bool _canEdit(Activity activity) {
+    final creatorId = activity.creator?.userId;
+    return activity.source == ActivitySource.community &&
+        creatorId != null &&
+        (creatorId == widget.user.serverId || creatorId == widget.user.id) &&
+        activity.startsAt.isAfter(DateTime.now());
+  }
+
+  /// Obre el formulari amb l'activitat i, si es desa, posa al dia la llista,
+  /// el mapa i l'Agenda. La fitxa es torna a carregar sola.
+  Future<bool> _editActivity(Activity activity) async {
+    final navigator = _sectionNavigatorKeys[_selectedIndex].currentState!;
+    final saved = await navigator.push<Activity>(
+      MaterialPageRoute<Activity>(
+        settings: RouteSettings(
+          name: '/activities/${Uri.encodeComponent(activity.id)}/edit',
+        ),
+        builder: (context) => CreateActivityScreen(
+          repository: _activityRepository,
+          locationRepository: const DemoLocationRepository(),
+          categoryRepository: widget.activityCategoryRepository,
+          creator: _currentCreator,
+          activity: activity,
+          onCreated: (updated) => Navigator.of(context).pop(updated),
+        ),
+      ),
+    );
+    if (saved == null) return false;
+    _activitiesMapViewModel?.refresh();
+    _activitiesViewModel.load();
+    _activitiesChanged.value++;
+    return true;
   }
 
   void _openProfileSettings() {
@@ -457,6 +525,8 @@ class _MainShellState extends State<MainShell> {
         repository: _activityRepository,
         enrollmentViewModel: _enrollmentViewModel,
         ratingBuilder: _buildRating,
+        canEdit: _canEdit,
+        onEdit: _editActivity,
       ),
     );
   }
@@ -548,6 +618,7 @@ class _MainShellState extends State<MainShell> {
                   enrollmentRepository: widget.enrollmentRepository,
                   activityRepository: _activityRepository,
                   onActivitySelected: _openActivityDetails,
+                  activitiesChanged: _activitiesChanged,
                   participationActionBuilder: (activity) => EnrollmentAction(
                     viewModel: _enrollmentViewModel,
                     activityId: activity.id,
@@ -599,38 +670,40 @@ class _MainShellState extends State<MainShell> {
           ],
         ),
       ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _selectedIndex,
-        onDestinationSelected: _selectDestination,
-        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home),
-            label: 'Inici',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.calendar_month_outlined),
-            selectedIcon: Icon(Icons.calendar_month),
-            label: 'Agenda',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.search_outlined),
-            selectedIcon: Icon(Icons.search),
-            label: 'Descobreix',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.notifications_outlined),
-            selectedIcon: Icon(Icons.notifications),
-            label: 'Avisos',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.person_outline),
-            selectedIcon: Icon(Icons.person),
-            label: 'Perfil',
-          ),
-        ],
-      ),
+      bottomNavigationBar: _isAssistantOpen
+          ? null
+          : NavigationBar(
+              selectedIndex: _selectedIndex,
+              onDestinationSelected: _selectDestination,
+              labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+              destinations: const [
+                NavigationDestination(
+                  icon: Icon(Icons.home_outlined),
+                  selectedIcon: Icon(Icons.home),
+                  label: 'Inici',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.calendar_month_outlined),
+                  selectedIcon: Icon(Icons.calendar_month),
+                  label: 'Agenda',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.search_outlined),
+                  selectedIcon: Icon(Icons.search),
+                  label: 'Descobreix',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.notifications_outlined),
+                  selectedIcon: Icon(Icons.notifications),
+                  label: 'Avisos',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.person_outline),
+                  selectedIcon: Icon(Icons.person),
+                  label: 'Perfil',
+                ),
+              ],
+            ),
     );
   }
 }

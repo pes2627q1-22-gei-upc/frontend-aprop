@@ -4,39 +4,41 @@
 
 ## Sprint
 
-- Sprint 2 · només frontend. Tasca activa #262: contrast i color del logotip respecte al fons.
+- Sprint 2 · només frontend. Tasca activa #261: amagar el menú inferior en obrir el xat.
 
 ## En curs
 
 | Taiga | Tasca | Branca | Estat |
 |---|---|---|---|
-| #185 | [FE] Valoració d'1–5 estrelles a la fitxa i a l'Agenda | `feature/valorar-esdeveniment` | Implementada amb Demo; sense assistència ni #184 (DP-048); pendent revisió |
+| #261 | [FE] Amagar menú de navegació inferior en obrir el xat | `feature/fix-261-chat-navigation` | PR publicada a 1e89723; conflictes amb develop resolts; 532 proves i anàlisi correctes; sense commit/push del merge |
+| #185 | [FE] Valoració d'1–5 estrelles a la fitxa i a l'Agenda | `feature/valorar-esdeveniment` | Implementada amb Demo; sense assistència ni #184 (DP-053); pendent revisió |
+| #203 | [FE] Valorar l'organitzador (esdeveniments comunitaris) i actualitzar-ne la fiabilitat | `feature/valorar-organitzador-203` | PR oberta #50 (Demo DP-049); apilada sobre #45; pendent CI i revisió humana |
 | #262 | [FE] Ajustar contrast i color del logotip respecte al fons | `feature/fix-262-logo-contrast` | Implementada; preparació de PR autoritzada; pendent CI i revisió humana |
 
 ## Base i abast
 
-- Frontend `origin/develop@a5e15f5`: #253 fusionada a la PR #41 i millores del mapa incorporades des de la PR #42 abans de publicar #262.
-- Es conserva `assets/branding/aprop_logo.png` com a original aprovat.
-- Nou `aprop_logo_transparent.png`: edició del recurs existent sense fons crema opac i amb menys marge.
-- `APropLogo` a `core/widgets/`: mateixa imatge, proporcions i etiqueta «AProp!» per a Inici i Login.
-- Alçades anteriors conservades: 80 a Inici i 96 a Login; cap canvi de navegació, autenticació o tema global.
-- No s’afegeixen paquets ni endpoints; backend sense modificar.
-- DP-047 documenta la derivació visual i la validació de marca per l’equip.
-- Guia: `docs/branding.md`; arquitectura i resum de mockups actualitzats.
+- Integració de `origin/develop@6988d40` a la branca de #261, sense reescriure historial ni publicar el merge.
+- #262 ja fusionada a develop (PR #43): es conserven el PNG transparent, `APropLogo`, els dos usos i les proves de marca. DP-047 i DP-048 es mantenen amb els seus identificadors.
+- `MainShell` conserva el navegador d’Inici i els ViewModels compartits. Només gestiona la visibilitat del menú durant `/assistant`.
+- `_openAssistant` espera el final de la ruta i restaura la barra a `finally`, amb comprovació de `mounted`.
+- Fletxa, retorn del sistema i dreceres restauren la navegació; conversa i inscripcions es conserven.
+- Les fitxes obertes des del xat mantenen el flux sense barra (DP-048); les altres fitxes conserven el menú.
+- Sense paquets, endpoints ni canvis al backend. No es modifica el contracte HTTP ni el ViewModel de l’assistent.
+- Flux i límits a `docs/architecture.md`, `docs/ai/50-ui-mockups.md` i DP-048.
 
-## Verificació (2026-11-16)
+## Verificació (2026-11-18)
 
-- Dues regressions fallaven abans del canvi: alfa 255 al fons del logo a Inici i Login.
-- Després del canvi, alfa zero a les cantonades i contrast del color opac majoritari ≥7:1 sobre crema i fons de targeta.
-- 16 proves de marca, accés i navegació superades.
-- Captures renderitzades amb Flutter i fonts Roboto a `PES/output/frontend/task-262-{inici,login}.png`, amb dades Demo.
-- Suite completa: 525 proves superades. `flutter analyze` sense incidències.
-- `dart format --output=none --set-exit-if-changed lib test`: 244 fitxers, cap canvi; `git diff --check` correcte.
-- Revisió independent del diff i les captures sense bloquejos; afegit `TODO(DP-047)` al recurs com suggeria la revisió. La validació humana de marca queda pendent.
-- Publicació de la branca autoritzada per l’usuari el 2026-11-16.
+- Les noves proves de navegació i el recorregut existent reproduïen la barra visible abans de corregir-la.
+- 7 proves de recorregut superades després: fletxa/sistema, scroll, teclat, Agenda/Configuració, resposta tardana, fi de sessió i inscripció des de la recomanació.
+- Abans del merge: 530 proves. Després d’integrar #262: 532 proves superades i `flutter analyze` sense incidències.
+- Conflictes limitats a `docs/ai/estat.md` i `docs/decisions-pendents.md`; el codi s’ha integrat automàticament.
+- Format: 245 fitxers, cap canvi. `git diff --cached --check` correcte; sense fitxers pendents de resolució ni marcadors de conflicte.
+- Captures reals amb Flutter, fonts Roboto i dades Demo a `PES/output/frontend/task-261-{assistent,conversa,retorn-inici}.png`; script de renderitzat superat.
+- Revisió tècnica independent de la resolució sense bloquejos: codi i proves del xat idèntics a HEAD; logo, consumidors i proves idèntics a develop; DP-047/048 conservades íntegres. La revisió humana i la prova al dispositiu continuen pendents.
+- Merge pendent de commit/push. L’usuari executa personalment aquests passos amb els comandos que se li facilitaran.
 
-## Pendents
+## Pendents / següents passos
 
-1. PR de #262 a develop, CI i revisió humana, inclosa la validació visual de marca.
-2. Repassar Inici i Login al dispositiu Android; mode fosc fora d’aquesta tasca.
-3. Els pendents de funcionalitats i contractes de #253 i la resta es conserven a les seves guies/DP.
+1. Revisió humana, commit de resolució i push a la mateixa branca per actualitzar la PR existent de #261; després CI i aprovació. Sense publicació automàtica.
+2. Repassar el xat al dispositiu Android i validar DP-048.
+3. La resta de funcionalitats i contractes pendents es conserven a les seves guies/DP.

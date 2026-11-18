@@ -11,6 +11,8 @@ Route<void> activityDetailsRoute({
   required ActivityDetailsRepository repository,
   required EnrollmentViewModel enrollmentViewModel,
   Widget Function(Activity activity)? ratingBuilder,
+  bool Function(Activity activity)? canEdit,
+  Future<bool> Function(Activity activity)? onEdit,
 }) {
   return MaterialPageRoute<void>(
     settings: RouteSettings(
@@ -21,6 +23,8 @@ Route<void> activityDetailsRoute({
       repository: repository,
       enrollmentViewModel: enrollmentViewModel,
       ratingBuilder: ratingBuilder,
+      canEdit: canEdit,
+      onEdit: onEdit,
     ),
   );
 }

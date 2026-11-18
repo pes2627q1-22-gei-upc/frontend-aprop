@@ -11,6 +11,31 @@ import 'package:http/testing.dart';
 import 'backend_event_fixture.dart';
 
 void main() {
+  group('creator-reliability', () {
+    Map<String, Object?> community(Object? reliability) => {
+      ...backendEvent(1),
+      'is-official': false,
+      'creator': '8c2a7f0e-0000-4000-8000-000000000001',
+      'creator-name': 'Maria',
+      'creator-reliability': reliability,
+    };
+
+    test('maps a valid value, and null/absent to no reliability', () {
+      expect(activityFromJson(community(4.5)).creator?.reliability, 4.5);
+      expect(activityFromJson(community(5)).creator?.reliability, 5.0);
+      expect(activityFromJson(community(null)).creator?.reliability, isNull);
+      expect(activityFromJson(community(0)).creator?.reliability, isNull);
+    });
+
+    test('ignores out-of-range, non-finite and non-numeric values', () {
+      for (final bad in [-0.1, 5.1, double.nan, double.infinity, '4.5', true]) {
+        final activity = activityFromJson(community(bad));
+        expect(activity.creator?.reliability, isNull, reason: '$bad');
+        expect(activity.creator?.name, 'Maria', reason: '$bad');
+      }
+    });
+  });
+
   test('A missing server date is displayed as unknown rather than year 1', () {
     final activity = activityFromJson({
       ...backendEvent(1),

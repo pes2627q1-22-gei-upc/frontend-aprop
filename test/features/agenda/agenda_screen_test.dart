@@ -23,6 +23,7 @@ void main() {
   Future<void> pumpAgenda(
     WidgetTester tester, {
     Size size = const Size(390, 844),
+    Listenable? activitiesChanged,
   }) async {
     tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1;
@@ -37,6 +38,7 @@ void main() {
             enrollmentRepository: enrollments,
             activityRepository: activities,
             onActivitySelected: selectedActivities.add,
+            activitiesChanged: activitiesChanged,
             now: agendaToday,
           ),
         ),
@@ -199,6 +201,23 @@ void main() {
     await tester.runAsync(() async {});
     await tester.pumpAndSettle();
     expect(find.text('Jazz'), findsOneWidget);
+  });
+
+  testWidgets('Reloads the plans when an activity is edited', (tester) async {
+    final activitiesChanged = ValueNotifier<int>(0);
+    addTearDown(activitiesChanged.dispose);
+    enrollments.emit(agendaUserId, {'jazz'});
+    await pumpAgenda(tester, activitiesChanged: activitiesChanged);
+    expect(find.text('Jazz'), findsOneWidget);
+
+    activities.findActivity = (id) async => id == 'jazz'
+        ? agendaActivity('jazz', DateTime(2026, 9, 26, 19), title: 'Jazz nou')
+        : agendaCatalogue[id];
+    activitiesChanged.value++;
+    await tester.pumpAndSettle();
+
+    expect(find.text('Jazz nou'), findsOneWidget);
+    expect(find.text('Jazz'), findsNothing);
   });
 
   testWidgets('The image and the title open the activity', (tester) async {

@@ -17,6 +17,24 @@ Activity activityFromJson(Map<String, Object?> json) {
   }
   final date = DateTime.tryParse(rawDate);
   if (date == null) throw const FormatException('Invalid event start date');
+  final startsAt = DateTime(
+    date.year,
+    date.month,
+    date.day,
+    date.hour,
+    date.minute,
+  );
+  // Sense data de fi, el backend hi desa la d'inici: aleshores no n'hi ha.
+  final rawEnd = DateTime.tryParse(_text(json['end-date']) ?? '');
+  final endsAt = rawEnd == null
+      ? null
+      : DateTime(
+          rawEnd.year,
+          rawEnd.month,
+          rawEnd.day,
+          rawEnd.hour,
+          rawEnd.minute,
+        );
   final image = _cover(json['image-url']) ?? _cover(json['images']);
   final rawCategories = json['categories'] ?? json['category'];
   final tags = rawCategories is List
@@ -42,6 +60,16 @@ Activity activityFromJson(Map<String, Object?> json) {
 
   final creatorUuid = _text(json['creator']);
   final creatorName = _text(json['creator-name']) ?? 'un usuari';
+  // An invalid value is ignored rather than failing the whole activity;
+  // 0 mirrors profileFromJson: no ratings yet, not a 0,0 score.
+  final rawReliability = json['creator-reliability'];
+  final reliability =
+      rawReliability is num &&
+          rawReliability.isFinite &&
+          rawReliability > 0 &&
+          rawReliability <= 5
+      ? rawReliability.toDouble()
+      : null;
   final hasFriends = json['has-friends'] as bool? ?? false;
 
   final rawPrice = json['price'];
@@ -57,7 +85,8 @@ Activity activityFromJson(Map<String, Object?> json) {
     categories: categories,
     municipality: _municipality(json['municipality']) ?? place ?? '',
     // The backend stores civil dates; preserve its calendar fields (DP-029).
-    startsAt: DateTime(date.year, date.month, date.day, date.hour, date.minute),
+    startsAt: startsAt,
+    endsAt: endsAt != null && endsAt.isAfter(startsAt) ? endsAt : null,
     imageAsset: image?.asset ?? '',
     imageUrl: image?.url,
     source: isOfficial
@@ -68,6 +97,7 @@ Activity activityFromJson(Map<String, Object?> json) {
         : ActivityCreator(
             name: creatorName,
             userId: creatorUuid,
+            reliability: reliability,
             isFriend: hasFriends,
           ),
     description: _text(json['description']),

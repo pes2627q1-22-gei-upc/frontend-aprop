@@ -182,6 +182,64 @@ void main() {
       });
     });
 
+    test('Editar: envia PUT /events/{id} i torna la data de fi', () async {
+      late http.Request received;
+      final repository = HttpActivityRepository(
+        apiClient: ApiClient(
+          client: MockClient((request) async {
+            received = request;
+            final payload = jsonDecode(request.body) as Map<String, Object?>;
+            return jsonResponse({
+              ...sampleEventJson(
+                id: 506,
+                title: payload['title'] as String,
+                isOfficial: false,
+              ),
+              'start-date': payload['start-date'],
+              'end-date': payload['end-date'],
+            });
+          }),
+        ),
+      );
+
+      final updated = await repository.updateActivity(
+        '506',
+        NewActivity(
+          title: 'Taller nou',
+          description: 'Ara a la tarda.',
+          category: 'agenda:categories/exposicions',
+          startsAt: DateTime(2026, 12, 7, 18),
+          endsAt: DateTime(2026, 12, 7, 20),
+          imageAsset: 'assets/images/jazz_al_parc.jpg',
+          creator: const ActivityCreator(name: 'Pol Vidal', isFriend: false),
+        ),
+      );
+
+      expect(received.method, 'PUT');
+      expect(received.url.path, '/events/506');
+      expect(updated.id, '506');
+      expect(updated.title, 'Taller nou');
+      expect(updated.startsAt, DateTime(2026, 12, 7, 18));
+      expect(updated.endsAt, DateTime(2026, 12, 7, 20));
+    });
+
+    test('Sense data de fi diferent de l’inici, no n’hi ha', () async {
+      final repository = HttpActivityRepository(
+        apiClient: ApiClient(
+          client: MockClient(
+            (request) async => jsonResponse({
+              ...sampleEventJson(),
+              'end-date': '2026-11-14T19:30:00Z',
+            }),
+          ),
+        ),
+      );
+
+      final activity = await repository.getActivityById('101');
+
+      expect(activity!.endsAt, isNull);
+    });
+
     test(
       'Categories: les de l’Agenda Cultural, ordenades i llegibles',
       () async {

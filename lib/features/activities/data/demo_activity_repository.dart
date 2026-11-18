@@ -54,6 +54,8 @@ class DemoActivityRepository implements ActivityRepository {
       creator: const ActivityCreator(
         name: 'Laia Soler',
         userId: 'demo-laiasoler',
+        // Same seed as the example profile (DemoProfileRepository).
+        reliability: 4.7,
         avatarAsset: 'assets/images/laia_soler.jpg',
         isFriend: true,
       ),
@@ -107,6 +109,7 @@ class DemoActivityRepository implements ActivityRepository {
       category: activity.category,
       municipality: activity.municipality,
       startsAt: activity.startsAt,
+      endsAt: activity.endsAt,
       source: ActivitySource.community,
       imageAsset: activity.imageAsset,
       creator: activity.creator,
@@ -117,5 +120,30 @@ class DemoActivityRepository implements ActivityRepository {
     );
     _activities.add(created);
     return created;
+  }
+
+  /// Canvia l'activitat de la llista en memòria, amb el mateix ID i autor.
+  @override
+  Future<Activity> updateActivity(String id, NewActivity activity) async {
+    final index = _activities.indexWhere((stored) => stored.id == id);
+    if (index == -1) throw StateError('No hi ha cap activitat $id.');
+    final stored = _activities[index];
+    final updated = Activity(
+      id: id,
+      title: activity.title,
+      category: activity.category,
+      municipality: activity.municipality,
+      startsAt: activity.startsAt,
+      endsAt: activity.endsAt,
+      source: stored.source,
+      imageAsset: activity.imageAsset,
+      creator: stored.creator,
+      description: activity.description,
+      directions: activity.directions,
+      location: activity.location,
+      price: activity.price,
+    );
+    _activities[index] = updated;
+    return updated;
   }
 }
