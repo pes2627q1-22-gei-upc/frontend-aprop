@@ -53,4 +53,82 @@ void main() {
     expect(find.byIcon(Icons.star_border), findsNothing);
     expect(find.byKey(const ValueKey('star-1')), findsNothing);
   });
+
+  Future<void> rateFirst(WidgetTester tester, int score) async {
+    await pump(tester);
+    await tester.tap(find.byKey(ValueKey('star-$score')));
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets('edit prefills the score and saves the new one', (tester) async {
+    await rateFirst(tester, 2);
+    expect(find.bySemanticsLabel('Modifica la valoració'), findsOneWidget);
+
+    await tester.tap(find.text('Modifica'));
+    await tester.pumpAndSettle();
+    expect(find.text('Modifica la valoració'), findsOneWidget);
+    expect(find.byIcon(Icons.star), findsNWidgets(2));
+
+    await tester.tap(find.byKey(const ValueKey('star-5')));
+    await tester.pumpAndSettle();
+
+    expect(viewModel.scoreFor('a1'), 5);
+    expect(find.text('Ja has valorat aquesta activitat'), findsOneWidget);
+    expect(find.byIcon(Icons.star), findsNWidgets(5));
+  });
+
+  testWidgets('cancelling an edit keeps the rating', (tester) async {
+    await rateFirst(tester, 3);
+    await tester.tap(find.text('Modifica'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Cancel·la'));
+    await tester.pumpAndSettle();
+
+    expect(viewModel.scoreFor('a1'), 3);
+    expect(find.text('Ja has valorat aquesta activitat'), findsOneWidget);
+  });
+
+  testWidgets('delete asks for confirmation and allows rating again', (
+    tester,
+  ) async {
+    await rateFirst(tester, 4);
+
+    await tester.tap(find.text('Elimina'));
+    await tester.pumpAndSettle();
+    expect(find.text('Eliminar la valoració?'), findsOneWidget);
+
+    await tester.tap(find.text('Cancel·la'));
+    await tester.pumpAndSettle();
+    expect(viewModel.hasRated('a1'), isTrue);
+
+    await tester.tap(find.text('Elimina'));
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.descendant(
+        of: find.byType(AlertDialog),
+        matching: find.text('Elimina'),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(viewModel.hasRated('a1'), isFalse);
+    expect(find.text('Com t’ha anat?'), findsOneWidget);
+    expect(find.byIcon(Icons.star), findsNothing);
+  });
+
+  testWidgets('a rating made earlier can still be edited', (tester) async {
+    final repository = DemoRatingRepository();
+    await repository.rate(userId: 'u', activityId: 'a1', score: 2);
+    viewModel = RatingViewModel(userId: 'u', repository: repository);
+    addTearDown(viewModel.dispose);
+    await viewModel.submit('a1', 1); // 409 -> rated, score unknown
+    await pump(tester);
+
+    await tester.tap(find.text('Modifica'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('star-4')));
+    await tester.pumpAndSettle();
+
+    expect(viewModel.scoreFor('a1'), 4);
+  });
 }
