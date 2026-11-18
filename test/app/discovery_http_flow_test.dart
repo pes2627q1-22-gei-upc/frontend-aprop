@@ -9,6 +9,7 @@ import 'package:aprop/features/activities/data/http_enrollment_repository.dart';
 import 'package:aprop/features/assistant/data/demo_assistant_repository.dart';
 import 'package:aprop/features/auth/models/app_user.dart';
 import 'package:aprop/features/notifications/data/demo_notification_repository.dart';
+import 'package:aprop/features/ratings/data/demo_rating_repository.dart';
 import 'package:aprop/features/profile/data/demo_profile_repository.dart';
 import 'package:aprop/features/profile/data/demo_profile_settings_repository.dart';
 import 'package:flutter/material.dart';
@@ -130,6 +131,7 @@ void main() {
               apiClient: client,
               searchPageSize: 2,
             ),
+            ratingRepository: DemoRatingRepository(),
             assistantRepository: DemoAssistantRepository(
               activityRepository: catalogue,
             ),

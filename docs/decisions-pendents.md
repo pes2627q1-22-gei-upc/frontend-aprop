@@ -560,3 +560,10 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Dubte:** la targeta estàndard (~330 px) deixa veure només una activitat per pantalla al xat.
 - **Provisionalment:** fila compacta (miniatura 72 px, títol, municipi · data i la mateixa acció d'apuntar-se). Mateix estat d'inscripcions, mateix detall en tocar. Sense avatar del creador ni «Font». `TODO(DP-044)`: confirmar amb l'equip/mockup.
 - **Qui decideix:** equip frontend (UX)
+
+### DP-048 · Valoració d'activitats (#185): requisit d'assistència i contracte de #184
+- **Estat:** oberta 2026-11-17
+- **Context:** `features/ratings/`, `_buildRating` a `main_shell.dart`; R8–R10 (`docs/ai/20-model-domini.md`); mockup 13 «Com va anar?».
+- **Dubte:** (1) el `develop` del backend ja té `PATCH /events/{id}/enrollment/attendance` (`{"attendance": true|false|null}`), però el frontend encara no modela ni té UI per confirmar l'assistència («Sí, hi vaig anar»); R10 exigeix assistència certa per valorar. (2) #184 (`POST /events/{id}/ratings`, `{score}`) respon `409` (ja valorada), `403` (sense assistència) i `404` (no trobada) a `feature/event-rating` (PR #59), però encara no és desplegat a Render i no hi ha consulta prèvia de la valoració pròpia.
+- **Provisionalment:** les estrelles surten a la fitxa i a l'Agenda si l'usuari és inscrit i l'activitat ja ha començat (sense data de fi al model: `startsAt` fa de substitut, de manera que l'usuari pot valorar durant l'esdeveniment; R10 només es compleix al servidor); el servidor farà valdre R8–R10. `main.dart` injecta `HttpRatingRepository` quan `ApiConfig.isConfigured` és cert (mentre #184 no estigui desplegat, valorar mostrarà l'error de desament), i tradueix `409` a `AlreadyRatedException`. En mode Demo, `DemoRatingRepository` (en memòria) és el per defecte. Sense consulta prèvia de la valoració pròpia, l'estat «ja valorada» abans d'enviar només es coneix en Demo durant la sessió o en rebre `409`. `TODO(DP-048)` al codi.
+- **Qui decideix:** equip (frontend i backend)
