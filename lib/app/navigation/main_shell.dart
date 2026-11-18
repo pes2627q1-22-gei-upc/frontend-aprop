@@ -89,6 +89,10 @@ class _MainShellState extends State<MainShell> {
   /// Quant ha de pujar el botó de l'assistent perquè no el tapi la targeta
   /// del mapa.
   final _assistantButtonLift = ValueNotifier<double>(0);
+
+  /// Avisa que una activitat ha canviat (s'ha editat), perquè les pantalles
+  /// que en guarden una còpia, com l'Agenda, la tornin a carregar.
+  final _activitiesChanged = ValueNotifier<int>(0);
   final _sectionNavigatorKeys = List.generate(
     5,
     (_) => GlobalKey<NavigatorState>(),
@@ -137,6 +141,7 @@ class _MainShellState extends State<MainShell> {
   @override
   void dispose() {
     _assistantButtonLift.dispose();
+    _activitiesChanged.dispose();
     _activitiesViewModel.dispose();
     _activitiesMapViewModel?.dispose();
     _enrollmentViewModel.dispose();
@@ -325,8 +330,8 @@ class _MainShellState extends State<MainShell> {
         activity.startsAt.isAfter(DateTime.now());
   }
 
-  /// Obre el formulari amb l'activitat i, si es desa, posa al dia la llista
-  /// i el mapa. La fitxa es torna a carregar sola.
+  /// Obre el formulari amb l'activitat i, si es desa, posa al dia la llista,
+  /// el mapa i l'Agenda. La fitxa es torna a carregar sola.
   Future<bool> _editActivity(Activity activity) async {
     final navigator = _sectionNavigatorKeys[_selectedIndex].currentState!;
     final saved = await navigator.push<Activity>(
@@ -347,6 +352,7 @@ class _MainShellState extends State<MainShell> {
     if (saved == null) return false;
     _activitiesMapViewModel?.refresh();
     _activitiesViewModel.load();
+    _activitiesChanged.value++;
     return true;
   }
 
@@ -555,6 +561,7 @@ class _MainShellState extends State<MainShell> {
                   enrollmentRepository: widget.enrollmentRepository,
                   activityRepository: _activityRepository,
                   onActivitySelected: _openActivityDetails,
+                  activitiesChanged: _activitiesChanged,
                   participationActionBuilder: (activity) => EnrollmentAction(
                     viewModel: _enrollmentViewModel,
                     activityId: activity.id,
