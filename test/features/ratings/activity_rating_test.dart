@@ -1,3 +1,4 @@
+import 'package:aprop/features/activities/models/activity.dart';
 import 'package:aprop/features/ratings/data/demo_rating_repository.dart';
 import 'package:aprop/features/ratings/presentation/view_models/rating_view_model.dart';
 import 'package:aprop/features/ratings/presentation/widgets/activity_rating.dart';
@@ -35,6 +36,37 @@ void main() {
     expect(viewModel.scoreFor('a1'), 4);
     expect(find.text('Ja has valorat aquesta activitat'), findsOneWidget);
     expect(find.byIcon(Icons.star), findsNWidgets(4));
+  });
+
+  testWidgets('organizer is highlighted when given, generic copy otherwise', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ActivityRating(
+            viewModel: viewModel,
+            activityId: 'a1',
+            organizer: const ActivityCreator(
+              name: 'Laia Soler',
+              isFriend: true,
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(
+      find.text('Com ha anat l’organitzador/a Laia Soler?'),
+      findsOneWidget,
+    );
+    expect(find.text('Com t’ha anat?'), findsNothing);
+
+    await tester.tap(find.byKey(const ValueKey('star-5')));
+    await tester.pumpAndSettle();
+    expect(find.text('Ja has valorat Laia Soler'), findsOneWidget);
+
+    await pump(tester); // no organizer (official activity)
+    expect(find.textContaining('organitzador'), findsNothing);
   });
 
   testWidgets('already rated without a known score shows only the text', (

@@ -2,7 +2,7 @@ import '../models/already_rated_exception.dart';
 import '../repositories/rating_repository.dart';
 
 /// In-memory ratings, kept until app shutdown.
-// TODO(DP-048): replace with `HttpRatingRepository` once #184 is deployed.
+// TODO(DP-053): replace with `HttpRatingRepository` once #184 is deployed.
 class DemoRatingRepository implements RatingRepository {
   final Map<String, Map<String, int>> _scoresByUser = {};
 
@@ -18,4 +18,9 @@ class DemoRatingRepository implements RatingRepository {
     if (scores.containsKey(activityId)) throw const AlreadyRatedException();
     scores[activityId] = score;
   }
+
+  /// Every score recorded for [activityId], from any user.
+  Iterable<int> scoresFor(String activityId) => [
+    for (final scores in _scoresByUser.values) ?scores[activityId],
+  ];
 }

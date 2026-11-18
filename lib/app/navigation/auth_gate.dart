@@ -118,7 +118,13 @@ class _AuthGateState extends State<AuthGate> {
         DemoDiscoveryRepository(activityRepository: _activityRepository);
     _profileRepository =
         widget.profileRepository ??
-        DemoProfileRepository(activityRepository: _activityRepository);
+        DemoProfileRepository(
+          activityRepository: _activityRepository,
+          ratingRepository: switch (_ratingRepository) {
+            final DemoRatingRepository demo => demo,
+            _ => null,
+          },
+        );
     _profileSettingsRepository =
         widget.profileSettingsRepository ?? DemoProfileSettingsRepository();
     _interestTestRepository =
