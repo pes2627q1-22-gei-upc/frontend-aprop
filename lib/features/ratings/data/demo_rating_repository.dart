@@ -2,7 +2,7 @@ import '../models/already_rated_exception.dart';
 import '../repositories/rating_repository.dart';
 
 /// In-memory ratings, kept until app shutdown.
-// TODO(DP-048): replace with `HttpRatingRepository` once #184 is deployed.
+// TODO(DP-053): replace with `HttpRatingRepository` once #184 is deployed.
 class DemoRatingRepository implements RatingRepository {
   final Map<String, Map<String, int>> _scoresByUser = {};
 

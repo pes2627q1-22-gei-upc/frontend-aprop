@@ -26,6 +26,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.widgetWithText(AppBar, 'Assistent'), findsOneWidget);
+      expect(find.byType(NavigationBar), findsNothing);
 
       // Ask for theatre in Tarragona on September 27
       await tester.enterText(
@@ -56,6 +57,7 @@ void main() {
 
       expect(find.widgetWithText(AppBar, 'Activitat'), findsOneWidget);
       expect(find.text('Apuntat'), findsOneWidget);
+      expect(find.byType(NavigationBar), findsNothing);
 
       // Return from details: conversation and recommendation are preserved
       await tester.tap(find.byTooltip('Tornar enrere'));
@@ -64,6 +66,21 @@ void main() {
       expect(find.widgetWithText(AppBar, 'Assistent'), findsOneWidget);
       expect(find.text('Teatre sota les estrelles'), findsOneWidget);
       expect(find.text('Apuntat'), findsOneWidget);
+      expect(find.byType(NavigationBar), findsNothing);
+
+      await tester.tap(find.byTooltip('Tornar enrere'));
+      await tester.pumpAndSettle();
+      expect(find.byType(NavigationBar), findsOneWidget);
+      expect(
+        tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex,
+        0,
+      );
+
+      await tester.tap(find.widgetWithText(FloatingActionButton, 'Assistent'));
+      await tester.pumpAndSettle();
+      expect(find.text('Teatre sota les estrelles'), findsOneWidget);
+      expect(find.text('Apuntat'), findsOneWidget);
+      expect(find.byType(NavigationBar), findsNothing);
       expect(tester.takeException(), isNull);
     },
   );

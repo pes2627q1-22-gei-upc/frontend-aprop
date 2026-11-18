@@ -118,6 +118,24 @@ class ApiClient {
     );
   }
 
+  Future<http.Response> put(
+    String path, {
+    Object? body,
+    Map<String, String>? queryParameters,
+    Map<String, String>? headers,
+  }) async {
+    final uri = resolveUri(path, queryParameters);
+    final hasBody = body != null;
+    final resolvedHeaders = await buildHeaders(
+      hasJsonBody: hasBody,
+      extraHeaders: headers,
+    );
+    final encodedBody = hasBody ? jsonEncode(body) : null;
+    return _send(
+      () => _client.put(uri, headers: resolvedHeaders, body: encodedBody),
+    );
+  }
+
   Future<http.Response> patch(
     String path, {
     Object? body,
@@ -174,6 +192,21 @@ class ApiClient {
     Map<String, String>? headers,
   }) async {
     final response = await post(
+      path,
+      body: body,
+      queryParameters: queryParameters,
+      headers: headers,
+    );
+    return decodeOrThrow(response);
+  }
+
+  Future<Object?> putJson(
+    String path, {
+    Object? body,
+    Map<String, String>? queryParameters,
+    Map<String, String>? headers,
+  }) async {
+    final response = await put(
       path,
       body: body,
       queryParameters: queryParameters,

@@ -25,6 +25,9 @@ class AgendaViewModel extends ChangeNotifier {
 
   StreamSubscription<Set<String>>? _subscription;
   final Map<String, Activity> _activityCache = {};
+
+  /// Last enrolled IDs received, to read their activities again.
+  Set<String> _enrolledIds = const {};
   Map<DateTime, List<Activity>> _plansByDay = const {};
   late DateTime _selectedDay;
   late DateTime _visibleMonth;
@@ -88,8 +91,17 @@ class AgendaViewModel extends ChangeNotifier {
     }
   }
 
+  /// Reads the activities of the current plans again (e.g. after one of
+  /// them has been edited): the cached copies may be out of date.
+  Future<void> refreshActivities() async {
+    if (_isDisposed || !_hasLoaded) return;
+    _activityCache.clear();
+    await _resolvePlans(_enrolledIds, _subscriptionVersion);
+  }
+
   Future<void> _resolvePlans(Set<String> ids, int version) async {
     if (_isDisposed || version != _subscriptionVersion) return;
+    _enrolledIds = ids;
     final request = ++_resolveRequest;
     try {
       final missing = ids.where((id) => !_activityCache.containsKey(id));
