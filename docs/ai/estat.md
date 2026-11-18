@@ -1,44 +1,41 @@
 # Estat viu
 
-> Llegir a l’inici; només el present. Detalls a les guies de cada funcionalitat.
+> Llegir a l’inici; detalls a les guies de cada funcionalitat.
 
 ## Sprint
 
-- Sprint 2 · canvis només al frontend. Backend consultat com a contracte.
-- L’usuari ha concretat #253: les categories no apareixen a Mapa i Inici.
+- Sprint 2 · només frontend. Tasca activa #261: amagar el menú inferior en obrir el xat.
 
 ## En curs
 
 | Taiga | Tasca | Branca | Estat |
 |---|---|---|---|
-| #253 | [FE] Corregir que no es mostren les categories | `feature/fix-253-categories` | Publicada a 8feed6f; conflicte amb develop resolt; 523 proves, analyze i revisió correctes; sense commit/push del merge |
+| #261 | [FE] Amagar menú de navegació inferior en obrir el xat | `feature/fix-261-chat-navigation` | PR publicada a 1e89723; conflictes amb develop resolts; 532 proves i anàlisi correctes; sense commit/push del merge |
 
 ## Base i abast
 
-- Frontend sincronitzat amb `origin/develop@cf99a0f` en un merge encara sense commit; backend `develop@6f4979e`, PR #54 fusionada.
-- La base ja incorpora Descobreix HTTP, test d’interessos i millores de l’assistent i de creació.
-- `/categories`: una fila amb ID vàlid i nom sense etiqueta visible no bloqueja les altres opcions.
-- Es conserven els noms/IDs del servidor; estructura, ID o tipus invàlids continuen generant error.
-- Catàleg no buit en memòria i peticions simultànies compartides; catàleg buit amb reintent.
-- Mateix panell i selecció provisional per Mapa/Llista; sense paquets, endpoints ni dades demo nous.
-- No es modifica el formulari de creació ni la seva política de categories de DP-018.
-- El mapa ja retorna categories: el mapper compartit descarta noms sense etiqueta visible abans d’escollir el distintiu.
-- Es filtren totes les categories rebudes de cada marcador a la zona carregada; no hi ha peticions de detall addicionals.
-- DP-046 documenta noms buits i recuperació; actualitza els límits de categories del mapa de DP-038.
+- Integració de `origin/develop@6988d40` a la branca de #261, sense reescriure historial ni publicar el merge.
+- #262 ja fusionada a develop (PR #43): es conserven el PNG transparent, `APropLogo`, els dos usos i les proves de marca. DP-047 i DP-048 es mantenen amb els seus identificadors.
+- `MainShell` conserva el navegador d’Inici i els ViewModels compartits. Només gestiona la visibilitat del menú durant `/assistant`.
+- `_openAssistant` espera el final de la ruta i restaura la barra a `finally`, amb comprovació de `mounted`.
+- Fletxa, retorn del sistema i dreceres restauren la navegació; conversa i inscripcions es conserven.
+- Les fitxes obertes des del xat mantenen el flux sense barra (DP-048); les altres fitxes conserven el menú.
+- Sense paquets, endpoints ni canvis al backend. No es modifica el contracte HTTP ni el ViewModel de l’assistent.
+- Flux i límits a `docs/architecture.md`, `docs/ai/50-ui-mockups.md` i DP-048.
 
-## Verificació (2026-11-16)
+## Verificació (2026-11-18)
 
-- 5 regressions reproduïdes abans de corregir: catàleg invàlid per nom buit, opcions ocultes a Mapa/Llista i resposta buida sense recuperació.
-- 3 regressions addicionals reproduïdes abans de corregir etiquetes sense nom en activitats del mapa.
-- 41 proves de repositoris de mapa/filtres i panells superades; inclou el recorregut llista → mapa → targeta → categoria secundària → llista → mapa.
-- Verificació anterior al merge: 532 proves superades. Després d’integrar develop: 523 proves superades i analitzador net. Es conserven les 8 regressions de #253; develop retira proves dels fluxos de verificació de correu eliminats i incorpora les d’inscripcions/navegació.
-- Revisió independent del merge sense bloquejos. Es conserva DP-045 del mapa web i es renumera categories a DP-046; proves de #253 i canvis d’inscripcions/navegació de develop conservats. Sense commit/push del merge.
-- Render sense sessió respon 401; encara no es confirma la causa amb el catàleg de producció.
-- Backend només llegit; no s’ha iniciat servidor, BD, migracions ni cap operació d’escriptura.
+- Les noves proves de navegació i el recorregut existent reproduïen la barra visible abans de corregir-la.
+- 7 proves de recorregut superades després: fletxa/sistema, scroll, teclat, Agenda/Configuració, resposta tardana, fi de sessió i inscripció des de la recomanació.
+- Abans del merge: 530 proves. Després d’integrar #262: 532 proves superades i `flutter analyze` sense incidències.
+- Conflictes limitats a `docs/ai/estat.md` i `docs/decisions-pendents.md`; el codi s’ha integrat automàticament.
+- Format: 245 fitxers, cap canvi. `git diff --cached --check` correcte; sense fitxers pendents de resolució ni marcadors de conflicte.
+- Captures reals amb Flutter, fonts Roboto i dades Demo a `PES/output/frontend/task-261-{assistent,conversa,retorn-inici}.png`; script de renderitzat superat.
+- Revisió tècnica independent de la resolució sense bloquejos: codi i proves del xat idèntics a HEAD; logo, consumidors i proves idèntics a develop; DP-047/048 conservades íntegres. La revisió humana i la prova al dispositiu continuen pendents.
+- Merge pendent de commit/push. L’usuari executa personalment aquests passos amb els comandos que se li facilitaran.
 
 ## Pendents / següents passos
 
-1. Revisió humana, commit de resolució i push a la mateixa branca/PR de #253; cap publicació automàtica.
-2. Provar «Categories» amb una sessió real a Inici i Mapa.
-3. Confirmar que Render inclou la PR #54. Per activitats sense categoria usable es manté l’avís i «Veure llista».
-4. Guia: `docs/inici-server-filters.md`, DP-038/046. Filtratge global del mapa i font compartida fora d’aquesta correcció.
+1. Revisió humana, commit de resolució i push a la mateixa branca per actualitzar la PR existent de #261; després CI i aprovació. Sense publicació automàtica.
+2. Repassar el xat al dispositiu Android i validar DP-048.
+3. La resta de funcionalitats i contractes pendents es conserven a les seves guies/DP.

@@ -80,6 +80,7 @@ class MainShell extends StatefulWidget {
 
 class _MainShellState extends State<MainShell> {
   int _selectedIndex = 0;
+  bool _isAssistantOpen = false;
 
   /// Identificador de les inscripcions: el backend les desa amb l'UUID de
   /// l'usuari, no amb l'UID de Firebase. Apuntar-se i l'Agenda han de fer
@@ -216,54 +217,61 @@ class _MainShellState extends State<MainShell> {
     );
   }
 
-  void _openAssistant() {
+  Future<void> _openAssistant() async {
     final navigator = _sectionNavigatorKeys[0].currentState!;
-    if (navigator.canPop()) return;
-    navigator.push<void>(
-      PageRouteBuilder<void>(
-        settings: const RouteSettings(name: '/assistant'),
-        transitionDuration: const Duration(milliseconds: 300),
-        reverseTransitionDuration: const Duration(milliseconds: 220),
-        transitionsBuilder: (context, animation, secondary, child) {
-          final curve = CurvedAnimation(
-            parent: animation,
-            curve: Curves.easeOutCubic,
-            reverseCurve: Curves.easeInCubic,
-          );
-          return FadeTransition(
-            opacity: curve,
-            child: SlideTransition(
-              position: Tween(
-                begin: const Offset(0, 0.06),
-                end: Offset.zero,
-              ).animate(curve),
-              child: child,
-            ),
-          );
-        },
-        pageBuilder: (context, animation, secondary) => AssistantScreen(
-          viewModel: _assistantViewModel,
-          onOpenScreen: _openAssistantTarget,
-          onActivitySelected: (activityId) {
-            if (!(ModalRoute.of(context)?.isCurrent ?? true)) return;
-            Navigator.of(context).push<void>(
-              activityDetailsRoute(
-                activityId: activityId,
-                repository: _activityRepository,
-                enrollmentViewModel: _enrollmentViewModel,
-                canEdit: _canEdit,
-                onEdit: _editActivity,
+    if (_isAssistantOpen || navigator.canPop()) return;
+    // TODO(DP-048): Confirm that details opened from chat keep this full-body
+    // flow. The section's history and shared ViewModels remain mounted.
+    setState(() => _isAssistantOpen = true);
+    try {
+      await navigator.push<void>(
+        PageRouteBuilder<void>(
+          settings: const RouteSettings(name: '/assistant'),
+          transitionDuration: const Duration(milliseconds: 300),
+          reverseTransitionDuration: const Duration(milliseconds: 220),
+          transitionsBuilder: (context, animation, secondary, child) {
+            final curve = CurvedAnimation(
+              parent: animation,
+              curve: Curves.easeOutCubic,
+              reverseCurve: Curves.easeInCubic,
+            );
+            return FadeTransition(
+              opacity: curve,
+              child: SlideTransition(
+                position: Tween(
+                  begin: const Offset(0, 0.06),
+                  end: Offset.zero,
+                ).animate(curve),
+                child: child,
               ),
             );
           },
-          participationActionBuilder: (activity) => EnrollmentAction(
-            viewModel: _enrollmentViewModel,
-            activityId: activity.id,
-            activityTitle: activity.title,
+          pageBuilder: (context, animation, secondary) => AssistantScreen(
+            viewModel: _assistantViewModel,
+            onOpenScreen: _openAssistantTarget,
+            onActivitySelected: (activityId) {
+              if (!(ModalRoute.of(context)?.isCurrent ?? true)) return;
+              Navigator.of(context).push<void>(
+                activityDetailsRoute(
+                  activityId: activityId,
+                  repository: _activityRepository,
+                  enrollmentViewModel: _enrollmentViewModel,
+                  canEdit: _canEdit,
+                  onEdit: _editActivity,
+                ),
+              );
+            },
+            participationActionBuilder: (activity) => EnrollmentAction(
+              viewModel: _enrollmentViewModel,
+              activityId: activity.id,
+              activityTitle: activity.title,
+            ),
           ),
         ),
-      ),
-    );
+      );
+    } finally {
+      if (mounted) setState(() => _isAssistantOpen = false);
+    }
   }
 
   void _openDiscoverySearch() {
@@ -611,38 +619,40 @@ class _MainShellState extends State<MainShell> {
           ],
         ),
       ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _selectedIndex,
-        onDestinationSelected: _selectDestination,
-        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home),
-            label: 'Inici',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.calendar_month_outlined),
-            selectedIcon: Icon(Icons.calendar_month),
-            label: 'Agenda',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.search_outlined),
-            selectedIcon: Icon(Icons.search),
-            label: 'Descobreix',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.notifications_outlined),
-            selectedIcon: Icon(Icons.notifications),
-            label: 'Avisos',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.person_outline),
-            selectedIcon: Icon(Icons.person),
-            label: 'Perfil',
-          ),
-        ],
-      ),
+      bottomNavigationBar: _isAssistantOpen
+          ? null
+          : NavigationBar(
+              selectedIndex: _selectedIndex,
+              onDestinationSelected: _selectDestination,
+              labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+              destinations: const [
+                NavigationDestination(
+                  icon: Icon(Icons.home_outlined),
+                  selectedIcon: Icon(Icons.home),
+                  label: 'Inici',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.calendar_month_outlined),
+                  selectedIcon: Icon(Icons.calendar_month),
+                  label: 'Agenda',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.search_outlined),
+                  selectedIcon: Icon(Icons.search),
+                  label: 'Descobreix',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.notifications_outlined),
+                  selectedIcon: Icon(Icons.notifications),
+                  label: 'Avisos',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.person_outline),
+                  selectedIcon: Icon(Icons.person),
+                  label: 'Perfil',
+                ),
+              ],
+            ),
     );
   }
 }
