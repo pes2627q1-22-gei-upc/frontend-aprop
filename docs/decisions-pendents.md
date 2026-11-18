@@ -497,6 +497,14 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Qui decideix:** frontend/backend per a la neteja de dades i el contracte de categories del mapa. Guia `docs/inici-server-filters.md`.
 - **Resolució:**
 
+### DP-047 · Contrast del logotip sobre el fons de l’app
+- **Estat:** oberta · 2026-11-16 · Taiga #262 [FE] Ajustar contrast i color del logotip respecte al fons.
+- **Context:** el PNG original té fons crema texturat i marges amplis. Inici i Login el pintaven directament, amb un rectangle diferent del fons del tema i poca mida útil per al símbol.
+- **Provisionalment:** derivació transparent del recurs existent, conservant mapa, tres marcadors, text i paleta. S’elimina el fons i es redueix el marge sense canviar el tema global. L’original queda intacte. `APropLogo` centralitza la mateixa imatge i semàntica a les dues pantalles, mantenint alçades de 80 i 96 píxels lògics respectivament. El mode fosc queda fora d’aquesta tasca.
+- **Verificació:** dues proves reprodueixen el fons opac abans del canvi i comproven transparència i contrast del color majoritari del logo sobre les superfícies clares després. Revisió visual de captures renderitzades amb Flutter. Guia `docs/branding.md`.
+- **Qui decideix:** equip/PO per validar l’edició visual de marca; la representació és reversible perquè es conserva el recurs original.
+- **Resolució:**
+
 ### DP-048 · Navegació de les fitxes obertes des del xat
 - **Estat:** oberta · 2026-11-16 · Taiga #261 [FE] Amagar menú de navegació inferior en obrir el xat.
 - **Context:** la tasca demana explícitament ocultar el menú en obrir l’Assistent. Les recomanacions poden obrir una fitxa sobre el xat, mentre que els mockups anteriors mostraven navegació inferior a les fitxes.
