@@ -401,20 +401,26 @@ void main() {
     'Map groups contain only activities kept by the confirmed filters',
     (tester) async {
       await pumpScreen(tester);
-      await open(tester, 'categories');
-      await tester.tap(category('Música'));
-      await tester.tap(category('Teatre'));
-      await apply(tester);
       await tester.tap(find.text('Mapa'));
       await tester.pumpAndSettle();
 
-      // Far away, Barcelona and Tarragona overlap and make one group; the
-      // exhibition in Girona, filtered out, is not in it.
+      // Far away, Barcelona, Tarragona and Girona overlap and make one
+      // group of three.
       map(tester).onCameraMove!(
         const CameraPosition(target: LatLng(41.5, 1.8), zoom: 3),
       );
       map(tester).onCameraIdle!();
       await tester.pumpAndSettle();
+      final unfiltered = map(tester).markers.single.markerId.value;
+      expect(unfiltered, startsWith('grup:'));
+      expect(unfiltered, endsWith(':3'));
+
+      // With the same zoom, the exhibition in Girona, filtered out, is no
+      // longer counted in the group.
+      await open(tester, 'categories');
+      await tester.tap(category('Música'));
+      await tester.tap(category('Teatre'));
+      await apply(tester);
       expect(map(tester).markers.map((marker) => marker.markerId.value), [
         'grup:demo-jazz:2',
       ]);

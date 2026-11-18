@@ -93,9 +93,11 @@ class _ActivitiesMapState extends State<ActivitiesMap> {
   double _zoom = _initialZoom;
   double _cameraZoom = _initialZoom;
 
-  /// Cercles dels grups ja dibuixats, per text («5», «2019»...).
-  final Map<String, BitmapDescriptor> _groupIcons = {};
-  final Set<String> _drawingGroupIcons = {};
+  /// Cercles dels grups ja dibuixats. Es guarden pel text («5», «2019»...),
+  /// els colors i la densitat de píxels: si canvia el tema o la pantalla, es
+  /// tornen a dibuixar.
+  final Map<_GroupIconKey, BitmapDescriptor> _groupIcons = {};
+  final Set<_GroupIconKey> _drawingGroupIcons = {};
 
   /// Últims grups calculats, perquè obrir o tancar la targeta no els torni a
   /// calcular: amb milers d'activitats, és feina.
@@ -271,22 +273,29 @@ class _ActivitiesMapState extends State<ActivitiesMap> {
   /// Cercle del grup amb el text [label]. Mentre es dibuixa, un marcador del
   /// color de l'app.
   BitmapDescriptor _groupIcon(String label, ColorScheme colors) {
-    final icon = _groupIcons[label];
+    final key = (
+      label: label,
+      fill: colors.primary,
+      textColor: colors.onPrimary,
+      border: colors.surface,
+      devicePixelRatio: MediaQuery.devicePixelRatioOf(context),
+    );
+    final icon = _groupIcons[key];
     if (icon != null) return icon;
-    if (_drawingGroupIcons.add(label)) {
+    if (_drawingGroupIcons.add(key)) {
       drawMapGroupIcon(
         label,
-        fill: colors.primary,
-        textColor: colors.onPrimary,
-        border: colors.surface,
-        devicePixelRatio: MediaQuery.devicePixelRatioOf(context),
+        fill: key.fill,
+        textColor: key.textColor,
+        border: key.border,
+        devicePixelRatio: key.devicePixelRatio,
       ).then(
         (drawn) {
-          if (mounted) setState(() => _groupIcons[label] = drawn);
+          if (mounted) setState(() => _groupIcons[key] = drawn);
         },
         // Si no es pot dibuixar, es torna a provar en el proper redibuix.
         onError: (Object _) {
-          _drawingGroupIcons.remove(label);
+          _drawingGroupIcons.remove(key);
         },
       );
     }
@@ -810,3 +819,12 @@ class _RenderSizeReporter extends RenderProxyBox {
     WidgetsBinding.instance.addPostFrameCallback((_) => onChanged(reported));
   }
 }
+
+/// El que fa diferent el dibuix d'un grup.
+typedef _GroupIconKey = ({
+  String label,
+  Color fill,
+  Color textColor,
+  Color border,
+  double devicePixelRatio,
+});
