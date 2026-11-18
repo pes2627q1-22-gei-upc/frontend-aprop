@@ -215,6 +215,7 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
   - el formulari demana que la fi sigui **posterior** a l'inici; el backend (R5) també n'accepta una d'igual;
   - sense data de fi s'envia `end-date` igual a `start-date`, com fins ara;
   - el backend només desa el dia de la fi (DP-029) i l'app encara no llegeix ni mostra `end-date` (`Activity` no en té camp).
+- **Editar (2026-11-16, Claude Code (Opus 5.5) amb confirmació de l'usuari, Taiga #189 / US #50):** el llapis «Edita l’activitat» de la fitxa només surt a qui l'ha creada (l'UUID del backend o l'UID de la sessió), si no és oficial i si encara no ha començat («activa» = no començada). Obre el mateix formulari amb les dades i «Desa els canvis», que envia `PUT /events/{id}` amb el mateix JSON que crear; el backend torna a comprovar l'autoria i R5. Ara l'app llegeix `end-date` (`Activity.endsAt`) perquè editar no la perdi. El backend no desa l'import del preu: d'una activitat de pagament no se'n sap, i si el camp es deixa buit no es converteix en gratuïta. La portada triada tampoc no es desa (DP-019). Després de desar, la fitxa es torna a carregar i la llista i el mapa es posen al dia.
 - **Qui decideix:** frontend + backend
 - **Resolució:**
 
@@ -267,6 +268,7 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Opcions:** A) vista inicial mapa · B) vista inicial llista (com ara); per a la zona: endpoint amb els límits del mapa o carregar-ho tot; per als grups: acceptar l'estil de Google o fer l'agrupació a Dart amb icones pròpies.
 - **Provisionalment:** la llista és la vista inicial (si Google Maps falla o no hi ha clau, Inici funciona igual); es mostren totes les activitats carregades; grups amb l'estil de Google (`TODO(DP-022)`).
 - **Targeta del marcador (2026-11-15, Claude Code (Opus 5.5) a petició de l'usuari):** tocar qualsevol lloc de la targeta obre la fitxa (com ja passa a les targetes de llista, l'assistent i l'Agenda), i el botó «Veure activitat» del mockup (fig. 7) es canvia pel d'apuntar-se («M’hi apunto» / «✓ Apuntat · Desapunta’m»). Desviació del mockup per confirmar amb l'equip.
+- **Grups propis (2026-11-16, Claude Code (Opus 5.5) a petició de l'usuari, Taiga #254):** els grups ja no els fa Google (`ClusterManager`), sinó l'app (`activity_map_groups.dart`): els marcadors que amb el zoom actual queden a menys de 64 px s'ajunten, i després s'ajunten també els grups que es tocarien segons la mida real del cercle, perquè mai no quedin l'un sobre l'altre. És igual a la web i al mòbil. El cercle és propi, amb el color principal de l'app, vora clara i el número total exacte (el cercle creix amb les xifres), en lloc dels cercles blaus i vermells de Google. Els grups es refan quan el mapa s'acaba de moure. Les activitats d'un mateix lloc sempre van en grup. El radi de 64 px i el disseny del cercle no surten del mockup (`TODO(DP-022)`).
 - **Qui decideix:** frontend + backend
 - **Resolució:**
 
@@ -390,7 +392,7 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 ### DP-034 · Mapa d'Inici: què fa tocar un grup de marcadors
 - **Estat:** oberta
 - **Obert per:** 2026-10-25 · Claude Code (Opus 5.5) amb confirmació de l'usuari · Taiga #79 / #21
-- **Context:** `ActivitiesMap` (`_onClusterTap`, `isSamePlace`, `_SamePlaceSheet`), llegenda del mapa. En provar-ho a l'emulador, tocar un grup no feia res.
+- **Context:** `ActivitiesMap` (`_onGroupTap`, `_SamePlaceSheet`), `isSamePlace` a `activity_map_groups.dart`, llegenda del mapa. En provar-ho a l'emulador, tocar un grup no feia res.
 - **Dubte:** no hi ha mockup de què passa en tocar un grup. A més, moltes activitats de l'Agenda Cultural comparteixen el mateix punt exacte (a la BD local, 2.019 de 2.335 activitats amb ubicació, en 603 llocs i fins a 32 en un de sol): apropar-s'hi no les separaria mai.
 - **Opcions:** A) només apropar-s'hi · B) apropar-s'hi i, si són al mateix lloc, mostrar-ne la llista · C) mostrar sempre la llista.
 - **Provisionalment:** B, triada per l'usuari («que t'augmenti la pantalla»). El mapa s'apropa fins que hi caben tots els marcadors del grup, amb 64 px de marge. Si les activitats són a menys de 0,0003° (uns 30 m) entre elles, surt un full inferior «N activitats en aquest lloc» amb el municipi, les activitats ordenades per data amb la data completa, i en tocar-ne una s'obre la fitxa. Molt a prop, Google deixa d'agrupar i els marcadors d'un mateix lloc queden apilats (provat a Girona: 4 activitats a l'Auditori i només se'n podia obrir una); per això tocar un marcador que en té d'altres al mateix lloc també mostra aquesta llista en lloc de la targeta. El llindar i el disseny del full són provisionals (`TODO(DP-034)`).
@@ -505,6 +507,15 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Qui decideix:** equip/PO per validar l’edició visual de marca; la representació és reversible perquè es conserva el recurs original.
 - **Resolució:**
 
+### DP-048 · Navegació de les fitxes obertes des del xat
+- **Estat:** oberta · 2026-11-16 · Taiga #261 [FE] Amagar menú de navegació inferior en obrir el xat.
+- **Context:** la tasca demana explícitament ocultar el menú en obrir l’Assistent. Les recomanacions poden obrir una fitxa sobre el xat, mentre que els mockups anteriors mostraven navegació inferior a les fitxes.
+- **Dubte:** mantenir el flux del xat sense barra també en aquestes fitxes o tornar-la a mostrar temporalment.
+- **Provisionalment:** mantenir-la amagada fins a sortir de `/assistant`. Això conserva la seqüència xat → fitxa → xat → Inici; les fitxes obertes des de les seccions habituals continuen amb barra. `TODO(DP-048)` a `MainShell._openAssistant`. La conversa i les inscripcions mantenen els ViewModels compartits.
+- **Verificació:** recorregut d’inscripció des del xat, fitxa i retorn; restauració de barra amb fletxa, retorn del sistema i dreceres a Agenda/Configuració.
+- **Qui decideix:** equip/PO a la revisió visual de #261. Ocultar la barra al xat ja és el requisit explícit; només queda oberta la fitxa que s’hi obre a sobre.
+- **Resolució:**
+
 ## Resoltes
 
 ### DP-031 · Enllaços de verificació amb la clau d'API antiga
@@ -550,7 +561,7 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Provisionalment:** fila compacta (miniatura 72 px, títol, municipi · data i la mateixa acció d'apuntar-se). Mateix estat d'inscripcions, mateix detall en tocar. Sense avatar del creador ni «Font». `TODO(DP-044)`: confirmar amb l'equip/mockup.
 - **Qui decideix:** equip frontend (UX)
 
-### DP-048 · Valoració d'activitats (#185): requisit d'assistència i contracte de #184
+### DP-053 · Valoració d'activitats (#185): requisit d'assistència i contracte de #184
 - **Estat:** oberta 2026-11-17
 - **Context:** `features/ratings/`, `_buildRating` a `main_shell.dart`; R8–R10 (`docs/ai/20-model-domini.md`); mockup 13 «Com va anar?».
 - **Dubte:** (1) el `develop` del backend ja té `PATCH /events/{id}/enrollment/attendance` (`{"attendance": true|false|null}`), però el frontend encara no modela ni té UI per confirmar l'assistència («Sí, hi vaig anar»); R10 exigeix assistència certa per valorar. (2) #184 (`POST /events/{id}/ratings`, `{score}`) respon `409` (ja valorada), `403` (sense assistència) i `404` (no trobada) a `feature/event-rating` (PR #59), però encara no és desplegat a Render i no hi ha consulta prèvia de la valoració pròpia.
@@ -567,6 +578,6 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 ### DP-050 · Fiabilitat visible (#204): contracte `creator-reliability` i valors deduïts
 - **Estat:** oberta 2026-11-18
 - **Context:** `ActivityCreator.reliability`, `activityFromJson`, bloc «Publicat per» de la fitxa (mockup 9) i tercer comptador de `ProfileHeader` (mockup 18).
-- **Dubte:** (1) `GET /events/{id}` publica `creator-name`/`creator-reliability` a `api-aprop` (branca `feature/creator-reliability-204`, pendent de merge; contracte no verificat contra el servidor real); (2) què vol dir un `0`; (3) l'etiqueta i el text del bloc.
-- **Provisionalment:** `creator-reliability` = nombre finit 0–5 o nul; altrament `FormatException`. Com al perfil, `0` es tracta com a «sense valoracions» (les valoracions són 1–5). Nul → «—» als dos llocs, sense estrella. Text del bloc: «Fiabilitat 4,7 ★»; etiquetes Semantics «Fiabilitat de l'organitzador: …». El tercer comptador del perfil ja existia («Valoració»); només s'hi ha afegit Semantics i el format compartit (`core/formatters/reliability_formatter.dart`). Demo: el 4,7 sembrat de Laia Soler a l'activitat demo coincideix amb el perfil, però no es recalcula amb les valoracions de la sessió (DP-049 queda oberta, no es resol).
+- **Dubte:** (1) `GET /events/{id}` publica `creator-name`/`creator-reliability` a `api-aprop` (`float32` nul·lable a `api/openapi.yaml` del `develop` del backend); (2) què vol dir un `0`; (3) l'etiqueta i el text del bloc.
+- **Provisionalment:** `creator-reliability` = nombre finit 0–5 o nul; un valor no vàlid s'ignora (`reliability` nul) en lloc de fer fallar tota l'activitat. Com al perfil, `0` es tracta com a «sense valoracions» (les valoracions són 1–5). Nul → «—» als dos llocs, sense estrella. Text del bloc: «Fiabilitat 4,7 ★»; etiquetes Semantics «Fiabilitat de l'organitzador: …». El tercer comptador del perfil ja existia («Valoració»); només s'hi ha afegit Semantics i el format compartit (`core/formatters/reliability_formatter.dart`). Demo: el 4,7 sembrat de Laia Soler a l'activitat demo coincideix amb el perfil, però no es recalcula amb les valoracions de la sessió (DP-049 queda oberta, no es resol).
 - **Qui decideix:** equip (frontend i backend)

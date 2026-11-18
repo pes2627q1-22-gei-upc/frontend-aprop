@@ -584,37 +584,32 @@ void main() {
   );
 
   testWidgets(
-    'Cluster sheets contain only activities kept by the confirmed filters',
+    'Map groups contain only activities kept by the confirmed filters',
     (tester) async {
       await pumpScreen(tester);
+      await tester.tap(find.text('Mapa'));
+      await tester.pumpAndSettle();
+
+      // Far away, Barcelona, Tarragona and Girona overlap and make one
+      // group of three.
+      map(tester).onCameraMove!(
+        const CameraPosition(target: LatLng(41.5, 1.8), zoom: 3),
+      );
+      map(tester).onCameraIdle!();
+      await tester.pumpAndSettle();
+      final unfiltered = map(tester).markers.single.markerId.value;
+      expect(unfiltered, startsWith('grup:'));
+      expect(unfiltered, endsWith(':3'));
+
+      // With the same zoom, the exhibition in Girona, filtered out, is no
+      // longer counted in the group.
       await open(tester, 'categories');
       await tester.tap(category('Música'));
       await tester.tap(category('Teatre'));
       await apply(tester);
-      await tester.tap(find.text('Mapa'));
-      await tester.pumpAndSettle();
-
-      final filteredMap = map(tester);
-      filteredMap.clusterManagers.single.onClusterTap!(
-        Cluster(
-          filteredMap.clusterManagers.single.clusterManagerId,
-          filteredMap.markers.map((marker) => marker.markerId).toList(),
-          position: const LatLng(41.38812, 2.18742),
-          bounds: LatLngBounds(
-            southwest: const LatLng(41.38810, 2.18740),
-            northeast: const LatLng(41.38812, 2.18742),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.text('2 activitats en aquest lloc'), findsOneWidget);
-      expect(find.text('Jazz al parc'), findsOneWidget);
-      expect(find.text('Teatre sota les estrelles'), findsOneWidget);
-      expect(find.text('Mirades de Catalunya'), findsNothing);
-      await tester.tap(find.text('Teatre sota les estrelles'));
-      await tester.pumpAndSettle();
-      expect(find.text('2 activitats en aquest lloc'), findsNothing);
+      expect(map(tester).markers.map((marker) => marker.markerId.value), [
+        'grup:demo-jazz:2',
+      ]);
       expect(model.filters.categories, {'Música', 'Teatre'});
       expect(tester.takeException(), isNull);
     },
@@ -661,7 +656,8 @@ void main() {
           startsAt: DateTime(2026, 9, 26),
           imageAsset: '',
           source: ActivitySource.culturalAgenda,
-          location: const GeoPoint(latitude: 41.4, longitude: 2.1),
+          // Lluny de Barcelona perquè no s'agrupin al mapa.
+          location: const GeoPoint(latitude: 41.9, longitude: 1.2),
         ),
       ];
       await pumpScreen(tester, areaModel: areaModel);

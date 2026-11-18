@@ -3,7 +3,7 @@ import '../models/already_rated_exception.dart';
 import '../repositories/rating_repository.dart';
 
 /// `POST /events/{id}/ratings` with `{score}`; the user comes from the token.
-// TODO(DP-048): #184 (`feature/event-rating`, PR #59) returns 409 when already
+// TODO(DP-053): #184 (`feature/event-rating`, PR #59) returns 409 when already
 // rated, 403 when not attended and 404 when missing; pending deploy to Render.
 class HttpRatingRepository implements RatingRepository {
   HttpRatingRepository({required this.apiClient});

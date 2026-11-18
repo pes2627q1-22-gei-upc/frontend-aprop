@@ -27,13 +27,11 @@ void main() {
       expect(activityFromJson(community(0)).creator?.reliability, isNull);
     });
 
-    test('rejects out-of-range, non-finite and non-numeric values', () {
+    test('ignores out-of-range, non-finite and non-numeric values', () {
       for (final bad in [-0.1, 5.1, double.nan, double.infinity, '4.5', true]) {
-        expect(
-          () => activityFromJson(community(bad)),
-          throwsFormatException,
-          reason: '$bad',
-        );
+        final activity = activityFromJson(community(bad));
+        expect(activity.creator?.reliability, isNull, reason: '$bad');
+        expect(activity.creator?.name, 'Maria', reason: '$bad');
       }
     });
   });

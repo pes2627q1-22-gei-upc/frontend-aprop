@@ -35,6 +35,7 @@ class Activity {
     required this.imageAsset,
     required this.source,
     this.creator,
+    this.endsAt,
     this.description,
     this.directions,
     this.location,
@@ -53,6 +54,9 @@ class Activity {
   final List<String> categories;
   final String municipality;
   final DateTime startsAt;
+
+  /// Fi de l'activitat, si n'hi ha i no és el mateix moment que l'inici.
+  final DateTime? endsAt;
   final String imageAsset;
 
   /// Remote cover when supplied by the server; demo assets remain independent.
