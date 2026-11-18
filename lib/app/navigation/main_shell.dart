@@ -195,13 +195,24 @@ class _MainShellState extends State<MainShell> {
     return ListenableBuilder(
       listenable: _enrollmentViewModel,
       builder: (context, child) {
-        if (!_enrollmentViewModel.isEnrolled(activity.id) ||
+        final creatorId = activity.creator?.userId;
+        // The organizer cannot rate their own event (it would feed their own
+        // reliability); the creator may carry either the Firebase or server id.
+        final isOwn =
+            creatorId != null &&
+            (creatorId == widget.user.id || creatorId == widget.user.serverId);
+        if (isOwn ||
+            !_enrollmentViewModel.isEnrolled(activity.id) ||
             activity.startsAt.isAfter((widget.now ?? DateTime.now)())) {
           return const SizedBox.shrink();
         }
         return ActivityRating(
           viewModel: _ratingViewModel,
           activityId: activity.id,
+          organizer:
+              activity.source == ActivitySource.community && creatorId != null
+              ? activity.creator
+              : null,
         );
       },
     );

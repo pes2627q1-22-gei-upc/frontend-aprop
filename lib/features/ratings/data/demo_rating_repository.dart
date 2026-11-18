@@ -18,4 +18,9 @@ class DemoRatingRepository implements RatingRepository {
     if (scores.containsKey(activityId)) throw const AlreadyRatedException();
     scores[activityId] = score;
   }
+
+  /// Every score recorded for [activityId], from any user.
+  Iterable<int> scoresFor(String activityId) => [
+    for (final scores in _scoresByUser.values) ?scores[activityId],
+  ];
 }

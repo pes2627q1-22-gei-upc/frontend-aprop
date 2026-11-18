@@ -17,12 +17,14 @@ Future<void> _pumpAgenda(
   WidgetTester tester, {
   required DateTime now,
   required bool enrolled,
+  String activityId = 'demo-jazz',
+  String? serverId,
 }) async {
   final catalogue = DemoActivityRepository();
   final enrollment = DemoEnrollmentRepository(activityRepository: catalogue);
   addTearDown(enrollment.dispose);
   if (enrolled) {
-    await enrollment.enroll(userId: 'u1', activityId: 'demo-jazz');
+    await enrollment.enroll(userId: serverId ?? 'u1', activityId: activityId);
   }
   tester.view.physicalSize = const Size(390, 844);
   tester.view.devicePixelRatio = 1;
@@ -32,8 +34,9 @@ Future<void> _pumpAgenda(
     MaterialApp(
       theme: AppTheme.light,
       home: MainShell(
-        user: const AppUser(
+        user: AppUser(
           id: 'u1',
+          serverId: serverId,
           email: 'a@example.test',
           firstName: 'Test',
           lastName: 'User',
@@ -84,5 +87,34 @@ void main() {
   testWidgets('stars are shown when enrolled and started', (tester) async {
     await _pumpAgenda(tester, now: DateTime(2026, 9, 26, 20), enrolled: true);
     expect(find.text('Com t’ha anat?'), findsOneWidget);
+    expect(find.textContaining('organitzador'), findsNothing);
+  });
+
+  testWidgets('community plan highlights its organizer', (tester) async {
+    // demo-theatre: community, created by Laia Soler (not u1), 2026-09-27 20:00.
+    await _pumpAgenda(
+      tester,
+      now: DateTime(2026, 9, 27, 21),
+      enrolled: true,
+      activityId: 'demo-theatre',
+    );
+    expect(
+      find.text('Com ha anat l’organitzador/a Laia Soler?'),
+      findsOneWidget,
+    );
+    expect(find.text('Com t’ha anat?'), findsNothing);
+  });
+
+  testWidgets('the organizer cannot rate their own event', (tester) async {
+    // The creator id is the server id of the signed-in user, not its Firebase id.
+    await _pumpAgenda(
+      tester,
+      now: DateTime(2026, 9, 27, 21),
+      enrolled: true,
+      activityId: 'demo-theatre',
+      serverId: 'demo-laiasoler',
+    );
+    expect(find.textContaining('organitzador'), findsNothing);
+    expect(find.text('Com t’ha anat?'), findsNothing);
   });
 }

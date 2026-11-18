@@ -2,6 +2,7 @@ import 'package:aprop/features/activities/data/demo_activity_repository.dart';
 import 'package:aprop/features/activities/models/activity.dart';
 import 'package:aprop/features/auth/models/app_user.dart';
 import 'package:aprop/features/profile/data/demo_profile_repository.dart';
+import 'package:aprop/features/ratings/data/demo_rating_repository.dart';
 import 'package:aprop/features/profile/data/demo_profile_settings_repository.dart';
 import 'package:aprop/features/profile/models/profile_settings.dart';
 import 'package:aprop/features/profile/models/user_profile.dart';
@@ -71,6 +72,58 @@ void main() {
       );
     },
   );
+
+  test(
+    'Organizer rating is the mean of ratings on own community events',
+    () async {
+      final ratings = DemoRatingRepository();
+      final catalogue = FakeActivityRepository()
+        ..activities = [
+          profileActivity(id: 'a'),
+          profileActivity(id: 'b'),
+          profileActivity(id: 'other', creatorId: 'user-b'),
+        ];
+      final repository = DemoProfileRepository(
+        activityRepository: catalogue,
+        ratingRepository: ratings,
+      );
+      expect(
+        (await repository.getProfile(profileUser)).organizerRating,
+        isNull,
+      );
+
+      await ratings.rate(userId: 'x', activityId: 'a', score: 5);
+      await ratings.rate(userId: 'x', activityId: 'other', score: 1);
+      expect((await repository.getProfile(profileUser)).organizerRating, 5);
+
+      await ratings.rate(userId: 'y', activityId: 'b', score: 4);
+      expect((await repository.getProfile(profileUser)).organizerRating, 4.5);
+    },
+  );
+
+  test('Ratings on official events do not count for the organizer', () async {
+    final ratings = DemoRatingRepository();
+    final official = Activity(
+      id: 'official',
+      title: 'Concert',
+      category: 'Música',
+      municipality: 'Girona',
+      startsAt: DateTime(2026, 9, 27, 20),
+      imageAsset: 'assets/images/teatre_sota_les_estrelles.jpg',
+      source: ActivitySource.culturalAgenda,
+      creator: const ActivityCreator(
+        name: 'Adam Ziani',
+        userId: 'user-a',
+        isFriend: false,
+      ),
+    );
+    final repository = DemoProfileRepository(
+      activityRepository: FakeActivityRepository()..activities = [official],
+      ratingRepository: ratings,
+    );
+    await ratings.rate(userId: 'x', activityId: 'official', score: 5);
+    expect((await repository.getProfile(profileUser)).organizerRating, isNull);
+  });
 
   test(
     'Optional details persist per account without changing auth identity',
