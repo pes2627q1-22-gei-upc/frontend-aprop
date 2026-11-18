@@ -505,6 +505,15 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Qui decideix:** equip/PO per validar l’edició visual de marca; la representació és reversible perquè es conserva el recurs original.
 - **Resolució:**
 
+### DP-048 · Navegació de les fitxes obertes des del xat
+- **Estat:** oberta · 2026-11-16 · Taiga #261 [FE] Amagar menú de navegació inferior en obrir el xat.
+- **Context:** la tasca demana explícitament ocultar el menú en obrir l’Assistent. Les recomanacions poden obrir una fitxa sobre el xat, mentre que els mockups anteriors mostraven navegació inferior a les fitxes.
+- **Dubte:** mantenir el flux del xat sense barra també en aquestes fitxes o tornar-la a mostrar temporalment.
+- **Provisionalment:** mantenir-la amagada fins a sortir de `/assistant`. Això conserva la seqüència xat → fitxa → xat → Inici; les fitxes obertes des de les seccions habituals continuen amb barra. `TODO(DP-048)` a `MainShell._openAssistant`. La conversa i les inscripcions mantenen els ViewModels compartits.
+- **Verificació:** recorregut d’inscripció des del xat, fitxa i retorn; restauració de barra amb fletxa, retorn del sistema i dreceres a Agenda/Configuració.
+- **Qui decideix:** equip/PO a la revisió visual de #261. Ocultar la barra al xat ja és el requisit explícit; només queda oberta la fitxa que s’hi obre a sobre.
+- **Resolució:**
+
 ## Resoltes
 
 ### DP-031 · Enllaços de verificació amb la clau d'API antiga
