@@ -394,6 +394,128 @@ void main() {
       expect(viewModel.categories, hasLength(1));
     });
   });
+
+  group('Editar', () {
+    final existing = Activity(
+      id: 'demo-created-1',
+      title: 'Concert a la plaça',
+      category: 'Música',
+      municipality: 'Vic',
+      startsAt: DateTime(2026, 11, 1, 19),
+      endsAt: DateTime(2026, 11, 1, 21),
+      imageAsset: jazzImage,
+      source: ActivitySource.community,
+      creator: creator,
+      description: 'Una nit de música',
+      location: mainSquare,
+      price: 5,
+    );
+
+    CreateActivityViewModel editing(
+      Activity activity, {
+      ActivityCategoryRepository? categories,
+    }) {
+      final viewModel = CreateActivityViewModel(
+        repository: repository,
+        locationRepository: const DemoLocationRepository(),
+        creator: creator,
+        categoryRepository: categories,
+        now: () => now,
+        editing: activity,
+      );
+      addTearDown(viewModel.dispose);
+      return viewModel;
+    }
+
+    test('Comença amb el que ja tenia l’activitat', () {
+      final viewModel = editing(existing);
+
+      expect(viewModel.isEditing, isTrue);
+      expect(viewModel.hasUnknownPrice, isFalse);
+      expect(viewModel.category, 'Música');
+      expect(viewModel.startsAt, DateTime(2026, 11, 1, 19));
+      expect(viewModel.endsAt, DateTime(2026, 11, 1, 21));
+      expect(viewModel.imageAsset, jazzImage);
+      expect(viewModel.location, mainSquare);
+    });
+
+    test('Desa els canvis a la mateixa activitat', () async {
+      final viewModel = editing(existing);
+
+      final saved = await viewModel.publish(
+        title: 'Concert al parc',
+        description: 'Una nit de música',
+        municipality: 'Vic',
+        price: '5',
+      );
+
+      expect(saved, isNotNull);
+      expect(repository.created, isEmpty);
+      final (id, sent) = repository.updated.single;
+      expect(id, 'demo-created-1');
+      expect(sent.title, 'Concert al parc');
+      expect(sent.endsAt, DateTime(2026, 11, 1, 21));
+      expect(sent.location, mainSquare);
+    });
+
+    test('Tria la categoria del backend pel nom que es veu', () async {
+      final viewModel = editing(
+        Activity(
+          id: '506',
+          title: 'Obra',
+          category: 'Teatre',
+          municipality: '',
+          startsAt: DateTime(2026, 11, 1, 19),
+          imageAsset: '',
+          source: ActivitySource.community,
+        ),
+        categories: _FakeCategoryRepository(),
+      );
+
+      await viewModel.loadCategories();
+
+      expect(viewModel.category, 'agenda:categories/teatre');
+    });
+
+    test(
+      'Si el preu no se sap i no es toca, no passa a ser gratuïta',
+      () async {
+        final unknownPrice = Activity(
+          id: '506',
+          title: 'Obra',
+          category: 'Música',
+          municipality: '',
+          startsAt: DateTime(2026, 11, 1, 19),
+          imageAsset: '',
+          source: ActivitySource.community,
+        );
+
+        final viewModel = editing(unknownPrice);
+        expect(viewModel.hasUnknownPrice, isTrue);
+        await viewModel.publish(
+          title: 'Obra',
+          description: 'Descripció',
+          price: '',
+        );
+
+        expect(repository.updated.single.$2.price, isNull);
+      },
+    );
+
+    test('Si no es pot desar, ho explica', () async {
+      repository.updateError = Exception('403');
+      final viewModel = editing(existing);
+
+      final saved = await viewModel.publish(
+        title: 'Concert',
+        description: 'Una nit',
+        price: '',
+      );
+
+      expect(saved, isNull);
+      expect(viewModel.errorMessage, updateActivityErrorMessage);
+    });
+  });
 }
 
 class _FakeCategoryRepository implements ActivityCategoryRepository {

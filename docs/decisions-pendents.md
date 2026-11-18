@@ -215,6 +215,7 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
   - el formulari demana que la fi sigui **posterior** a l'inici; el backend (R5) també n'accepta una d'igual;
   - sense data de fi s'envia `end-date` igual a `start-date`, com fins ara;
   - el backend només desa el dia de la fi (DP-029) i l'app encara no llegeix ni mostra `end-date` (`Activity` no en té camp).
+- **Editar (2026-11-16, Claude Code (Opus 5.5) amb confirmació de l'usuari, Taiga #189 / US #50):** el llapis «Edita l’activitat» de la fitxa només surt a qui l'ha creada (l'UUID del backend o l'UID de la sessió), si no és oficial i si encara no ha començat («activa» = no començada). Obre el mateix formulari amb les dades i «Desa els canvis», que envia `PUT /events/{id}` amb el mateix JSON que crear; el backend torna a comprovar l'autoria i R5. Ara l'app llegeix `end-date` (`Activity.endsAt`) perquè editar no la perdi. El backend no desa l'import del preu: d'una activitat de pagament no se'n sap, i si el camp es deixa buit no es converteix en gratuïta. La portada triada tampoc no es desa (DP-019). Després de desar, la fitxa es torna a carregar i la llista i el mapa es posen al dia.
 - **Qui decideix:** frontend + backend
 - **Resolució:**
 
@@ -267,6 +268,7 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Opcions:** A) vista inicial mapa · B) vista inicial llista (com ara); per a la zona: endpoint amb els límits del mapa o carregar-ho tot; per als grups: acceptar l'estil de Google o fer l'agrupació a Dart amb icones pròpies.
 - **Provisionalment:** la llista és la vista inicial (si Google Maps falla o no hi ha clau, Inici funciona igual); es mostren totes les activitats carregades; grups amb l'estil de Google (`TODO(DP-022)`).
 - **Targeta del marcador (2026-11-15, Claude Code (Opus 5.5) a petició de l'usuari):** tocar qualsevol lloc de la targeta obre la fitxa (com ja passa a les targetes de llista, l'assistent i l'Agenda), i el botó «Veure activitat» del mockup (fig. 7) es canvia pel d'apuntar-se («M’hi apunto» / «✓ Apuntat · Desapunta’m»). Desviació del mockup per confirmar amb l'equip.
+- **Grups propis (2026-11-16, Claude Code (Opus 5.5) a petició de l'usuari, Taiga #254):** els grups ja no els fa Google (`ClusterManager`), sinó l'app (`activity_map_groups.dart`): els marcadors que amb el zoom actual queden a menys de 64 px s'ajunten, i després s'ajunten també els grups que es tocarien segons la mida real del cercle, perquè mai no quedin l'un sobre l'altre. És igual a la web i al mòbil. El cercle és propi, amb el color principal de l'app, vora clara i el número total exacte (el cercle creix amb les xifres), en lloc dels cercles blaus i vermells de Google. Els grups es refan quan el mapa s'acaba de moure. Les activitats d'un mateix lloc sempre van en grup. El radi de 64 px i el disseny del cercle no surten del mockup (`TODO(DP-022)`).
 - **Qui decideix:** frontend + backend
 - **Resolució:**
 
@@ -390,7 +392,7 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 ### DP-034 · Mapa d'Inici: què fa tocar un grup de marcadors
 - **Estat:** oberta
 - **Obert per:** 2026-10-25 · Claude Code (Opus 5.5) amb confirmació de l'usuari · Taiga #79 / #21
-- **Context:** `ActivitiesMap` (`_onClusterTap`, `isSamePlace`, `_SamePlaceSheet`), llegenda del mapa. En provar-ho a l'emulador, tocar un grup no feia res.
+- **Context:** `ActivitiesMap` (`_onGroupTap`, `_SamePlaceSheet`), `isSamePlace` a `activity_map_groups.dart`, llegenda del mapa. En provar-ho a l'emulador, tocar un grup no feia res.
 - **Dubte:** no hi ha mockup de què passa en tocar un grup. A més, moltes activitats de l'Agenda Cultural comparteixen el mateix punt exacte (a la BD local, 2.019 de 2.335 activitats amb ubicació, en 603 llocs i fins a 32 en un de sol): apropar-s'hi no les separaria mai.
 - **Opcions:** A) només apropar-s'hi · B) apropar-s'hi i, si són al mateix lloc, mostrar-ne la llista · C) mostrar sempre la llista.
 - **Provisionalment:** B, triada per l'usuari («que t'augmenti la pantalla»). El mapa s'apropa fins que hi caben tots els marcadors del grup, amb 64 px de marge. Si les activitats són a menys de 0,0003° (uns 30 m) entre elles, surt un full inferior «N activitats en aquest lloc» amb el municipi, les activitats ordenades per data amb la data completa, i en tocar-ne una s'obre la fitxa. Molt a prop, Google deixa d'agrupar i els marcadors d'un mateix lloc queden apilats (provat a Girona: 4 activitats a l'Auditori i només se'n podia obrir una); per això tocar un marcador que en té d'altres al mateix lloc també mostra aquesta llista en lloc de la targeta. El llindar i el disseny del full són provisionals (`TODO(DP-034)`).
@@ -503,6 +505,15 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Provisionalment:** derivació transparent del recurs existent, conservant mapa, tres marcadors, text i paleta. S’elimina el fons i es redueix el marge sense canviar el tema global. L’original queda intacte. `APropLogo` centralitza la mateixa imatge i semàntica a les dues pantalles, mantenint alçades de 80 i 96 píxels lògics respectivament. El mode fosc queda fora d’aquesta tasca.
 - **Verificació:** dues proves reprodueixen el fons opac abans del canvi i comproven transparència i contrast del color majoritari del logo sobre les superfícies clares després. Revisió visual de captures renderitzades amb Flutter. Guia `docs/branding.md`.
 - **Qui decideix:** equip/PO per validar l’edició visual de marca; la representació és reversible perquè es conserva el recurs original.
+- **Resolució:**
+
+### DP-048 · Navegació de les fitxes obertes des del xat
+- **Estat:** oberta · 2026-11-16 · Taiga #261 [FE] Amagar menú de navegació inferior en obrir el xat.
+- **Context:** la tasca demana explícitament ocultar el menú en obrir l’Assistent. Les recomanacions poden obrir una fitxa sobre el xat, mentre que els mockups anteriors mostraven navegació inferior a les fitxes.
+- **Dubte:** mantenir el flux del xat sense barra també en aquestes fitxes o tornar-la a mostrar temporalment.
+- **Provisionalment:** mantenir-la amagada fins a sortir de `/assistant`. Això conserva la seqüència xat → fitxa → xat → Inici; les fitxes obertes des de les seccions habituals continuen amb barra. `TODO(DP-048)` a `MainShell._openAssistant`. La conversa i les inscripcions mantenen els ViewModels compartits.
+- **Verificació:** recorregut d’inscripció des del xat, fitxa i retorn; restauració de barra amb fletxa, retorn del sistema i dreceres a Agenda/Configuració.
+- **Qui decideix:** equip/PO a la revisió visual de #261. Ocultar la barra al xat ja és el requisit explícit; només queda oberta la fitxa que s’hi obre a sobre.
 - **Resolució:**
 
 ## Resoltes

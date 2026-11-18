@@ -1,6 +1,9 @@
 import 'package:aprop/app/aprop_app.dart';
 import 'package:aprop/features/activities/data/demo_activity_repository.dart';
+import 'package:aprop/features/activities/models/new_activity.dart';
+import 'package:aprop/features/activities/models/activity.dart';
 import 'package:aprop/features/activities/presentation/widgets/activity_card.dart';
+import 'package:aprop/features/activities/presentation/widgets/activity_image.dart';
 import 'package:aprop/features/auth/data/demo_auth_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -113,4 +116,86 @@ void main() {
       expect(find.text('Concert a la plaça'), findsOneWidget);
     },
   );
+
+  testWidgets('Qui l’ha creada l’edita des de la fitxa', (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final auth = DemoAuthRepository();
+    await auth.signIn(usernameOrEmail: 'laiasoler', password: 'Aprop2026!');
+    final catalogue = DemoActivityRepository();
+    final soon = DateTime.now().add(const Duration(days: 3));
+    await catalogue.createActivity(
+      NewActivity(
+        title: 'Concert a la plaça',
+        description: 'Una nit de música',
+        category: 'Música',
+        startsAt: DateTime(soon.year, soon.month, soon.day, 19),
+        imageAsset: 'assets/images/jazz_al_parc.jpg',
+        creator: const ActivityCreator(
+          name: 'Laia Soler',
+          userId: 'demo-laiasoler',
+          isFriend: false,
+        ),
+      ),
+    );
+    await tester.pumpWidget(
+      APropApp(authRepository: auth, activityRepository: catalogue),
+    );
+    await tester.pumpAndSettle();
+
+    // Una activitat oficial no es pot editar.
+    await tester.tap(find.text('Jazz al parc'));
+    await tester.pumpAndSettle();
+    expect(find.byTooltip('Edita l’activitat'), findsNothing);
+    await tester.tap(find.byTooltip('Tornar enrere'));
+    await tester.pumpAndSettle();
+
+    await tester.scrollUntilVisible(
+      find.text('Concert a la plaça'),
+      300,
+      scrollable: find.descendant(
+        of: find.byKey(const PageStorageKey<String>('activities-list')),
+        matching: find.byType(Scrollable),
+      ),
+    );
+    final card = find.widgetWithText(ActivityCard, 'Concert a la plaça');
+    await tester.ensureVisible(card);
+    await tester.pumpAndSettle();
+    // A la dreta hi ha el botó de l'assistent: es toca la imatge.
+    await tester.tap(
+      find.descendant(
+        of: find.widgetWithText(ActivityCard, 'Concert a la plaça'),
+        matching: find.byType(ActivityImage),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Edita l’activitat'));
+    await tester.pumpAndSettle();
+
+    expect(find.widgetWithText(AppBar, 'Edita l’activitat'), findsOneWidget);
+    final title = find.widgetWithText(TextField, 'Títol');
+    expect(
+      tester.widget<TextField>(title).controller!.text,
+      'Concert a la plaça',
+    );
+    await tester.enterText(title, 'Concert al parc');
+    await tester.scrollUntilVisible(
+      find.text('Desa els canvis'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(find.text('Desa els canvis'));
+    await tester.pumpAndSettle();
+
+    // Torna a la fitxa, ja amb el títol nou.
+    expect(find.widgetWithText(AppBar, 'Activitat'), findsOneWidget);
+    expect(find.text('Concert al parc'), findsOneWidget);
+    expect(
+      (await catalogue.getActivityById('demo-created-1'))!.title,
+      'Concert al parc',
+    );
+    expect(tester.takeException(), isNull);
+  });
 }

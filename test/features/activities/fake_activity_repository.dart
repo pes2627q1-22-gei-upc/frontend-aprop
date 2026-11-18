@@ -74,4 +74,31 @@ class FakeActivityRepository implements ActivityRepository {
       price: activity.price,
     );
   }
+
+  /// Canvis rebuts per [updateActivity], amb l'ID.
+  final updated = <(String, NewActivity)>[];
+
+  /// Si no és nul, [updateActivity] el llança.
+  Object? updateError;
+
+  @override
+  Future<Activity> updateActivity(String id, NewActivity activity) async {
+    updated.add((id, activity));
+    if (updateError case final error?) throw error;
+    return Activity(
+      id: id,
+      title: activity.title,
+      category: activity.category,
+      municipality: activity.municipality,
+      startsAt: activity.startsAt,
+      endsAt: activity.endsAt,
+      source: ActivitySource.community,
+      imageAsset: activity.imageAsset,
+      creator: activity.creator,
+      description: activity.description,
+      directions: activity.directions,
+      location: activity.location,
+      price: activity.price,
+    );
+  }
 }
