@@ -117,4 +117,41 @@ void main() {
     expect(repository.positions.hasListener, isFalse);
     expect(viewModel.position, isNull);
   });
+
+  test(
+    'Si s’amaga el mapa mentre busca, el botó no es queda esperant',
+    () async {
+      repository = FakeUserLocationRepository()
+        ..answer = LocationAccess.granted;
+      create();
+      await viewModel.show();
+
+      final locating = viewModel.locate();
+      await pumpEventQueue();
+      viewModel.hide();
+
+      // No espera els 15 s del temps màxim.
+      expect(
+        await locating.timeout(const Duration(seconds: 1)),
+        LocateResult.unavailable,
+      );
+      expect(viewModel.isLocating, isFalse);
+    },
+  );
+
+  test('Si es tanca mentre busca, la cerca acaba igualment', () async {
+    repository = FakeUserLocationRepository()..answer = LocationAccess.granted;
+    final viewModel = UserLocationViewModel(repository: repository);
+    await viewModel.show();
+
+    final locating = viewModel.locate();
+    await pumpEventQueue();
+    viewModel.dispose();
+
+    expect(
+      await locating.timeout(const Duration(seconds: 1)),
+      LocateResult.unavailable,
+    );
+    expect(repository.positions.hasListener, isFalse);
+  });
 }

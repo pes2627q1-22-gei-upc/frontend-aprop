@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 
 import '../../models/app_notification.dart';
 import '../../repositories/notification_repository.dart';
+import '../../../../core/l10n/locale_controller.dart';
 
 /// Inbox state for a single signed-in account. Contains no navigation/widgets.
 class NotificationsViewModel extends ChangeNotifier {
@@ -72,7 +73,7 @@ class NotificationsViewModel extends ChangeNotifier {
       _errors.clear();
     } catch (_) {
       if (!_isDisposed) {
-        _errorMessage = 'No hem pogut carregar els avisos. Torna-ho a provar.';
+        _errorMessage = currentL10n.notifLoadError;
       }
     } finally {
       if (!_isDisposed) {
@@ -105,8 +106,7 @@ class NotificationsViewModel extends ChangeNotifier {
       return true;
     } catch (_) {
       if (!_isDisposed) {
-        _errors[id] =
-            'No hem pogut marcar l’avís com a llegit. Torna-ho a provar.';
+        _errors[id] = currentL10n.notifMarkReadError;
       }
       return false;
     } finally {
@@ -147,8 +147,7 @@ class NotificationsViewModel extends ChangeNotifier {
       );
     } catch (_) {
       if (!_isDisposed) {
-        _errors[id] =
-            'No hem pogut respondre la sol·licitud. Torna-ho a provar.';
+        _errors[id] = currentL10n.notifRespondError;
       }
     } finally {
       if (!_isDisposed) {

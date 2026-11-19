@@ -7,6 +7,7 @@ import '../widgets/auth_status_message.dart';
 import '../widgets/auth_submit_button.dart';
 import '../widgets/google_sign_in_button.dart';
 import '../widgets/password_field.dart';
+import '../../../../core/l10n/locale_controller.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key, required this.repository});
@@ -75,7 +76,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Crea un compte')),
+      appBar: AppBar(title: Text(context.l10n.authCreateAccountLink)),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
@@ -91,8 +92,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       Text(
-                        'Uneix-te a AProp! per apuntar-te a activitats i '
-                        'crear-ne de noves.',
+                        context.l10n.authRegisterIntro,
                         style: TextStyle(
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
@@ -106,7 +106,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         onChanged: (_) =>
                             _viewModel.onFieldChanged(RegisterField.firstName),
                         decoration: InputDecoration(
-                          labelText: 'Nom',
+                          labelText: context.l10n.authFirstName,
                           errorText: _viewModel.fieldError(
                             RegisterField.firstName,
                           ),
@@ -122,7 +122,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         onChanged: (_) =>
                             _viewModel.onFieldChanged(RegisterField.lastName),
                         decoration: InputDecoration(
-                          labelText: 'Cognoms',
+                          labelText: context.l10n.authLastName,
                           errorText: _viewModel.fieldError(
                             RegisterField.lastName,
                           ),
@@ -138,13 +138,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         onChanged: (_) =>
                             _viewModel.onFieldChanged(RegisterField.username),
                         decoration: InputDecoration(
-                          labelText: "Nom d'usuari",
+                          labelText: context.l10n.authUsernameLabel,
                           errorText: _viewModel.fieldError(
                             RegisterField.username,
                           ),
                           prefixIcon: const Icon(Icons.alternate_email),
-                          helperText:
-                              'Minúscules, números, punt o guió baix (3-20).',
+                          helperText: context.l10n.authUsernameHelper,
                           // Sense límit pràctic: amb la lletra gran no hi
                           // cap en una línia i no s'ha de tallar.
                           helperMaxLines: 10,
@@ -160,7 +159,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         onChanged: (_) =>
                             _viewModel.onFieldChanged(RegisterField.email),
                         decoration: InputDecoration(
-                          labelText: 'Correu electrònic',
+                          labelText: context.l10n.authEmail,
                           errorText: _viewModel.fieldError(RegisterField.email),
                           prefixIcon: const Icon(Icons.mail_outline),
                         ),
@@ -168,10 +167,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       const SizedBox(height: 16),
                       PasswordField(
                         controller: _passwordController,
-                        label: 'Contrasenya',
-                        helperText:
-                            'Mínim 8 caràcters, amb majúscula, minúscula, '
-                            'número i caràcter especial.',
+                        label: context.l10n.authPassword,
+                        helperText: context.l10n.authPasswordHelper,
                         errorText: _viewModel.fieldError(
                           RegisterField.password,
                         ),
@@ -181,7 +178,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       const SizedBox(height: 16),
                       PasswordField(
                         controller: _confirmationController,
-                        label: 'Repeteix la contrasenya',
+                        label: context.l10n.authRepeatPassword,
                         errorText: _viewModel.fieldError(
                           RegisterField.passwordConfirmation,
                         ),
@@ -197,7 +194,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         const SizedBox(height: 12),
                       ],
                       AuthSubmitButton(
-                        label: 'Crea el compte',
+                        label: context.l10n.authCreateAccountButton,
                         isLoading: _viewModel.isLoading,
                         onPressed: _viewModel.isGoogleLoading ? null : _submit,
                       ),
@@ -210,8 +207,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                       const SizedBox(height: 24),
                       AuthLinkPrompt(
-                        question: 'Ja tens compte?',
-                        label: 'Inicia sessió',
+                        question: context.l10n.authHaveAccount,
+                        label: context.l10n.authLoginTitle,
                         onPressed: () => Navigator.of(context).pop(),
                       ),
                     ],

@@ -106,6 +106,40 @@ void main() {
     }
   });
 
+  test('updateLanguage sends PATCH users/me with the language code', () async {
+    final writes = <Map<String, Object?>>[];
+    final repo = HttpProfileSettingsRepository(
+      apiClient: api((request) async {
+        if (request.method == 'GET') return profileJson(backendProfile());
+        expect(request.method, 'PATCH');
+        expect(request.url.path, '/users/me');
+        writes.add(jsonDecode(request.body) as Map<String, Object?>);
+        return profileJson(backendProfile());
+      }),
+    );
+    await repo.updateLanguage(userId: profileUser.id, language: 'es');
+    expect(writes.single, {'language': 'es'});
+  });
+
+  test('Created activities are requested with the current language', () async {
+    String? lang;
+    final repo = HttpProfileRepository(
+      apiClient: ApiClient(
+        idToken: () async => 'profile-token',
+        language: () => 'en',
+        client: MockClient((request) async {
+          if (request.url.path == '/users/me/created-events') {
+            lang = request.url.queryParameters['lang'];
+            return profileJson([]);
+          }
+          return profileJson(backendProfile());
+        }),
+      ),
+    );
+    await repo.getCreatedActivities(profileUser);
+    expect(lang, 'en');
+  });
+
   test(
     'Updates supported fields and returns the server-confirmed identity',
     () async {

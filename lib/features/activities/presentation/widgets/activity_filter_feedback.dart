@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/locale_controller.dart';
+
 /// Shrinks to its messages, leaving the map interactive outside the notices.
 class MapFilterFeedback extends StatelessWidget {
   const MapFilterFeedback({
@@ -35,7 +37,7 @@ class MapFilterFeedback extends StatelessWidget {
             if (isEmpty && missingCategories > 0)
               TextButton(
                 onPressed: onClear,
-                child: const Text('Netejar filtres'),
+                child: Text(context.l10n.actClearFilters),
               ),
           ],
         ),
@@ -68,22 +70,19 @@ class FilteredActivitiesEmptyState extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             isPartialCatalogue
-                ? 'Cap coincidència entre les activitats carregades'
-                : 'No hi ha activitats amb aquests filtres',
+                ? context.l10n.actNoMatchLoaded
+                : context.l10n.actNoMatchFilters,
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 8),
-          const Text(
-            'Prova unes altres dates o categories.',
-            textAlign: TextAlign.center,
-          ),
+          Text(context.l10n.actTryOther, textAlign: TextAlign.center),
           if (missingCategories > 0)
             MissingCategoryNotice(count: missingCategories),
           const SizedBox(height: 16),
           FilledButton(
             onPressed: onClear,
-            child: const Text('Netejar filtres'),
+            child: Text(context.l10n.actClearFilters),
           ),
         ],
       ),
@@ -106,10 +105,11 @@ class MapFilterNotice extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'No hi ha activitats amb aquests filtres en aquesta zona.',
+          Text(context.l10n.actNoMatchZone),
+          TextButton(
+            onPressed: onClear,
+            child: Text(context.l10n.actClearFilters),
           ),
-          TextButton(onPressed: onClear, child: const Text('Netejar filtres')),
         ],
       ),
     ),
@@ -132,19 +132,13 @@ class MissingCategoryNotice extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            count == 1
-                ? '1 activitat sense categoria informada no s’inclou en aquest filtre.'
-                : '$count activitats sense categoria informada no s’inclouen en aquest filtre.',
-          ),
+          Text(context.l10n.actUncategorised(count)),
           if (onShowList != null) ...[
             const SizedBox(height: 8),
-            const Text(
-              'Consulta la llista per veure els resultats per categoria.',
-            ),
+            Text(context.l10n.actSeeListHint),
             TextButton(
               onPressed: onShowList,
-              child: const Text('Veure llista'),
+              child: Text(context.l10n.actSeeList),
             ),
           ],
         ],

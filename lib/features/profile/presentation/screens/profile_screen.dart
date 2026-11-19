@@ -6,6 +6,7 @@ import '../widgets/edit_profile_sheet.dart';
 import '../widgets/profile_activity_tile.dart';
 import '../widgets/profile_header.dart';
 import '../widgets/profile_progress_section.dart';
+import '../../../../core/l10n/locale_controller.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({
@@ -49,7 +50,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         builder: (context, _) => Text(
           widget.viewModel.profile?.username ??
               widget.viewModel.user.username ??
-              'Perfil',
+              context.l10n.profileTitleFallback,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: Theme.of(context).textTheme.titleLarge
@@ -57,15 +58,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
       ),
       actions: [
-        const Tooltip(
-          message: 'Cerca de persones disponible properament',
-          child: IconButton(
+        Tooltip(
+          message: context.l10n.profilePeopleSearchSoon,
+          child: const IconButton(
             onPressed: null,
             icon: Icon(Icons.person_add_alt_1_outlined),
           ),
         ),
         IconButton(
-          tooltip: 'Configuració',
+          tooltip: context.l10n.settingsTooltip,
           onPressed: widget.onSettingsPressed,
           icon: const Icon(Icons.settings_outlined),
         ),
@@ -91,11 +92,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
               if (model.isLoading)
                 SliverToBoxAdapter(
                   child: profile == null
-                      ? const Padding(
-                          padding: EdgeInsets.all(32),
+                      ? Padding(
+                          padding: const EdgeInsets.all(32),
                           child: Center(
                             child: CircularProgressIndicator(
-                              semanticsLabel: 'Carregant el perfil',
+                              semanticsLabel: context.l10n.profileLoading,
                             ),
                           ),
                         )
@@ -111,7 +112,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         const SizedBox(height: 12),
                         FilledButton(
                           onPressed: model.load,
-                          child: const Text('Tornar-ho a provar'),
+                          child: Text(context.l10n.retry),
                         ),
                       ],
                     ),
@@ -161,8 +162,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       onTap: (index) => setState(() => _chosenTab = index),
                       tabs: [
                         for (final tab in [
-                          (Icons.event_available_outlined, 'Plans fets'),
-                          (Icons.edit_note, 'Creats per mi'),
+                          (
+                            Icons.event_available_outlined,
+                            context.l10n.profileTabCompletedPlans,
+                          ),
+                          (Icons.edit_note, context.l10n.profileTabCreatedByMe),
                         ])
                           Tab(
                             height:
@@ -188,11 +192,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ),
                 if (_selectedTab == 1 && model.isLoadingCreated)
-                  const SliverToBoxAdapter(
+                  SliverToBoxAdapter(
                     child: Padding(
-                      padding: EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(16),
                       child: LinearProgressIndicator(
-                        semanticsLabel: 'Carregant les activitats creades',
+                        semanticsLabel: context.l10n.profileCreatedLoading,
                       ),
                     ),
                   ),
@@ -205,7 +209,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           Semantics(liveRegion: true, child: Text(error)),
                           TextButton(
                             onPressed: model.loadCreatedActivities,
-                            child: const Text('Tornar-ho a provar'),
+                            child: Text(context.l10n.retry),
                           ),
                         ],
                       ),
@@ -230,18 +234,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           Text(
                             _selectedTab == 0
                                 ? model.capabilities.completedPlans
-                                      ? 'Encara no tens plans fets'
-                                      : 'Historial d’assistència disponible properament'
-                                : 'Encara no has creat cap activitat',
+                                      ? context.l10n.profileNoCompletedPlans
+                                      : context.l10n.profileCompletedHistorySoon
+                                : context.l10n.profileNoCreated,
                             textAlign: TextAlign.center,
                           ),
                           const SizedBox(height: 8),
                           Text(
                             _selectedTab == 0
                                 ? model.capabilities.completedPlans
-                                      ? 'Aquí veuràs les activitats amb assistència confirmada.'
-                                      : 'Pots consultar els plans guardats a l’Agenda.'
-                                : 'Pots crear-ne una des d’Inici.',
+                                      ? context.l10n.profileCompletedHint
+                                      : context.l10n.profileSavedPlansHint
+                                : context.l10n.profileCreateHint,
                             textAlign: TextAlign.center,
                           ),
                         ],

@@ -4,6 +4,7 @@ import '../../models/auth_failure.dart';
 import '../../repositories/auth_repository.dart';
 import 'auth_failure_message.dart';
 import 'auth_validators.dart';
+import '../../../../core/l10n/locale_controller.dart';
 
 enum RegisterField {
   firstName,
@@ -66,11 +67,11 @@ class RegisterViewModel extends ChangeNotifier {
       ..addAll({
         RegisterField.firstName: ?AuthValidators.notEmpty(
           firstName,
-          message: 'Introdueix el nom.',
+          message: currentL10n.authFirstNameRequired,
         ),
         RegisterField.lastName: ?AuthValidators.notEmpty(
           lastName,
-          message: 'Introdueix els cognoms.',
+          message: currentL10n.authLastNameRequired,
         ),
         RegisterField.username: ?AuthValidators.username(username),
         RegisterField.email: ?AuthValidators.email(email),

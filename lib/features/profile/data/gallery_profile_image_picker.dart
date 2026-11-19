@@ -17,7 +17,7 @@ class GalleryProfileImagePicker implements ProfileImagePicker {
     );
     if (file == null) return null;
     if (await file.length() > ProfileAvatar.maxBytes) {
-      throw const AvatarSelectionException('Tria una foto de menys de 5 MB.');
+      throw const AvatarSelectionException(AvatarProblem.tooBig);
     }
     return ProfileAvatar(bytes: await file.readAsBytes(), filename: file.name);
   }

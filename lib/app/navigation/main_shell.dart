@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../core/l10n/locale_controller.dart';
 import '../../features/activities/data/demo_location_repository.dart';
 import '../../features/activities/models/activity.dart';
 import '../../features/activities/presentation/screens/activities_screen.dart';
@@ -122,7 +123,13 @@ class _MainShellState extends State<MainShell> {
   late final AssistantViewModel _assistantViewModel;
   late final ProfileViewModel _profileViewModel;
 
-  static const _titles = ['AProp!', 'Agenda', 'Descobreix', 'Avisos', 'Perfil'];
+  static String _title(BuildContext context, int index) => [
+    context.l10n.appTitle,
+    context.l10n.navAgenda,
+    context.l10n.navDiscover,
+    context.l10n.navNotifications,
+    context.l10n.navProfile,
+  ][index];
 
   @override
   void initState() {
@@ -165,8 +172,38 @@ class _MainShellState extends State<MainShell> {
     _activitiesViewModel.load(); //mientras espera ésto flutter dibuja un indicador de carga. Cuando termina, el ViewModel notifica a la pantalla y ésta se redibuja con la lista de actividades.
   }
 
+  LocaleController? _localeController;
+  String? _languageCode;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final controller = LocaleScope.maybeOf(context);
+    if (controller == _localeController) return;
+    _localeController?.removeListener(_onLocaleChanged);
+    _localeController = controller?..addListener(_onLocaleChanged);
+    _languageCode = controller?.locale.languageCode;
+  }
+
+  /// Event texts come translated from the backend, so a new language means
+  /// asking for them again.
+  void _onLocaleChanged() {
+    final code = _localeController?.locale.languageCode;
+    if (code == _languageCode) return;
+    _languageCode = code;
+    _activitiesViewModel.load();
+    _activitiesMapViewModel?.refresh();
+    _activitiesChanged.value++; // Agenda
+    _assistantViewModel.onLanguageChanged();
+    // Discover builds its own view model; a new key makes it load again.
+    setState(() => _discoverGeneration++);
+  }
+
+  int _discoverGeneration = 0;
+
   @override
   void dispose() {
+    _localeController?.removeListener(_onLocaleChanged);
     _assistantButtonLift.dispose();
     _activitiesChanged.dispose();
     _activitiesViewModel.dispose();
@@ -464,14 +501,14 @@ class _MainShellState extends State<MainShell> {
       useRootNavigator: false,
       builder: (dialogContext) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
-          title: const Text('Compartir perfil'),
+          title: Text(context.l10n.shareProfile),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text('@$username'),
               const SizedBox(height: 8),
-              const Text('Comparteix el teu nom d’usuari d’AProp!'),
+              Text(context.l10n.shareDialogBody),
             ],
           ),
           actions: [
@@ -479,7 +516,7 @@ class _MainShellState extends State<MainShell> {
               onPressed: copying
                   ? null
                   : () => Navigator.of(dialogContext).pop(),
-              child: const Text('Cancel·lar'),
+              child: Text(context.l10n.shareCancel),
             ),
             FilledButton(
               onPressed: copying
@@ -495,9 +532,7 @@ class _MainShellState extends State<MainShell> {
                         }
                         if (mounted) {
                           ScaffoldMessenger.of(this.context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Nom d’usuari copiat'),
-                            ),
+                            SnackBar(content: Text(currentL10n.shareCopied)),
                           );
                         }
                       } catch (_) {
@@ -506,16 +541,14 @@ class _MainShellState extends State<MainShell> {
                         }
                         if (mounted) {
                           ScaffoldMessenger.of(this.context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                'No hem pogut copiar el nom d’usuari.',
-                              ),
-                            ),
+                            SnackBar(content: Text(currentL10n.shareCopyError)),
                           );
                         }
                       }
                     },
-              child: Text(copying ? 'Copiant…' : 'Copiar nom d’usuari'),
+              child: Text(
+                copying ? context.l10n.shareCopying : context.l10n.shareCopy,
+              ),
             ),
           ],
         ),
@@ -569,7 +602,7 @@ class _MainShellState extends State<MainShell> {
     return Scaffold(
       appBar: index == 0
           ? null
-          : AppBar(title: Text(_titles[index]), centerTitle: false),
+          : AppBar(title: Text(_title(context, index)), centerTitle: false),
       body: child,
       floatingActionButton: index == 0
           ? ValueListenableBuilder<double>(
@@ -583,9 +616,9 @@ class _MainShellState extends State<MainShell> {
               ),
               child: FloatingActionButton.extended(
                 onPressed: _openAssistant,
-                tooltip: 'Obrir l’assistent',
+                tooltip: context.l10n.assistantOpenTooltip,
                 icon: const Icon(Icons.smart_toy_outlined, size: 20),
-                label: const Text('Assistent'),
+                label: Text(context.l10n.assistantTitle),
               ),
             )
           : null,
@@ -648,6 +681,7 @@ class _MainShellState extends State<MainShell> {
               (context) => _sectionRoot(
                 2,
                 DiscoverScreen(
+                  key: ValueKey(_discoverGeneration),
                   userId: widget.user.id,
                   repository: widget.discoveryRepository,
                   enrollmentViewModel: _enrollmentViewModel,
@@ -690,31 +724,31 @@ class _MainShellState extends State<MainShell> {
               selectedIndex: _selectedIndex,
               onDestinationSelected: _selectDestination,
               labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-              destinations: const [
+              destinations: [
                 NavigationDestination(
-                  icon: Icon(Icons.home_outlined),
-                  selectedIcon: Icon(Icons.home),
-                  label: 'Inici',
+                  icon: const Icon(Icons.home_outlined),
+                  selectedIcon: const Icon(Icons.home),
+                  label: context.l10n.navHome,
                 ),
                 NavigationDestination(
-                  icon: Icon(Icons.calendar_month_outlined),
-                  selectedIcon: Icon(Icons.calendar_month),
-                  label: 'Agenda',
+                  icon: const Icon(Icons.calendar_month_outlined),
+                  selectedIcon: const Icon(Icons.calendar_month),
+                  label: context.l10n.navAgenda,
                 ),
                 NavigationDestination(
-                  icon: Icon(Icons.search_outlined),
-                  selectedIcon: Icon(Icons.search),
-                  label: 'Descobreix',
+                  icon: const Icon(Icons.search_outlined),
+                  selectedIcon: const Icon(Icons.search),
+                  label: context.l10n.navDiscover,
                 ),
                 NavigationDestination(
-                  icon: Icon(Icons.notifications_outlined),
-                  selectedIcon: Icon(Icons.notifications),
-                  label: 'Avisos',
+                  icon: const Icon(Icons.notifications_outlined),
+                  selectedIcon: const Icon(Icons.notifications),
+                  label: context.l10n.navNotifications,
                 ),
                 NavigationDestination(
-                  icon: Icon(Icons.person_outline),
-                  selectedIcon: Icon(Icons.person),
-                  label: 'Perfil',
+                  icon: const Icon(Icons.person_outline),
+                  selectedIcon: const Icon(Icons.person),
+                  label: context.l10n.navProfile,
                 ),
               ],
             ),

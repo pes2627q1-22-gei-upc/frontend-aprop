@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../models/user_profile.dart';
 import '../formatters/profile_level_formatter.dart';
 import 'profile_palette.dart';
+import '../../../../core/l10n/locale_controller.dart';
 
 class ProfileProgressSection extends StatelessWidget {
   const ProfileProgressSection({super.key, required this.progress});
@@ -18,7 +19,7 @@ class ProfileProgressSection extends StatelessWidget {
       return Align(
         alignment: Alignment.centerLeft,
         child: Text(
-          '${progress.experience} XP',
+          context.l10n.xpValue(progress.experience),
           style: theme.textTheme.titleSmall,
         ),
       );
@@ -62,18 +63,21 @@ class ProfileProgressSection extends StatelessWidget {
           children: [
             Text(
               progress.nextLevelTarget == null
-                  ? '${progress.experience} XP'
-                  : '${progress.experience} / ${progress.nextLevelTarget} XP',
+                  ? context.l10n.xpValue(progress.experience)
+                  : context.l10n.xpOfTarget(
+                      progress.experience,
+                      progress.nextLevelTarget!,
+                    ),
               style: theme.textTheme.titleSmall?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
             ),
             Text(
               next == null
-                  ? 'Has assolit el nivell màxim'
+                  ? context.l10n.xpMaxLevel
                   : remaining == null
-                  ? 'El teu recorregut cultural comença aquí'
-                  : '$remaining XP per a ${next.fullLabel}',
+                  ? context.l10n.xpStart
+                  : context.l10n.xpRemainingForLevel(remaining, next.fullLabel),
             ),
           ],
         ),
@@ -85,8 +89,11 @@ class ProfileProgressSection extends StatelessWidget {
             minHeight: 8,
             backgroundColor: palette.lockedBackground,
             semanticsLabel: progress.nextLevelTarget == null
-                ? 'Progrés d’experiència: ${progress.experience} XP'
-                : 'Progrés d’experiència: ${progress.experience} de ${progress.nextLevelTarget} XP',
+                ? context.l10n.xpProgressSemantics(progress.experience)
+                : context.l10n.xpProgressOfSemantics(
+                    progress.experience,
+                    progress.nextLevelTarget!,
+                  ),
           ),
         ),
       ],
@@ -118,10 +125,10 @@ class _LevelBadge extends StatelessWidget {
     return Semantics(
       label:
           '${level.fullLabel}: ${isCurrent
-              ? 'nivell actual'
+              ? context.l10n.levelStateCurrent
               : reached
-              ? 'assolit'
-              : 'pendent'}',
+              ? context.l10n.levelStateReached
+              : context.l10n.levelStatePending}',
       child: ExcludeSemantics(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4),

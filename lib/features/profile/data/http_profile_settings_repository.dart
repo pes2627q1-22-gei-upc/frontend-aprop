@@ -28,6 +28,21 @@ class HttpProfileSettingsRepository implements ProfileSettingsRepository {
       _settings((await _profiles.own(userId)).profile);
 
   @override
+  Future<void> updateLanguage({
+    required String userId,
+    required String language,
+  }) async {
+    // TODO(DP-054): `language` in PATCH /users/me is the agreed backend
+    // contract for #28; the response is not read back yet.
+    final session = await _profiles.own(userId);
+    await apiClient.patchJson(
+      'users/me',
+      headers: session.headers,
+      body: {'language': language},
+    );
+  }
+
+  @override
   Future<ProfileSettings> updatePreference({
     required String userId,
     required ProfilePreference preference,

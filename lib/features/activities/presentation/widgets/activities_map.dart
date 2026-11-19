@@ -16,6 +16,7 @@ import 'activity_image.dart';
 import 'activity_map_groups.dart';
 import 'map_group_icon.dart';
 import 'user_location_marker.dart';
+import '../../../../core/l10n/locale_controller.dart';
 
 /// Durada de les transicions de la targeta i dels botons que s'hi aparten.
 const mapOverlayAnimationDuration = Duration(milliseconds: 280);
@@ -181,6 +182,8 @@ class _ActivitiesMapState extends State<ActivitiesMap> {
     // torna a mirar si es pot mostrar on és la persona.
     _lifecycle = AppLifecycleListener(
       onResume: () => widget.userLocation?.show(),
+      // En segon pla no cal saber on és: s'estalvia bateria.
+      onHide: () => widget.userLocation?.hide(),
     );
     _startUserLocation(widget.userLocation);
   }
@@ -257,33 +260,22 @@ class _ActivitiesMapState extends State<ActivitiesMap> {
 
     // TODO(DP-057): textos sense mockup.
     final (message, action) = switch (result) {
-      LocateResult.located || LocateResult.unavailable => (
-        'No hem pogut trobar on ets. Torna-ho a provar.',
-        null,
-      ),
-      LocateResult.denied => (
-        'Per veure on ets, cal que permetis que AProp! faci servir la teva '
-            'ubicació.',
-        null,
-      ),
+      LocateResult.located ||
+      LocateResult.unavailable => (context.l10n.mapLocateError, null),
+      LocateResult.denied => (context.l10n.mapLocateDenied, null),
       LocateResult.deniedForever when location.canOpenSettings => (
-        'Has denegat l’accés a la ubicació. Pots activar-lo a la '
-            'configuració.',
+        context.l10n.mapLocateDeniedForever,
         SnackBarAction(
-          label: 'Configuració',
+          label: context.l10n.mapLocateSettings,
           onPressed: location.openAppSettings,
         ),
       ),
-      LocateResult.deniedForever => (
-        'El navegador no deixa veure on ets. Pots permetre-ho des de la '
-            'icona del costat de l’adreça.',
-        null,
-      ),
+      LocateResult.deniedForever => (context.l10n.mapLocateBrowserDenied, null),
       LocateResult.serviceDisabled => (
-        'La ubicació del dispositiu està desactivada.',
+        context.l10n.mapLocationDisabled,
         location.canOpenSettings
             ? SnackBarAction(
-                label: 'Activar',
+                label: context.l10n.mapLocationEnable,
                 onPressed: location.openLocationSettings,
               )
             : null,
@@ -489,7 +481,7 @@ class _ActivitiesMapState extends State<ActivitiesMap> {
       children: [
         Positioned.fill(
           child: Semantics(
-            label: 'Mapa d’activitats',
+            label: context.l10n.actMapLabel,
             child: GoogleMap(
               initialCameraPosition: CameraPosition(
                 target: _toLatLng(cataloniaCenter),
@@ -666,7 +658,7 @@ class _LegendChip extends StatelessWidget {
     return ActionChip(
       onPressed: onPressed,
       avatar: Icon(Icons.info_outline, size: 18, color: colors.primary),
-      label: const Text('Llegenda'),
+      label: Text(context.l10n.actLegend),
       backgroundColor: colors.surface,
       side: BorderSide(color: colors.outlineVariant),
       shape: const StadiumBorder(),
@@ -697,7 +689,7 @@ class _MyLocationButton extends StatelessWidget {
       elevation: 3,
       child: IconButton(
         onPressed: isLocating ? null : onPressed,
-        tooltip: 'La meva ubicació',
+        tooltip: context.l10n.mapMyLocation,
         iconSize: 24,
         padding: const EdgeInsets.all(12),
         color: colors.primary,
@@ -738,15 +730,15 @@ class _LegendSheet extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
             child: Text(
-              'Llegenda',
+              context.l10n.actLegend,
               style: theme.textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.w700,
               ),
             ),
           ),
-          row(ActivityMarkerKind.official, 'Activitat de l’Agenda Cultural'),
-          row(ActivityMarkerKind.community, 'Publicada per un usuari'),
-          row(ActivityMarkerKind.friend, 'Publicada per una amistat'),
+          row(ActivityMarkerKind.official, context.l10n.actLegendOfficial),
+          row(ActivityMarkerKind.community, context.l10n.actLegendCommunity),
+          row(ActivityMarkerKind.friend, context.l10n.actLegendFriend),
           ListTile(
             leading: CircleAvatar(
               radius: 14,
@@ -754,7 +746,7 @@ class _LegendSheet extends StatelessWidget {
               foregroundColor: theme.colorScheme.onPrimary,
               child: const Text('3', style: TextStyle(fontSize: 12)),
             ),
-            title: const Text('Diverses activitats a prop: toca per veure-les'),
+            title: Text(context.l10n.actLegendCluster),
           ),
           if (userDot case final dot?)
             ListTile(
@@ -775,16 +767,13 @@ class _LegendSheet extends StatelessWidget {
                   ),
                 ),
               ),
-              title: const Text('On ets tu'),
+              title: Text(context.l10n.mapYouAreHere),
             ),
           if (withoutLocation > 0)
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 8, 24, 0),
               child: Text(
-                withoutLocation == 1
-                    ? '1 activitat no té ubicació i només surt a la llista.'
-                    : '$withoutLocation activitats no tenen ubicació i només '
-                          'surten a la llista.',
+                context.l10n.actWithoutLocation(withoutLocation),
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
@@ -822,7 +811,7 @@ class _SamePlaceSheet extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 0, 24, 4),
               child: Text(
-                '${activities.length} activitats en aquest lloc',
+                context.l10n.actInThisPlace(activities.length),
                 style: theme.textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.w700,
                 ),
@@ -899,7 +888,7 @@ class _MapActivityCard extends StatelessWidget {
             children: [
               Flexible(
                 child: Text(
-                  'Publicat per ${creator.name}',
+                  context.l10n.actPublishedByName(creator.name),
                   style: theme.textTheme.bodySmall,
                 ),
               ),
@@ -910,7 +899,7 @@ class _MapActivityCard extends StatelessWidget {
             ],
           )
         : Text(
-            'Font: Agenda Cultural · Generalitat',
+            context.l10n.agendaSourceOfficial,
             style: theme.textTheme.bodySmall?.copyWith(
               color: colors.onSurfaceVariant,
             ),
@@ -988,7 +977,7 @@ class _MapActivityCard extends StatelessWidget {
                   ),
                   IconButton(
                     onPressed: onClose,
-                    tooltip: 'Tancar',
+                    tooltip: context.l10n.close,
                     icon: const Icon(Icons.close),
                   ),
                 ],
@@ -1012,7 +1001,7 @@ class _MapActivityCard extends StatelessWidget {
                         onPressed: onOpen,
                         iconAlignment: IconAlignment.end,
                         icon: const Icon(Icons.chevron_right, size: 20),
-                        label: const Text('Veure activitat'),
+                        label: Text(context.l10n.actViewActivity),
                       ),
                     ],
                   ),

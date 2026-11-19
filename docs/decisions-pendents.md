@@ -46,7 +46,7 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Opcions:** A) `flutter_localizations` + `intl` amb ARB (ca/es/en) · B) el mateix però només ca/es · C) ajornar-ho fins a la història «Canviar idioma»
 - **Provisionalment:** UI només en català; cap paquet afegit.
 - **Qui decideix:** equip
-- **Resolució:**
+- **Resolució:** 2026-11-19 · decidit per l'usuari (#28 «Canviar idioma»): opció A, ca/es/en, català per defecte. `flutter_localizations` + `intl` amb ARB (`lib/l10n/app_{ca,es,en}.arb`, plantilla `app_ca.arb`, `l10n.yaml`, `flutter: generate: true`). Els límits que queden són a DP-054 i DP-055.
 
 ### DP-002 · Llibreria de migracions de BD
 - **Estat:** oberta
@@ -608,3 +608,17 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Dubte:** (1) cap endpoint no retorna la valoració pròpia (DP-053): l'app no sap el `score` d'una valoració feta en una sessió anterior. (2) `GET /events/{id}` ja exposa `creator-reliability` (#204, DP-050), però no es torna a llegir en editar o eliminar la valoració.
 - **Provisionalment:** (1) «Modifica» i «Elimina» surten sempre que l'activitat consta com a valorada (sessió actual o `409`); si el `score` és desconegut, en editar es mostren les estrelles buides i el valor nou substitueix el del servidor. (2) Després d'editar/eliminar només s'actualitza `RatingViewModel`; quan #204 mostri la fiabilitat a la fitxa/perfil, caldrà tornar-la a llegir (cal verificar si el perfil recarrega la fiabilitat en obrir-lo). `404` → `RatingNotFoundException`: es deixa de mostrar com a valorada. `TODO(DP-052)` a `http_rating_repository.dart`. (3) «Modifica» i «Elimina» també apareixen a les targetes d'Agenda, perquè el bloc de valoració és el mateix que el de la fitxa (decidit: es deixen; el requisit de #61 només esmenta la fitxa).
 - **Qui decideix:** equip (frontend i backend)
+
+### DP-054 · Canviar idioma (#28): contracte `language` al backend i sincronització
+- **Estat:** oberta 2026-11-19
+- **Context:** `ProfileSettingsRepository.updateLanguage`, `HttpProfileSettingsRepository`, `ApiClient.language`, `LocaleController` (`lib/core/l10n/`).
+- **Dubte:** (1) el backend afegeix `language` (`ca`/`es`/`en`) a la configuració d'usuari i al `PATCH /users/me`, i el paràmetre opcional `lang` als endpoints d'`events`; el contracte encara no és al `develop` del backend ni desplegat. (2) Si el valor del servidor ha de guanyar sobre el local en entrar des d'un altre dispositiu.
+- **Provisionalment:** l'idioma s'aplica a l'instant i es desa localment (`shared_preferences`, clau `ui-language`; per defecte `ca`); alhora s'envia `{"language": "<codi>"}` a `PATCH /users/me` (sense llegir-lo a la resposta). Si l'enviament falla, es manté el nou idioma i es mostra un avís. En Demo no s'envia res. No es llegeix `language` del servidor ni se sincronitza en iniciar sessió: el local és la font de veritat. `ApiClient` afegeix `?lang=<idioma actual>` a totes les peticions `events…` (si el servidor no el coneix, l'ignora). `TODO(DP-054)` a `http_profile_settings_repository.dart`.
+- **Qui decideix:** equip (frontend i backend)
+
+### DP-055 · Internacionalització (#28): textos que continuen en català
+- **Estat:** oberta 2026-11-19
+- **Context:** `lib/features/*/data/` (repositoris HTTP i Demo), `models/` (excepcions), ViewModels.
+- **Dubte:** els models i els contractes han de ser independents de Flutter (`AGENTS.md`), i els ViewModels no tenen `BuildContext`.
+- **Provisionalment:** (1) Els ViewModels, validadors i formatadors fan servir `currentL10n` (`LocaleController.active`, global) i els widgets `context.l10n`. Els missatges d'error que un ViewModel ja ha desat (p. ex. «No hem pogut carregar…») no es tornen a traduir fins al pròxim intent; els widgets sí que es redibuixen. El missatge de benvinguda de l'assistent es resol en cada renderitzat i els xips de suggeriments es tornen a demanar en canviar d'idioma. Els errors d'avatar (`AvatarSelectionException`) són un enum que el ViewModel tradueix. (2) Es queden en català: les dades de demostració (`demo_*_repository`: respostes de l'assistent, activitats, avisos), els missatges `ApiException`/`StateError` dels repositoris HTTP que no es mostren tal qual i els errors `{"error": "…"}` del backend. `updateLanguage` fa un `GET users/me` addicional abans del `PATCH` (acceptat, pendent de simplificar quan el backend ho permeti). (3) Els noms de categories i el contingut dels esdeveniments (títol, descripció) no van als ARB; la traducció d'esdeveniments és del backend (`?lang=`). (4) Mockup fig. 19 només mostrava ca/es: s'afegeix l'anglès per decisió de l'usuari.
+- **Qui decideix:** equip

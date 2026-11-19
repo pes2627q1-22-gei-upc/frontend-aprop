@@ -1,0 +1,1060 @@
+{
+  "@@locale": "ca",
+  "appTitle": "AProp!",
+  "profileTitleFallback": "Perfil",
+  "profilePeopleSearchSoon": "Cerca de persones disponible properament",
+  "settingsTooltip": "Configuració",
+  "profileLoading": "Carregant el perfil",
+  "retry": "Tornar-ho a provar",
+  "profileTabCompletedPlans": "Plans fets",
+  "profileTabCreatedByMe": "Creats per mi",
+  "profileCreatedLoading": "Carregant les activitats creades",
+  "profileNoCompletedPlans": "Encara no tens plans fets",
+  "profileCompletedHistorySoon": "Historial d’assistència disponible properament",
+  "profileNoCreated": "Encara no has creat cap activitat",
+  "profileCompletedHint": "Aquí veuràs les activitats amb assistència confirmada.",
+  "profileSavedPlansHint": "Pots consultar els plans guardats a l’Agenda.",
+  "profileCreateHint": "Pots crear-ne una des d’Inici.",
+  "profileLoadError": "No hem pogut carregar el perfil. Torna-ho a provar.",
+  "profileCreatedLoadError": "No hem pogut carregar les activitats creades.",
+  "profileBiographyTooLong": "La biografia és massa llarga. Prova de fer-la més curta.",
+  "profileMunicipalityTooLong": "Escriu com a màxim 80 caràcters.",
+  "profileNameRequired": "Escriu el teu nom.",
+  "profileNameTooLong": "El nom és massa llarg.",
+  "profileUsernameInvalid": "Fes servir entre 3 i 30 lletres, números o guions baixos.",
+  "profileUsernameTaken": "El nom d’usuari ja està ocupat. Tria’n un altre.",
+  "profileSaveError": "No hem pogut desar el perfil. Torna-ho a provar.",
+  "profileAvatarError": "No hem pogut canviar la foto. Torna-ho a provar.",
+  "profileAvatarInterrupted": "S’ha interromput una selecció de foto. Torna-la a triar.",
+  "avatarTooBig": "Tria una foto de menys de 5 MB.",
+  "avatarNameUnreadable": "No hem pogut llegir el nom de la foto.",
+  "avatarWrongFormat": "Tria una foto JPG, PNG o WebP.",
+  "editProfileTitle": "Editar perfil",
+  "close": "Tancar",
+  "fieldName": "Nom",
+  "fieldUsername": "Nom d’usuari",
+  "fieldBiography": "Biografia",
+  "fieldMunicipality": "Municipi",
+  "municipalityEditSoon": "L’edició del municipi estarà disponible properament.",
+  "saving": "Desant…",
+  "save": "Desar",
+  "profileActivityViewLabel": "Veure activitat: {title}",
+  "@profileActivityViewLabel": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "profileActivityRatingSuffix": "Valoració: {rating} de 5",
+  "@profileActivityRatingSuffix": {
+    "placeholders": {
+      "rating": {
+        "type": "int"
+      }
+    }
+  },
+  "statPlans": "Plans",
+  "statFriends": "Amics",
+  "statRating": "Valoració",
+  "reliabilityNone": "Fiabilitat com a organitzador: sense valoracions",
+  "reliabilityOutOfFive": "Fiabilitat com a organitzador: {value} sobre 5",
+  "@reliabilityOutOfFive": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "changing": "Canviant…",
+  "changePhoto": "Canviar foto",
+  "shareProfile": "Compartir perfil",
+  "shareNeedsUsername": "Cal un nom d’usuari per compartir el perfil",
+  "shareUsername": "Compartir el nom d’usuari",
+  "photoOf": "Foto de {name}",
+  "@photoOf": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "xpValue": "{xp} XP",
+  "@xpValue": {
+    "placeholders": {
+      "xp": {
+        "type": "int"
+      }
+    }
+  },
+  "xpOfTarget": "{xp} / {target} XP",
+  "@xpOfTarget": {
+    "placeholders": {
+      "xp": {
+        "type": "int"
+      },
+      "target": {
+        "type": "int"
+      }
+    }
+  },
+  "xpMaxLevel": "Has assolit el nivell màxim",
+  "xpStart": "El teu recorregut cultural comença aquí",
+  "xpRemainingForLevel": "{remaining} XP per a {level}",
+  "@xpRemainingForLevel": {
+    "placeholders": {
+      "remaining": {
+        "type": "int"
+      },
+      "level": {
+        "type": "String"
+      }
+    }
+  },
+  "xpProgressSemantics": "Progrés d’experiència: {xp} XP",
+  "@xpProgressSemantics": {
+    "placeholders": {
+      "xp": {
+        "type": "int"
+      }
+    }
+  },
+  "xpProgressOfSemantics": "Progrés d’experiència: {xp} de {target} XP",
+  "@xpProgressOfSemantics": {
+    "placeholders": {
+      "xp": {
+        "type": "int"
+      },
+      "target": {
+        "type": "int"
+      }
+    }
+  },
+  "levelStateCurrent": "nivell actual",
+  "levelStateReached": "assolit",
+  "levelStatePending": "pendent",
+  "levelCurious": "Curiós/a",
+  "levelExplorer": "Explorador/a",
+  "levelAdventurer": "Aventurer/a",
+  "levelDiscoverer": "Descobridor/a",
+  "levelAmbassador": "Ambaixador/a",
+  "levelCultural": "{label} cultural",
+  "@levelCultural": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "comingSoon": "Disponible properament",
+  "comingSoonTitled": "{title}: disponible properament",
+  "@comingSoonTitled": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsTitle": "Configuració",
+  "goBack": "Tornar enrere",
+  "settingsLoading": "Carregant la configuració",
+  "settingsSavingChange": "Desant el canvi…",
+  "settingsGroupPreferences": "PREFERÈNCIES",
+  "settingsLanguage": "Idioma",
+  "languageNameCa": "Català",
+  "languageNameEs": "Castellano",
+  "languageNameEn": "English",
+  "settingsLanguageSyncError": "L’idioma s’ha canviat, però no l’hem pogut desar al teu compte. Torna-ho a provar.",
+  "settingsTheme": "Tema",
+  "themeLight": "Clar",
+  "themeDark": "Fosc",
+  "settingsDarkThemeSoon": "Tema fosc disponible properament",
+  "settingsGroupPrivacy": "PRIVACITAT",
+  "settingsShowMyPlans": "Mostrar els meus plans",
+  "settingsShowMyPlansHint": "Els amics veuen a què t’apuntes",
+  "settingsBlockedUsers": "Usuaris bloquejats",
+  "settingsGroupNotifications": "NOTIFICACIONS",
+  "settingsReminders": "Recordatoris",
+  "settingsRemindersHint": "Avisos dels plans de la teva agenda",
+  "settingsFriendActivity": "Activitat dels amics",
+  "settingsFriendActivityHint": "Quan un amic s’apunta a un pla",
+  "settingsRecommendations": "Recomanacions",
+  "settingsFriendRequests": "Sol·licituds d’amistat",
+  "settingsPersistsAccount": "Els canvis disponibles es desen al teu compte.",
+  "settingsPersistsSession": "Les preferències es conserven durant aquesta sessió de l’app.",
+  "settingsGroupAccount": "COMPTE",
+  "settingsGoogleCalendar": "Google Calendar",
+  "settingsGoogleCalendarHint": "Exportació disponible properament",
+  "settingsNotConnected": "No connectat",
+  "settingsRetakeInterestTest": "Tornar a fer el test d’interessos",
+  "settingsSigningOut": "Tancant sessió…",
+  "settingsSignOut": "Tancar sessió",
+  "settingsDeleteAccount": "Eliminar compte",
+  "settingsLoadError": "No hem pogut carregar la configuració. Torna-ho a provar.",
+  "settingsSaveError": "No hem pogut desar el canvi. Torna-ho a provar.",
+  "settingsSignOutError": "No hem pogut tancar la sessió. Torna-ho a provar.",
+  "authGreetingNamed": "Hola, {name}!",
+  "@authGreetingNamed": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "authGreeting": "Hola!",
+  "authChooseUsernameTitle": "Tria el teu nom d'usuari",
+  "authChooseUsernameBody": "{greeting} Tria el nom amb què et trobaran a l'app.",
+  "@authChooseUsernameBody": {
+    "placeholders": {
+      "greeting": {
+        "type": "String"
+      }
+    }
+  },
+  "authUsernameTaken": "El nom «{username}» ja és d'una altra persona. Tria'n un altre.",
+  "@authUsernameTaken": {
+    "placeholders": {
+      "username": {
+        "type": "String"
+      }
+    }
+  },
+  "authUsernameLabel": "Nom d'usuari",
+  "authUsernameHelper": "Minúscules, números, punt o guió baix (3-20).",
+  "authContinue": "Continua",
+  "authNotYourAccount": "No és el teu compte?",
+  "authSignOutLink": "Tanca la sessió",
+  "authLoginTitle": "Inicia sessió",
+  "authLoginSubtitle": "Troba plans culturals a prop teu.",
+  "authUsernameOrEmail": "Nom d'usuari o correu",
+  "authPassword": "Contrasenya",
+  "authSignIn": "Entra",
+  "authNoAccount": "Encara no tens compte?",
+  "authCreateAccountLink": "Crea un compte",
+  "authRegisterIntro": "Uneix-te a AProp! per apuntar-te a activitats i crear-ne de noves.",
+  "authFirstName": "Nom",
+  "authLastName": "Cognoms",
+  "authEmail": "Correu electrònic",
+  "authPasswordHelper": "Mínim 8 caràcters, amb majúscula, minúscula, número i caràcter especial.",
+  "authRepeatPassword": "Repeteix la contrasenya",
+  "authCreateAccountButton": "Crea el compte",
+  "authHaveAccount": "Ja tens compte?",
+  "authVerifyTitle": "Verifica el teu correu",
+  "authVerifySentTo": "T'hem enviat un enllaç a",
+  "authVerifyOpenIt": ". Obre'l per activar el compte i després torna aquí.",
+  "authAlreadyVerified": "Ja l'he verificat",
+  "authResendEmailIn": "Torna a enviar el correu ({seconds} s)",
+  "@authResendEmailIn": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "authResendEmail": "Torna a enviar el correu",
+  "authWrongEmail": "T'has equivocat de correu?",
+  "authUnexpectedError": "No hem pogut completar l'operació. Torna-ho a provar.",
+  "authInvalidCredentials": "L'usuari o la contrasenya no són correctes.",
+  "authEmailInUse": "Ja hi ha un compte amb aquest correu.",
+  "authUsernameInUse": "Aquest nom d'usuari ja està agafat. Prova'n un altre.",
+  "authNetworkError": "No hi ha connexió. Comprova la xarxa i torna-ho a provar.",
+  "authTooManyRequests": "Massa intents seguits. Espera una mica i torna-ho a provar.",
+  "authEmailRequired": "De moment només pots entrar amb el correu electrònic.",
+  "authPopupBlocked": "El navegador ha bloquejat la finestra de Google. Permet les finestres emergents i torna-ho a provar.",
+  "authEmailRequiredField": "Introdueix el correu.",
+  "authEmailInvalid": "El correu no és vàlid.",
+  "authUsernameRequired": "Introdueix un nom d'usuari.",
+  "authUsernameRules": "Entre 3 i 20 caràcters: minúscules, números, punt o guió baix.",
+  "authPasswordRequired": "Introdueix una contrasenya.",
+  "authPasswordMissingLength": "almenys {min} caràcters",
+  "@authPasswordMissingLength": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      }
+    }
+  },
+  "authPasswordMissingUpper": "una majúscula",
+  "authPasswordMissingLower": "una minúscula",
+  "authPasswordMissingDigit": "un número",
+  "authPasswordMissingSpecial": "un caràcter especial",
+  "authPasswordMustHave": "Ha de tenir {requirements}.",
+  "@authPasswordMustHave": {
+    "placeholders": {
+      "requirements": {
+        "type": "String"
+      }
+    }
+  },
+  "authListAnd": "{list} i {last}",
+  "@authListAnd": {
+    "placeholders": {
+      "list": {
+        "type": "String"
+      },
+      "last": {
+        "type": "String"
+      }
+    }
+  },
+  "authRepeatPasswordRequired": "Repeteix la contrasenya.",
+  "authPasswordsDiffer": "Les contrasenyes no coincideixen.",
+  "authUsernameOrEmailRequired": "Introdueix el nom d'usuari o el correu.",
+  "authFirstNameRequired": "Introdueix el nom.",
+  "authLastNameRequired": "Introdueix els cognoms.",
+  "authEmailNotVerified": "Encara no consta que hagis verificat el correu. Obre l'enllaç que t'hem enviat i torna-ho a provar.",
+  "authVerificationSent": "T'hem tornat a enviar el correu.",
+  "loading": "Carregant",
+  "authOr": "o",
+  "authContinueWithGoogle": "Continua amb Google",
+  "authShowPassword": "Mostra la contrasenya",
+  "authHidePassword": "Amaga la contrasenya",
+  "authLoginPasswordRequired": "Introdueix la contrasenya.",
+  "assistantTitle": "Assistent",
+  "assistantAnnouncement": "Assistent: {text}",
+  "@assistantAnnouncement": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "assistantSuggestedQuestion": "Pregunta suggerida: {text}",
+  "@assistantSuggestedQuestion": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "assistantSearching": "Cercant recomanacions",
+  "assistantGoToLast": "Anar a l’últim missatge",
+  "assistantWelcome": "Hola! Sóc l’assistent d’AProp!. Digue’m quin tipus d’activitat busques, a quin municipi i per a quines dates, i et proposaré plans culturals.",
+  "assistantRateError": "No hem pogut desar la valoració. Torna-ho a provar.",
+  "assistantTooManyMessages": "Massa missatges, espera un minut",
+  "assistantReplyError": "No hem pogut obtenir les recomanacions de l’assistent. Torna-ho a provar.",
+  "assistantViewActivity": "Veure activitat: {title}",
+  "@assistantViewActivity": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "assistantVoiceSoon": "Entrada per veu disponible properament",
+  "assistantInputHint": "Escriu una consulta…",
+  "assistantSend": "Enviar",
+  "assistantChipType": "Tipus: {value}",
+  "@assistantChipType": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "assistantChipMunicipality": "Municipi: {value}",
+  "@assistantChipMunicipality": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "assistantChipDates": "Dates: {value}",
+  "@assistantChipDates": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "assistantOpenHome": "Obre Inici",
+  "assistantOpenAgenda": "Obre Agenda",
+  "assistantOpenDiscover": "Obre Descobreix",
+  "assistantOpenNotifications": "Obre Avisos",
+  "assistantOpenProfile": "Obre Perfil",
+  "assistantOpenSettings": "Obre Configuració",
+  "assistantOpenInterestTest": "Obre el test d’interessos",
+  "assistantHelpful": "Resposta útil",
+  "assistantNotHelpful": "Resposta poc útil",
+  "selected": "Seleccionat",
+  "assistantYou": "Tu",
+  "monthName": "{n, select, 1{gener} 2{febrer} 3{març} 4{abril} 5{maig} 6{juny} 7{juliol} 8{agost} 9{setembre} 10{octubre} 11{novembre} 12{desembre} other{}}",
+  "@monthName": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "monthOf": "{n, select, 1{de gener} 2{de febrer} 3{de març} 4{d’abril} 5{de maig} 6{de juny} 7{de juliol} 8{d’agost} 9{de setembre} 10{d’octubre} 11{de novembre} 12{de desembre} other{}}",
+  "@monthOf": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "weekdayName": "{n, select, 1{Dilluns} 2{Dimarts} 3{Dimecres} 4{Dijous} 5{Divendres} 6{Dissabte} 7{Diumenge} other{}}",
+  "@weekdayName": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "weekdayAbbr": "{n, select, 1{Dl} 2{Dt} 3{Dc} 4{Dj} 5{Dv} 6{Ds} 7{Dg} other{}}",
+  "@weekdayAbbr": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "timeOfDay": "{hour}.{minute} h",
+  "@timeOfDay": {
+    "placeholders": {
+      "hour": {
+        "type": "String"
+      },
+      "minute": {
+        "type": "String"
+      }
+    }
+  },
+  "dateLong": "{weekday} {day} {monthOf} de {year}",
+  "@dateLong": {
+    "placeholders": {
+      "weekday": {
+        "type": "String"
+      },
+      "day": {
+        "type": "int"
+      },
+      "monthOf": {
+        "type": "String"
+      },
+      "year": {
+        "type": "int"
+      }
+    }
+  },
+  "dateWithYear": "{day} {monthOf} de {year}",
+  "@dateWithYear": {
+    "placeholders": {
+      "day": {
+        "type": "int"
+      },
+      "monthOf": {
+        "type": "String"
+      },
+      "year": {
+        "type": "int"
+      }
+    }
+  },
+  "dateNoYear": "{day} {monthOf}",
+  "@dateNoYear": {
+    "placeholders": {
+      "day": {
+        "type": "int"
+      },
+      "monthOf": {
+        "type": "String"
+      }
+    }
+  },
+  "monthHeader": "{month} de {year}",
+  "@monthHeader": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      },
+      "year": {
+        "type": "int"
+      }
+    }
+  },
+  "monthYear": "{month} {year}",
+  "@monthYear": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      },
+      "year": {
+        "type": "int"
+      }
+    }
+  },
+  "weekdayDay": "{weekday}, {day} {monthOf}",
+  "@weekdayDay": {
+    "placeholders": {
+      "weekday": {
+        "type": "String"
+      },
+      "day": {
+        "type": "int"
+      },
+      "monthOf": {
+        "type": "String"
+      }
+    }
+  },
+  "scheduleJoin": "{day} · {time}",
+  "@scheduleJoin": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "dateUnknown": "Data no informada",
+  "rangeAll": "Totes les dates",
+  "rangeFromTo": "Del {start} al {end}",
+  "@rangeFromTo": {
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "rangeFromDayTo": "Del {startDay} al {end}",
+  "@rangeFromDayTo": {
+    "placeholders": {
+      "startDay": {
+        "type": "int"
+      },
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "today": "Avui",
+  "yesterday": "Ahir",
+  "notifCategorySocial": "Social",
+  "notifCategoryReminder": "Recordatori",
+  "notifCategoryRecommendation": "Recomanació",
+  "notifCategoryNotice": "Avís",
+  "notifFilterAll": "Tots",
+  "notifFilterReminders": "Recordatoris",
+  "notifFilterRecommendations": "Recomanacions",
+  "notifMessageReminder": "Tens un recordatori cultural.",
+  "notifMessageRecommendation": "Tens una recomanació cultural.",
+  "notifMessageRecommendationFor": "“{title}” et pot interessar.",
+  "@notifMessageRecommendationFor": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "notifMessageSocialAbout": "Avís social sobre “{title}”.",
+  "@notifMessageSocialAbout": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "notifMessageSocialPerson": "Tens un avís social relacionat amb {name}.",
+  "@notifMessageSocialPerson": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "notifMessageSocial": "Tens un nou avís social.",
+  "notifMessageOther": "Tens un nou avís.",
+  "notifMessagePublished": "{name} ha publicat “{title}”.",
+  "@notifMessagePublished": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "notifMessageEnrolled": "{name} s’ha apuntat a “{title}”.",
+  "@notifMessageEnrolled": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "notifMessageFriendRequest": "{name} t’ha enviat una sol·licitud d’amistat.",
+  "@notifMessageFriendRequest": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "notifMessageFriendAccepted": "{name} ha acceptat la teva sol·licitud d’amistat.",
+  "@notifMessageFriendAccepted": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "notifLoading": "Carregant els avisos",
+  "notifEmptyAll": "Encara no tens cap avís",
+  "notifEmptySocial": "Encara no tens avisos socials",
+  "notifEmptyReminders": "Encara no has rebut cap recordatori",
+  "notifEmptyRecommendations": "Encara no has rebut recomanacions",
+  "notifEmptyRemindersHint": "Els recordatoris que configuris a l’agenda apareixeran aquí quan arribi l’hora de l’avís.",
+  "notifEmptySocialHint": "Aquí trobaràs les sol·licituds d’amistat i les novetats dels teus amics.",
+  "notifEmptyRecommendationsHint": "Aquí trobaràs avisos d’activitats que et poden interessar.",
+  "notifEmptyAllHint": "Aquí trobaràs els avisos socials, els recordatoris i les recomanacions que rebis.",
+  "notifSeeAll": "Veure tots els avisos",
+  "notifLoadError": "No hem pogut carregar els avisos. Torna-ho a provar.",
+  "notifMarkReadError": "No hem pogut marcar l’avís com a llegit. Torna-ho a provar.",
+  "notifRespondError": "No hem pogut respondre la sol·licitud. Torna-ho a provar.",
+  "notifRead": "Llegit",
+  "notifUnread": "Sense llegir",
+  "notifHintProfileUnavailable": "Marca l’avís com a llegit. El perfil encara no està disponible.",
+  "notifHintOpenActivity": "Obre l’activitat",
+  "notifHintOpenProfile": "Obre el perfil",
+  "notifHintMarkRead": "Marca l’avís com a llegit",
+  "notifReceivedAt": "Rebut a les {time}",
+  "@notifReceivedAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "notifProfileSoon": "Perfil disponible properament",
+  "notifActivityGone": "L’activitat ja no està disponible.",
+  "notifActivityLoadError": "No s’ha pogut carregar la informació de l’activitat. Pots provar d’obrir-la.",
+  "notifSendingResponse": "Enviant la resposta",
+  "notifAccept": "Acceptar",
+  "notifDecline": "Rebutjar",
+  "notifRequestAccepted": "Sol·licitud acceptada",
+  "notifRequestDeclined": "Sol·licitud rebutjada",
+  "interestTestTitle": "Test d’interessos",
+  "interestTestLoading": "Carregant el test",
+  "interestTestEmpty": "Ara mateix no hi ha activitats per al test.",
+  "interestTestBack": "Tornar",
+  "interestTestDone": "Hem actualitzat els teus interessos. Les recomanacions de «Per a tu» els tindran en compte.",
+  "interestTestBackToSettings": "Tornar a la configuració",
+  "interestTestSaving": "Desant les respostes",
+  "interestTestProgress": "{current} de {total}",
+  "@interestTestProgress": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "interestTestProgressSemantics": "Progrés del test",
+  "interestTestSwipeHint": "Llisca cap a la dreta si t’interessa i cap a l’esquerra si no.",
+  "interestTestLike": "M’interessa",
+  "interestTestDislike": "No m’interessa",
+  "interestTestLoadError": "No hem pogut carregar el test. Torna-ho a provar.",
+  "interestTestSaveError": "No hem pogut desar les respostes. Torna-ho a provar.",
+  "ratingDeleteTitle": "Eliminar la valoració?",
+  "ratingDeleteBody": "La teva valoració s’eliminarà i podràs tornar a valorar l’activitat.",
+  "cancel": "Cancel·la",
+  "delete": "Elimina",
+  "ratingEdit": "Modifica la valoració",
+  "ratingOrganizerRated": "Ja has valorat {name}",
+  "@ratingOrganizerRated": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "ratingOrganizerAsk": "Com ha anat l’organitzador/a {name}?",
+  "@ratingOrganizerAsk": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "ratingActivityRated": "Ja has valorat aquesta activitat",
+  "ratingAsk": "Com t’ha anat?",
+  "ratingCancelEdit": "Cancel·la la modificació",
+  "ratingEditShort": "Modifica",
+  "ratingDelete": "Elimina la valoració",
+  "ratingScore": "Valoració: {score} de 5",
+  "@ratingScore": {
+    "placeholders": {
+      "score": {
+        "type": "int"
+      }
+    }
+  },
+  "ratingStarLabel": "{star, plural, one{Valora amb {star} estrella} other{Valora amb {star} estrelles}}",
+  "@ratingStarLabel": {
+    "placeholders": {
+      "star": {
+        "type": "int"
+      }
+    }
+  },
+  "ratingStarValue": "{star} de 5",
+  "@ratingStarValue": {
+    "placeholders": {
+      "star": {
+        "type": "int"
+      }
+    }
+  },
+  "ratingSaving": "Desant la valoració",
+  "ratingSaveError": "No hem pogut desar la valoració. Torna-ho a provar.",
+  "ratingEditError": "No hem pogut modificar la valoració. Torna-ho a provar.",
+  "ratingDeleteError": "No hem pogut eliminar la valoració. Torna-ho a provar.",
+  "ratingGone": "La valoració ja no existeix.",
+  "agendaLoading": "Carregant la teva agenda",
+  "agendaEmptyDay": "No tens cap pla per a aquest dia.",
+  "agendaEmptyHint": "Apunta’t a activitats des d’Inici i les veuràs aquí.",
+  "agendaLoadError": "No hem pogut carregar la teva agenda. Torna-ho a provar.",
+  "agendaPublishedBy": "Publicat per {name}",
+  "@agendaPublishedBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "agendaSourceOfficial": "Font: Agenda Cultural · Generalitat",
+  "agendaPreviousMonth": "Mes anterior",
+  "agendaNextMonth": "Mes següent",
+  "agendaDayToday": "avui",
+  "agendaDayWithPlans": "amb plans",
+  "agendaDayWithoutPlans": "sense plans",
+  "actCloseFilter": "Tancar el filtre",
+  "actUpdating": "Actualitzant les activitats",
+  "actNoneAvailable": "No hi ha activitats disponibles.",
+  "actLoadingZone": "Carregant les activitats de la zona",
+  "actFilterLocation": "Catalunya",
+  "actFilterDates": "Dates",
+  "actFilterCategories": "Categories",
+  "actClearAllFilters": "Netejar tots els filtres",
+  "actViewMap": "Mapa",
+  "actViewList": "Llista",
+  "actCreate": "Crear activitat",
+  "actCreateSoon": "Crear activitat disponible properament",
+  "actViewSelected": "Vista {label} seleccionada",
+  "@actViewSelected": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "actViewSoon": "Vista {label} disponible properament",
+  "@actViewSoon": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "actViewShow": "Mostrar {label}",
+  "@actViewShow": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "actDetailsTitle": "Activitat",
+  "actEdit": "Edita l’activitat",
+  "actNotFound": "No hem trobat aquesta activitat.",
+  "actAbout": "Sobre l’activitat",
+  "actNoDescription": "Encara no hi ha una descripció disponible.",
+  "actPracticalInfo": "Informació pràctica",
+  "actOriginalLinkSoon": "Enllaç original disponible properament",
+  "actOriginalLink": "Consultar informació original",
+  "actChatSoon": "Xat disponible properament",
+  "actChat": "Xat de l’activitat",
+  "actChatHint": "Parla amb les persones que també s’hi han apuntat.",
+  "actPublishedBy": "Publicat per",
+  "actReliabilityNone": "Fiabilitat de l’organitzador: sense valoracions",
+  "actReliabilityOutOfFive": "Fiabilitat de l’organitzador: {value} sobre 5",
+  "@actReliabilityOutOfFive": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "actReliabilityChip": "Fiabilitat {value}",
+  "@actReliabilityChip": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "actViewProfile": "Veure perfil",
+  "actSearchTitle": "Cerca",
+  "actSearchHint": "Cerca activitats…",
+  "actSearchLabel": "Cerca activitats",
+  "actClearSearch": "Esborrar la cerca",
+  "actSegActivities": "Activitats",
+  "actSegPeople": "Persones",
+  "actSearchPromptTitle": "Quina activitat busques?",
+  "actSearchPromptBody": "Escriu el nom d’una activitat o un municipi.",
+  "actSearching": "Cercant activitats",
+  "actFoundCount": "{count, plural, one{1 activitat trobada} other{{count} activitats trobades}}",
+  "@actFoundCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "actNoResultsTitle": "No hem trobat activitats",
+  "actNoResultsBody": "Prova amb altres paraules.",
+  "actMapLabel": "Mapa d’activitats",
+  "actLegend": "Llegenda",
+  "actLegendOfficial": "Activitat de l’Agenda Cultural",
+  "actLegendCommunity": "Publicada per un usuari",
+  "actLegendFriend": "Publicada per una amistat",
+  "actLegendCluster": "Diverses activitats a prop: toca per veure-les",
+  "actWithoutLocation": "{count, plural, one{1 activitat no té ubicació i només surt a la llista.} other{{count} activitats no tenen ubicació i només surten a la llista.}}",
+  "@actWithoutLocation": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "mapMyLocation": "La meva ubicació",
+  "mapYouAreHere": "On ets tu",
+  "mapLocateError": "No hem pogut trobar on ets. Torna-ho a provar.",
+  "mapLocateDenied": "Per veure on ets, cal que permetis que AProp! faci servir la teva ubicació.",
+  "mapLocateDeniedForever": "Has denegat l’accés a la ubicació. Pots activar-lo a la configuració.",
+  "mapLocateSettings": "Configuració",
+  "mapLocateBrowserDenied": "El navegador no deixa veure on ets. Pots permetre-ho des de la icona del costat de l’adreça.",
+  "mapLocationDisabled": "La ubicació del dispositiu està desactivada.",
+  "mapLocationEnable": "Activar",
+  "actInThisPlace": "{count} activitats en aquest lloc",
+  "@actInThisPlace": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "actPublishedByName": "Publicat per {name}",
+  "@actPublishedByName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "actViewActivity": "Veure activitat",
+  "actFriendBadge": "Amiga",
+  "actCategoriesTitle": "Categories",
+  "actCategoriesSubtitle": "Pots triar més d’una categoria",
+  "categoriesAll": "Totes les categories",
+  "categoriesSelected": "{count, plural, one{1 categoria seleccionada} other{{count} categories seleccionades}}",
+  "@categoriesSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "actCategoriesLoading": "Carregant categories",
+  "actCategoriesEmpty": "No hi ha categories disponibles. Pots consultar totes les activitats.",
+  "actDatesTitle": "Dates",
+  "actDatesSubtitle": "Tria un dia o un interval",
+  "actPresetToday": "Avui",
+  "actPresetTomorrow": "Demà",
+  "actPresetWeekend": "Aquest cap de setmana",
+  "actDayToday": "avui",
+  "actClearFilters": "Netejar filtres",
+  "actNoMatchLoaded": "Cap coincidència entre les activitats carregades",
+  "actNoMatchFilters": "No hi ha activitats amb aquests filtres",
+  "actTryOther": "Prova unes altres dates o categories.",
+  "actNoMatchZone": "No hi ha activitats amb aquests filtres en aquesta zona.",
+  "actUncategorised": "{count, plural, one{1 activitat sense categoria informada no s’inclou en aquest filtre.} other{{count} activitats sense categoria informada no s’inclouen en aquest filtre.}}",
+  "@actUncategorised": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "actSeeListHint": "Consulta la llista per veure els resultats per categoria.",
+  "actSeeList": "Veure llista",
+  "actClear": "Netejar",
+  "actApply": "Aplicar",
+  "actLoadedCount": "{count, plural, one{1 activitat carregada} other{{count} activitats carregades}}",
+  "@actLoadedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "actLoadingMore": "Carregant més activitats",
+  "actLoadMore": "Carregar més activitats",
+  "enrollLeaving": "Desapuntant…",
+  "enrollLeave": "Desapunta’m",
+  "enrollSigningUp": "Apuntant…",
+  "enrollLoading": "Carregant…",
+  "enrollSignUp": "M’hi apunto",
+  "enrollLeavingSemantics": "Desapuntant-te de l’activitat",
+  "enrollSigningUpSemantics": "Apuntant-te a l’activitat",
+  "enrollCheckingSemantics": "Consultant els teus plans",
+  "enrollLeaveTooltip": "Desapuntar-me de {title}",
+  "@enrollLeaveTooltip": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "enrollRecheckTooltip": "Tornar a consultar els teus plans",
+  "enrollSignUpTooltip": "Apuntar-me a {title}",
+  "@enrollSignUpTooltip": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "enrollHelperEnrolled": "Aquest pla ja és a la teva agenda.",
+  "enrollHelperNot": "Afegeix aquest pla a la teva agenda.",
+  "enrollLeftSnack": "T’has desapuntat de «{title}».",
+  "@enrollLeftSnack": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "enrollUndo": "Desfer",
+  "enrollBadge": "Apuntat",
+  "enrollLoadError": "No hem pogut consultar els teus plans. Torna-ho a provar.",
+  "enrollSignUpError": "No t’hi hem pogut apuntar. Torna-ho a provar.",
+  "enrollLeaveError": "No t’hem pogut desapuntar. Torna-ho a provar.",
+  "pickerMapLabel": "Mapa per marcar el lloc de l’activitat",
+  "pickerTapToAdjust": "Toca per ajustar el punt",
+  "startSheetTitle": "Data i hora d’inici",
+  "startSheetError": "L’inici ha de ser posterior a ara.",
+  "endSheetTitle": "Data i hora de fi",
+  "endSheetError": "La fi ha de ser posterior a l’inici.",
+  "wheelDay": "Dia",
+  "wheelMonth": "Mes",
+  "wheelYear": "Any",
+  "wheelTime": "Hora",
+  "done": "Fet",
+  "priceFree": "Gratuït",
+  "actLoadCategoriesError": "No hem pogut carregar les categories.",
+  "actLoadError": "No hem pogut carregar les activitats. Torna-ho a provar.",
+  "actLoadMoreError": "No hem pogut carregar més activitats. Torna-ho a provar.",
+  "actLoadZoneError": "No hem pogut carregar les activitats d’aquesta zona. Torna-ho a provar.",
+  "actLoadDetailError": "No hem pogut carregar l’activitat. Torna-ho a provar.",
+  "actSearchError": "No hem pogut cercar les activitats. Torna-ho a provar.",
+  "discoverSearchField": "Cerca activitats",
+  "discoverLoading": "Carregant propostes",
+  "discoverEmptyTitle": "Encara no hi ha propostes",
+  "discoverEmptyBody": "Pots cercar activitats o tornar-ho a provar més tard.",
+  "discoverForYou": "Per a tu",
+  "discoverByInterests": "Segons els teus interessos",
+  "discoverStarter": "Una selecció per començar",
+  "discoverNoRecommendations": "No hi ha recomanacions disponibles.",
+  "discoverRecommendationsAfterTest": "Les recomanacions estaran disponibles quan hagis completat el test d’interessos.",
+  "discoverRecommendationsError": "No hem pogut carregar les recomanacions.",
+  "discoverFeatured": "Destacats",
+  "discoverNoFeatured": "No hi ha activitats destacades.",
+  "discoverFeaturedError": "No hem pogut carregar les activitats destacades.",
+  "discoverGetToKnowYou": "Coneguem els teus gustos",
+  "discoverLoadError": "No hem pogut carregar les propostes. Torna-ho a provar.",
+  "createLocationEmpty": "Escriu el municipi o toca el mapa per marcar el lloc.",
+  "createLocationApproximate": "Marcador al centre del municipi: toca el lloc exacte.",
+  "createLocationMarked": "Lloc marcat. Pots tornar a tocar el mapa per canviar-lo.",
+  "createTitleEdit": "Edita l’activitat",
+  "createTitleNew": "Crea una activitat",
+  "createFieldTitle": "Títol",
+  "createFieldDescription": "Descripció",
+  "createFieldCategory": "Categoria",
+  "createCategoriesLoading": "Carregant les categories",
+  "createFieldStart": "Data i hora d’inici",
+  "createPickStart": "Tria la data i l’hora",
+  "createFieldEnd": "Data i hora de fi (opcional)",
+  "createRemoveEnd": "Treu la data de fi",
+  "createPickStartFirst": "Tria primer l’inici",
+  "createNoEnd": "Sense data de fi",
+  "createFieldMunicipality": "Municipi (opcional)",
+  "createFieldDirections": "Indicacions (opcional)",
+  "createDirectionsHint": "Per exemple: entrada pel pati, 2n pis",
+  "createFieldPrice": "Preu (opcional)",
+  "createPriceHelperUnknown": "Si el deixes buit, no es canvia. Escriu 0 si és gratuïta.",
+  "createPriceHelper": "Deixa-ho buit si és gratuïta.",
+  "createPublishing": "Publicant",
+  "createSaveChanges": "Desa els canvis",
+  "createPublish": "Publica",
+  "createCoverSemantics": "Imatge de portada. Canvia la imatge",
+  "createChangeImage": "Canvia la imatge",
+  "createCoverTitle": "Imatge de portada",
+  "createUploadSoonTooltip": "Pujar fotos estarà disponible properament",
+  "createUploadSoon": "Puja una foto (properament)",
+  "createOrPickOurs": "O tria una de les nostres",
+  "createImageOption": "Imatge {number}",
+  "@createImageOption": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "createPublishError": "No hem pogut publicar l’activitat. Torna-ho a provar.",
+  "createUpdateError": "No hem pogut desar els canvis. Torna-ho a provar.",
+  "createCategoryRequired": "Tria una categoria.",
+  "createPriceInvalid": "Introdueix un preu vàlid, per exemple 12,50.",
+  "createTitleRequired": "Introdueix el títol.",
+  "createMaxChars": "Màxim {max} caràcters.",
+  "@createMaxChars": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "createDescriptionRequired": "Introdueix una descripció.",
+  "createStartRequired": "Tria la data i l’hora d’inici.",
+  "navHome": "Inici",
+  "navAgenda": "Agenda",
+  "navDiscover": "Descobreix",
+  "navNotifications": "Avisos",
+  "navProfile": "Perfil",
+  "shareDialogBody": "Comparteix el teu nom d’usuari d’AProp!",
+  "shareCancel": "Cancel·lar",
+  "shareCopied": "Nom d’usuari copiat",
+  "shareCopyError": "No hem pogut copiar el nom d’usuari.",
+  "shareCopying": "Copiant…",
+  "shareCopy": "Copiar nom d’usuari",
+  "assistantOpenTooltip": "Obrir l’assistent",
+  "apiTimeout": "El servidor està despertant o triga massa a respondre. Torna-ho a provar.",
+  "apiNetwork": "No s’ha pogut connectar amb el servidor."
+}

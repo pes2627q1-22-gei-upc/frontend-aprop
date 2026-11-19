@@ -2,6 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../formatters/activity_date_formatter.dart';
+import '../../../../core/l10n/date_labels.dart';
+import '../../../../core/l10n/locale_controller.dart';
 
 /// Panell inferior per triar la data i l'hora d'inici amb rodes: dia, mes i
 /// any, i l'hora en intervals de 15 minuts. Retorna el moment triat, o `null`
@@ -13,11 +15,11 @@ Future<DateTime?> showStartDateTimeSheet(
 }) {
   return _showDateTimeSheet(
     context,
-    title: 'Data i hora d’inici',
+    title: context.l10n.startSheetTitle,
     keyPrefix: 'start',
     initial: initial,
     after: now,
-    errorText: 'L’inici ha de ser posterior a ara.',
+    errorText: context.l10n.startSheetError,
   );
 }
 
@@ -30,11 +32,11 @@ Future<DateTime?> showEndDateTimeSheet(
 }) {
   return _showDateTimeSheet(
     context,
-    title: 'Data i hora de fi',
+    title: context.l10n.endSheetTitle,
     keyPrefix: 'end',
     initial: initial,
     after: startsAt,
-    errorText: 'La fi ha de ser posterior a l’inici.',
+    errorText: context.l10n.endSheetError,
   );
 }
 
@@ -205,7 +207,7 @@ class _DateTimeSheetState extends State<_DateTimeSheet> {
                     flex: 2,
                     child: _Wheel(
                       key: ValueKey('${widget.keyPrefix}-day'),
-                      label: 'Dia',
+                      label: context.l10n.wheelDay,
                       controller: _dayController,
                       itemCount: _daysInMonth,
                       itemLabel: (index) => '${index + 1}',
@@ -216,10 +218,10 @@ class _DateTimeSheetState extends State<_DateTimeSheet> {
                     flex: 4,
                     child: _Wheel(
                       key: ValueKey('${widget.keyPrefix}-month'),
-                      label: 'Mes',
+                      label: context.l10n.wheelMonth,
                       controller: _monthController,
                       itemCount: 12,
-                      itemLabel: (index) => catalanMonths[index],
+                      itemLabel: (index) => monthName(index + 1),
                       onChanged: (index) => _updateMonth(month: index + 1),
                     ),
                   ),
@@ -227,7 +229,7 @@ class _DateTimeSheetState extends State<_DateTimeSheet> {
                     flex: 3,
                     child: _Wheel(
                       key: ValueKey('${widget.keyPrefix}-year'),
-                      label: 'Any',
+                      label: context.l10n.wheelYear,
                       controller: _yearController,
                       itemCount: 3,
                       itemLabel: (index) => '${_firstYear + index}',
@@ -243,7 +245,7 @@ class _DateTimeSheetState extends State<_DateTimeSheet> {
               height: _wheelHeight,
               child: _Wheel(
                 key: ValueKey('${widget.keyPrefix}-time'),
-                label: 'Hora',
+                label: context.l10n.wheelTime,
                 controller: _timeController,
                 itemCount: 24 * 60 ~/ _minuteStep,
                 itemLabel: (index) {
@@ -272,7 +274,7 @@ class _DateTimeSheetState extends State<_DateTimeSheet> {
                     style: TextButton.styleFrom(
                       minimumSize: const Size.fromHeight(52),
                     ),
-                    child: const Text('Cancel·la'),
+                    child: Text(context.l10n.cancel),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -285,7 +287,7 @@ class _DateTimeSheetState extends State<_DateTimeSheet> {
                     style: FilledButton.styleFrom(
                       minimumSize: const Size.fromHeight(52),
                     ),
-                    child: const Text('Fet'),
+                    child: Text(context.l10n.done),
                   ),
                 ),
               ],

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 
 import '../../repositories/enrollment_repository.dart';
+import '../../../../core/l10n/locale_controller.dart';
 
 /// How long a plan removed from a list can still be recovered with «Desfer».
 const unenrollUndoDelay = Duration(seconds: 5);
@@ -84,7 +85,7 @@ class EnrollmentViewModel extends ChangeNotifier {
   void _onReadError(int version) {
     if (_isDisposed || version != _subscriptionVersion) return;
     _isLoading = false;
-    _loadError = 'No hem pogut consultar els teus plans. Torna-ho a provar.';
+    _loadError = currentL10n.enrollLoadError;
     notifyListeners();
   }
 
@@ -118,7 +119,7 @@ class EnrollmentViewModel extends ChangeNotifier {
       _errors.remove(activityId);
     } catch (_) {
       if (_isDisposed) return;
-      _errors[activityId] = 'No t’hi hem pogut apuntar. Torna-ho a provar.';
+      _errors[activityId] = currentL10n.enrollSignUpError;
     } finally {
       if (!_isDisposed) {
         _pendingActivityIds.remove(activityId);
@@ -192,8 +193,7 @@ class EnrollmentViewModel extends ChangeNotifier {
       );
     } catch (_) {
       if (_isDisposed) return;
-      _unenrollErrors[activityId] =
-          'No t’hem pogut desapuntar. Torna-ho a provar.';
+      _unenrollErrors[activityId] = currentL10n.enrollLeaveError;
     }
   }
 

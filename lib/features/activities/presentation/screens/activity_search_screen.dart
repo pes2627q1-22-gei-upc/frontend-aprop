@@ -7,6 +7,7 @@ import '../widgets/activity_card.dart';
 import '../widgets/activity_list_pagination.dart';
 import '../widgets/discovery_message.dart';
 import '../widgets/enrollment_action.dart';
+import '../../../../core/l10n/locale_controller.dart';
 
 class ActivitySearchScreen extends StatefulWidget {
   const ActivitySearchScreen({
@@ -59,9 +60,9 @@ class _ActivitySearchScreenState extends State<ActivitySearchScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Cerca'),
+        title: Text(context.l10n.actSearchTitle),
         leading: IconButton(
-          tooltip: 'Tornar enrere',
+          tooltip: context.l10n.goBack,
           onPressed: widget.onBack,
           icon: const Icon(Icons.arrow_back),
         ),
@@ -84,13 +85,13 @@ class _ActivitySearchScreenState extends State<ActivitySearchScreen> {
                   _viewModel.searchNow();
                 },
                 decoration: InputDecoration(
-                  hintText: 'Cerca activitats…',
-                  labelText: 'Cerca activitats',
+                  hintText: context.l10n.actSearchHint,
+                  labelText: context.l10n.actSearchLabel,
                   prefixIcon: const Icon(Icons.search),
                   suffixIcon: _controller.text.isEmpty
                       ? null
                       : IconButton(
-                          tooltip: 'Esborrar la cerca',
+                          tooltip: context.l10n.actClearSearch,
                           constraints: const BoxConstraints(
                             minWidth: 48,
                             minHeight: 48,
@@ -112,14 +113,17 @@ class _ActivitySearchScreenState extends State<ActivitySearchScreen> {
                 // TODO(DP-024): Enable people search only with its real
                 // contract and a usable destination profile.
                 child: SegmentedButton<bool>(
-                  segments: const [
-                    ButtonSegment(value: true, label: Text('Activitats')),
+                  segments: [
+                    ButtonSegment(
+                      value: true,
+                      label: Text(context.l10n.actSegActivities),
+                    ),
                     ButtonSegment(
                       value: false,
                       enabled: false,
                       label: Tooltip(
-                        message: 'Cerca de persones disponible properament',
-                        child: Text('Persones'),
+                        message: context.l10n.profilePeopleSearchSoon,
+                        child: Text(context.l10n.actSegPeople),
                       ),
                     ),
                   ],
@@ -143,17 +147,19 @@ class _ActivitySearchScreenState extends State<ActivitySearchScreen> {
   Widget _buildResults() {
     final query = _viewModel.query.trim();
     if (query.isEmpty) {
-      return const SingleChildScrollView(
+      return SingleChildScrollView(
         child: DiscoveryMessage(
           icon: Icons.search,
-          title: 'Quina activitat busques?',
-          description: 'Escriu el nom d’una activitat o un municipi.',
+          title: context.l10n.actSearchPromptTitle,
+          description: context.l10n.actSearchPromptBody,
         ),
       );
     }
     if (!_viewModel.hasSearched && _viewModel.errorMessage == null) {
-      return const Center(
-        child: CircularProgressIndicator(semanticsLabel: 'Cercant activitats'),
+      return Center(
+        child: CircularProgressIndicator(
+          semanticsLabel: context.l10n.actSearching,
+        ),
       );
     }
     if (_viewModel.errorMessage case final error?
@@ -189,20 +195,16 @@ class _ActivitySearchScreenState extends State<ActivitySearchScreen> {
             sliver: SliverToBoxAdapter(
               child: Semantics(
                 liveRegion: true,
-                child: Text(
-                  _viewModel.totalCount == 1
-                      ? '1 activitat trobada'
-                      : '${_viewModel.totalCount} activitats trobades',
-                ),
+                child: Text(context.l10n.actFoundCount(_viewModel.totalCount)),
               ),
             ),
           ),
           if (results.isEmpty)
-            const SliverToBoxAdapter(
+            SliverToBoxAdapter(
               child: DiscoveryMessage(
                 icon: Icons.search_off,
-                title: 'No hem trobat activitats',
-                description: 'Prova amb altres paraules.',
+                title: context.l10n.actNoResultsTitle,
+                description: context.l10n.actNoResultsBody,
               ),
             )
           else

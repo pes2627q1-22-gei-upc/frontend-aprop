@@ -112,18 +112,15 @@ class UserLocationViewModel extends ChangeNotifier {
     _subscription = _repository.watchPosition().listen(
       (position) {
         _position = position;
-        for (final waiter in _positionWaiters) {
-          waiter.complete(position);
-        }
+        final waiters = List.of(_positionWaiters);
         _positionWaiters.clear();
+        for (final waiter in waiters) {
+          if (!waiter.isCompleted) waiter.complete(position);
+        }
         notifyListeners();
       },
       onError: (Object error) {
-        _stopListening();
-        for (final waiter in _positionWaiters) {
-          waiter.completeError(error);
-        }
-        _positionWaiters.clear();
+        _stopListening(error);
         if (_position != null) {
           _position = null;
           notifyListeners();
@@ -138,9 +135,18 @@ class UserLocationViewModel extends ChangeNotifier {
     return waiter.future;
   }
 
-  void _stopListening() {
+  /// Deixa d'escoltar. Qui esperava una posició (el botó) rep [error] en lloc
+  /// de quedar-se esperant fins que caduqui.
+  void _stopListening([Object? error]) {
     _subscription?.cancel();
     _subscription = null;
+    final waiters = List.of(_positionWaiters);
+    _positionWaiters.clear();
+    for (final waiter in waiters) {
+      if (!waiter.isCompleted) {
+        waiter.completeError(error ?? StateError('Location stopped'));
+      }
+    }
   }
 
   @override

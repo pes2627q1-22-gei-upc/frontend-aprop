@@ -1,5 +1,6 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 
+import '../../../../core/l10n/locale_controller.dart';
 import '../../models/profile_settings.dart';
 import '../../repositories/profile_settings_repository.dart';
 
@@ -8,8 +9,10 @@ class ProfileSettingsViewModel extends ChangeNotifier {
     required this.userId,
     required this.repository,
     required this.onSignOut,
+    this.localeController,
   });
 
+  final LocaleController? localeController;
   final String userId;
   final ProfileSettingsRepository repository;
   final Future<void> Function() onSignOut;
@@ -25,6 +28,7 @@ class ProfileSettingsViewModel extends ChangeNotifier {
   bool supports(ProfilePreference preference) =>
       repository.supportedPreferences.contains(preference);
   bool get persistsPreferences => repository.persistsPreferences;
+  bool get hasLocaleController => localeController != null;
   bool get isLoading => _isLoading;
   bool get isSigningOut => _isSigningOut;
   bool get isBusy => _savingPreference != null || _isSigningOut;
@@ -42,8 +46,7 @@ class ProfileSettingsViewModel extends ChangeNotifier {
       if (!_isDisposed) _settings = result;
     } catch (_) {
       if (!_isDisposed) {
-        _errorMessage =
-            'No hem pogut carregar la configuració. Torna-ho a provar.';
+        _errorMessage = currentL10n.settingsLoadError;
       }
     } finally {
       if (!_isDisposed) {
@@ -77,7 +80,7 @@ class ProfileSettingsViewModel extends ChangeNotifier {
       if (!_isDisposed) _settings = result;
     } catch (_) {
       if (!_isDisposed) {
-        _actionError = 'No hem pogut desar el canvi. Torna-ho a provar.';
+        _actionError = currentL10n.settingsSaveError;
       }
     } finally {
       if (!_isDisposed) {
@@ -85,6 +88,31 @@ class ProfileSettingsViewModel extends ChangeNotifier {
         notifyListeners();
       }
     }
+  }
+
+  /// Applies the language to the whole app at once (and stores it locally),
+  /// then tells the account. A failed sync keeps the new language.
+  int _languageRequest = 0;
+
+  Future<void> changeLanguage(Locale locale) async {
+    final controller = localeController;
+    if (_isDisposed || controller == null) return;
+    final request = ++_languageRequest;
+    _actionError = null;
+    await controller.setLocale(locale);
+    String? error;
+    try {
+      await repository.updateLanguage(
+        userId: userId,
+        language: locale.languageCode,
+      );
+    } catch (_) {
+      error = currentL10n.settingsLanguageSyncError;
+    }
+    // A newer change owns the result; an older one must not overwrite it.
+    if (_isDisposed || request != _languageRequest) return;
+    _actionError = error;
+    notifyListeners();
   }
 
   Future<void> signOut() async {
@@ -96,7 +124,7 @@ class ProfileSettingsViewModel extends ChangeNotifier {
       await onSignOut();
     } catch (_) {
       if (!_isDisposed) {
-        _actionError = 'No hem pogut tancar la sessió. Torna-ho a provar.';
+        _actionError = currentL10n.settingsSignOutError;
       }
     } finally {
       if (!_isDisposed) {

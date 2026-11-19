@@ -15,6 +15,7 @@ import '../widgets/activity_date_filter_sheet.dart';
 import '../widgets/activity_filter_feedback.dart';
 import '../widgets/activity_list_pagination.dart';
 import '../widgets/enrollment_action.dart';
+import '../../../../core/l10n/locale_controller.dart';
 
 class ActivitiesScreen extends StatefulWidget {
   const ActivitiesScreen({
@@ -103,7 +104,7 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
       useSafeArea: true,
       showDragHandle: true,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      barrierLabel: 'Tancar el filtre',
+      barrierLabel: context.l10n.actCloseFilter,
     );
     // Mentre el panell és obert, el mapa de sota no respon (#255).
     setState(() => _activeFilterRoute = route);
@@ -273,7 +274,7 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
                   const SizedBox(height: 16),
                   FilledButton(
                     onPressed: viewModel.load,
-                    child: const Text('Tornar-ho a provar'),
+                    child: Text(context.l10n.retry),
                   ),
                 ],
               ),
@@ -321,7 +322,7 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
                 Semantics(liveRegion: true, child: Text(errorMessage)),
                 TextButton(
                   onPressed: viewModel.load,
-                  child: const Text('Tornar-ho a provar'),
+                  child: Text(context.l10n.retry),
                 ),
               ],
             ),
@@ -331,9 +332,7 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
         return Column(
           children: [
             if (viewModel.isLoading)
-              const LinearProgressIndicator(
-                semanticsLabel: 'Actualitzant les activitats',
-              ),
+              LinearProgressIndicator(semanticsLabel: context.l10n.actUpdating),
             Expanded(
               child: RefreshIndicator(
                 onRefresh: viewModel.load,
@@ -370,10 +369,10 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
                           scrollable: false,
                         );
                       }
-                      return const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 32),
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 32),
                         child: Text(
-                          'No hi ha activitats disponibles.',
+                          context.l10n.actNoneAvailable,
                           textAlign: TextAlign.center,
                         ),
                       );
@@ -430,12 +429,12 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
                 ),
               ),
               if (mapViewModel.isLoading)
-                const Positioned(
+                Positioned(
                   top: 0,
                   left: 0,
                   right: 0,
                   child: LinearProgressIndicator(
-                    semanticsLabel: 'Carregant les activitats de la zona',
+                    semanticsLabel: context.l10n.actLoadingZone,
                   ),
                 ),
               if (errorMessage != null)
@@ -493,10 +492,7 @@ class _MapErrorBanner extends StatelessWidget {
           children: [
             Expanded(child: Text(message)),
             const SizedBox(width: 8),
-            TextButton(
-              onPressed: onRetry,
-              child: const Text('Tornar-ho a provar'),
-            ),
+            TextButton(onPressed: onRetry, child: Text(context.l10n.retry)),
           ],
         ),
       ),

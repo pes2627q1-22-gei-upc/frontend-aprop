@@ -5,6 +5,7 @@ import '../view_models/verify_email_view_model.dart';
 import '../widgets/auth_link_prompt.dart';
 import '../widgets/auth_status_message.dart';
 import '../widgets/auth_submit_button.dart';
+import '../../../../core/l10n/locale_controller.dart';
 
 /// Pantalla de bloqueig: es mostra mentre l'usuari de la sessió no ha
 /// verificat el correu.
@@ -65,7 +66,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                       ),
                       const SizedBox(height: 24),
                       Text(
-                        'Verifica el teu correu',
+                        context.l10n.authVerifyTitle,
                         style: theme.textTheme.headlineSmall?.copyWith(
                           color: theme.colorScheme.primary,
                           fontWeight: FontWeight.w700,
@@ -74,7 +75,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                       const SizedBox(height: 8),
                       Text.rich(
                         TextSpan(
-                          text: "T'hem enviat un enllaç a ",
+                          text: '${context.l10n.authVerifySentTo} ',
                           children: [
                             TextSpan(
                               text: widget.email,
@@ -82,11 +83,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
-                            const TextSpan(
-                              text:
-                                  ". Obre'l per activar el compte i després "
-                                  'torna aquí.',
-                            ),
+                            TextSpan(text: context.l10n.authVerifyOpenIt),
                           ],
                         ),
                         style: TextStyle(
@@ -103,7 +100,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                         const SizedBox(height: 12),
                       ],
                       AuthSubmitButton(
-                        label: "Ja l'he verificat",
+                        label: context.l10n.authAlreadyVerified,
                         isLoading: _viewModel.isChecking,
                         onPressed: _viewModel.checkVerification,
                       ),
@@ -119,15 +116,15 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                         // entre dues línies amb la lletra gran.
                         child: Text(
                           secondsLeft > 0
-                              ? 'Torna a enviar el correu ($secondsLeft s)'
-                              : 'Torna a enviar el correu',
+                              ? context.l10n.authResendEmailIn(secondsLeft)
+                              : context.l10n.authResendEmail,
                           textAlign: TextAlign.center,
                         ),
                       ),
                       const SizedBox(height: 24),
                       AuthLinkPrompt(
-                        question: "T'has equivocat de correu?",
-                        label: 'Tanca la sessió',
+                        question: context.l10n.authWrongEmail,
+                        label: context.l10n.authSignOutLink,
                         onPressed: _viewModel.signOut,
                       ),
                     ],

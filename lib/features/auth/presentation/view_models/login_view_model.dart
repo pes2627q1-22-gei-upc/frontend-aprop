@@ -4,6 +4,7 @@ import '../../models/auth_failure.dart';
 import '../../repositories/auth_repository.dart';
 import 'auth_failure_message.dart';
 import 'auth_validators.dart';
+import '../../../../core/l10n/locale_controller.dart';
 
 enum LoginField { usernameOrEmail, password }
 
@@ -49,11 +50,11 @@ class LoginViewModel extends ChangeNotifier {
       ..addAll({
         LoginField.usernameOrEmail: ?AuthValidators.notEmpty(
           usernameOrEmail,
-          message: "Introdueix el nom d'usuari o el correu.",
+          message: currentL10n.authUsernameOrEmailRequired,
         ),
         LoginField.password: ?AuthValidators.notEmpty(
           password,
-          message: 'Introdueix la contrasenya.',
+          message: currentL10n.authLoginPasswordRequired,
         ),
       });
 

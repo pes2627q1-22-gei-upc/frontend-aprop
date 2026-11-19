@@ -98,7 +98,7 @@ class HttpProfileRepository implements ProfileRepository {
         maximumBodyBytes: ProfileAvatar.maxBytes,
       );
     } on MultipartBodyTooLargeException {
-      throw const AvatarSelectionException('Tria una foto de menys de 5 MB.');
+      throw const AvatarSelectionException(AvatarProblem.tooBig);
     }
     final profile = profileFromJson(validateOwnProfile(decoded, user.id), user);
     if (profile.avatarUrl == null) {

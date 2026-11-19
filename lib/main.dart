@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import 'app/aprop_app.dart';
 import 'core/config/api_config.dart';
+import 'core/l10n/locale_controller.dart';
 import 'core/network/api_client.dart';
 import 'features/activities/data/geolocator_user_location_repository.dart';
 import 'features/activities/data/http_activity_map_repository.dart';
@@ -36,23 +37,28 @@ Future<APropApp> createConfiguredApp() async {
   final authRepository = await _createAuthRepository();
   // La ubicació no depèn del backend: també funciona amb les demostracions.
   const userLocationRepository = GeolocatorUserLocationRepository();
+  final localeController = LocaleController();
+  await localeController.load();
 
   if (!ApiConfig.isConfigured) {
     return APropApp(
       authRepository: authRepository,
       userLocationRepository: userLocationRepository,
+      localeController: localeController,
     );
   }
 
   final apiClient = ApiClient(
     baseUrl: Uri.parse(ApiConfig.baseUrl),
     idToken: authRepository.currentIdToken,
+    language: () => localeController.locale.languageCode,
   );
 
   final activityRepository = HttpActivityRepository(apiClient: apiClient);
 
   return APropApp(
     authRepository: authRepository,
+    localeController: localeController,
     activityRepository: activityRepository,
     activityCategoryRepository: activityRepository,
     activityMapRepository: HttpActivityMapRepository(apiClient: apiClient),

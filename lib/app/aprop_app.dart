@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
+import '../core/l10n/locale_controller.dart';
+import '../l10n/app_localizations.dart';
 import '../features/activities/repositories/activity_category_repository.dart';
 import '../features/activities/repositories/activity_map_repository.dart';
 import '../features/activities/repositories/activity_repository.dart';
@@ -32,7 +35,11 @@ class APropApp extends StatelessWidget {
     this.interestTestRepository,
     this.activityCategoryRepository,
     this.userLocationRepository,
+    this.localeController,
   });
+
+  /// Drives the UI language. Without one the app stays in Catalan.
+  final LocaleController? localeController;
 
   final AuthRepository authRepository;
 
@@ -86,11 +93,29 @@ class APropApp extends StatelessWidget {
       userLocationRepository: userLocationRepository,
     );
 
-    return MaterialApp(
-      title: 'AProp!',
+    final controller = localeController;
+    Widget app(Locale locale) => MaterialApp(
+      onGenerateTitle: (context) => context.l10n.appTitle,
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
+      locale: locale,
+      supportedLocales: AppLocalizations.supportedLocales,
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      builder: controller == null
+          ? null
+          : (context, child) =>
+                LocaleScope(controller: controller, child: child!),
       home: authGate,
+    );
+    if (controller == null) return app(LocaleController.defaultLocale);
+    return ListenableBuilder(
+      listenable: controller,
+      builder: (context, _) => app(controller.locale),
     );
   }
 }

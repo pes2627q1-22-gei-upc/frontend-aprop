@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/widgets/content_image.dart';
 
 import '../../../activities/models/activity.dart';
+import '../../../../core/l10n/locale_controller.dart';
 
 class ProfileActivityTile extends StatelessWidget {
   const ProfileActivityTile({
@@ -23,7 +24,10 @@ class ProfileActivityTile extends StatelessWidget {
       button: true,
       onTap: onTap,
       label:
-          'Veure activitat: ${activity.title}${rating == null ? '' : '. Valoració: $rating de 5'}',
+          context.l10n.profileActivityViewLabel(activity.title) +
+          (rating == null
+              ? ''
+              : '. ${context.l10n.profileActivityRatingSuffix(rating!)}'),
       child: ExcludeSemantics(
         child: Material(
           clipBehavior: Clip.antiAlias,
