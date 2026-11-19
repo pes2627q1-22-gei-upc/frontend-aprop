@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import '../../models/activity_filters.dart';
 import '../formatters/activity_date_formatter.dart';
 import '../formatters/activity_filter_formatter.dart';
+import '../../../../core/l10n/date_labels.dart';
+import '../../../../core/l10n/locale_controller.dart';
 
 class ActivityFilterCalendar extends StatelessWidget {
   const ActivityFilterCalendar({
@@ -33,7 +35,7 @@ class ActivityFilterCalendar extends StatelessWidget {
         Row(
           children: [
             IconButton(
-              tooltip: 'Mes anterior',
+              tooltip: context.l10n.agendaPreviousMonth,
               onPressed: () =>
                   onMonthChanged(DateTime(month.year, month.month - 1)),
               icon: const Icon(Icons.chevron_left),
@@ -46,7 +48,7 @@ class ActivityFilterCalendar extends StatelessWidget {
               ),
             ),
             IconButton(
-              tooltip: 'Mes següent',
+              tooltip: context.l10n.agendaNextMonth,
               onPressed: () =>
                   onMonthChanged(DateTime(month.year, month.month + 1)),
               icon: const Icon(Icons.chevron_right),
@@ -64,14 +66,9 @@ class ActivityFilterCalendar extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        for (final label in const [
-                          'Dl',
-                          'Dt',
-                          'Dc',
-                          'Dj',
-                          'Dv',
-                          'Ds',
-                          'Dg',
+                        for (final label in [
+                          for (var day = 1; day <= 7; day++)
+                            weekdayAbbreviation(day),
                         ])
                           Expanded(
                             child: SizedBox(
@@ -119,7 +116,8 @@ class ActivityFilterCalendar extends StatelessWidget {
       key: ValueKey('activity-filter-date-${day.year}-${day.month}-$number'),
       button: true,
       selected: selected,
-      label: '${formatActivityDate(day)}${isToday ? ', avui' : ''}',
+      label:
+          '${formatActivityDate(day)}${isToday ? ', ${context.l10n.actDayToday}' : ''}',
       onTap: () => onDateSelected(day),
       child: ExcludeSemantics(
         child: InkWell(

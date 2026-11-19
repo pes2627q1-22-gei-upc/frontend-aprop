@@ -6,6 +6,7 @@ import '../../../../core/widgets/content_image.dart';
 import '../../models/user_profile.dart';
 import '../formatters/profile_level_formatter.dart';
 import 'profile_palette.dart';
+import '../../../../core/l10n/locale_controller.dart';
 
 class ProfileHeader extends StatelessWidget {
   const ProfileHeader({
@@ -31,15 +32,22 @@ class ProfileHeader extends StatelessWidget {
     final palette = theme.extension<ProfilePalette>()!;
     final statistics = Row(
       children: [
-        _Statistic(value: '${profile.displayedPlanCount}', label: 'Plans'),
-        _Statistic(value: '${profile.friendCount}', label: 'Amics'),
+        _Statistic(
+          value: '${profile.displayedPlanCount}',
+          label: context.l10n.statPlans,
+        ),
+        _Statistic(
+          value: '${profile.friendCount}',
+          label: context.l10n.statFriends,
+        ),
         _Statistic(
           value: formatReliability(profile.organizerRating),
-          label: 'Valoració',
+          label: context.l10n.statRating,
           semanticsLabel: profile.organizerRating == null
-              ? 'Fiabilitat com a organitzador: sense valoracions'
-              : 'Fiabilitat com a organitzador: '
-                    '${formatReliability(profile.organizerRating)} sobre 5',
+              ? context.l10n.reliabilityNone
+              : context.l10n.reliabilityOutOfFive(
+                  formatReliability(profile.organizerRating),
+                ),
           star: profile.organizerRating != null,
         ),
       ],
@@ -64,7 +72,9 @@ class ProfileHeader extends StatelessWidget {
                           )
                         : const Icon(Icons.photo_camera_outlined),
                     label: Text(
-                      isChangingAvatar ? 'Canviant…' : 'Canviar foto',
+                      isChangingAvatar
+                          ? context.l10n.changing
+                          : context.l10n.changePhoto,
                     ),
                   ),
               ],
@@ -148,15 +158,18 @@ class ProfileHeader extends StatelessWidget {
                     borderRadius: BorderRadius.circular(14),
                   ),
                 ),
-                child: const Text('Editar perfil', textAlign: TextAlign.center),
+                child: Text(
+                  context.l10n.editProfileTitle,
+                  textAlign: TextAlign.center,
+                ),
               ),
             ),
             const SizedBox(width: 8),
             Expanded(
               child: Tooltip(
                 message: onShare == null
-                    ? 'Cal un nom d’usuari per compartir el perfil'
-                    : 'Compartir el nom d’usuari',
+                    ? context.l10n.shareNeedsUsername
+                    : context.l10n.shareUsername,
                 child: OutlinedButton(
                   onPressed: onShare,
                   style: OutlinedButton.styleFrom(
@@ -165,8 +178,8 @@ class ProfileHeader extends StatelessWidget {
                       borderRadius: BorderRadius.circular(14),
                     ),
                   ),
-                  child: const Text(
-                    'Compartir perfil',
+                  child: Text(
+                    context.l10n.shareProfile,
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -252,7 +265,7 @@ class _ProfileAvatar extends StatelessWidget {
               child: ContentImage(
                 url: profile.avatarUrl,
                 asset: profile.avatarAsset,
-                label: 'Foto de ${profile.displayName}',
+                label: context.l10n.photoOf(profile.displayName),
                 placeholderIcon: Icons.person_outline,
               ),
             ),

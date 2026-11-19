@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import 'app/aprop_app.dart';
 import 'core/config/api_config.dart';
+import 'core/l10n/locale_controller.dart';
 import 'core/network/api_client.dart';
 import 'features/activities/data/http_activity_map_repository.dart';
 import 'features/activities/data/http_activity_repository.dart';
@@ -33,20 +34,27 @@ Future<void> main() async {
 /// quan [ApiConfig.isConfigured] és cert, o els de demostració altrament.
 Future<APropApp> createConfiguredApp() async {
   final authRepository = await _createAuthRepository();
+  final localeController = LocaleController();
+  await localeController.load();
 
   if (!ApiConfig.isConfigured) {
-    return APropApp(authRepository: authRepository);
+    return APropApp(
+      authRepository: authRepository,
+      localeController: localeController,
+    );
   }
 
   final apiClient = ApiClient(
     baseUrl: Uri.parse(ApiConfig.baseUrl),
     idToken: authRepository.currentIdToken,
+    language: () => localeController.locale.languageCode,
   );
 
   final activityRepository = HttpActivityRepository(apiClient: apiClient);
 
   return APropApp(
     authRepository: authRepository,
+    localeController: localeController,
     activityRepository: activityRepository,
     activityCategoryRepository: activityRepository,
     activityMapRepository: HttpActivityMapRepository(apiClient: apiClient),

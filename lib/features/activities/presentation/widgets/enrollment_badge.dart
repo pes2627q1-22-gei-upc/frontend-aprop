@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../view_models/enrollment_view_model.dart';
+import '../../../../core/l10n/locale_controller.dart';
 
 /// Distintiu «Apuntat»: indica que l'activitat és a l'agenda de l'usuari. No
 /// fa res en tocar-lo; per desapuntar-se hi ha el botó de [EnrollmentAction].
@@ -26,7 +27,7 @@ class EnrolledBadge extends StatelessWidget {
             const SizedBox(width: 4),
             Flexible(
               child: Text(
-                'Apuntat',
+                context.l10n.enrollBadge,
                 style: theme.textTheme.labelMedium?.copyWith(
                   color: colors.primary,
                   fontWeight: FontWeight.w700,

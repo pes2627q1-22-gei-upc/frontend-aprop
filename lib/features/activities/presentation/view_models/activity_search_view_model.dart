@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 
 import '../../models/activity.dart';
 import '../../repositories/discovery_repository.dart';
+import '../../../../core/l10n/locale_controller.dart';
 
 class ActivitySearchViewModel extends ChangeNotifier {
   ActivitySearchViewModel({
@@ -76,7 +77,7 @@ class ActivitySearchViewModel extends ChangeNotifier {
       _hasSearched = true;
     } catch (_) {
       if (_isDisposed || revision != _revision) return;
-      _errorMessage = 'No hem pogut cercar les activitats. Torna-ho a provar.';
+      _errorMessage = currentL10n.actSearchError;
     } finally {
       if (!_isDisposed && revision == _revision) {
         _isSearching = false;
@@ -108,7 +109,7 @@ class ActivitySearchViewModel extends ChangeNotifier {
       _nextPage = result.nextPage;
     } catch (_) {
       if (!_isDisposed && revision == _revision) {
-        _pageError = 'No hem pogut carregar més activitats. Torna-ho a provar.';
+        _pageError = currentL10n.actLoadMoreError;
       }
     } finally {
       if (!_isDisposed && revision == _revision) {

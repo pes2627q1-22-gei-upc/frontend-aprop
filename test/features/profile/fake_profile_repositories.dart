@@ -119,8 +119,21 @@ class FakeProfileSettingsRepository implements ProfileSettingsRepository {
   )?
   onUpdate;
   final users = <String>[];
+  final languages = <String>[];
+  Object? languageError;
+  Future<void>? Function(String language)? onUpdateLanguage;
   final updates =
       <({String userId, ProfilePreference preference, bool enabled})>[];
+
+  @override
+  Future<void> updateLanguage({
+    required String userId,
+    required String language,
+  }) async {
+    languages.add(language);
+    await onUpdateLanguage?.call(language);
+    if (languageError case final error?) throw error;
+  }
 
   @override
   Future<ProfileSettings> getSettings(String userId) {

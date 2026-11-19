@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/locale_controller.dart';
+
 /// Draft content can scroll; confirmation actions stay above the safe area.
 class ActivityFilterSheet extends StatelessWidget {
   const ActivityFilterSheet({
@@ -53,7 +55,7 @@ class ActivityFilterSheet extends StatelessWidget {
                     ),
                   ),
                   IconButton(
-                    tooltip: 'Tancar el filtre',
+                    tooltip: context.l10n.actCloseFilter,
                     onPressed: () {
                       if (ModalRoute.of(context)?.isCurrent ?? false) {
                         Navigator.of(context).pop();
@@ -100,11 +102,11 @@ class ActivityFilterSheet extends StatelessWidget {
                 builder: (context, constraints) {
                   final clear = OutlinedButton(
                     onPressed: onClear,
-                    child: const Text('Netejar'),
+                    child: Text(context.l10n.actClear),
                   );
                   final apply = FilledButton(
                     onPressed: onApply,
-                    child: const Text('Aplicar'),
+                    child: Text(context.l10n.actApply),
                   );
                   final style = ButtonStyle(
                     minimumSize: const WidgetStatePropertyAll(Size(0, 48)),

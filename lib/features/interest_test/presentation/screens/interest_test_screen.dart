@@ -4,6 +4,7 @@ import '../../../../core/widgets/content_image.dart';
 import '../../models/interest_question.dart';
 import '../../repositories/interest_test_repository.dart';
 import '../view_models/interest_test_view_model.dart';
+import '../../../../core/l10n/locale_controller.dart';
 
 /// Shows the test activities one by one: swipe right if it interests the
 /// user, left if it does not. Buttons offer the same choice without swiping.
@@ -33,10 +34,10 @@ class _InterestTestScreenState extends State<InterestTestScreen> {
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(
-      title: const Text('Test d’interessos'),
+      title: Text(context.l10n.interestTestTitle),
       centerTitle: true,
       leading: IconButton(
-        tooltip: 'Tornar enrere',
+        tooltip: context.l10n.goBack,
         onPressed: widget.onBack,
         icon: const Icon(Icons.arrow_back),
       ),
@@ -54,28 +55,30 @@ class _InterestTestScreenState extends State<InterestTestScreen> {
 
   Widget _body(BuildContext context, InterestTestViewModel model) {
     if (model.isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(semanticsLabel: 'Carregant el test'),
+      return Center(
+        child: CircularProgressIndicator(
+          semanticsLabel: context.l10n.interestTestLoading,
+        ),
       );
     }
     if (model.errorMessage case final error?) {
       return _Message(
         text: error,
-        action: 'Tornar-ho a provar',
+        action: context.l10n.retry,
         onPressed: model.load,
       );
     }
     if (model.questions.isEmpty) {
       return _Message(
-        text: 'Ara mateix no hi ha activitats per al test.',
-        action: 'Tornar',
+        text: context.l10n.interestTestEmpty,
+        action: context.l10n.interestTestBack,
         onPressed: widget.onBack,
       );
     }
     if (model.isCompleted) {
       return _Message(
-        text: 'Hem actualitzat els teus interessos. Les recomanacions de «Per a tu» els tindran en compte.',
-        action: 'Tornar a la configuració',
+        text: context.l10n.interestTestDone,
+        action: context.l10n.interestTestBackToSettings,
         onPressed: widget.onBack,
       );
     }
@@ -84,13 +87,13 @@ class _InterestTestScreenState extends State<InterestTestScreen> {
       if (model.submitError case final error?) {
         return _Message(
           text: error,
-          action: 'Tornar-ho a provar',
+          action: context.l10n.retry,
           onPressed: model.submit,
         );
       }
-      return const Center(
+      return Center(
         child: CircularProgressIndicator(
-          semanticsLabel: 'Desant les respostes',
+          semanticsLabel: context.l10n.interestTestSaving,
         ),
       );
     }
@@ -100,20 +103,20 @@ class _InterestTestScreenState extends State<InterestTestScreen> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          '${model.answeredCount + 1} de ${model.questions.length}',
+          context.l10n.interestTestProgress(
+            model.answeredCount + 1,
+            model.questions.length,
+          ),
           textAlign: TextAlign.center,
           style: Theme.of(context).textTheme.labelLarge,
         ),
         const SizedBox(height: 8),
         LinearProgressIndicator(
           value: model.answeredCount / model.questions.length,
-          semanticsLabel: 'Progrés del test',
+          semanticsLabel: context.l10n.interestTestProgressSemantics,
         ),
         const SizedBox(height: 8),
-        const Text(
-          'Llisca cap a la dreta si t’interessa i cap a l’esquerra si no.',
-          textAlign: TextAlign.center,
-        ),
+        Text(context.l10n.interestTestSwipeHint, textAlign: TextAlign.center),
         const SizedBox(height: 16),
         Expanded(
           child: Dismissible(
@@ -123,13 +126,13 @@ class _InterestTestScreenState extends State<InterestTestScreen> {
                 model.answer(likes: direction == DismissDirection.startToEnd),
             background: _SwipeHint(
               icon: Icons.favorite,
-              label: 'M’interessa',
+              label: context.l10n.interestTestLike,
               color: colors.primary,
               alignment: Alignment.centerLeft,
             ),
             secondaryBackground: _SwipeHint(
               icon: Icons.close,
-              label: 'No m’interessa',
+              label: context.l10n.interestTestDislike,
               color: colors.error,
               alignment: Alignment.centerRight,
             ),
@@ -144,7 +147,7 @@ class _InterestTestScreenState extends State<InterestTestScreen> {
                 key: const ValueKey('interest-test-dislike'),
                 onPressed: () => model.answer(likes: false),
                 icon: const Icon(Icons.close),
-                label: const Text('No m’interessa'),
+                label: Text(context.l10n.interestTestDislike),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: colors.error,
                   minimumSize: const Size(48, 48),
@@ -157,7 +160,7 @@ class _InterestTestScreenState extends State<InterestTestScreen> {
                 key: const ValueKey('interest-test-like'),
                 onPressed: () => model.answer(likes: true),
                 icon: const Icon(Icons.favorite),
-                label: const Text('M’interessa'),
+                label: Text(context.l10n.interestTestLike),
                 style: FilledButton.styleFrom(minimumSize: const Size(48, 48)),
               ),
             ),

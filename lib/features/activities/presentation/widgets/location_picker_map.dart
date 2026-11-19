@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import '../../models/geo_point.dart';
+import '../../../../core/l10n/locale_controller.dart';
 
 const _markerId = MarkerId('activity-location');
 const _overviewZoom = 7.0;
@@ -55,7 +56,7 @@ class _LocationPickerMapState extends State<LocationPickerMap> {
     final location = widget.location;
 
     return Semantics(
-      label: 'Mapa per marcar el lloc de l’activitat',
+      label: context.l10n.pickerMapLabel,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(16),
         child: SizedBox(
@@ -105,7 +106,7 @@ class _LocationPickerMapState extends State<LocationPickerMap> {
                         vertical: 6,
                       ),
                       child: Text(
-                        'Toca per ajustar el punt',
+                        context.l10n.pickerTapToAdjust,
                         style: theme.textTheme.labelMedium,
                       ),
                     ),

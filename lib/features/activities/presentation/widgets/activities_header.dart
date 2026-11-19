@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/widgets/aprop_logo.dart';
+import '../../../../core/l10n/locale_controller.dart';
 
 enum ActivitiesView { map, list }
 
@@ -48,20 +49,20 @@ class ActivitiesHeader extends StatelessWidget {
             builder: (context, constraints) {
               final filters = [
                 _FilterButton(
-                  label: 'Catalunya',
+                  label: context.l10n.actFilterLocation,
                   icon: Icons.location_on_outlined,
                   onPressed: onLocationPressed,
                 ),
                 _FilterButton(
                   key: const ValueKey('activities-filter-dates'),
-                  label: 'Dates',
+                  label: context.l10n.actFilterDates,
                   icon: Icons.calendar_month_outlined,
                   onPressed: onDatesPressed,
                   selected: datesSelected,
                 ),
                 _FilterButton(
                   key: const ValueKey('activities-filter-categories'),
-                  label: 'Categories',
+                  label: context.l10n.actFilterCategories,
                   icon: Icons.sell_outlined,
                   onPressed: onCategoriesPressed,
                   selected: categoriesSelected,
@@ -92,7 +93,7 @@ class ActivitiesHeader extends StatelessWidget {
                 Expanded(child: Text(summary)),
                 IconButton(
                   onPressed: onClearFilters,
-                  tooltip: 'Netejar tots els filtres',
+                  tooltip: context.l10n.actClearAllFilters,
                   icon: const Icon(Icons.filter_alt_off_outlined),
                 ),
               ],
@@ -110,7 +111,7 @@ class ActivitiesHeader extends StatelessWidget {
                 children: [
                   Expanded(
                     child: _ViewButton(
-                      label: 'Mapa',
+                      label: context.l10n.actViewMap,
                       icon: Icons.map_outlined,
                       selected: selectedView == ActivitiesView.map,
                       onPressed: onMapPressed,
@@ -118,7 +119,7 @@ class ActivitiesHeader extends StatelessWidget {
                   ),
                   Expanded(
                     child: _ViewButton(
-                      label: 'Llista',
+                      label: context.l10n.actViewList,
                       icon: Icons.format_list_bulleted,
                       selected: selectedView == ActivitiesView.list,
                       onPressed: onListPressed,
@@ -145,8 +146,8 @@ class _ActivitiesBrand extends StatelessWidget {
     final create = IconButton.filledTonal(
       onPressed: onCreatePressed,
       tooltip: onCreatePressed == null
-          ? 'Crear activitat disponible properament'
-          : 'Crear activitat',
+          ? context.l10n.actCreateSoon
+          : context.l10n.actCreate,
       constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
       style: IconButton.styleFrom(
         disabledBackgroundColor: colors.primaryContainer,
@@ -185,7 +186,9 @@ class _FilterButton extends StatelessWidget {
     return Semantics(
       selected: selected,
       child: Tooltip(
-        message: onPressed == null ? '$label disponible properament' : label,
+        message: onPressed == null
+            ? context.l10n.comingSoonTitled(label)
+            : label,
         child: OutlinedButton(
           onPressed: onPressed,
           style: OutlinedButton.styleFrom(
@@ -240,10 +243,10 @@ class _ViewButton extends StatelessWidget {
       selected: selected,
       child: Tooltip(
         message: selected
-            ? 'Vista $label seleccionada'
+            ? context.l10n.actViewSelected(label)
             : onPressed == null
-            ? 'Vista $label disponible properament'
-            : 'Mostrar $label',
+            ? context.l10n.actViewSoon(label)
+            : context.l10n.actViewShow(label),
         child: TextButton.icon(
           onPressed: onPressed,
           icon: Icon(icon, size: 20),

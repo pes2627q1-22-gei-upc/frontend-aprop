@@ -3,28 +3,21 @@ import 'package:flutter/foundation.dart';
 import '../../../../core/network/api_client.dart';
 import '../../models/assistant_message.dart';
 import '../../repositories/assistant_repository.dart';
+import '../../../../core/l10n/locale_controller.dart';
 
 class AssistantViewModel extends ChangeNotifier {
   AssistantViewModel({required this._repository, DateTime Function()? clock})
     : _clock = clock ?? DateTime.now {
-    _messages = List.unmodifiable([
-      AssistantMessage.assistant(
-        id: 'assistant-welcome',
-        text: welcomeText,
-        sentAt: _clock(),
-      ),
-    ]);
+    _welcomeSentAt = _clock();
   }
 
-  static const welcomeText =
-      'Hola! Sóc l’assistent d’AProp!. Digue’m quin tipus d’activitat '
-      'busques, a quin municipi i per a quines dates, i et proposaré plans '
-      'culturals.';
+  static String get welcomeText => currentL10n.assistantWelcome;
 
   final AssistantRepository _repository;
   final DateTime Function() _clock;
 
-  late List<AssistantMessage> _messages;
+  late final DateTime _welcomeSentAt;
+  List<AssistantMessage> _messages = const [];
   bool _isLoading = false;
   bool _isDisposed = false;
   String? _errorMessage;
@@ -37,7 +30,15 @@ class AssistantViewModel extends ChangeNotifier {
   final Set<String> _rating = {};
   String? _feedbackError;
 
-  List<AssistantMessage> get messages => _messages;
+  /// The welcome is built here so it follows the current language.
+  List<AssistantMessage> get messages => [
+    AssistantMessage.assistant(
+      id: 'assistant-welcome',
+      text: welcomeText,
+      sentAt: _welcomeSentAt,
+    ),
+    ..._messages,
+  ];
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
@@ -70,7 +71,8 @@ class AssistantViewModel extends ChangeNotifier {
   }
 
   /// Loads the quick replies once; failure just means no chips.
-  Future<void> loadSuggestions({String lang = 'ca'}) async {
+  Future<void> loadSuggestions({String? lang}) async {
+    lang ??= LocaleController.active.languageCode;
     if (_suggestionsRequested || _isDisposed) return;
     _suggestionsRequested = true;
     try {
@@ -79,6 +81,13 @@ class AssistantViewModel extends ChangeNotifier {
       _suggestions = List.unmodifiable(loaded);
       notifyListeners();
     } catch (_) {}
+  }
+
+  /// The chips are in the old language: ask for them again if they were shown.
+  void onLanguageChanged() {
+    if (!_suggestionsRequested) return;
+    _suggestionsRequested = false;
+    loadSuggestions();
   }
 
   Future<void> rate(AssistantMessage message, {required bool helpful}) async {
@@ -101,10 +110,10 @@ class AssistantViewModel extends ChangeNotifier {
       if (error.statusCode == 404) {
         _unratable.add(message.id);
       } else {
-        _feedbackError = 'No hem pogut desar la valoració. Torna-ho a provar.';
+        _feedbackError = currentL10n.assistantRateError;
       }
     } catch (_) {
-      _feedbackError = 'No hem pogut desar la valoració. Torna-ho a provar.';
+      _feedbackError = currentL10n.assistantRateError;
     } finally {
       _rating.remove(message.id);
       if (!_isDisposed) notifyListeners();
@@ -133,8 +142,8 @@ class AssistantViewModel extends ChangeNotifier {
       if (_isDisposed) return;
       _failedQuery = query;
       _errorMessage = error is ApiException && error.statusCode == 429
-          ? 'Massa missatges, espera un minut'
-          : 'No hem pogut obtenir les recomanacions de l’assistent. Torna-ho a provar.';
+          ? currentL10n.assistantTooManyMessages
+          : currentL10n.assistantReplyError;
     } finally {
       if (!_isDisposed) {
         _isLoading = false;

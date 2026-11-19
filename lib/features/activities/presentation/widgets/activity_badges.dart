@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/locale_controller.dart';
+
 class ActivityCategoryBadge extends StatelessWidget {
   const ActivityCategoryBadge({super.key, required this.category});
 
@@ -46,8 +48,8 @@ class FriendshipBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const _ActivityBadge(
-      label: 'Amiga',
+    return _ActivityBadge(
+      label: context.l10n.actFriendBadge,
       background: Color(0xFFFFF1CC),
       foreground: Color(0xFF785400),
       icon: Icons.people_outline,

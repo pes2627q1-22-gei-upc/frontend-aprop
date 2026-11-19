@@ -5,6 +5,7 @@ import '../../repositories/notification_repository.dart';
 import '../formatters/notification_formatter.dart';
 import '../view_models/notifications_view_model.dart';
 import '../widgets/notification_card.dart';
+import '../../../../core/l10n/locale_controller.dart';
 
 /// Section content; MainShell owns the AppBar and bottom navigation.
 class NotificationsScreen extends StatefulWidget {
@@ -146,7 +147,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                   ),
                   TextButton(
                     onPressed: _viewModel.load,
-                    child: const Text('Tornar-ho a provar'),
+                    child: Text(context.l10n.retry),
                   ),
                 ],
               ),
@@ -159,9 +160,9 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
   Widget _buildContent(List<AppNotification> visible) {
     if (!_viewModel.hasLoaded && _viewModel.isLoading) {
-      return const Center(
+      return Center(
         child: CircularProgressIndicator(
-          semanticsLabel: 'Carregant els avisos',
+          semanticsLabel: context.l10n.notifLoading,
         ),
       );
     }
@@ -169,7 +170,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       return _InboxMessage(
         icon: Icons.cloud_off_outlined,
         title: _viewModel.errorMessage!,
-        actionLabel: 'Tornar-ho a provar',
+        actionLabel: context.l10n.retry,
         onAction: _viewModel.load,
       );
     }
@@ -177,18 +178,18 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       final category = _viewModel.filter;
       final hasOtherNotices = _viewModel.notifications.isNotEmpty;
       final title = switch (category) {
-        null => 'Encara no tens cap avís',
-        NotificationCategory.social => 'Encara no tens avisos socials',
-        NotificationCategory.reminders => 'Encara no has rebut cap recordatori',
+        null => context.l10n.notifEmptyAll,
+        NotificationCategory.social => context.l10n.notifEmptySocial,
+        NotificationCategory.reminders => context.l10n.notifEmptyReminders,
         NotificationCategory.recommendations =>
-          'Encara no has rebut recomanacions',
+          context.l10n.notifEmptyRecommendations,
       };
       final description = switch (category) {
-        NotificationCategory.reminders => 'Els recordatoris que configuris a l’agenda apareixeran aquí quan arribi l’hora de l’avís.',
-        NotificationCategory.social => 'Aquí trobaràs les sol·licituds d’amistat i les novetats dels teus amics.',
+        NotificationCategory.reminders => context.l10n.notifEmptyRemindersHint,
+        NotificationCategory.social => context.l10n.notifEmptySocialHint,
         NotificationCategory.recommendations =>
-          'Aquí trobaràs avisos d’activitats que et poden interessar.',
-        null => 'Aquí trobaràs els avisos socials, els recordatoris i les recomanacions que rebis.',
+          context.l10n.notifEmptyRecommendationsHint,
+        null => context.l10n.notifEmptyAllHint,
       };
       return RefreshIndicator(
         onRefresh: _viewModel.load,
@@ -196,7 +197,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           icon: Icons.notifications_none,
           title: title,
           description: description,
-          actionLabel: hasOtherNotices ? 'Veure tots els avisos' : null,
+          actionLabel: hasOtherNotices ? context.l10n.notifSeeAll : null,
           onAction: hasOtherNotices
               ? () => _viewModel.selectFilter(null)
               : null,

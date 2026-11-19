@@ -9,6 +9,7 @@ import '../../models/user_profile.dart';
 import '../../repositories/profile_image_picker.dart';
 import '../../repositories/profile_repository.dart';
 import '../../models/profile_failure.dart';
+import '../../../../core/l10n/locale_controller.dart';
 
 class ProfileViewModel extends ChangeNotifier {
   ProfileViewModel({
@@ -62,7 +63,7 @@ class ProfileViewModel extends ChangeNotifier {
       received = true;
     } catch (_) {
       if (!_isDisposed) {
-        _errorMessage = 'No hem pogut carregar el perfil. Torna-ho a provar.';
+        _errorMessage = currentL10n.profileLoadError;
       }
     } finally {
       if (!_isDisposed) {
@@ -87,7 +88,7 @@ class ProfileViewModel extends ChangeNotifier {
       _hasLoadedCreated = true;
     } catch (_) {
       if (!_isDisposed) {
-        _createdError = 'No hem pogut carregar les activitats creades.';
+        _createdError = currentL10n.profileCreatedLoadError;
       }
     } finally {
       if (!_isDisposed) {
@@ -105,21 +106,21 @@ class ProfileViewModel extends ChangeNotifier {
 
   static String? validateBiography(String? value) =>
       utf8.encode(value?.trim() ?? '').length > 500
-      ? 'La biografia és massa llarga. Prova de fer-la més curta.'
+      ? currentL10n.profileBiographyTooLong
       : null;
   static String? validateMunicipality(String? value) =>
       (value?.trim().length ?? 0) > 80
-      ? 'Escriu com a màxim 80 caràcters.'
+      ? currentL10n.profileMunicipalityTooLong
       : null;
   static String? validateName(String? value) => (value?.trim().isEmpty ?? true)
-      ? 'Escriu el teu nom.'
+      ? currentL10n.profileNameRequired
       : utf8.encode(value!.trim()).length > 100
-      ? 'El nom és massa llarg.'
+      ? currentL10n.profileNameTooLong
       : null;
   static String? validateUsername(String? value) =>
       RegExp(r'^[A-Za-z0-9_]{3,30}$').hasMatch(value?.trim() ?? '')
       ? null
-      : 'Fes servir entre 3 i 30 lletres, números o guions baixos.';
+      : currentL10n.profileUsernameInvalid;
 
   Future<bool> saveDetails({
     required String biography,
@@ -160,8 +161,8 @@ class ProfileViewModel extends ChangeNotifier {
     } catch (error) {
       if (!_isDisposed) {
         _saveError = error == ProfileFailure.usernameInUse
-            ? 'El nom d’usuari ja està ocupat. Tria’n un altre.'
-            : 'No hem pogut desar el perfil. Torna-ho a provar.';
+            ? currentL10n.profileUsernameTaken
+            : currentL10n.profileSaveError;
       }
       return false;
     } finally {
@@ -196,11 +197,17 @@ class ProfileViewModel extends ChangeNotifier {
       _profile = result.withCreatedActivities(_profile!.createdActivities);
       return true;
     } on AvatarSelectionException catch (error) {
-      if (!_isDisposed) _avatarError = error.message;
+      if (!_isDisposed) {
+        _avatarError = switch (error.problem) {
+          AvatarProblem.tooBig => currentL10n.avatarTooBig,
+          AvatarProblem.unreadableName => currentL10n.avatarNameUnreadable,
+          AvatarProblem.wrongFormat => currentL10n.avatarWrongFormat,
+        };
+      }
       return false;
     } catch (_) {
       if (!_isDisposed) {
-        _avatarError = 'No hem pogut canviar la foto. Torna-ho a provar.';
+        _avatarError = currentL10n.profileAvatarError;
       }
       return false;
     } finally {
@@ -218,8 +225,7 @@ class ProfileViewModel extends ChangeNotifier {
     try {
       final interrupted = await _imagePicker!.hadInterruptedSelection();
       if (!_isDisposed && action == _avatarAction && interrupted) {
-        _avatarError =
-            'S’ha interromput una selecció de foto. Torna-la a triar.';
+        _avatarError = currentL10n.profileAvatarInterrupted;
         notifyListeners();
       }
     } catch (_) {

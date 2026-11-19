@@ -9,6 +9,7 @@ import '../widgets/auth_submit_button.dart';
 import '../widgets/google_sign_in_button.dart';
 import '../widgets/password_field.dart';
 import 'register_screen.dart';
+import '../../../../core/l10n/locale_controller.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key, required this.repository});
@@ -85,7 +86,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       const APropLogo(height: 96),
                       const SizedBox(height: 24),
                       Text(
-                        'Inicia sessió',
+                        context.l10n.authLoginTitle,
                         style: theme.textTheme.headlineSmall?.copyWith(
                           color: theme.colorScheme.primary,
                           fontWeight: FontWeight.w700,
@@ -93,7 +94,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Troba plans culturals a prop teu.',
+                        context.l10n.authLoginSubtitle,
                         style: TextStyle(
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
@@ -112,7 +113,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           LoginField.usernameOrEmail,
                         ),
                         decoration: InputDecoration(
-                          labelText: "Nom d'usuari o correu",
+                          labelText: context.l10n.authUsernameOrEmail,
                           errorText: _viewModel.fieldError(
                             LoginField.usernameOrEmail,
                           ),
@@ -122,7 +123,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       const SizedBox(height: 16),
                       PasswordField(
                         controller: _passwordController,
-                        label: 'Contrasenya',
+                        label: context.l10n.authPassword,
                         errorText: _viewModel.fieldError(LoginField.password),
                         onChanged: (_) =>
                             _viewModel.onFieldChanged(LoginField.password),
@@ -135,7 +136,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         const SizedBox(height: 12),
                       ],
                       AuthSubmitButton(
-                        label: 'Entra',
+                        label: context.l10n.authSignIn,
                         isLoading: _viewModel.isLoading,
                         onPressed: _viewModel.isGoogleLoading ? null : _submit,
                       ),
@@ -148,8 +149,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       const SizedBox(height: 32),
                       AuthSecondaryAction(
-                        question: 'Encara no tens compte?',
-                        label: 'Crea un compte',
+                        question: context.l10n.authNoAccount,
+                        label: context.l10n.authCreateAccountLink,
                         icon: Icons.person_add_alt_1_outlined,
                         onPressed: _openRegister,
                       ),

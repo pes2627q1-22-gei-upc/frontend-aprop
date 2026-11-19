@@ -9,6 +9,7 @@ import '../../models/assistant_message.dart';
 import '../view_models/assistant_view_model.dart';
 import '../widgets/assistant_input_bar.dart';
 import '../widgets/assistant_message_bubble.dart';
+import '../../../../core/l10n/locale_controller.dart';
 
 class AssistantScreen extends StatefulWidget {
   const AssistantScreen({
@@ -89,7 +90,7 @@ class _AssistantScreenState extends State<AssistantScreen> {
         messages.last.sender == AssistantMessageSender.assistant) {
       SemanticsService.sendAnnouncement(
         View.of(context),
-        'Assistent: ${messages.last.text}',
+        context.l10n.assistantAnnouncement(messages.last.text),
         Directionality.of(context),
       );
     }
@@ -139,10 +140,10 @@ class _AssistantScreenState extends State<AssistantScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Assistent'),
+        title: Text(context.l10n.assistantTitle),
         centerTitle: true,
         leading: IconButton(
-          tooltip: 'Tornar enrere',
+          tooltip: context.l10n.goBack,
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.of(context).maybePop(),
         ),
@@ -296,7 +297,7 @@ class _SuggestionChips extends StatelessWidget {
         Semantics(
           button: true,
           enabled: enabled,
-          label: 'Pregunta suggerida: $text',
+          label: context.l10n.assistantSuggestedQuestion(text),
           excludeSemantics: true,
           child: ActionChip(
             label: Text(text),
@@ -414,7 +415,7 @@ class _TypingIndicatorState extends State<_TypingIndicator>
       alignment: Alignment.centerLeft,
       child: Semantics(
         liveRegion: true,
-        label: 'Cercant recomanacions',
+        label: context.l10n.assistantSearching,
         excludeSemantics: true,
         child: DecoratedBox(
           key: const ValueKey('assistant-typing'),
@@ -493,10 +494,10 @@ class _JumpToEndButton extends StatelessWidget {
       ),
       child: Semantics(
         button: true,
-        label: 'Anar a l’últim missatge',
+        label: context.l10n.assistantGoToLast,
         excludeSemantics: true,
         child: IconButton.filledTonal(
-          tooltip: 'Anar a l’últim missatge',
+          tooltip: context.l10n.assistantGoToLast,
           constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
           onPressed: onPressed,
           icon: const Icon(Icons.keyboard_arrow_down),
@@ -543,10 +544,7 @@ class _AssistantErrorBanner extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 12),
-            FilledButton(
-              onPressed: onRetry,
-              child: const Text('Tornar-ho a provar'),
-            ),
+            FilledButton(onPressed: onRetry, child: Text(context.l10n.retry)),
           ],
         ),
       ),

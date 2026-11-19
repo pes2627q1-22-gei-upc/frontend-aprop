@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 
 import '../../models/interest_question.dart';
 import '../../repositories/interest_test_repository.dart';
+import '../../../../core/l10n/locale_controller.dart';
 
 class InterestTestViewModel extends ChangeNotifier {
   InterestTestViewModel({required this.repository});
@@ -39,7 +40,7 @@ class InterestTestViewModel extends ChangeNotifier {
       if (!_isDisposed) _questions = result;
     } catch (_) {
       if (!_isDisposed) {
-        _errorMessage = 'No hem pogut carregar el test. Torna-ho a provar.';
+        _errorMessage = currentL10n.interestTestLoadError;
       }
     } finally {
       if (!_isDisposed) {
@@ -70,7 +71,7 @@ class InterestTestViewModel extends ChangeNotifier {
       if (!_isDisposed) _isCompleted = true;
     } catch (_) {
       if (!_isDisposed) {
-        _submitError = 'No hem pogut desar les respostes. Torna-ho a provar.';
+        _submitError = currentL10n.interestTestSaveError;
       }
     } finally {
       if (!_isDisposed) {

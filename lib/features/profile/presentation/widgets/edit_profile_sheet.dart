@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../view_models/profile_view_model.dart';
+import '../../../../core/l10n/locale_controller.dart';
 
 class EditProfileSheet extends StatefulWidget {
   const EditProfileSheet({super.key, required this.viewModel});
@@ -60,12 +61,12 @@ class _EditProfileSheetState extends State<EditProfileSheet> {
                     children: [
                       Expanded(
                         child: Text(
-                          'Editar perfil',
+                          context.l10n.editProfileTitle,
                           style: Theme.of(context).textTheme.titleLarge,
                         ),
                       ),
                       IconButton(
-                        tooltip: 'Tancar',
+                        tooltip: context.l10n.close,
                         onPressed: saving
                             ? null
                             : () => Navigator.of(context).pop(),
@@ -81,7 +82,9 @@ class _EditProfileSheetState extends State<EditProfileSheet> {
                       validator: ProfileViewModel.validateName,
                       maxLength: 100,
                       onChanged: (_) => widget.viewModel.clearSaveError(),
-                      decoration: const InputDecoration(labelText: 'Nom'),
+                      decoration: InputDecoration(
+                        labelText: context.l10n.fieldName,
+                      ),
                     ),
                     const SizedBox(height: 12),
                     TextFormField(
@@ -91,8 +94,8 @@ class _EditProfileSheetState extends State<EditProfileSheet> {
                       validator: ProfileViewModel.validateUsername,
                       maxLength: 30,
                       onChanged: (_) => widget.viewModel.clearSaveError(),
-                      decoration: const InputDecoration(
-                        labelText: 'Nom d’usuari',
+                      decoration: InputDecoration(
+                        labelText: context.l10n.fieldUsername,
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -105,7 +108,9 @@ class _EditProfileSheetState extends State<EditProfileSheet> {
                     maxLength: 500,
                     onChanged: (_) => widget.viewModel.clearSaveError(),
                     validator: ProfileViewModel.validateBiography,
-                    decoration: const InputDecoration(labelText: 'Biografia'),
+                    decoration: InputDecoration(
+                      labelText: context.l10n.fieldBiography,
+                    ),
                   ),
                   const SizedBox(height: 12),
                   if (widget.viewModel.capabilities.editMunicipality)
@@ -114,12 +119,12 @@ class _EditProfileSheetState extends State<EditProfileSheet> {
                       enabled: !saving,
                       maxLength: 80,
                       validator: ProfileViewModel.validateMunicipality,
-                      decoration: const InputDecoration(labelText: 'Municipi'),
+                      decoration: InputDecoration(
+                        labelText: context.l10n.fieldMunicipality,
+                      ),
                     )
                   else
-                    const Text(
-                      'L’edició del municipi estarà disponible properament.',
-                    ),
+                    Text(context.l10n.municipalityEditSoon),
                   if (widget.viewModel.saveError case final error?) ...[
                     const SizedBox(height: 12),
                     Text(
@@ -150,7 +155,9 @@ class _EditProfileSheetState extends State<EditProfileSheet> {
                               Navigator.of(context).pop();
                             }
                           },
-                    child: Text(saving ? 'Desant…' : 'Desar'),
+                    child: Text(
+                      saving ? context.l10n.saving : context.l10n.save,
+                    ),
                   ),
                 ],
               ),

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/locale_controller.dart';
+
 /// Five tappable stars. [score] null means not rated; with [isReadOnly] the
 /// stars cannot be changed (already rated). While [isLoading] taps are ignored.
 class StarRatingWidget extends StatelessWidget {
@@ -32,7 +34,7 @@ class StarRatingWidget extends StatelessWidget {
             Semantics(
               container: isReadOnly && score != null,
               label: isReadOnly && score != null
-                  ? 'Valoració: $score de 5'
+                  ? context.l10n.ratingScore(score!)
                   : null,
               excludeSemantics: isReadOnly && score != null,
               child: Row(
@@ -43,9 +45,8 @@ class StarRatingWidget extends StatelessWidget {
                       button: true,
                       enabled: enabled,
                       selected: star == score,
-                      label:
-                          'Valora amb $star ${star == 1 ? 'estrella' : 'estrelles'}',
-                      value: '$star de 5',
+                      label: context.l10n.ratingStarLabel(star),
+                      value: context.l10n.ratingStarValue(star),
                       excludeSemantics: true,
                       onTap: enabled ? () => onSelected(star) : null,
                       child: IconButton(
@@ -61,13 +62,13 @@ class StarRatingWidget extends StatelessWidget {
               ),
             ),
             if (isLoading)
-              const Padding(
-                padding: EdgeInsets.only(left: 8),
+              Padding(
+                padding: const EdgeInsets.only(left: 8),
                 child: SizedBox.square(
                   dimension: 20,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
-                    semanticsLabel: 'Desant la valoració',
+                    semanticsLabel: context.l10n.ratingSaving,
                   ),
                 ),
               ),

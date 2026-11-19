@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../view_models/enrollment_view_model.dart';
 import 'enrollment_badge.dart';
+import '../../../../core/l10n/locale_controller.dart';
 
 /// The same enrollment states for compact cards and the detail's primary action.
 ///
@@ -43,16 +44,16 @@ class EnrollmentAction extends StatelessWidget {
             viewModel.errorFor(activityId) ??
             (enrolled ? null : viewModel.loadError);
         final label = leaving
-            ? 'Desapuntant…'
+            ? context.l10n.enrollLeaving
             : enrolled
-            ? 'Desapunta’m'
+            ? context.l10n.enrollLeave
             : saving
-            ? 'Apuntant…'
+            ? context.l10n.enrollSigningUp
             : loading
-            ? 'Carregant…'
+            ? context.l10n.enrollLoading
             : readFailed
-            ? 'Tornar-ho a provar'
-            : 'M’hi apunto';
+            ? context.l10n.retry
+            : context.l10n.enrollSignUp;
 
         final VoidCallback? onPressed = saving || leaving || loading
             ? null
@@ -74,10 +75,10 @@ class EnrollmentAction extends StatelessWidget {
                   strokeWidth: 2,
                   color: colors.primary,
                   semanticsLabel: leaving
-                      ? 'Desapuntant-te de l’activitat'
+                      ? context.l10n.enrollLeavingSemantics
                       : saving
-                      ? 'Apuntant-te a l’activitat'
-                      : 'Consultant els teus plans',
+                      ? context.l10n.enrollSigningUpSemantics
+                      : context.l10n.enrollCheckingSemantics,
                 ),
               ),
               const SizedBox(width: 8),
@@ -130,10 +131,10 @@ class EnrollmentAction extends StatelessWidget {
                 // per sobre del botó molestava.
                 Semantics(
                   tooltip: enrolled
-                      ? 'Desapuntar-me de $activityTitle'
+                      ? context.l10n.enrollLeaveTooltip(activityTitle)
                       : readFailed
-                      ? 'Tornar a consultar els teus plans'
-                      : 'Apuntar-me a $activityTitle',
+                      ? context.l10n.enrollRecheckTooltip
+                      : context.l10n.enrollSignUpTooltip(activityTitle),
                   child: primary
                       ? button
                       // A les targetes, el distintiu al costat del botó; amb
@@ -162,8 +163,8 @@ class EnrollmentAction extends StatelessWidget {
                   const SizedBox(height: 8),
                   Text(
                     enrolled
-                        ? 'Aquest pla ja és a la teva agenda.'
-                        : 'Afegeix aquest pla a la teva agenda.',
+                        ? context.l10n.enrollHelperEnrolled
+                        : context.l10n.enrollHelperNot,
                     textAlign: TextAlign.center,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: colors.onSurface,
@@ -185,7 +186,7 @@ class EnrollmentAction extends StatelessWidget {
       ..hideCurrentSnackBar()
       ..showSnackBar(
         SnackBar(
-          content: Text('T’has desapuntat de «$activityTitle».'),
+          content: Text(context.l10n.enrollLeftSnack(activityTitle)),
           // It starts counting once it has slid in: it ends a little before
           // the removal is sent, so «Desfer» never shows when it no longer
           // works.
@@ -194,7 +195,7 @@ class EnrollmentAction extends StatelessWidget {
           // when «Desfer» is no longer possible.
           persist: false,
           action: SnackBarAction(
-            label: 'Desfer',
+            label: context.l10n.enrollUndo,
             onPressed: () => viewModel.undoUnenroll(activityId),
           ),
         ),

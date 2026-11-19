@@ -1,7 +1,9 @@
+import '../../../../core/l10n/locale_controller.dart';
+
 /// «Gratuït» si el preu és 0; si no, l'import en euros amb coma decimal:
 /// «12 €», «12,50 €».
 String formatActivityPrice(double price) {
-  if (price == 0) return 'Gratuït';
+  if (price == 0) return currentL10n.priceFree;
 
   final cents = (price * 100).round();
   final euros = cents ~/ 100;

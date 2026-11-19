@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../activities/models/activity.dart';
 import '../view_models/rating_view_model.dart';
 import 'star_rating_widget.dart';
+import '../../../../core/l10n/locale_controller.dart';
 
 /// «Com t’ha anat?» block bound to the shared [RatingViewModel]. The caller
 /// decides when an activity can be rated. Once rated, the user can change or
@@ -42,18 +43,16 @@ class _ActivityRatingState extends State<ActivityRating> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Eliminar la valoració?'),
-        content: const Text(
-          'La teva valoració s’eliminarà i podràs tornar a valorar l’activitat.',
-        ),
+        title: Text(context.l10n.ratingDeleteTitle),
+        content: Text(context.l10n.ratingDeleteBody),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel·la'),
+            child: Text(context.l10n.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Elimina'),
+            child: Text(context.l10n.delete),
           ),
         ],
       ),
@@ -98,11 +97,12 @@ class _ActivityRatingState extends State<ActivityRating> {
                       Expanded(
                         child: Text(
                           editing
-                              ? 'Modifica la valoració'
+                              ? context.l10n.ratingEdit
                               : rated
-                              ? 'Ja has valorat ${organizer.name}'
-                              : 'Com ha anat l’organitzador/a '
-                                    '${organizer.name}?',
+                              ? context.l10n.ratingOrganizerRated(
+                                  organizer.name,
+                                )
+                              : context.l10n.ratingOrganizerAsk(organizer.name),
                           style: Theme.of(context).textTheme.titleSmall,
                         ),
                       ),
@@ -112,10 +112,10 @@ class _ActivityRatingState extends State<ActivityRating> {
               else
                 Text(
                   editing
-                      ? 'Modifica la valoració'
+                      ? context.l10n.ratingEdit
                       : rated
-                      ? 'Ja has valorat aquesta activitat'
-                      : 'Com t’ha anat?',
+                      ? context.l10n.ratingActivityRated
+                      : context.l10n.ratingAsk,
                   style: Theme.of(context).textTheme.titleSmall,
                 ),
               if (showStars)
@@ -144,9 +144,9 @@ class _ActivityRatingState extends State<ActivityRating> {
                                 _viewModel.clearError(_id);
                                 setState(() => _editing = false);
                               },
-                        child: const Text(
-                          'Cancel·la',
-                          semanticsLabel: 'Cancel·la la modificació',
+                        child: Text(
+                          context.l10n.cancel,
+                          semanticsLabel: context.l10n.ratingCancelEdit,
                         ),
                       )
                     else
@@ -157,16 +157,16 @@ class _ActivityRatingState extends State<ActivityRating> {
                                 _viewModel.clearError(_id);
                                 setState(() => _editing = true);
                               },
-                        child: const Text(
-                          'Modifica',
-                          semanticsLabel: 'Modifica la valoració',
+                        child: Text(
+                          context.l10n.ratingEditShort,
+                          semanticsLabel: context.l10n.ratingEdit,
                         ),
                       ),
                     TextButton(
                       onPressed: busy ? null : _confirmDelete,
-                      child: const Text(
-                        'Elimina',
-                        semanticsLabel: 'Elimina la valoració',
+                      child: Text(
+                        context.l10n.delete,
+                        semanticsLabel: context.l10n.ratingDelete,
                       ),
                     ),
                   ],
