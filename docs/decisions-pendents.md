@@ -215,6 +215,7 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
   - el formulari demana que la fi sigui **posterior** a l'inici; el backend (R5) també n'accepta una d'igual;
   - sense data de fi s'envia `end-date` igual a `start-date`, com fins ara;
   - el backend només desa el dia de la fi (DP-029) i l'app encara no llegeix ni mostra `end-date` (`Activity` no en té camp).
+- **Editar (2026-11-16, Claude Code (Opus 5.5) amb confirmació de l'usuari, Taiga #189 / US #50):** el llapis «Edita l’activitat» de la fitxa només surt a qui l'ha creada (l'UUID del backend o l'UID de la sessió), si no és oficial i si encara no ha començat («activa» = no començada). Obre el mateix formulari amb les dades i «Desa els canvis», que envia `PUT /events/{id}` amb el mateix JSON que crear; el backend torna a comprovar l'autoria i R5. Ara l'app llegeix `end-date` (`Activity.endsAt`) perquè editar no la perdi. El backend no desa l'import del preu: d'una activitat de pagament no se'n sap, i si el camp es deixa buit no es converteix en gratuïta. La portada triada tampoc no es desa (DP-019). Després de desar, la fitxa es torna a carregar i la llista i el mapa es posen al dia.
 - **Qui decideix:** frontend + backend
 - **Resolució:**
 
@@ -408,6 +409,7 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Provisionalment:** B per a Dates/Categories. Un únic valor immutable a `ActivitiesViewModel` s'aplica al catàleg i a la zona carregada; sense endpoints/paràmetres nous. Interval inclusiu de dies civils basat en l'inici; categories OR i dates AND; vuit etiquetes dels mockups, coincidència tolerant a accents i sense equivalències deduïdes. Cap categoria = sense restricció. Categories no informades excloses quan se'n tria una, amb recompte visible. Cap de setmana = dissabte/diumenge actual si ja és cap de setmana, o el següent en dies laborables. Esborrany local, Aplicar confirma, tancar descarta; filtres per sessió i només d'Inici. Zona/municipi pendent. `TODO(DP-035)` al model; detalls a `docs/activity-filters.md`.
 - **Qui decideix:** frontend + backend + equip (criteris i categories)
 - **Actualització 2026-10-26:** la llista consulta el servidor amb dates i categories reals abans de paginar. Les opcions deixen de ser les vuit de demostració quan s’injecta HTTP. El mapa continua limitat al filtratge local i metadades absents. Detalls a DP-038; la decisió continua oberta per font compartida i abast global.
+- **Actualització 2026-11-16 · #253:** el backend `6f4979e` incorpora les categories al mapa. El filtre local ja pot comprovar totes les categories rebudes i el distintiu mostra la primera etiqueta usable. Les metadades absents es continuen tractant explícitament (DP-046). La font compartida i els filtres globals de servidor segueixen pendents.
 - **Resolució:**
 
 ### DP-037 · Llista real d'Inici: paginació i metadades disponibles
@@ -428,6 +430,7 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Dubte:** selecció múltiple OR sense paràmetre múltiple; etiquetes del mockup diferents de la taxonomia real; mapa sense metadades/filtres; dates en format Go estricte sense zona; sense ordre global estable entre consultes.
 - **Provisionalment:** opcions HTTP carregades i validades des de `/categories`, cache de sessió amb reintent si falla. Etiqueta llegible del nom/últim segment del tag, sense equivalències semàntiques inventades. Noms visibles coincidents agrupen els seus IDs amb OR. La pàgina N és un lot de la pàgina N de cada categoria, amb màxim quatre peticions simultànies; resposta atòmica, deduplicació per ID i continuació si alguna font retorna una pàgina completa. Ordre determinista per ID de categoria i ordre del servidor dins de cada resposta; no es promet ordre cronològic global. Poden carregar-se més de 50 activitats en un lot de diverses categories. Totes les categories d’una activitat es conserven en un snapshot immutable. Dates civils inclusives `YYYY-MM-DDT00:00:00.000`, sense UTC. Canviar filtres reinicia a 0 i invalida respostes antigues. Refresc/error conserva dades només de la mateixa consulta.
 - **Mapa:** es manté la consulta geogràfica existent i s’apliquen filtres locals a dades informades. Si falten categories, s’indica el nombre exclòs i s’ofereix «Veure llista»; no s’afirma falsament que no hi ha coincidències. No s’envien paràmetres que el servidor ignora ni es fan peticions de detall per cada marcador.
+- **Actualització 2026-11-16 · #253:** PR #54 del backend fusionada a `6f4979e`: `/events/map` retorna les categories de les activitats. El frontend les llegeix amb el mapper compartit i filtra la zona carregada per qualsevol etiqueta rebuda. Prova HTTP de Mapa/Llista amb categoria secundària i IDs reals; contracte de categories resolt en codi, desplegament pendent de prova autenticada. Multiselecció en servidor i ordre global continuen oberts.
 - **Qui decideix:** equip frontend/backend; demanar multiselecció i ordre estable al servidor, filtres/categories al mapa i confirmar la taxonomia visible. Guia: `docs/inici-server-filters.md`. Render ha esgotat 15 s a `/categories`; verificació autenticada pendent. No es canvia cap fitxer del backend.
 - **Resolució:**
 
@@ -486,10 +489,10 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Qui decideix:** equip (paquet nou)
 - **Resolució:**
 
-### DP-049 · Geolocalització al mapa d'Inici: paquet, permís i disseny
+### DP-057 · Geolocalització al mapa d'Inici: paquet, permís i disseny
 - **Estat:** oberta
+- **Identificador:** es va obrir com a DP-049; renumerada a DP-057 en integrar develop (de la DP-047 a la DP-056 ja estan agafades).
 - **Obert per:** 2026-11-17 · Claude Code (Opus 5.5) a petició de l'usuari · Taiga #266
-- **Identificador:** DP-046 a DP-048 ja són a altres branques sense fusionar; es fa servir DP-049 per no col·lidir-hi.
 - **Context:** `UserLocationRepository`, `GeolocatorUserLocationRepository`, `UserLocationViewModel`, `ActivitiesMap` (punt «ets aquí» i botó «La meva ubicació»), `AndroidManifest.xml`, `Info.plist`, `UserLocationTheme` a `app_theme.dart`.
 - **Dubte:**
   - Cal un paquet nou per al permís i la posició (`geolocator`).
@@ -503,8 +506,34 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
   - Botó rodó a baix a la dreta, per sobre d'«Assistent», que puja amb la targeta. En prémer-lo, el mapa hi va amb zoom 14.
   - Si no es pot, un avís explica per què: permís denegat; denegat per sempre (amb «Configuració» al mòbil, o com fer-ho al navegador a la web); ubicació del dispositiu desactivada (amb «Activar»).
   - Només s'escolta la posició mentre el mapa és visible, cada 10 m.
-  - Textos sense mockup. `TODO(DP-049)` marca aquestes adaptacions.
+  - Textos sense mockup. `TODO(DP-057)` marca aquestes adaptacions.
 - **Qui decideix:** equip (paquet nou) + disseny
+
+### DP-046 · Categories d’Inici: entrades sense nom i catàleg buit
+- **Estat:** oberta · 2026-11-15 · Taiga #253 [FE] Corregir que no es mostren les categories.
+- **Identificador:** renumerada de DP-045 a DP-046 en integrar develop per conservar la decisió publicada de clics sobre el mapa.
+- **Context:** filtre «Categories» compartit per Mapa/Llista a `frontend-aprop@5b0c95c`; backend consultat a `api-aprop@0fdba4f`, sense modificar-lo. El catàleg de proves existent ja inclou una fila amb nom buit, mentre que el carregador del filtre rebutjava tota la resposta quan en trobava una. Un catàleg buit també quedava en memòria durant tota la sessió i el panell no oferia reintent.
+- **Provisionalment:** ometre únicament entrades amb ID vàlid i nom sense etiqueta visible; conservar noms i IDs reals de totes les altres categories, inclosos els àmbits. Un objecte invàlid, un ID invàlid, un nom que no és text o un error HTTP continuen sent errors amb reintent. Compartir peticions simultànies, conservar en memòria el catàleg no buit i permetre tornar a consultar una resposta buida des del mateix panell. `TODO(DP-046)` al repositori HTTP.
+- **Mapa (actualització 2026-11-16):** PR #54 del backend fusionada a `6f4979e`, amb categories a `/events/map`. El mapper compartit elimina etiquetes sense nom visible abans de triar el distintiu i conserva totes les vàlides per filtrar. Es comproven categories secundàries i canvi de vista amb el mateix filtre, sense peticions de detall per marcador. Es manté l’avís només per activitats genuïnament sense categoria usable.
+- **Verificació:** regressions de repositori i de panell HTTP des de Mapa/Llista, amb una entrada sense nom al costat de categories vàlides; reintent de catàleg buit. Tres regressions addicionals reproduïdes abans de corregir la conversió, inclòs el recorregut complet de categories del mapa. La consulta a Render sense sessió retorna 401: manca comprovació autenticada de producció; la presència del codi fusionat no acredita desplegament.
+- **Qui decideix:** frontend/backend per a la neteja de dades i el contracte de categories del mapa. Guia `docs/inici-server-filters.md`.
+- **Resolució:**
+
+### DP-047 · Contrast del logotip sobre el fons de l’app
+- **Estat:** oberta · 2026-11-16 · Taiga #262 [FE] Ajustar contrast i color del logotip respecte al fons.
+- **Context:** el PNG original té fons crema texturat i marges amplis. Inici i Login el pintaven directament, amb un rectangle diferent del fons del tema i poca mida útil per al símbol.
+- **Provisionalment:** derivació transparent del recurs existent, conservant mapa, tres marcadors, text i paleta. S’elimina el fons i es redueix el marge sense canviar el tema global. L’original queda intacte. `APropLogo` centralitza la mateixa imatge i semàntica a les dues pantalles, mantenint alçades de 80 i 96 píxels lògics respectivament. El mode fosc queda fora d’aquesta tasca.
+- **Verificació:** dues proves reprodueixen el fons opac abans del canvi i comproven transparència i contrast del color majoritari del logo sobre les superfícies clares després. Revisió visual de captures renderitzades amb Flutter. Guia `docs/branding.md`.
+- **Qui decideix:** equip/PO per validar l’edició visual de marca; la representació és reversible perquè es conserva el recurs original.
+- **Resolució:**
+
+### DP-048 · Navegació de les fitxes obertes des del xat
+- **Estat:** oberta · 2026-11-16 · Taiga #261 [FE] Amagar menú de navegació inferior en obrir el xat.
+- **Context:** la tasca demana explícitament ocultar el menú en obrir l’Assistent. Les recomanacions poden obrir una fitxa sobre el xat, mentre que els mockups anteriors mostraven navegació inferior a les fitxes.
+- **Dubte:** mantenir el flux del xat sense barra també en aquestes fitxes o tornar-la a mostrar temporalment.
+- **Provisionalment:** mantenir-la amagada fins a sortir de `/assistant`. Això conserva la seqüència xat → fitxa → xat → Inici; les fitxes obertes des de les seccions habituals continuen amb barra. `TODO(DP-048)` a `MainShell._openAssistant`. La conversa i les inscripcions mantenen els ViewModels compartits.
+- **Verificació:** recorregut d’inscripció des del xat, fitxa i retorn; restauració de barra amb fletxa, retorn del sistema i dreceres a Agenda/Configuració.
+- **Qui decideix:** equip/PO a la revisió visual de #261. Ocultar la barra al xat ja és el requisit explícit; només queda oberta la fitxa que s’hi obre a sobre.
 - **Resolució:**
 
 ## Resoltes
@@ -551,3 +580,31 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Dubte:** la targeta estàndard (~330 px) deixa veure només una activitat per pantalla al xat.
 - **Provisionalment:** fila compacta (miniatura 72 px, títol, municipi · data i la mateixa acció d'apuntar-se). Mateix estat d'inscripcions, mateix detall en tocar. Sense avatar del creador ni «Font». `TODO(DP-044)`: confirmar amb l'equip/mockup.
 - **Qui decideix:** equip frontend (UX)
+
+### DP-053 · Valoració d'activitats (#185): requisit d'assistència i contracte de #184
+- **Estat:** oberta 2026-11-17
+- **Context:** `features/ratings/`, `_buildRating` a `main_shell.dart`; R8–R10 (`docs/ai/20-model-domini.md`); mockup 13 «Com va anar?».
+- **Dubte:** (1) el `develop` del backend ja té `PATCH /events/{id}/enrollment/attendance` (`{"attendance": true|false|null}`), però el frontend encara no modela ni té UI per confirmar l'assistència («Sí, hi vaig anar»); R10 exigeix assistència certa per valorar. (2) #184 (`POST /events/{id}/ratings`, `{score}`) respon `409` (ja valorada), `403` (sense assistència) i `404` (no trobada) a `feature/event-rating` (PR #59), però encara no és desplegat a Render i no hi ha consulta prèvia de la valoració pròpia.
+- **Provisionalment:** les estrelles surten a la fitxa i a l'Agenda si l'usuari és inscrit i l'activitat ja ha començat (sense data de fi al model: `startsAt` fa de substitut, de manera que l'usuari pot valorar durant l'esdeveniment; R10 només es compleix al servidor); el servidor farà valdre R8–R10. `main.dart` injecta `HttpRatingRepository` quan `ApiConfig.isConfigured` és cert (mentre #184 no estigui desplegat, valorar mostrarà l'error de desament), i tradueix `409` a `AlreadyRatedException`. En mode Demo, `DemoRatingRepository` (en memòria) és el per defecte. Sense consulta prèvia de la valoració pròpia, l'estat «ja valorada» abans d'enviar només es coneix en Demo durant la sessió o en rebre `409`. `TODO(DP-053)` al codi.
+- **Qui decideix:** equip (frontend i backend)
+
+### DP-049 · Fiabilitat de l'organitzador (#203): recàlcul en Demo i contracte HTTP
+- **Estat:** oberta 2026-11-17
+- **Context:** `ActivityRating` (organitzador destacat), `DemoProfileRepository.organizerRating`; `/fiabilitat` = mitjana de les valoracions dels esdeveniments NoOficial creats per l'usuari (R9/R10, `docs/ai/20-model-domini.md`).
+- **Dubte:** (1) en Demo, què passa amb el 4,7 sembrat del compte d'exemple quan arriben valoracions reals; (2) amb HTTP no es coneix cap endpoint de valoració ni si `reliability` es recalcula al servidor en valorar (#184).
+- **Provisionalment:** Demo: `organizerRating` = mitjana de les puntuacions de `DemoRatingRepository` dels esdeveniments comunitaris creats per l'usuari; si cap no està valorat, queda el sembrat (4,7 només al compte d'exemple, `null` als altres). Amb la primera valoració real el sembrat se substitueix. Només compta el que es valora en aquesta sessió. HTTP: sense canvis; el perfil es torna a carregar en obrir la pestanya Perfil (`MainShell._selectDestination`) i mostra el `reliability` del servidor. `TODO(DP-049)` al codi. L'organitzador no pot valorar el seu propi esdeveniment (no hi ha cap regla R que ho digui; s'oculta per no inflar la pròpia fiabilitat, comparant `creator.userId` amb l'id de Firebase i el del servidor). Sense `creator.userId` es mostra el bloc genèric. El perfil de Demo depèn de `DemoRatingRepository` concret (cablejat provisional a `auth_gate`); caldria un contracte de lectura.
+- **Qui decideix:** equip (frontend i backend)
+
+### DP-050 · Fiabilitat visible (#204): contracte `creator-reliability` i valors deduïts
+- **Estat:** oberta 2026-11-18
+- **Context:** `ActivityCreator.reliability`, `activityFromJson`, bloc «Publicat per» de la fitxa (mockup 9) i tercer comptador de `ProfileHeader` (mockup 18).
+- **Dubte:** (1) `GET /events/{id}` publica `creator-name`/`creator-reliability` a `api-aprop` (`float32` nul·lable a `api/openapi.yaml` del `develop` del backend); (2) què vol dir un `0`; (3) l'etiqueta i el text del bloc.
+- **Provisionalment:** `creator-reliability` = nombre finit 0–5 o nul; un valor no vàlid s'ignora (`reliability` nul) en lloc de fer fallar tota l'activitat. Com al perfil, `0` es tracta com a «sense valoracions» (les valoracions són 1–5). Nul → «—» als dos llocs, sense estrella. Text del bloc: «Fiabilitat 4,7 ★»; etiquetes Semantics «Fiabilitat de l'organitzador: …». El tercer comptador del perfil ja existia («Valoració»); només s'hi ha afegit Semantics i el format compartit (`core/formatters/reliability_formatter.dart`). Demo: el 4,7 sembrat de Laia Soler a l'activitat demo coincideix amb el perfil, però no es recalcula amb les valoracions de la sessió (DP-049 queda oberta, no es resol).
+- **Qui decideix:** equip (frontend i backend)
+
+### DP-052 · Modificar o eliminar la valoració pròpia (#206): contracte de #205 i estat inicial
+- **Estat:** oberta 2026-11-18
+- **Context:** `features/ratings/` (`RatingRepository.updateRating`/`deleteRating`, `ActivityRating`), `ApiClient.put`/`putJson`; contracte `api-aprop-205/api/openapi.yaml` (`PUT`/`DELETE /events/{id}/ratings/me`, branca de #205 sense fusionar ni desplegada). Es basa en #185 (DP-053), ja a `develop`.
+- **Dubte:** (1) cap endpoint no retorna la valoració pròpia (DP-053): l'app no sap el `score` d'una valoració feta en una sessió anterior. (2) `GET /events/{id}` ja exposa `creator-reliability` (#204, DP-050), però no es torna a llegir en editar o eliminar la valoració.
+- **Provisionalment:** (1) «Modifica» i «Elimina» surten sempre que l'activitat consta com a valorada (sessió actual o `409`); si el `score` és desconegut, en editar es mostren les estrelles buides i el valor nou substitueix el del servidor. (2) Després d'editar/eliminar només s'actualitza `RatingViewModel`; quan #204 mostri la fiabilitat a la fitxa/perfil, caldrà tornar-la a llegir (cal verificar si el perfil recarrega la fiabilitat en obrir-lo). `404` → `RatingNotFoundException`: es deixa de mostrar com a valorada. `TODO(DP-052)` a `http_rating_repository.dart`. (3) «Modifica» i «Elimina» també apareixen a les targetes d'Agenda, perquè el bloc de valoració és el mateix que el de la fitxa (decidit: es deixen; el requisit de #61 només esmenta la fitxa).
+- **Qui decideix:** equip (frontend i backend)

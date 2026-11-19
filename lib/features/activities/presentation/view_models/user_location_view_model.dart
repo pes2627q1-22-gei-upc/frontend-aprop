@@ -18,7 +18,7 @@ enum LocateResult {
 ///
 /// El permís només es demana quan la persona prem el botó. Si ja el va donar,
 /// en obrir el mapa es mostra on és sense preguntar res.
-// TODO(DP-049): moment de demanar el permís sense mockup.
+// TODO(DP-057): moment de demanar el permís sense mockup.
 class UserLocationViewModel extends ChangeNotifier {
   UserLocationViewModel({
     required this._repository,

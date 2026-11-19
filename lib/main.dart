@@ -22,6 +22,7 @@ import 'features/interest_test/data/http_interest_test_repository.dart';
 import 'features/notifications/data/http_notification_repository.dart';
 import 'features/profile/data/http_profile_repository.dart';
 import 'features/profile/data/http_profile_settings_repository.dart';
+import 'features/ratings/data/http_rating_repository.dart';
 import 'firebase_options.dart';
 
 Future<void> main() async {
@@ -68,6 +69,7 @@ Future<APropApp> createConfiguredApp() async {
     ),
     interestTestRepository: HttpInterestTestRepository(apiClient: apiClient),
     userLocationRepository: userLocationRepository,
+    ratingRepository: HttpRatingRepository(apiClient: apiClient),
   );
 }
 

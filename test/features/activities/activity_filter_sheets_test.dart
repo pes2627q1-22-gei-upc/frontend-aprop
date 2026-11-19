@@ -1,8 +1,12 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:ui' show SemanticsAction;
 
 import 'package:aprop/app/theme/app_theme.dart';
+import 'package:aprop/core/network/api_client.dart';
 import 'package:aprop/features/activities/data/demo_activity_repository.dart';
+import 'package:aprop/features/activities/data/http_activity_map_repository.dart';
+import 'package:aprop/features/activities/data/http_activity_repository.dart';
 import 'package:aprop/features/activities/models/activity.dart';
 import 'package:aprop/features/activities/models/activity_filters.dart';
 import 'package:aprop/features/activities/models/geo_bounds.dart';
@@ -15,14 +19,18 @@ import 'package:aprop/features/activities/presentation/widgets/activities_header
 import 'package:aprop/features/activities/presentation/widgets/activity_categories_filter_sheet.dart';
 import 'package:aprop/features/activities/presentation/widgets/activity_date_filter_sheet.dart';
 import 'package:aprop/features/activities/presentation/widgets/activity_filter_calendar.dart';
+import 'package:aprop/features/activities/presentation/widgets/activity_filter_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
 
 import 'fake_activity_map_repository.dart';
 import 'fake_activity_repository.dart';
 import 'fake_enrollment_repository.dart';
 import 'activity_filter_test_data.dart';
+import 'backend_event_fixture.dart';
 
 void main() {
   late ActivitiesViewModel model;
@@ -160,6 +168,184 @@ void main() {
       await apply(tester);
       expect(model.filters.isActive, isFalse);
       expect(find.byType(ActivityCategoriesFilterSheet), findsNothing);
+    },
+  );
+
+  testWidgets('An empty category catalogue offers a retry in the same panel', (
+    tester,
+  ) async {
+    var requests = 0;
+    model.dispose();
+    model = ActivitiesViewModel(
+      repository: FakeActivityRepository()
+        ..onCategories = () async => ++requests == 1 ? [] : ['Teatre'],
+    );
+    await pumpScreen(tester);
+    await open(tester, 'categories');
+    expect(find.byType(CheckboxListTile), findsNothing);
+
+    await tester.tap(find.text('Tornar-ho a provar'));
+    await tester.pumpAndSettle();
+    expect(category('Teatre'), findsOneWidget);
+    expect(requests, 2);
+    await tester.tap(category('Teatre'));
+    await apply(tester);
+    expect(model.filters.categories, {'Teatre'});
+    expect(tester.takeException(), isNull);
+  });
+
+  for (final view in ['Llista', 'Mapa']) {
+    testWidgets(
+      '$view shows valid HTTP categories when the catalogue contains unnamed rows',
+      (tester) async {
+        final requestedIds = <String?>[];
+        final repository = HttpActivityRepository(
+          apiClient: ApiClient(
+            client: MockClient((request) async {
+              final Object body;
+              if (request.url.path == '/categories') {
+                body = [
+                  {'id': 1, 'name': ''},
+                  {'id': 3, 'name': 'agenda:categories/teatre'},
+                  {'id': 4, 'name': 'agenda:ambits/concerts'},
+                ];
+              } else {
+                requestedIds.add(request.url.queryParameters['filterCategory']);
+                body = [];
+              }
+              return http.Response.bytes(
+                utf8.encode(jsonEncode(body)),
+                200,
+                headers: {'content-type': 'application/json'},
+              );
+            }),
+          ),
+        );
+        model.dispose();
+        model = ActivitiesViewModel(repository: repository);
+        await pumpScreen(tester);
+        if (view == 'Mapa') {
+          await tester.tap(find.text('Mapa'));
+          await tester.pumpAndSettle();
+        }
+        await open(tester, 'categories');
+        expect(category('Concerts'), findsOneWidget);
+        expect(category('Teatre'), findsOneWidget);
+        expect(
+          find.text('No hem pogut carregar les categories.'),
+          findsNothing,
+        );
+
+        await tester.tap(category('Teatre'));
+        await apply(tester);
+        expect(model.filters.categories, {'Teatre'});
+        expect(requestedIds.last, '3');
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
+
+  testWidgets(
+    'HTTP map badges and secondary-category filters stay consistent with the list',
+    (tester) async {
+      final paths = <String>[];
+      final filterIds = <String?>[];
+      final events = [
+        {
+          ...backendEvent(1),
+          'categories': [
+            'agenda:categories/',
+            'agenda:categories/musica',
+            'agenda:ambits/concerts',
+          ],
+          'latitude': 41.98,
+          'longitude': 2.82,
+        },
+        {
+          ...backendEvent(2),
+          'categories': ['agenda:categories/teatre'],
+          'latitude': 41.12,
+          'longitude': 1.24,
+        },
+      ];
+      final client = ApiClient(
+        client: MockClient((request) async {
+          paths.add(request.url.path);
+          final Object body;
+          switch (request.url.path) {
+            case '/categories':
+              body = [
+                {'id': 1, 'name': ''},
+                {'id': 3, 'name': 'agenda:categories/musica'},
+                {'id': 4, 'name': 'agenda:ambits/concerts'},
+                {'id': 5, 'name': 'agenda:categories/teatre'},
+              ];
+            case '/events/map':
+              body = events;
+            case '/events':
+              final id = request.url.queryParameters['filterCategory'];
+              filterIds.add(id);
+              body = id == '4' ? [events.first] : events;
+            default:
+              throw StateError('Unexpected request: ${request.url.path}');
+          }
+          return http.Response.bytes(
+            utf8.encode(jsonEncode(body)),
+            200,
+            headers: {'content-type': 'application/json'},
+          );
+        }),
+      );
+      model.dispose();
+      model = ActivitiesViewModel(
+        repository: HttpActivityRepository(apiClient: client),
+      );
+      final areaModel = ActivitiesMapViewModel(
+        repository: HttpActivityMapRepository(apiClient: client),
+      );
+      addTearDown(areaModel.dispose);
+      await areaModel.loadArea(
+        const GeoBounds(
+          southWest: GeoPoint(latitude: 40, longitude: 0),
+          northEast: GeoPoint(latitude: 43, longitude: 4),
+        ),
+      );
+      await pumpScreen(tester, areaModel: areaModel);
+      expect(find.text('Musica'), findsWidgets);
+      await tester.tap(find.text('Mapa'));
+      await tester.pumpAndSettle();
+      expect(
+        map(tester).markers.map((marker) => marker.markerId.value),
+        unorderedEquals(['1', '2']),
+      );
+      map(tester).markers
+          .singleWhere((marker) => marker.markerId.value == '1')
+          .onTap!();
+      await tester.pumpAndSettle();
+      expect(find.text('Musica'), findsOneWidget);
+
+      await open(tester, 'categories');
+      await tester.tap(category('Concerts'));
+      await apply(tester);
+      expect(map(tester).markers.single.markerId.value, '1');
+      expect(find.byType(MapFilterFeedback), findsNothing);
+      expect(model.filters.categories, {'Concerts'});
+      await tester.tap(find.text('Llista'));
+      await tester.pumpAndSettle();
+      expect(find.text('Activitat 1'), findsOneWidget);
+      expect(find.text('Activitat 2'), findsNothing);
+      expect(find.text('Musica'), findsOneWidget);
+      expect(filterIds, [null, '4']);
+      await tester.tap(find.text('Mapa'));
+      await tester.pumpAndSettle();
+      expect(map(tester).markers.single.markerId.value, '1');
+      expect(paths.where((path) => path == '/events/map'), hasLength(1));
+      expect(paths.where((path) => path == '/categories'), hasLength(1));
+      expect(
+        paths.any((path) => RegExp(r'^/events/\d+$').hasMatch(path)),
+        isFalse,
+      );
+      expect(tester.takeException(), isNull);
     },
   );
 
@@ -401,20 +587,26 @@ void main() {
     'Map groups contain only activities kept by the confirmed filters',
     (tester) async {
       await pumpScreen(tester);
-      await open(tester, 'categories');
-      await tester.tap(category('Música'));
-      await tester.tap(category('Teatre'));
-      await apply(tester);
       await tester.tap(find.text('Mapa'));
       await tester.pumpAndSettle();
 
-      // Far away, Barcelona and Tarragona overlap and make one group; the
-      // exhibition in Girona, filtered out, is not in it.
+      // Far away, Barcelona, Tarragona and Girona overlap and make one
+      // group of three.
       map(tester).onCameraMove!(
         const CameraPosition(target: LatLng(41.5, 1.8), zoom: 3),
       );
       map(tester).onCameraIdle!();
       await tester.pumpAndSettle();
+      final unfiltered = map(tester).markers.single.markerId.value;
+      expect(unfiltered, startsWith('grup:'));
+      expect(unfiltered, endsWith(':3'));
+
+      // With the same zoom, the exhibition in Girona, filtered out, is no
+      // longer counted in the group.
+      await open(tester, 'categories');
+      await tester.tap(category('Música'));
+      await tester.tap(category('Teatre'));
+      await apply(tester);
       expect(map(tester).markers.map((marker) => marker.markerId.value), [
         'grup:demo-jazz:2',
       ]);

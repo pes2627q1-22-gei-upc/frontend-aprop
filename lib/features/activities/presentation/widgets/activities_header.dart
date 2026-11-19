@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/widgets/aprop_logo.dart';
+
 enum ActivitiesView { map, list }
 
 /// Dibuixa els controls d'Inici; la pantalla decideix què fa cada acció.
@@ -139,13 +141,6 @@ class _ActivitiesBrand extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
-    final logo = Image.asset(
-      'assets/branding/aprop_logo.png',
-      height: 80,
-      fit: BoxFit.contain,
-      alignment: Alignment.centerLeft,
-      semanticLabel: 'AProp!',
-    );
     // Només el «+»: el nom surt al consell i el llegeix el lector de pantalla.
     final create = IconButton.filledTonal(
       onPressed: onCreatePressed,
@@ -161,7 +156,7 @@ class _ActivitiesBrand extends StatelessWidget {
     );
     return Row(
       children: [
-        Expanded(child: logo),
+        const Expanded(child: APropLogo(alignment: Alignment.centerLeft)),
         const SizedBox(width: 8),
         create,
       ],

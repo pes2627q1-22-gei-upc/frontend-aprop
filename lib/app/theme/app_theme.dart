@@ -41,7 +41,7 @@ class AppTheme {
       ),
       // Blau com el punt de Google Maps, que la gent ja reconeix i que no es
       // confon amb els grups verds ni amb els marcadors.
-      // TODO(DP-049): color sense mockup.
+      // TODO(DP-057): color sense mockup.
       UserLocationTheme(dot: Color(0xFF1A73E8)),
     ],
     colorScheme: ColorScheme.fromSeed(

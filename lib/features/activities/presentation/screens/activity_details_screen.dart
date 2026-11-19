@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/formatters/reliability_formatter.dart';
+
 import '../../models/activity.dart';
 import '../../repositories/activity_details_repository.dart';
 import '../formatters/activity_date_formatter.dart';
@@ -18,11 +20,24 @@ class ActivityDetailsScreen extends StatefulWidget {
     required this.activityId,
     required this.repository,
     required this.enrollmentViewModel,
+    this.ratingBuilder,
+    this.canEdit,
+    this.onEdit,
   });
 
   final String activityId;
   final ActivityDetailsRepository repository;
   final EnrollmentViewModel enrollmentViewModel;
+
+  /// Rating block for the activity; the app decides when it can be rated.
+  final Widget Function(Activity activity)? ratingBuilder;
+
+  /// Si qui mira la fitxa pot editar l'activitat (n'és qui l'ha creada).
+  final bool Function(Activity activity)? canEdit;
+
+  /// Obre el formulari d'edició; acaba amb `true` si s'han desat canvis, i
+  /// llavors la fitxa es torna a carregar.
+  final Future<bool> Function(Activity activity)? onEdit;
 
   @override
   State<ActivityDetailsScreen> createState() => _ActivityDetailsScreenState();
@@ -55,6 +70,11 @@ class _ActivityDetailsScreenState extends State<ActivityDetailsScreen> {
     }
   }
 
+  Future<void> _edit(Activity activity) async {
+    final saved = await widget.onEdit?.call(activity) ?? false;
+    if (saved && mounted) _viewModel.load();
+  }
+
   @override
   void dispose() {
     _viewModel.dispose();
@@ -72,6 +92,25 @@ class _ActivityDetailsScreenState extends State<ActivityDetailsScreen> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.of(context).maybePop(),
         ),
+        actions: [
+          // Només per a qui l'ha creada, quan ja s'ha carregat.
+          ListenableBuilder(
+            listenable: _viewModel,
+            builder: (context, child) {
+              final activity = _viewModel.activity;
+              if (activity == null ||
+                  widget.onEdit == null ||
+                  !(widget.canEdit?.call(activity) ?? false)) {
+                return const SizedBox.shrink();
+              }
+              return IconButton(
+                tooltip: 'Edita l’activitat',
+                icon: const Icon(Icons.edit_outlined),
+                onPressed: () => _edit(activity),
+              );
+            },
+          ),
+        ],
       ),
       body: SafeArea(
         top: false,
@@ -105,6 +144,7 @@ class _ActivityDetailsScreenState extends State<ActivityDetailsScreen> {
                   child: _ActivityDetailsContent(
                     activity: activity,
                     enrollmentViewModel: widget.enrollmentViewModel,
+                    ratingBuilder: widget.ratingBuilder,
                   ),
                 ),
                 _ParticipationAction(
@@ -124,10 +164,12 @@ class _ActivityDetailsContent extends StatelessWidget {
   const _ActivityDetailsContent({
     required this.activity,
     required this.enrollmentViewModel,
+    this.ratingBuilder,
   });
 
   final Activity activity;
   final EnrollmentViewModel enrollmentViewModel;
+  final Widget Function(Activity activity)? ratingBuilder;
 
   @override
   Widget build(BuildContext context) {
@@ -169,6 +211,7 @@ class _ActivityDetailsContent extends StatelessWidget {
             fontWeight: FontWeight.w700,
           ),
         ),
+        if (ratingBuilder != null) ratingBuilder!(activity),
         const SizedBox(height: 16),
         ActivityInformationRow(
           icon: Icons.calendar_month_outlined,
@@ -312,6 +355,31 @@ class _CreatorSection extends StatelessWidget {
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
                 if (creator.isFriend) const FriendshipBadge(),
+                Semantics(
+                  label: creator.reliability == null
+                      ? 'Fiabilitat de l’organitzador: sense valoracions'
+                      : 'Fiabilitat de l’organitzador: '
+                            '${formatReliability(creator.reliability)} sobre 5',
+                  excludeSemantics: true,
+                  child: Text.rich(
+                    TextSpan(
+                      text:
+                          'Fiabilitat ${formatReliability(creator.reliability)}',
+                      children: [
+                        if (creator.reliability != null)
+                          WidgetSpan(
+                            alignment: PlaceholderAlignment.middle,
+                            child: Icon(
+                              Icons.star,
+                              size: 18,
+                              color: theme.colorScheme.primary,
+                            ),
+                          ),
+                      ],
+                    ),
+                    style: theme.textTheme.labelLarge,
+                  ),
+                ),
                 Tooltip(
                   message: 'Perfil disponible properament',
                   child: TextButton.icon(

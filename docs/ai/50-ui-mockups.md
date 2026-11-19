@@ -12,12 +12,18 @@
   `border #E3DED5`, `selectedBackground #E6EEE7`. Mostassa i tema fosc: `TODO` (encara no existeixen).
 - **NFR:** un únic `ThemeData` amb tokens de color, tipografia i espaiat; mode clar i fosc conforme a WCAG 2.1 AA.
 - **Interfície en català.** No hi ha vocabulari transaccional («comprar», «reservar») ni publicitat.
+- **Logotip (#262):** `APropLogo` compartit a Inici i Login, amb fons transparent i sense deformar-lo. Es conserva la composició Catalunya + tres marcadors + «AProp!», amb verd bosc, coral, mostassa i crema. Original conservat; detall i verificació a `docs/branding.md` (DP-047).
 
 ## Navegació
 
 Barra inferior fixa amb 5 seccions: **Inici · Agenda · Descobreix · Avisos · Perfil**. Cada secció conserva
 el seu historial; tornar d'una fitxa o perfil conserva els filtres, la cerca i la posició del desplaçament.
 Accés amb Google; en el primer accés es completa el perfil i es fa el test d'interessos.
+
+**Actualització #261 (2026-11-16):** en obrir el xat de l’Assistent s’amaga la barra inferior. La fletxa,
+el retorn del sistema i les dreceres recuperen la navegació habitual sense perdre l’estat de les seccions.
+La conversa es conserva en tornar d’una fitxa o reobrir l’Assistent. Les fitxes obertes des del xat també
+mantenen el flux sense barra, pendent de validar aquest detall de disseny a DP-048.
 
 ## Comportaments compartits
 
@@ -47,7 +53,7 @@ Accés amb Google; en el primer accés es completa el perfil i es fa el test d'i
 
 ## Estat actual vs mockups
 
-Taiga #87 implementa els panells Dates/Categories aprovats: calendari inclusiu, dreceres, caselles, esborrany, Aplicar/Netejar i cancel·lació sense guardar. Les vuit caselles del mockup són l’exemple Demo; en HTTP les opcions venen de `/categories`, amb càrrega/error/reintent. La capçalera mostra selecció i resum; Mapa/Llista comparteixen els filtres. La llista consulta el servidor abans de paginar. El mapa encara filtra dades disponibles i ofereix «Veure llista» si falten categories, sense confondre-les amb absència d’esdeveniments. Font compartida i contracte del mapa pendents (DP-035/DP-029/DP-038). Zona/municipi continua pendent. Vegeu `docs/activity-filters.md`.
+Taiga #87 implementa els panells Dates/Categories aprovats: calendari inclusiu, dreceres, caselles, esborrany, Aplicar/Netejar i cancel·lació sense guardar. Les vuit caselles del mockup són l’exemple Demo; en HTTP les opcions venen de `/categories`, amb càrrega/error/reintent. La capçalera mostra selecció i resum; Mapa/Llista comparteixen els filtres. La llista consulta el servidor abans de paginar. #253 conserva les opcions vàlides si hi ha noms buits i permet reintentar un catàleg buit. Amb el contracte de mapa del backend `6f4979e`, es mostren les categories rebudes i es filtra localment per qualsevol categoria de l’activitat. Si genuïnament falta categoria es manté «Veure llista», sense confondre-ho amb absència d’esdeveniments. Font compartida i filtratge global pendents (DP-035/DP-038/DP-046). Zona/municipi continua pendent. Vegeu `docs/inici-server-filters.md`.
 
 Perfil propi i Configuració segueixen `perfil_1_principal.png` i `perfil_2_configuracio.png`. En HTTP, la identitat, comptadors i XP venen de `/users/me`; s’editen nom/username/biografia, es puja la foto i es desa `show-plans`. «Creats per mi» és la pestanya inicial i carrega a part amb error/reintent; «Plans fets» indica historial pendent perquè plans passats no confirmen assistència. Sense metadades de nivells no es dibuixen insígnies/llindars inventats. Municipi i preferències d’avisos queden pendents; Demo conserva els exemples i canvis en memòria. Compartir copia el username confirmat. Colors centralitzats i disposició adaptable. Taiga #230; DP-032/DP-033/DP-040 i `docs/profile-backend.md`.
 

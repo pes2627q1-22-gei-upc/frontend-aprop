@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:aprop/features/activities/data/http_activity_map_repository.dart';
 import 'package:aprop/features/activities/models/activity.dart';
+import 'package:aprop/features/activities/models/activity_filters.dart';
 import 'package:aprop/features/activities/models/geo_bounds.dart';
 import 'package:aprop/features/activities/models/geo_point.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -32,6 +33,7 @@ void main() {
     'start-date': '2026-11-07T00:00:00Z',
     'is-official': true,
     'has-friends': false,
+    'categories': ['agenda:categories/musica', 'agenda:ambits/concerts'],
     ...changes,
   };
 
@@ -82,9 +84,62 @@ void main() {
     expect(activity.description, 'Concerts gratuïts cada dissabte.');
     expect(activity.directions, 'Sala Salamandra · Av. del Carrilet, 235');
     expect(activity.price, 0);
-    // El mapa no rep categories.
-    expect(activity.category, 'Activitat');
+    expect(activity.category, 'Musica');
+    expect(activity.categories, ['Musica', 'Concerts']);
   });
+
+  test('Unnamed map categories do not hide the first usable badge', () async {
+    final activities = await repository(
+      (_) => json([
+        event({
+          'categories': [
+            '',
+            'agenda:categories/',
+            '  ',
+            'agenda:categories/teatre',
+            'agenda:ambits/concerts',
+            'agenda:categories/teatre',
+          ],
+        }),
+      ]),
+    ).getActivitiesInArea(area);
+
+    final activity = activities.single;
+    expect(activity.category, 'Teatre');
+    expect(activity.categories, ['Teatre', 'Concerts']);
+    expect(ActivityFilters(categories: ['Concerts']).matches(activity), isTrue);
+    expect(ActivityFilters(categories: ['Cinema']).matches(activity), isFalse);
+    expect(() => activity.categories.clear(), throwsUnsupportedError);
+    expect(requests, hasLength(1));
+  });
+
+  test(
+    'A genuinely uncategorized map event keeps its explicit fallback',
+    () async {
+      for (final categories in [
+        null,
+        <String>[],
+        ['', 'agenda:categories/'],
+      ]) {
+        final activities = await repository(
+          (_) => json([
+            event({'categories': categories}),
+          ]),
+        ).getActivitiesInArea(area);
+        final activity = activities.single;
+        expect(activity.category, 'Activitat');
+        expect(
+          ActivityFilters(categories: ['Teatre']).matches(activity),
+          isFalse,
+        );
+        expect(
+          ActivityFilters(categories: ['Teatre'])
+              .missingCategoryCount(activities),
+          1,
+        );
+      }
+    },
+  );
 
   test('Converteix l’etiqueta del municipi en el seu nom', () async {
     Future<String> municipality(String? tag) async {

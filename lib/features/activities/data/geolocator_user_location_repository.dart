@@ -7,7 +7,7 @@ import '../repositories/user_location_repository.dart';
 
 /// Ubicació del dispositiu amb `geolocator`: el GPS a Android i iOS i
 /// `navigator.geolocation` a la web.
-// TODO(DP-049): paquet nou, pendent de validar amb l'equip.
+// TODO(DP-057): paquet nou, pendent de validar amb l'equip.
 class GeolocatorUserLocationRepository implements UserLocationRepository {
   const GeolocatorUserLocationRepository();
 

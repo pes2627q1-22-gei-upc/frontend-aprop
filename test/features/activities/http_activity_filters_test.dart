@@ -104,6 +104,63 @@ void main() {
   );
 
   test(
+    'Unnamed categories do not hide valid options or their server IDs',
+    () async {
+      final requestedIds = <String?>[];
+      final repository = HttpActivityRepository(
+        apiClient: ApiClient(
+          client: MockClient((request) async {
+            if (request.url.path == '/categories') {
+              return json([
+                {'id': 1, 'name': ''},
+                {'id': 2, 'name': '  '},
+                {'id': 3, 'name': 'agenda:categories/teatre'},
+                {'id': 4, 'name': 'agenda:ambits/concerts'},
+                {'id': 5, 'name': 'agenda:categories/'},
+              ]);
+            }
+            requestedIds.add(request.url.queryParameters['filterCategory']);
+            return json([]);
+          }),
+        ),
+      );
+
+      expect(await repository.getFilterCategories(), ['Concerts', 'Teatre']);
+      await repository.getActivitiesPage(
+        filters: ActivityFilters(categories: ['Teatre']),
+      );
+      expect(requestedIds, ['3']);
+    },
+  );
+
+  test(
+    'An empty category response can be refreshed without a new session',
+    () async {
+      var requests = 0;
+      final repository = HttpActivityRepository(
+        apiClient: ApiClient(
+          client: MockClient((request) async {
+            requests++;
+            return json(
+              requests == 1
+                  ? []
+                  : [
+                      {'id': 3, 'name': 'agenda:categories/teatre'},
+                    ],
+            );
+          }),
+        ),
+      );
+
+      expect(await repository.getFilterCategories(), isEmpty);
+      expect(await repository.getFilterCategories(), ['Teatre']);
+      expect(requests, 2);
+      expect(await repository.getFilterCategories(), ['Teatre']);
+      expect(requests, 2);
+    },
+  );
+
+  test(
     'Multiple categories are OR queries on every page, with unique IDs',
     () async {
       final requests = <Map<String, String>>[];

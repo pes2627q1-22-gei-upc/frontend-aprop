@@ -27,4 +27,9 @@ abstract interface class ActivityRepository
   /// Publica una activitat no oficial i la retorna amb el seu ID. Llança una
   /// excepció si no s'ha pogut crear.
   Future<Activity> createActivity(NewActivity activity);
+
+  /// Desa els canvis d'una activitat no oficial de qui l'ha creada i la
+  /// retorna actualitzada. Llança una excepció si no s'ha pogut desar (per
+  /// exemple, si qui ho demana no n'és qui l'ha creada).
+  Future<Activity> updateActivity(String id, NewActivity activity);
 }

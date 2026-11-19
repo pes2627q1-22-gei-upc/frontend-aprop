@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/formatters/reliability_formatter.dart';
 import '../../../../core/widgets/content_image.dart';
 
 import '../../models/user_profile.dart';
@@ -33,12 +34,12 @@ class ProfileHeader extends StatelessWidget {
         _Statistic(value: '${profile.displayedPlanCount}', label: 'Plans'),
         _Statistic(value: '${profile.friendCount}', label: 'Amics'),
         _Statistic(
-          value:
-              profile.organizerRating
-                  ?.toStringAsFixed(1)
-                  .replaceAll('.', ',') ??
-              '—',
+          value: formatReliability(profile.organizerRating),
           label: 'Valoració',
+          semanticsLabel: profile.organizerRating == null
+              ? 'Fiabilitat com a organitzador: sense valoracions'
+              : 'Fiabilitat com a organitzador: '
+                    '${formatReliability(profile.organizerRating)} sobre 5',
           star: profile.organizerRating != null,
         ),
       ],
@@ -183,8 +184,10 @@ class _Statistic extends StatelessWidget {
     required this.value,
     required this.label,
     this.star = false,
+    this.semanticsLabel,
   });
   final String value;
+  final String? semanticsLabel;
   final String label;
   final bool star;
 
@@ -192,29 +195,33 @@ class _Statistic extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Expanded(
-      child: Column(
-        children: [
-          Wrap(
-            alignment: WrapAlignment.center,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: [
-              Text(
-                value,
-                style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
+      child: Semantics(
+        label: semanticsLabel,
+        excludeSemantics: semanticsLabel != null,
+        child: Column(
+          children: [
+            Wrap(
+              alignment: WrapAlignment.center,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                Text(
+                  value,
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-              if (star)
-                Icon(
-                  Icons.star,
-                  size: 18,
-                  color: theme.extension<ProfilePalette>()!.goldInk,
-                ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Text(label, textAlign: TextAlign.center),
-        ],
+                if (star)
+                  Icon(
+                    Icons.star,
+                    size: 18,
+                    color: theme.extension<ProfilePalette>()!.goldInk,
+                  ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Text(label, textAlign: TextAlign.center),
+          ],
+        ),
       ),
     );
   }

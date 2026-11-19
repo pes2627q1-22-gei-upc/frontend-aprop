@@ -37,7 +37,7 @@
   donar el permís a la configuració), es torna a mirar.
 - Plataformes: `ACCESS_FINE_LOCATION` i `ACCESS_COARSE_LOCATION` a Android (la persona pot triar ubicació
   aproximada) i `NSLocationWhenInUseUsageDescription` a iOS. La web necessita HTTPS o `localhost`.
-- Decisions provisionals a DP-049.
+- Decisions provisionals a DP-057.
 
 ## Amb el backend
 
