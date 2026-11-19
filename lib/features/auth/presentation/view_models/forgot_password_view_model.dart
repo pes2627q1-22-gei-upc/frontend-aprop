@@ -2,15 +2,14 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 
+import '../../../../core/l10n/locale_controller.dart';
 import '../../models/auth_failure.dart';
 import '../../repositories/auth_repository.dart';
 import 'auth_failure_message.dart';
 import 'auth_validators.dart';
 
 /// No diu si hi ha cap compte amb el correu: es mostra igual en tots dos casos.
-const passwordResetSentMessage =
-    "Si hi ha un compte amb aquest correu, t'hi hem enviat un enllaç per "
-    'triar una contrasenya nova. Si no el trobes, mira el correu brossa.';
+String get passwordResetSentMessage => currentL10n.forgotSent;
 
 /// Formulari per demanar l'enllaç de «He oblidat la contrasenya».
 class ForgotPasswordViewModel extends ChangeNotifier {
@@ -92,7 +91,7 @@ class ForgotPasswordViewModel extends ChangeNotifier {
 
     _cooldownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       _cooldownSecondsLeft--;
-      if (_cooldownSecondsLeft == 0) timer.cancel();
+      if (_cooldownSecondsLeft <= 0) timer.cancel();
       notifyListeners();
     });
   }

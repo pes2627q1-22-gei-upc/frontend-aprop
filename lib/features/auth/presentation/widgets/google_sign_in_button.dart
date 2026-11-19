@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/locale_controller.dart';
+
 /// Separador «o» seguit del botó per entrar amb Google.
 ///
 /// Un [onPressed] nul desactiva el botó, per exemple mentre s'envia el
@@ -28,7 +30,7 @@ class GoogleSignInButton extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12),
               child: Text(
-                'o',
+                context.l10n.authOr,
                 style: TextStyle(color: colors.onSurfaceVariant),
               ),
             ),
@@ -43,7 +45,7 @@ class GoogleSignInButton extends StatelessWidget {
                   dimension: 20,
                   child: CircularProgressIndicator(
                     strokeWidth: 2.5,
-                    semanticsLabel: 'Carregant',
+                    semanticsLabel: context.l10n.loading,
                     color: colors.onSurfaceVariant,
                   ),
                 )
@@ -58,7 +60,7 @@ class GoogleSignInButton extends StatelessWidget {
                     excludeFromSemantics: true,
                   ),
                 ),
-          label: const Text('Continua amb Google'),
+          label: Text(context.l10n.authContinueWithGoogle),
           style: OutlinedButton.styleFrom(
             minimumSize: const Size.fromHeight(52),
           ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/locale_controller.dart';
 import '../../repositories/auth_repository.dart';
 import '../view_models/forgot_password_view_model.dart';
 import '../widgets/auth_link_prompt.dart';
@@ -54,7 +55,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Recupera la contrasenya')),
+      appBar: AppBar(title: Text(context.l10n.forgotTitle)),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -78,7 +79,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                       ),
                       const SizedBox(height: 24),
                       Text(
-                        'Has oblidat la contrasenya?',
+                        context.l10n.forgotLink,
                         style: theme.textTheme.headlineSmall?.copyWith(
                           color: theme.colorScheme.primary,
                           fontWeight: FontWeight.w700,
@@ -86,8 +87,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        "Escriu el correu del teu compte i t'enviarem un "
-                        "enllaç per triar-ne una de nova.",
+                        context.l10n.forgotIntro,
                         style: TextStyle(
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
@@ -102,7 +102,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                         onChanged: (_) => _viewModel.onEmailChanged(),
                         onSubmitted: (_) => _send(),
                         decoration: InputDecoration(
-                          labelText: 'Correu',
+                          labelText: context.l10n.forgotEmailLabel,
                           errorText: _viewModel.emailError,
                           prefixIcon: const Icon(Icons.mail_outline),
                         ),
@@ -120,17 +120,17 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                         // L'espai no separable evita que «(27 s)» es parteixi
                         // entre dues línies amb la lletra gran.
                         label: !_viewModel.hasSent
-                            ? "Envia l'enllaç"
+                            ? context.l10n.forgotSend
                             : secondsLeft > 0
-                            ? "Torna a enviar l'enllaç ($secondsLeft s)"
-                            : "Torna a enviar l'enllaç",
+                            ? context.l10n.forgotResendIn(secondsLeft)
+                            : context.l10n.forgotResend,
                         isLoading: _viewModel.isSending,
                         onPressed: _viewModel.canSend ? _send : null,
                       ),
                       const SizedBox(height: 24),
                       AuthLinkPrompt(
-                        question: 'Ja la recordes?',
-                        label: "Torna a l'inici de sessió",
+                        question: context.l10n.forgotRemember,
+                        label: context.l10n.forgotBackToLogin,
                         onPressed: () => Navigator.of(context).maybePop(),
                       ),
                     ],

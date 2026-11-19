@@ -282,8 +282,8 @@ void main() {
       );
       expect(email.controller!.text, 'laia@aprop.cat');
 
-      // «Torna a l'inici de sessió» hi torna.
-      await tester.tap(find.text("Torna a l'inici de sessió"));
+      // «Torna a l’inici de sessió» hi torna.
+      await tester.tap(find.text("Torna a l’inici de sessió"));
       await tester.pumpAndSettle();
       expect(find.byType(ForgotPasswordScreen), findsNothing);
       expect(find.text('Inicia sessió'), findsOneWidget);
@@ -310,7 +310,7 @@ void main() {
     ) async {
       await pumpScreen(tester, ForgotPasswordScreen(repository: repository));
 
-      await tester.tap(find.text("Envia l'enllaç"));
+      await tester.tap(find.text("Envia l’enllaç"));
       await tester.pump();
       expect(find.text('Introdueix el correu.'), findsOneWidget);
       expect(repository.passwordResetEmails, isEmpty);
@@ -319,15 +319,15 @@ void main() {
         find.widgetWithText(TextField, 'Correu'),
         'laia@aprop.cat',
       );
-      await tester.tap(find.text("Envia l'enllaç"));
+      await tester.tap(find.text("Envia l’enllaç"));
       await tester.pump();
 
       expect(repository.passwordResetEmails, ['laia@aprop.cat']);
       expect(find.text(passwordResetSentMessage), findsOneWidget);
-      expect(find.text("Torna a enviar l'enllaç (60 s)"), findsOneWidget);
+      expect(find.text("Torna a enviar l’enllaç (60 s)"), findsOneWidget);
 
       await tester.pump(const Duration(seconds: 60));
-      await tester.tap(find.text("Torna a enviar l'enllaç"));
+      await tester.tap(find.text("Torna a enviar l’enllaç"));
       await tester.pump();
       expect(repository.passwordResetEmails, hasLength(2));
     });
@@ -344,8 +344,8 @@ void main() {
         textScale: 2,
       );
 
-      await tester.ensureVisible(find.text("Envia l'enllaç"));
-      await tester.tap(find.text("Envia l'enllaç"));
+      await tester.ensureVisible(find.text("Envia l’enllaç"));
+      await tester.tap(find.text("Envia l’enllaç"));
       await tester.pump();
 
       expect(tester.takeException(), isNull);

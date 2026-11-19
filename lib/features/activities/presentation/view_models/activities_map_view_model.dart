@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import '../../models/activity.dart';
 import '../../models/geo_bounds.dart';
 import '../../repositories/activity_map_repository.dart';
+import '../../../../core/l10n/locale_controller.dart';
 
 /// Activitats del mapa d'Inici per zona visible (CA3 de la #21).
 class ActivitiesMapViewModel extends ChangeNotifier {
@@ -53,9 +54,7 @@ class ActivitiesMapViewModel extends ChangeNotifier {
       _loadedArea = area;
     } catch (_) {
       if (_isDisposed || request != _lastRequest) return;
-      _errorMessage =
-          'No hem pogut carregar les activitats d’aquesta zona. '
-          'Torna-ho a provar.';
+      _errorMessage = currentL10n.actLoadZoneError;
     } finally {
       if (!_isDisposed && request == _lastRequest) {
         _isLoading = false;

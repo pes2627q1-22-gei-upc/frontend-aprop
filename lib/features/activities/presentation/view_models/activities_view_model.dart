@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import '../../models/activity.dart';
 import '../../models/activity_filters.dart';
 import '../../repositories/activity_repository.dart';
+import '../../../../core/l10n/locale_controller.dart';
 
 class ActivitiesViewModel extends ChangeNotifier {
   ActivitiesViewModel({required this._repository, this.pageSize = 50}) {
@@ -71,7 +72,7 @@ class ActivitiesViewModel extends ChangeNotifier {
       _hasLoadedCategories = categories.isNotEmpty;
     } catch (_) {
       if (_isDisposed) return;
-      _categoriesError = 'No hem pogut carregar les categories.';
+      _categoriesError = currentL10n.actLoadCategoriesError;
     } finally {
       if (!_isDisposed) {
         _isLoadingCategories = false;
@@ -104,8 +105,7 @@ class ActivitiesViewModel extends ChangeNotifier {
     } catch (_) {
       if (_isDisposed || generation != _generation) return;
 
-      _errorMessage =
-          'No hem pogut carregar les activitats. Torna-ho a provar.';
+      _errorMessage = currentL10n.actLoadError;
     } finally {
       if (!_isDisposed && generation == _generation) {
         _isLoading = false;
@@ -143,8 +143,7 @@ class ActivitiesViewModel extends ChangeNotifier {
       _nextPage = page + 1;
     } catch (_) {
       if (_isDisposed || generation != _generation) return;
-      _loadMoreError =
-          'No hem pogut carregar més activitats. Torna-ho a provar.';
+      _loadMoreError = currentL10n.actLoadMoreError;
     } finally {
       if (!_isDisposed && generation == _generation) {
         _isLoadingMore = false;

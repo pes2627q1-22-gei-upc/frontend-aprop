@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/locale_controller.dart';
+
 class SettingsGroup extends StatelessWidget {
   const SettingsGroup({super.key, required this.title, required this.children});
   final String title;
@@ -73,19 +75,19 @@ class PendingSettingsTile extends StatelessWidget {
     super.key,
     required this.title,
     required this.icon,
-    this.subtitle = 'Disponible properament',
+    this.subtitle,
     this.status,
     this.danger = false,
   });
   final String title;
   final IconData icon;
-  final String subtitle;
+  final String? subtitle;
   final String? status;
   final bool danger;
 
   @override
   Widget build(BuildContext context) => Tooltip(
-    message: '$title: disponible properament',
+    message: context.l10n.comingSoonTitled(title),
     child: LayoutBuilder(
       builder: (context, constraints) {
         final stackStatus =
@@ -100,7 +102,9 @@ class PendingSettingsTile extends StatelessWidget {
                 : null,
           ),
           subtitle: Text(
-            stackStatus && status != null ? '$status · $subtitle' : subtitle,
+            stackStatus && status != null
+                ? '$status · ${subtitle ?? context.l10n.comingSoon}'
+                : subtitle ?? context.l10n.comingSoon,
           ),
           trailing: status == null || stackStatus ? null : Text(status!),
           enabled: false,

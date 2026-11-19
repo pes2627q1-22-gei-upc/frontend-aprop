@@ -1,3 +1,5 @@
+import '../../../../core/l10n/locale_controller.dart';
+
 /// Validacions dels formularis d'accés. Retornen el missatge d'error o
 /// `null` si el valor és correcte.
 abstract final class AuthValidators {
@@ -21,17 +23,17 @@ abstract final class AuthValidators {
   static String? email(String? value) {
     final email = value?.trim() ?? '';
 
-    if (email.isEmpty) return 'Introdueix el correu.';
-    if (!_emailPattern.hasMatch(email)) return 'El correu no és vàlid.';
+    if (email.isEmpty) return currentL10n.authEmailRequiredField;
+    if (!_emailPattern.hasMatch(email)) return currentL10n.authEmailInvalid;
     return null;
   }
 
   static String? username(String? value) {
     final username = value?.trim() ?? '';
 
-    if (username.isEmpty) return "Introdueix un nom d'usuari.";
+    if (username.isEmpty) return currentL10n.authUsernameRequired;
     if (!_usernamePattern.hasMatch(username)) {
-      return 'Entre 3 i 20 caràcters: minúscules, números, punt o guió baix.';
+      return currentL10n.authUsernameRules;
     }
     return null;
   }
@@ -41,27 +43,34 @@ abstract final class AuthValidators {
   static String? newPassword(String? value) {
     final password = value ?? '';
 
-    if (password.isEmpty) return 'Introdueix una contrasenya.';
+    final l10n = currentL10n;
+    if (password.isEmpty) return l10n.authPasswordRequired;
 
     final missing = [
       if (password.length < minPasswordLength)
-        'almenys $minPasswordLength caràcters',
-      if (!_uppercasePattern.hasMatch(password)) 'una majúscula',
-      if (!_lowercasePattern.hasMatch(password)) 'una minúscula',
-      if (!_digitPattern.hasMatch(password)) 'un número',
-      if (!_specialCharacterPattern.hasMatch(password)) 'un caràcter especial',
+        l10n.authPasswordMissingLength(minPasswordLength),
+      if (!_uppercasePattern.hasMatch(password)) l10n.authPasswordMissingUpper,
+      if (!_lowercasePattern.hasMatch(password)) l10n.authPasswordMissingLower,
+      if (!_digitPattern.hasMatch(password)) l10n.authPasswordMissingDigit,
+      if (!_specialCharacterPattern.hasMatch(password))
+        l10n.authPasswordMissingSpecial,
     ];
     if (missing.isEmpty) return null;
 
     final requirements = missing.length == 1
         ? missing.single
-        : '${missing.take(missing.length - 1).join(', ')} i ${missing.last}';
-    return 'Ha de tenir $requirements.';
+        : l10n.authListAnd(
+            missing.take(missing.length - 1).join(', '),
+            missing.last,
+          );
+    return l10n.authPasswordMustHave(requirements);
   }
 
   static String? passwordConfirmation(String? value, String password) {
-    if (value == null || value.isEmpty) return 'Repeteix la contrasenya.';
-    if (value != password) return 'Les contrasenyes no coincideixen.';
+    if (value == null || value.isEmpty) {
+      return currentL10n.authRepeatPasswordRequired;
+    }
+    if (value != password) return currentL10n.authPasswordsDiffer;
     return null;
   }
 }

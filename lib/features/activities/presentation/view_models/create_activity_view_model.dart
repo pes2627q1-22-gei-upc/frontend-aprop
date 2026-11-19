@@ -8,6 +8,7 @@ import '../../models/new_activity.dart';
 import '../../repositories/activity_category_repository.dart';
 import '../../repositories/activity_repository.dart';
 import '../../repositories/location_repository.dart';
+import '../../../../core/l10n/locale_controller.dart';
 
 enum CreateActivityField {
   title,
@@ -21,10 +22,8 @@ enum CreateActivityField {
 const maxActivityTitleLength = 80;
 const maxActivityDescriptionLength = 1000;
 const maxActivityDirectionsLength = 200;
-const createActivityErrorMessage =
-    'No hem pogut publicar l’activitat. Torna-ho a provar.';
-const updateActivityErrorMessage =
-    'No hem pogut desar els canvis. Torna-ho a provar.';
+String get createActivityErrorMessage => currentL10n.createPublishError;
+String get updateActivityErrorMessage => currentL10n.createUpdateError;
 
 /// Formulari per publicar una activitat no oficial, o per editar-ne una amb
 /// [editing]. Els textos arriben en enviar el formulari; la categoria, la
@@ -137,7 +136,7 @@ class CreateActivityViewModel extends ChangeNotifier {
       _matchEditedCategory();
     } catch (_) {
       if (_isDisposed) return;
-      _categoriesError = 'No hem pogut carregar les categories.';
+      _categoriesError = currentL10n.actLoadCategoriesError;
     } finally {
       if (!_isDisposed) {
         _isLoadingCategories = false;
@@ -253,12 +252,12 @@ class CreateActivityViewModel extends ChangeNotifier {
         CreateActivityField.title: ?_validateTitle(title),
         CreateActivityField.description: ?_validateDescription(description),
         CreateActivityField.category: ?(category == null
-            ? 'Tria una categoria.'
+            ? currentL10n.createCategoryRequired
             : null),
         CreateActivityField.startsAt: ?_validateStartsAt(startsAt),
         CreateActivityField.endsAt: ?_validateEndsAt(startsAt, endsAt),
         CreateActivityField.price: ?(parsedPrice == null && !keepsUnknownPrice
-            ? 'Introdueix un preu vàlid, per exemple 12,50.'
+            ? currentL10n.createPriceInvalid
             : null),
       });
 
@@ -304,26 +303,26 @@ class CreateActivityViewModel extends ChangeNotifier {
 
   String? _validateTitle(String title) {
     final trimmed = title.trim();
-    if (trimmed.isEmpty) return 'Introdueix el títol.';
+    if (trimmed.isEmpty) return currentL10n.createTitleRequired;
     if (trimmed.length > maxActivityTitleLength) {
-      return 'Màxim $maxActivityTitleLength caràcters.';
+      return currentL10n.createMaxChars(maxActivityTitleLength);
     }
     return null;
   }
 
   String? _validateDescription(String description) {
     final trimmed = description.trim();
-    if (trimmed.isEmpty) return 'Introdueix una descripció.';
+    if (trimmed.isEmpty) return currentL10n.createDescriptionRequired;
     if (trimmed.length > maxActivityDescriptionLength) {
-      return 'Màxim $maxActivityDescriptionLength caràcters.';
+      return currentL10n.createMaxChars(maxActivityDescriptionLength);
     }
     return null;
   }
 
   /// Criteri de Taiga: l'inici no pot ser anterior a la creació.
   String? _validateStartsAt(DateTime? startsAt) {
-    if (startsAt == null) return 'Tria la data i l’hora d’inici.';
-    if (!startsAt.isAfter(_now())) return 'L’inici ha de ser posterior a ara.';
+    if (startsAt == null) return currentL10n.createStartRequired;
+    if (!startsAt.isAfter(_now())) return currentL10n.startSheetError;
     return null;
   }
 
@@ -333,7 +332,7 @@ class CreateActivityViewModel extends ChangeNotifier {
     if (startsAt == null || endsAt == null || endsAt.isAfter(startsAt)) {
       return null;
     }
-    return 'La fi ha de ser posterior a l’inici.';
+    return currentL10n.endSheetError;
   }
 
   @override

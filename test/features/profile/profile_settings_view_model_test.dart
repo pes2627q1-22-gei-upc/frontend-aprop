@@ -1,8 +1,11 @@
 import 'dart:async';
 
+import 'package:aprop/core/l10n/locale_controller.dart';
 import 'package:aprop/features/profile/models/profile_settings.dart';
+import 'package:flutter/widgets.dart' show Locale;
 import 'package:aprop/features/profile/presentation/view_models/profile_settings_view_model.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'fake_profile_repositories.dart';
 
@@ -20,6 +23,26 @@ void main() {
     );
   });
   tearDown(() => model.dispose());
+
+  test('Only the latest language change sets the result', () async {
+    SharedPreferences.setMockInitialValues({});
+    final controller = LocaleController();
+    final localised = ProfileSettingsViewModel(
+      userId: 'user-a',
+      repository: repository,
+      localeController: controller,
+      onSignOut: () async {},
+    );
+    addTearDown(localised.dispose);
+    final first = Completer<void>();
+    repository.onUpdateLanguage = (language) =>
+        language == 'es' ? first.future : null;
+    final older = localised.changeLanguage(const Locale('es'));
+    await localised.changeLanguage(const Locale('en'));
+    first.completeError(Exception('late failure'));
+    await older;
+    expect(localised.actionError, isNull);
+  });
 
   test(
     'Loading is account scoped, deduplicated and failures can be retried',

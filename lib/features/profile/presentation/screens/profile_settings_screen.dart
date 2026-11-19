@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/locale_controller.dart';
 import '../../../auth/models/app_user.dart';
 import '../../models/profile_settings.dart';
 import '../../repositories/profile_settings_repository.dart';
@@ -14,12 +15,16 @@ class ProfileSettingsScreen extends StatefulWidget {
     required this.onSignOut,
     required this.onBack,
     this.onOpenInterestTest,
+    this.localeController,
   });
   final AppUser user;
   final ProfileSettingsRepository repository;
   final Future<void> Function() onSignOut;
   final VoidCallback onBack;
   final VoidCallback? onOpenInterestTest;
+
+  /// Defaults to the app's [LocaleScope] controller.
+  final LocaleController? localeController;
 
   @override
   State<ProfileSettingsScreen> createState() => _ProfileSettingsScreenState();
@@ -33,6 +38,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
       userId: widget.user.id,
       repository: widget.repository,
       onSignOut: widget.onSignOut,
+      localeController: widget.localeController ?? LocaleScope.maybeOf(context),
     )..load();
   }
 
@@ -61,10 +67,10 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(
-      title: const Text('Configuració'),
+      title: Text(context.l10n.settingsTitle),
       centerTitle: true,
       leading: IconButton(
-        tooltip: 'Tornar enrere',
+        tooltip: context.l10n.goBack,
         onPressed: widget.onBack,
         icon: const Icon(Icons.arrow_back),
       ),
@@ -86,14 +92,14 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   if (model.isLoading)
-                    const LinearProgressIndicator(
-                      semanticsLabel: 'Carregant la configuració',
+                    LinearProgressIndicator(
+                      semanticsLabel: context.l10n.settingsLoading,
                     ),
                   if (model.errorMessage case final error?) ...[
                     Text(error, textAlign: TextAlign.center),
                     TextButton(
                       onPressed: model.load,
-                      child: const Text('Tornar-ho a provar'),
+                      child: Text(context.l10n.retry),
                     ),
                   ],
                   if (model.actionError case final error?)
@@ -114,120 +120,134 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                       padding: const EdgeInsets.only(bottom: 12),
                       child: Semantics(
                         liveRegion: true,
-                        child: const Text('Desant el canvi…'),
+                        child: Text(context.l10n.settingsSavingChange),
                       ),
                     ),
                 ],
               ),
               if (settings != null) ...[
-                // TODO(DP-033): Activate language/theme only when they apply to
-                // the whole app. These controls must not pretend to change them.
-                const SettingsGroup(
-                  title: 'PREFERÈNCIES',
+                // TODO(DP-033): Theme stays disabled until dark mode exists.
+                SettingsGroup(
+                  title: context.l10n.settingsGroupPreferences,
                   children: [
-                    _PendingChoiceRow(
-                      title: 'Idioma',
+                    _ChoiceRow(
+                      title: context.l10n.settingsLanguage,
                       icon: Icons.language,
-                      options: ['Català', 'Castellà'],
-                      tooltip: 'Canvi d’idioma disponible properament',
+                      options: [
+                        ('ca', context.l10n.languageNameCa),
+                        ('es', context.l10n.languageNameEs),
+                        ('en', context.l10n.languageNameEn),
+                      ],
+                      selected:
+                          Localizations.maybeLocaleOf(context)?.languageCode ??
+                          'ca',
+                      onChanged: model.hasLocaleController
+                          ? (code) => model.changeLanguage(Locale(code))
+                          : null,
                     ),
-                    _PendingChoiceRow(
-                      title: 'Tema',
+                    _ChoiceRow(
+                      title: context.l10n.settingsTheme,
                       icon: Icons.light_mode_outlined,
-                      options: ['Clar', 'Fosc'],
-                      tooltip: 'Tema fosc disponible properament',
+                      options: [
+                        ('light', context.l10n.themeLight),
+                        ('dark', context.l10n.themeDark),
+                      ],
+                      selected: 'light',
+                      tooltip: context.l10n.settingsDarkThemeSoon,
                     ),
                   ],
                 ),
                 SettingsGroup(
-                  title: 'PRIVACITAT',
+                  title: context.l10n.settingsGroupPrivacy,
                   children: [
                     _preference(
                       ProfilePreference.showMyPlans,
                       Icons.visibility_outlined,
-                      'Mostrar els meus plans',
-                      'Els amics veuen a què t’apuntes',
+                      context.l10n.settingsShowMyPlans,
+                      context.l10n.settingsShowMyPlansHint,
                     ),
-                    const PendingSettingsTile(
-                      title: 'Usuaris bloquejats',
+                    PendingSettingsTile(
+                      title: context.l10n.settingsBlockedUsers,
                       icon: Icons.block,
                     ),
                   ],
                 ),
                 SettingsGroup(
-                  title: 'NOTIFICACIONS',
+                  title: context.l10n.settingsGroupNotifications,
                   children: [
                     _preference(
                       ProfilePreference.reminders,
                       Icons.notifications_outlined,
-                      'Recordatoris',
-                      'Avisos dels plans de la teva agenda',
+                      context.l10n.settingsReminders,
+                      context.l10n.settingsRemindersHint,
                     ),
                     _preference(
                       ProfilePreference.friendActivity,
                       Icons.people_outline,
-                      'Activitat dels amics',
-                      'Quan un amic s’apunta a un pla',
+                      context.l10n.settingsFriendActivity,
+                      context.l10n.settingsFriendActivityHint,
                     ),
                     _preference(
                       ProfilePreference.recommendations,
                       Icons.lightbulb_outline,
-                      'Recomanacions',
+                      context.l10n.settingsRecommendations,
                       null,
                     ),
                     _preference(
                       ProfilePreference.friendRequests,
                       Icons.chat_bubble_outline,
-                      'Sol·licituds d’amistat',
+                      context.l10n.settingsFriendRequests,
                       null,
                     ),
                   ],
                 ),
                 Padding(
-                  padding: EdgeInsets.only(bottom: 16),
+                  padding: const EdgeInsets.only(bottom: 16),
                   child: Text(
                     model.persistsPreferences
-                        ? 'Els canvis disponibles es desen al teu compte.'
-                        : 'Les preferències es conserven durant aquesta sessió de l’app.',
+                        ? context.l10n.settingsPersistsAccount
+                        : context.l10n.settingsPersistsSession,
                   ),
                 ),
               ],
               SettingsGroup(
-                title: 'COMPTE',
+                title: context.l10n.settingsGroupAccount,
                 children: [
-                  const PendingSettingsTile(
-                    title: 'Google Calendar',
+                  PendingSettingsTile(
+                    title: context.l10n.settingsGoogleCalendar,
                     icon: Icons.event_available_outlined,
-                    subtitle: 'Exportació disponible properament',
-                    status: 'No connectat',
+                    subtitle: context.l10n.settingsGoogleCalendarHint,
+                    status: context.l10n.settingsNotConnected,
                   ),
                   if (widget.onOpenInterestTest case final open?)
                     ListTile(
                       key: const ValueKey('profile-interest-test'),
                       leading: const SettingsIcon(icon: Icons.sync),
-                      title: const Text('Tornar a fer el test d’interessos'),
+                      title: Text(context.l10n.settingsRetakeInterestTest),
                       minVerticalPadding: 12,
                       enabled: !model.isBusy,
                       onTap: open,
                     )
                   else
-                    const PendingSettingsTile(
-                      title: 'Tornar a fer el test d’interessos',
+                    PendingSettingsTile(
+                      title: context.l10n.settingsRetakeInterestTest,
                       icon: Icons.sync,
                     ),
                   ListTile(
                     key: const ValueKey('profile-sign-out'),
                     leading: const SettingsIcon(icon: Icons.logout),
                     title: Text(
-                      model.isSigningOut ? 'Tancant sessió…' : 'Tancar sessió',
+                      model.isSigningOut
+                          ? context.l10n.settingsSigningOut
+                          : context.l10n.settingsSignOut,
                     ),
                     subtitle: Text(widget.user.email),
                     minVerticalPadding: 12,
                     enabled: !model.isBusy,
                     onTap: model.isBusy ? null : model.signOut,
                   ),
-                  const PendingSettingsTile(
-                    title: 'Eliminar compte',
+                  PendingSettingsTile(
+                    title: context.l10n.settingsDeleteAccount,
                     icon: Icons.delete_outline,
                     danger: true,
                   ),
@@ -251,7 +271,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
       return PendingSettingsTile(
         title: title,
         icon: icon,
-        subtitle: 'Disponible properament',
+        subtitle: context.l10n.comingSoon,
       );
     }
     return SwitchListTile.adaptive(
@@ -268,29 +288,41 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
   }
 }
 
-class _PendingChoiceRow extends StatelessWidget {
-  const _PendingChoiceRow({
+/// Segmented choice. Without [onChanged] it is shown disabled.
+class _ChoiceRow extends StatelessWidget {
+  const _ChoiceRow({
     required this.title,
     required this.icon,
     required this.options,
-    required this.tooltip,
+    required this.selected,
+    this.onChanged,
+    this.tooltip,
   });
   final String title;
   final IconData icon;
-  final List<String> options;
-  final String tooltip;
+  final List<(String, String)> options;
+  final String selected;
+  final ValueChanged<String>? onChanged;
+  final String? tooltip;
 
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
     final control = Tooltip(
-      message: tooltip,
+      message: tooltip ?? '',
       child: SegmentedButton<String>(
         segments: [
-          for (final option in options)
-            ButtonSegment(value: option, label: Text(option), enabled: false),
+          for (final (value, label) in options)
+            ButtonSegment(
+              value: value,
+              label: Text(label),
+              enabled: onChanged != null,
+            ),
         ],
-        selected: {options.first},
+        selected: {selected},
+        onSelectionChanged: onChanged == null
+            ? null
+            : (values) => onChanged!(values.first),
         showSelectedIcon: false,
         style: ButtonStyle(
           minimumSize: const WidgetStatePropertyAll(Size(48, 48)),
@@ -314,7 +346,7 @@ class _PendingChoiceRow extends StatelessWidget {
               Expanded(child: Text(title)),
             ],
           );
-          if (constraints.maxWidth < 330 ||
+          if (constraints.maxWidth < (options.length > 2 ? 460 : 330) ||
               MediaQuery.textScalerOf(context).scale(14) > 21) {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,

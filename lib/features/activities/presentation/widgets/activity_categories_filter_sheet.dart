@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'activity_filter_sheet.dart';
+import '../../../../core/l10n/locale_controller.dart';
 
 class ActivityCategoriesFilterSheet extends StatefulWidget {
   const ActivityCategoriesFilterSheet({
@@ -30,12 +31,11 @@ class _ActivityCategoriesFilterSheetState
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return ActivityFilterSheet(
-      title: 'Categories',
-      subtitle: 'Pots triar més d’una categoria',
+      title: context.l10n.actCategoriesTitle,
+      subtitle: context.l10n.actCategoriesSubtitle,
       summary: Text(switch (_selected.length) {
-        0 => 'Totes les categories',
-        1 => '1 categoria seleccionada',
-        final count => '$count categories seleccionades',
+        0 => context.l10n.categoriesAll,
+        final count => context.l10n.categoriesSelected(count),
       }),
       onClear: () => setState(_selected.clear),
       onApply: widget.isLoading || widget.errorMessage != null
@@ -48,11 +48,11 @@ class _ActivityCategoriesFilterSheetState
       content: Column(
         children: [
           if (widget.isLoading)
-            const Padding(
-              padding: EdgeInsets.all(24),
+            Padding(
+              padding: const EdgeInsets.all(24),
               child: Center(
                 child: CircularProgressIndicator(
-                  semanticsLabel: 'Carregant categories',
+                  semanticsLabel: context.l10n.actCategoriesLoading,
                 ),
               ),
             )
@@ -62,20 +62,18 @@ class _ActivityCategoriesFilterSheetState
                 Semantics(liveRegion: true, child: Text(error)),
                 TextButton(
                   onPressed: widget.onRetry,
-                  child: const Text('Tornar-ho a provar'),
+                  child: Text(context.l10n.retry),
                 ),
               ],
             )
           else if (widget.categories.isEmpty)
             Column(
               children: [
-                const Text(
-                  'No hi ha categories disponibles. Pots consultar totes les activitats.',
-                ),
+                Text(context.l10n.actCategoriesEmpty),
                 if (widget.onRetry != null)
                   TextButton(
                     onPressed: widget.onRetry,
-                    child: const Text('Tornar-ho a provar'),
+                    child: Text(context.l10n.retry),
                   ),
               ],
             ),

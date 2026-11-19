@@ -17,6 +17,35 @@ void main() {
   });
 
   group('ApiClient', () {
+    test('Envia ?lang=<idioma actual> només als endpoints d’esdeveniments', () {
+      var language = 'es';
+      final client = ApiClient(
+        baseUrl: Uri.parse('https://api-aprop.onrender.com/'),
+        language: () => language,
+      );
+
+      Map<String, String> q(String path, [Map<String, String>? params]) =>
+          client.resolveUri(path, params, true).queryParameters;
+
+      expect(q('events', {'pageNum': '0'}), {'pageNum': '0', 'lang': 'es'});
+      expect(q('/events/12'), {'lang': 'es'});
+      expect(q('events?x=1'), {'x': '1', 'lang': 'es'});
+      expect(q('users/u1/events'), {'lang': 'es'});
+      expect(q('users/me/created-events'), {'lang': 'es'});
+      expect(q('users/me/events/extra'), isEmpty);
+      language = 'en';
+      expect(q('events/12'), {'lang': 'en'});
+      expect(q('users/me'), isEmpty);
+      // Només les lectures (GET) en porten.
+      expect(client.resolveUri('events').queryParameters, isEmpty);
+      expect(
+        ApiClient(baseUrl: Uri.parse('https://x.test/'))
+            .resolveUri('events', null, true)
+            .query,
+        isEmpty,
+      );
+    });
+
     test('Injecta Accept, Content-Type i Authorization (sense X-User-ID) i resol la URI', () async {
       late http.Request capturedRequest;
       final client = ApiClient(

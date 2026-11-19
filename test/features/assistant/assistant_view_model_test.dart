@@ -1,3 +1,6 @@
+import 'package:aprop/core/l10n/locale_controller.dart';
+import 'package:flutter/widgets.dart' show Locale;
+
 import 'dart:async';
 
 import 'package:aprop/features/assistant/models/assistant_message.dart';
@@ -29,6 +32,29 @@ void main() {
     expect(viewModel.isLoading, isFalse);
     expect(viewModel.errorMessage, isNull);
   });
+
+  test(
+    'Welcome follows the language and suggestions reload on change',
+    () async {
+      addTearDown(
+        () => LocaleController.active = LocaleController.defaultLocale,
+      );
+      final catalan = viewModel.messages.first.text;
+      repository.suggestions = ['ca'];
+      await viewModel.loadSuggestions();
+      expect(viewModel.suggestions, ['ca']);
+
+      LocaleController.active = const Locale('es');
+      repository.suggestions = ['es'];
+      viewModel.onLanguageChanged();
+      await Future<void>.delayed(Duration.zero);
+
+      expect(viewModel.messages.first.id, 'assistant-welcome');
+      expect(viewModel.messages.first.text, isNot(catalan));
+      expect(viewModel.messages.first.text, currentL10n.assistantWelcome);
+      expect(viewModel.suggestions, ['es']);
+    },
+  );
 
   test('Ignores empty or whitespace-only queries', () async {
     await viewModel.sendMessage('   ');
