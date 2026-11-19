@@ -4,6 +4,7 @@ import '../../models/activity_filters.dart';
 import '../formatters/activity_filter_formatter.dart';
 import 'activity_filter_calendar.dart';
 import 'activity_filter_sheet.dart';
+import '../../../../core/l10n/locale_controller.dart';
 
 typedef ActivityDateSelection = ({ActivityDateRange? dates});
 
@@ -57,8 +58,8 @@ class _ActivityDateFilterSheetState extends State<ActivityDateFilterSheet> {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
     return ActivityFilterSheet(
-      title: 'Dates',
-      subtitle: 'Tria un dia o un interval',
+      title: context.l10n.actDatesTitle,
+      subtitle: context.l10n.actDatesSubtitle,
       onClear: () => setState(() {
         _draft = null;
         _selectingEnd = false;
@@ -88,9 +89,11 @@ class _ActivityDateFilterSheetState extends State<ActivityDateFilterSheet> {
                 for (final preset in ActivityDatePreset.values)
                   ChoiceChip(
                     label: Text(switch (preset) {
-                      ActivityDatePreset.today => 'Avui',
-                      ActivityDatePreset.tomorrow => 'Demà',
-                      ActivityDatePreset.thisWeekend => 'Aquest cap de setmana',
+                      ActivityDatePreset.today => context.l10n.actPresetToday,
+                      ActivityDatePreset.tomorrow =>
+                        context.l10n.actPresetTomorrow,
+                      ActivityDatePreset.thisWeekend =>
+                        context.l10n.actPresetWeekend,
                     }),
                     selected:
                         _draft == activityDatePresetRange(preset, widget.today),

@@ -48,7 +48,7 @@ flutter build apk --debug                             # mateixa comprovació que
 - Models i contractes, independents de Flutter. Els ViewModels no depenen de `BuildContext` ni construeixen widgets.
 - `core/` només conté elements compartits i no depèn de `features/` ni d'`app/`. Les funcionalitats no importen `app/`.
 - No dupliquis estat de negoci entre pantalles: llista, detall i agenda comparteixen la font d'inscripcions.
-- Segueix els mockups aprovats (`docs/ai/50-ui-mockups.md`). **UI en català.** Colors i estils només des de
+- Segueix els mockups aprovats (`docs/ai/50-ui-mockups.md`). **UI en català per defecte, amb ca/es/en des dels fitxers ARB (`lib/l10n/`).** Colors i estils només des de
   `lib/app/theme/app_theme.dart`.
 - No incorporis paquets, endpoints, credencials ni funcionalitats fora de l'abast sense una necessitat concreta.
   No inventis contractes del backend.

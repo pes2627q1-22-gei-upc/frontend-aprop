@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../models/app_notification.dart';
 import '../formatters/notification_formatter.dart';
 import 'notification_badge_theme.dart';
+import '../../../../core/l10n/locale_controller.dart';
 
 class NotificationCard extends StatelessWidget {
   const NotificationCard({
@@ -62,14 +63,16 @@ class NotificationCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Semantics(
-            label: notice.isRead ? 'Llegit' : 'Sense llegir',
+            label: notice.isRead
+                ? context.l10n.notifRead
+                : context.l10n.notifUnread,
             hint: unavailableProfile
-                ? 'Marca l’avís com a llegit. El perfil encara no està disponible.'
+                ? context.l10n.notifHintProfileUnavailable
                 : notice.canOpenActivity
-                ? 'Obre l’activitat'
+                ? context.l10n.notifHintOpenActivity
                 : hasDestination
-                ? 'Obre el perfil'
-                : 'Marca l’avís com a llegit',
+                ? context.l10n.notifHintOpenProfile
+                : context.l10n.notifHintMarkRead,
             child: InkWell(
               onTap: busy ? null : onOpen,
               child: Padding(
@@ -91,8 +94,9 @@ class NotificationCard extends StatelessWidget {
                               _CategoryBadge(category: notice.category),
                               Text(
                                 notificationTime(notice.receivedAt),
-                                semanticsLabel:
-                                    'Rebut a les ${notificationTime(notice.receivedAt)}',
+                                semanticsLabel: context.l10n.notifReceivedAt(
+                                  notificationTime(notice.receivedAt),
+                                ),
                                 style: theme.textTheme.bodySmall?.copyWith(
                                   color: colors.onSurface,
                                 ),
@@ -145,7 +149,7 @@ class NotificationCard extends StatelessWidget {
                           if (unavailableProfile) ...[
                             const SizedBox(height: 8),
                             Text(
-                              'Perfil disponible properament',
+                              context.l10n.notifProfileSoon,
                               style: theme.textTheme.bodySmall,
                             ),
                           ],
@@ -154,8 +158,8 @@ class NotificationCard extends StatelessWidget {
                             const SizedBox(height: 8),
                             Text(
                               notice.activityUnavailable
-                                  ? 'L’activitat ja no està disponible.'
-                                  : 'No s’ha pogut carregar la informació de l’activitat. Pots provar d’obrir-la.',
+                                  ? context.l10n.notifActivityGone
+                                  : context.l10n.notifActivityLoadError,
                               style: theme.textTheme.bodySmall,
                             ),
                           ],
@@ -183,8 +187,8 @@ class NotificationCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   if (responding) ...[
-                    const LinearProgressIndicator(
-                      semanticsLabel: 'Enviant la resposta',
+                    LinearProgressIndicator(
+                      semanticsLabel: context.l10n.notifSendingResponse,
                     ),
                     const SizedBox(height: 8),
                   ],
@@ -197,14 +201,14 @@ class NotificationCard extends StatelessWidget {
                         style: FilledButton.styleFrom(
                           minimumSize: const Size(120, 48),
                         ),
-                        child: const Text('Acceptar'),
+                        child: Text(context.l10n.notifAccept),
                       ),
                       OutlinedButton(
                         onPressed: busy ? null : () => onRespond(false),
                         style: OutlinedButton.styleFrom(
                           minimumSize: const Size(120, 48),
                         ),
-                        child: const Text('Rebutjar'),
+                        child: Text(context.l10n.notifDecline),
                       ),
                     ],
                   ),
@@ -218,8 +222,8 @@ class NotificationCard extends StatelessWidget {
                 liveRegion: true,
                 child: Text(
                   notice.requestStatus == FriendRequestStatus.accepted
-                      ? 'Sol·licitud acceptada'
-                      : 'Sol·licitud rebutjada',
+                      ? context.l10n.notifRequestAccepted
+                      : context.l10n.notifRequestDeclined,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: colors.primary,
                     fontWeight: FontWeight.w600,

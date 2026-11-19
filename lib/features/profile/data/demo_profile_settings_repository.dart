@@ -16,6 +16,12 @@ class DemoProfileSettingsRepository implements ProfileSettingsRepository {
       _settings[userId] ?? const ProfileSettings();
 
   @override
+  Future<void> updateLanguage({
+    required String userId,
+    required String language,
+  }) async {}
+
+  @override
   Future<ProfileSettings> updatePreference({
     required String userId,
     required ProfilePreference preference,

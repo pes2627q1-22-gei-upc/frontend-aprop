@@ -2,18 +2,16 @@ class ProfileAvatar {
   ProfileAvatar({required Iterable<int> bytes, required this.filename})
     : bytes = List.unmodifiable(bytes) {
     if (this.bytes.isEmpty || this.bytes.length > maxBytes) {
-      throw const AvatarSelectionException('Tria una foto de menys de 5 MB.');
+      throw const AvatarSelectionException(AvatarProblem.tooBig);
     }
     if (filename.isEmpty || filename.contains('/') || filename.contains('\\')) {
-      throw const AvatarSelectionException(
-        'No hem pogut llegir el nom de la foto.',
-      );
+      throw const AvatarSelectionException(AvatarProblem.unreadableName);
     }
     if (!RegExp(
       r'\.(jpe?g|png|webp)$',
       caseSensitive: false,
     ).hasMatch(filename)) {
-      throw const AvatarSelectionException('Tria una foto JPG, PNG o WebP.');
+      throw const AvatarSelectionException(AvatarProblem.wrongFormat);
     }
   }
   static const maxBytes = 5 * 1024 * 1024;
@@ -21,7 +19,9 @@ class ProfileAvatar {
   final String filename;
 }
 
+enum AvatarProblem { tooBig, unreadableName, wrongFormat }
+
 class AvatarSelectionException implements Exception {
-  const AvatarSelectionException(this.message);
-  final String message;
+  const AvatarSelectionException(this.problem);
+  final AvatarProblem problem;
 }

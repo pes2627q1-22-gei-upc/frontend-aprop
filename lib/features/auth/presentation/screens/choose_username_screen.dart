@@ -5,6 +5,7 @@ import '../view_models/choose_username_view_model.dart';
 import '../widgets/auth_link_prompt.dart';
 import '../widgets/auth_status_message.dart';
 import '../widgets/auth_submit_button.dart';
+import '../../../../core/l10n/locale_controller.dart';
 
 /// El compte encara no té nom d'usuari (primer accés amb Google) i no es pot
 /// entrar a l'app fins que en triï un.
@@ -47,7 +48,9 @@ class _ChooseUsernameScreenState extends State<ChooseUsernameScreen> {
   /// Un compte de Google pot no tenir nom.
   String _greeting() {
     final firstName = widget.firstName.trim();
-    return firstName.isEmpty ? 'Hola!' : 'Hola, $firstName!';
+    return firstName.isEmpty
+        ? context.l10n.authGreeting
+        : context.l10n.authGreetingNamed(firstName);
   }
 
   Future<void> _submit() async {
@@ -83,7 +86,7 @@ class _ChooseUsernameScreenState extends State<ChooseUsernameScreen> {
                       ),
                       const SizedBox(height: 24),
                       Text(
-                        "Tria el teu nom d'usuari",
+                        context.l10n.authChooseUsernameTitle,
                         style: theme.textTheme.headlineSmall?.copyWith(
                           color: theme.colorScheme.primary,
                           fontWeight: FontWeight.w700,
@@ -94,8 +97,7 @@ class _ChooseUsernameScreenState extends State<ChooseUsernameScreen> {
                       // provisionalment també hi arriba qui entra amb correu
                       // en un altre dispositiu (DP-026).
                       Text(
-                        '${_greeting()} Tria el nom amb què et trobaran a '
-                        "l'app.",
+                        context.l10n.authChooseUsernameBody(_greeting()),
                         style: TextStyle(
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
@@ -103,8 +105,7 @@ class _ChooseUsernameScreenState extends State<ChooseUsernameScreen> {
                       if (widget.rejectedUsername case final rejected?) ...[
                         const SizedBox(height: 16),
                         AuthStatusMessage.info(
-                          "El nom «$rejected» ja és d'una altra persona. "
-                          "Tria'n un altre.",
+                          context.l10n.authUsernameTaken(rejected),
                         ),
                       ],
                       const SizedBox(height: 24),
@@ -116,11 +117,10 @@ class _ChooseUsernameScreenState extends State<ChooseUsernameScreen> {
                         onChanged: (_) => _viewModel.onUsernameChanged(),
                         onSubmitted: (_) => _submit(),
                         decoration: InputDecoration(
-                          labelText: "Nom d'usuari",
+                          labelText: context.l10n.authUsernameLabel,
                           errorText: _viewModel.usernameError,
                           prefixIcon: const Icon(Icons.alternate_email),
-                          helperText:
-                              'Minúscules, números, punt o guió baix (3-20).',
+                          helperText: context.l10n.authUsernameHelper,
                           // Com al registre: amb la lletra gran no s'ha de
                           // tallar.
                           helperMaxLines: 10,
@@ -132,14 +132,14 @@ class _ChooseUsernameScreenState extends State<ChooseUsernameScreen> {
                         const SizedBox(height: 12),
                       ],
                       AuthSubmitButton(
-                        label: 'Continua',
+                        label: context.l10n.authContinue,
                         isLoading: _viewModel.isLoading,
                         onPressed: _submit,
                       ),
                       const SizedBox(height: 24),
                       AuthLinkPrompt(
-                        question: 'No és el teu compte?',
-                        label: 'Tanca la sessió',
+                        question: context.l10n.authNotYourAccount,
+                        label: context.l10n.authSignOutLink,
                         onPressed: _viewModel.signOut,
                       ),
                     ],

@@ -1,85 +1,74 @@
+import '../../../../core/l10n/date_labels.dart';
+import '../../../../core/l10n/locale_controller.dart';
 import '../../models/app_notification.dart';
 
 String notificationCategoryLabel(NotificationCategory? category) =>
     switch (category) {
-      NotificationCategory.social => 'Social',
-      NotificationCategory.reminders => 'Recordatori',
-      NotificationCategory.recommendations => 'Recomanació',
-      null => 'Avís',
+      NotificationCategory.social => currentL10n.notifCategorySocial,
+      NotificationCategory.reminders => currentL10n.notifCategoryReminder,
+      NotificationCategory.recommendations =>
+        currentL10n.notifCategoryRecommendation,
+      null => currentL10n.notifCategoryNotice,
     };
 
 String notificationFilterLabel(NotificationCategory? category) =>
     switch (category) {
-      null => 'Tots',
-      NotificationCategory.social => 'Social',
-      NotificationCategory.reminders => 'Recordatoris',
-      NotificationCategory.recommendations => 'Recomanacions',
+      null => currentL10n.notifFilterAll,
+      NotificationCategory.social => currentL10n.notifCategorySocial,
+      NotificationCategory.reminders => currentL10n.notifFilterReminders,
+      NotificationCategory.recommendations =>
+        currentL10n.notifFilterRecommendations,
     };
 
-String notificationMessage(AppNotification notice) => switch (notice.type) {
-  NotificationType.reminder =>
-    notice.activity?.title ?? 'Tens un recordatori cultural.',
-  NotificationType.recommendation =>
-    notice.activity == null
-        ? 'Tens una recomanació cultural.'
-        : '“${notice.activity!.title}” et pot interessar.',
-  NotificationType.socialUpdate =>
-    notice.activity != null
-        ? 'Avís social sobre “${notice.activity!.title}”.'
-        : notice.person != null
-        ? 'Tens un avís social relacionat amb ${notice.person!.name}.'
-        : 'Tens un nou avís social.',
-  NotificationType.other => 'Tens un nou avís.',
-  NotificationType.activityPublished =>
-    '${notice.person!.name} ha publicat “${notice.activity!.title}”.',
-  NotificationType.friendEnrolled =>
-    '${notice.person!.name} s’ha apuntat a “${notice.activity!.title}”.',
-  NotificationType.friendRequest =>
-    '${notice.person!.name} t’ha enviat una sol·licitud d’amistat.',
-  NotificationType.friendRequestAccepted =>
-    '${notice.person!.name} ha acceptat la teva sol·licitud d’amistat.',
-};
-
-String notificationTime(DateTime date) {
-  final local = date.toLocal();
-  return '${local.hour.toString().padLeft(2, '0')}.${local.minute.toString().padLeft(2, '0')} h';
+String notificationMessage(AppNotification notice) {
+  final l10n = currentL10n;
+  return switch (notice.type) {
+    NotificationType.reminder =>
+      notice.activity?.title ?? l10n.notifMessageReminder,
+    NotificationType.recommendation =>
+      notice.activity == null
+          ? l10n.notifMessageRecommendation
+          : l10n.notifMessageRecommendationFor(notice.activity!.title),
+    NotificationType.socialUpdate =>
+      notice.activity != null
+          ? l10n.notifMessageSocialAbout(notice.activity!.title)
+          : notice.person != null
+          ? l10n.notifMessageSocialPerson(notice.person!.name)
+          : l10n.notifMessageSocial,
+    NotificationType.other => l10n.notifMessageOther,
+    NotificationType.activityPublished => l10n.notifMessagePublished(
+      notice.person!.name,
+      notice.activity!.title,
+    ),
+    NotificationType.friendEnrolled => l10n.notifMessageEnrolled(
+      notice.person!.name,
+      notice.activity!.title,
+    ),
+    NotificationType.friendRequest => l10n.notifMessageFriendRequest(
+      notice.person!.name,
+    ),
+    NotificationType.friendRequestAccepted => l10n.notifMessageFriendAccepted(
+      notice.person!.name,
+    ),
+  };
 }
+
+String notificationTime(DateTime date) => timeOfDay(date.toLocal());
 
 String notificationDayLabel(DateTime date, DateTime today) {
   final local = date.toLocal();
   final day = DateTime(local.year, local.month, local.day);
   final current = DateTime(today.year, today.month, today.day);
-  if (day == current) return 'Avui';
+  if (day == current) return currentL10n.today;
   if (day == DateTime(current.year, current.month, current.day - 1)) {
-    return 'Ahir';
+    return currentL10n.yesterday;
   }
   return notificationDate(day);
 }
 
-String notificationDate(DateTime date) {
-  final day = date.toLocal();
-  const months = [
-    'gener',
-    'febrer',
-    'març',
-    'abril',
-    'maig',
-    'juny',
-    'juliol',
-    'agost',
-    'setembre',
-    'octubre',
-    'novembre',
-    'desembre',
-  ];
-  final month = months[day.month - 1];
-  final preposition = day.month == 4 || day.month == 8 || day.month == 10
-      ? 'd’'
-      : 'de ';
-  return '${day.day} $preposition$month de ${day.year}';
-}
+String notificationDate(DateTime date) => dateWithYear(date.toLocal());
 
 String notificationActivitySchedule(DateTime date) =>
     date.year == 1 && date.month == 1 && date.day == 1
-    ? 'Data no informada'
-    : '${notificationDate(date)} · ${notificationTime(date)}';
+    ? currentL10n.dateUnknown
+    : currentL10n.scheduleJoin(notificationDate(date), notificationTime(date));

@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 
 import '../../models/activity.dart';
 import '../../repositories/activity_details_repository.dart';
+import '../../../../core/l10n/locale_controller.dart';
 
 class ActivityDetailsViewModel extends ChangeNotifier {
   ActivityDetailsViewModel({
@@ -35,7 +36,7 @@ class ActivityDetailsViewModel extends ChangeNotifier {
       _activity = result;
     } catch (_) {
       if (_isDisposed) return;
-      _errorMessage = 'No hem pogut carregar l’activitat. Torna-ho a provar.';
+      _errorMessage = currentL10n.actLoadDetailError;
     } finally {
       if (!_isDisposed) {
         _isLoading = false;

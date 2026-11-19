@@ -1,3 +1,5 @@
+import 'package:aprop/core/l10n/locale_controller.dart';
+
 import 'dart:async';
 
 import 'package:aprop/features/activities/models/activity.dart';
@@ -126,9 +128,9 @@ void main() {
       expect(repository.uploads, isEmpty);
       expect(model.avatarError, isNull);
       picker.onPick = () async =>
-          throw const AvatarSelectionException('Foto massa gran');
+          throw const AvatarSelectionException(AvatarProblem.tooBig);
       expect(await model.changeAvatar(), isFalse);
-      expect(model.avatarError, 'Foto massa gran');
+      expect(model.avatarError, currentL10n.avatarTooBig);
       expect(model.profile, same(before));
       expect(repository.uploads, isEmpty);
     },

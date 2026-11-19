@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/locale_controller.dart';
+
 /// Shared, scrollable by its parent, for discovery/search empty and error states.
 class DiscoveryMessage extends StatelessWidget {
   const DiscoveryMessage({
@@ -36,10 +38,7 @@ class DiscoveryMessage extends StatelessWidget {
           ],
           if (onRetry != null) ...[
             const SizedBox(height: 16),
-            FilledButton(
-              onPressed: onRetry,
-              child: const Text('Tornar-ho a provar'),
-            ),
+            FilledButton(onPressed: onRetry, child: Text(context.l10n.retry)),
           ],
         ],
       ),

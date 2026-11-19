@@ -7,6 +7,7 @@ import '../formatters/agenda_date_formatter.dart';
 import '../view_models/agenda_view_model.dart';
 import '../widgets/agenda_plan_card.dart';
 import '../widgets/month_calendar.dart';
+import '../../../../core/l10n/locale_controller.dart';
 
 class AgendaScreen extends StatefulWidget {
   const AgendaScreen({
@@ -132,7 +133,7 @@ class _AgendaScreenState extends State<AgendaScreen> {
         Center(
           child: FilledButton(
             onPressed: _viewModel.load,
-            child: const Text('Tornar-ho a provar'),
+            child: Text(context.l10n.retry),
           ),
         ),
       ];
@@ -140,11 +141,11 @@ class _AgendaScreenState extends State<AgendaScreen> {
 
     if (_viewModel.isLoading || !_viewModel.hasLoaded) {
       return [
-        const Padding(
-          padding: EdgeInsets.all(16),
+        Padding(
+          padding: const EdgeInsets.all(16),
           child: Center(
             child: CircularProgressIndicator(
-              semanticsLabel: 'Carregant la teva agenda',
+              semanticsLabel: context.l10n.agendaLoading,
             ),
           ),
         ),
@@ -155,13 +156,13 @@ class _AgendaScreenState extends State<AgendaScreen> {
     if (plans.isEmpty) {
       return [
         Text(
-          'No tens cap pla per a aquest dia.',
+          context.l10n.agendaEmptyDay,
           textAlign: TextAlign.center,
           style: theme.textTheme.bodyLarge,
         ),
         const SizedBox(height: 4),
         Text(
-          'Apunta’t a activitats des d’Inici i les veuràs aquí.',
+          context.l10n.agendaEmptyHint,
           textAlign: TextAlign.center,
           style: theme.textTheme.bodyMedium,
         ),

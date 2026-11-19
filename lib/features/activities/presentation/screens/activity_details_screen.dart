@@ -13,6 +13,7 @@ import '../widgets/activity_information_row.dart';
 import '../widgets/activity_image.dart';
 import '../widgets/enrollment_action.dart';
 import '../widgets/enrollment_badge.dart';
+import '../../../../core/l10n/locale_controller.dart';
 
 class ActivityDetailsScreen extends StatefulWidget {
   const ActivityDetailsScreen({
@@ -85,10 +86,10 @@ class _ActivityDetailsScreenState extends State<ActivityDetailsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Activitat'),
+        title: Text(context.l10n.actDetailsTitle),
         centerTitle: true,
         leading: IconButton(
-          tooltip: 'Tornar enrere',
+          tooltip: context.l10n.goBack,
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.of(context).maybePop(),
         ),
@@ -104,7 +105,7 @@ class _ActivityDetailsScreenState extends State<ActivityDetailsScreen> {
                 return const SizedBox.shrink();
               }
               return IconButton(
-                tooltip: 'Edita l’activitat',
+                tooltip: context.l10n.actEdit,
                 icon: const Icon(Icons.edit_outlined),
                 onPressed: () => _edit(activity),
               );
@@ -132,9 +133,9 @@ class _ActivityDetailsScreenState extends State<ActivityDetailsScreen> {
 
             final activity = _viewModel.activity;
             if (activity == null) {
-              return const _DetailsMessage(
+              return _DetailsMessage(
                 icon: Icons.event_busy_outlined,
-                title: 'No hem trobat aquesta activitat.',
+                title: context.l10n.actNotFound,
               );
             }
 
@@ -245,7 +246,7 @@ class _ActivityDetailsContent extends StatelessWidget {
         ],
         const SizedBox(height: 20),
         Text(
-          'Sobre l’activitat',
+          context.l10n.actAbout,
           style: theme.textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.w700,
           ),
@@ -253,44 +254,44 @@ class _ActivityDetailsContent extends StatelessWidget {
         const SizedBox(height: 8),
         Text(
           description == null || description.isEmpty
-              ? 'Encara no hi ha una descripció disponible.'
+              ? context.l10n.actNoDescription
               : description,
           style: theme.textTheme.bodyLarge?.copyWith(height: 1.5),
         ),
         if (activity.source == ActivitySource.culturalAgenda) ...[
           const SizedBox(height: 20),
           Text(
-            'Informació pràctica',
+            context.l10n.actPracticalInfo,
             style: theme.textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.w700,
             ),
           ),
           const SizedBox(height: 8),
-          const Text('Font: Agenda Cultural · Generalitat'),
+          Text(context.l10n.agendaSourceOfficial),
           Align(
             alignment: Alignment.centerLeft,
             child: Tooltip(
-              message: 'Enllaç original disponible properament',
+              message: context.l10n.actOriginalLinkSoon,
               child: TextButton.icon(
                 onPressed: null,
                 icon: const Icon(Icons.open_in_new, size: 20),
-                label: const Text('Consultar informació original'),
+                label: Text(context.l10n.actOriginalLink),
               ),
             ),
           ),
         ],
         const SizedBox(height: 20),
         Tooltip(
-          message: 'Xat disponible properament',
+          message: context.l10n.actChatSoon,
           child: OutlinedButton.icon(
             onPressed: null,
             icon: const Icon(Icons.chat_bubble_outline),
-            label: const Text('Xat de l’activitat'),
+            label: Text(context.l10n.actChat),
           ),
         ),
         const SizedBox(height: 8),
         Text(
-          'Parla amb les persones que també s’hi han apuntat.',
+          context.l10n.actChatHint,
           style: theme.textTheme.bodyMedium?.copyWith(
             color: colors.onSurfaceVariant,
           ),
@@ -341,7 +342,7 @@ class _CreatorSection extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Publicat per'),
+                      Text(context.l10n.actPublishedBy),
                       Text(creator.name, style: theme.textTheme.titleMedium),
                     ],
                   ),
@@ -357,14 +358,16 @@ class _CreatorSection extends StatelessWidget {
                 if (creator.isFriend) const FriendshipBadge(),
                 Semantics(
                   label: creator.reliability == null
-                      ? 'Fiabilitat de l’organitzador: sense valoracions'
-                      : 'Fiabilitat de l’organitzador: '
-                            '${formatReliability(creator.reliability)} sobre 5',
+                      ? context.l10n.actReliabilityNone
+                      : context.l10n.actReliabilityOutOfFive(
+                          formatReliability(creator.reliability),
+                        ),
                   excludeSemantics: true,
                   child: Text.rich(
                     TextSpan(
-                      text:
-                          'Fiabilitat ${formatReliability(creator.reliability)}',
+                      text: context.l10n.actReliabilityChip(
+                        formatReliability(creator.reliability),
+                      ),
                       children: [
                         if (creator.reliability != null)
                           WidgetSpan(
@@ -381,10 +384,10 @@ class _CreatorSection extends StatelessWidget {
                   ),
                 ),
                 Tooltip(
-                  message: 'Perfil disponible properament',
+                  message: context.l10n.notifProfileSoon,
                   child: TextButton.icon(
                     onPressed: null,
-                    label: const Text('Veure perfil'),
+                    label: Text(context.l10n.actViewProfile),
                     icon: const Icon(Icons.chevron_right, size: 20),
                   ),
                 ),
@@ -462,10 +465,7 @@ class _DetailsMessage extends StatelessWidget {
             Text(title, textAlign: TextAlign.center),
             if (onRetry != null) ...[
               const SizedBox(height: 16),
-              FilledButton(
-                onPressed: onRetry,
-                child: const Text('Tornar-ho a provar'),
-              ),
+              FilledButton(onPressed: onRetry, child: Text(context.l10n.retry)),
             ],
           ],
         ),

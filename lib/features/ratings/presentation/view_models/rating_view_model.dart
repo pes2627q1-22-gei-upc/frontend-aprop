@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import '../../models/already_rated_exception.dart';
 import '../../models/rating_not_found_exception.dart';
 import '../../repositories/rating_repository.dart';
+import '../../../../core/l10n/locale_controller.dart';
 
 /// Ratings of the signed-in user, shared by the details and the agenda.
 class RatingViewModel extends ChangeNotifier {
@@ -44,8 +45,7 @@ class RatingViewModel extends ChangeNotifier {
     } on AlreadyRatedException {
       _alreadyRated.add(activityId);
     } catch (_) {
-      _errors[activityId] =
-          'No hem pogut desar la valoració. Torna-ho a provar.';
+      _errors[activityId] = currentL10n.ratingSaveError;
     } finally {
       _submitting.remove(activityId);
       if (!_isDisposed) notifyListeners();
@@ -63,7 +63,7 @@ class RatingViewModel extends ChangeNotifier {
         score: score,
       ),
       onSuccess: () => _scores[activityId] = score,
-      failure: 'No hem pogut modificar la valoració. Torna-ho a provar.',
+      failure: currentL10n.ratingEditError,
     );
   }
 
@@ -74,7 +74,7 @@ class RatingViewModel extends ChangeNotifier {
       activityId,
       () => _repository.deleteRating(userId: userId, activityId: activityId),
       onSuccess: () => _forget(activityId),
-      failure: 'No hem pogut eliminar la valoració. Torna-ho a provar.',
+      failure: currentL10n.ratingDeleteError,
       goneIsSuccess: true,
     );
   }
@@ -109,7 +109,7 @@ class RatingViewModel extends ChangeNotifier {
       // Deleting something already gone is the outcome the user wanted.
       _forget(activityId);
       if (goneIsSuccess) return true;
-      _errors[activityId] = 'La valoració ja no existeix.';
+      _errors[activityId] = currentL10n.ratingGone;
       return false;
     } catch (_) {
       _errors[activityId] = failure;

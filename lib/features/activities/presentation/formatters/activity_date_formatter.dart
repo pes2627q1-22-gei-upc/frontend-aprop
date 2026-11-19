@@ -1,53 +1,23 @@
-const catalanWeekdays = [
-  'Dilluns',
-  'Dimarts',
-  'Dimecres',
-  'Dijous',
-  'Divendres',
-  'Dissabte',
-  'Diumenge',
-];
-
-const catalanMonths = [
-  'gener',
-  'febrer',
-  'març',
-  'abril',
-  'maig',
-  'juny',
-  'juliol',
-  'agost',
-  'setembre',
-  'octubre',
-  'novembre',
-  'desembre',
-];
+import '../../../../core/l10n/date_labels.dart';
+import '../../../../core/l10n/locale_controller.dart';
 
 /// «20.00 h».
-String formatActivityTime(DateTime date) {
-  final hour = date.hour.toString().padLeft(2, '0');
-  final minute = date.minute.toString().padLeft(2, '0');
-  return '$hour.$minute h';
-}
+String formatActivityTime(DateTime date) => timeOfDay(date);
 
 /// «Dissabte 24 d’octubre de 2026».
 String formatActivityDate(DateTime date) {
-  if (_isUnknownDate(date)) return 'Data no informada';
-  final weekday = catalanWeekdays[date.weekday - 1];
-  final month = catalanMonths[date.month - 1];
-  // «d’abril», «d’agost», «d’octubre»: la preposició s'apostrofa davant de
-  // vocal.
-  final ofMonth = 'aeiou'.contains(month[0]) ? 'd’$month' : 'de $month';
-  return '$weekday ${date.day} $ofMonth de ${date.year}';
+  if (_isUnknownDate(date)) return currentL10n.dateUnknown;
+  return longDate(date);
 }
 
-/// Formats an activity date for the Catalan UI without changing its time zone.
+/// Formats an activity date for the active language without changing its time
+/// zone.
 String formatActivitySchedule(DateTime date, {bool includeDate = false}) {
-  if (_isUnknownDate(date)) return 'Data no informada';
+  if (_isUnknownDate(date)) return currentL10n.dateUnknown;
   final day = includeDate
       ? formatActivityDate(date)
-      : catalanWeekdays[date.weekday - 1];
-  return '$day · ${formatActivityTime(date)}';
+      : weekdayName(date.weekday);
+  return currentL10n.scheduleJoin(day, formatActivityTime(date));
 }
 
 // TODO(DP-037): Go serializes an absent start date as its zero time, year 1.

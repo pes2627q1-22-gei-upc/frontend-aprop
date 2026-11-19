@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../formatters/agenda_date_formatter.dart';
+import '../../../../core/l10n/locale_controller.dart';
 
 /// Monday-first month grid. Days with plans show a dot, today is outlined and
 /// the selected day is filled.
@@ -52,7 +53,7 @@ class MonthCalendar extends StatelessWidget {
           children: [
             IconButton(
               onPressed: onPreviousMonth,
-              tooltip: 'Mes anterior',
+              tooltip: context.l10n.agendaPreviousMonth,
               icon: const Icon(Icons.chevron_left),
             ),
             Expanded(
@@ -71,7 +72,7 @@ class MonthCalendar extends StatelessWidget {
             ),
             IconButton(
               onPressed: onNextMonth,
-              tooltip: 'Mes següent',
+              tooltip: context.l10n.agendaNextMonth,
               icon: const Icon(Icons.chevron_right),
             ),
           ],
@@ -138,8 +139,10 @@ class _DayCell extends StatelessWidget {
     final colors = theme.colorScheme;
     final label = [
       formatAgendaDay(day),
-      if (isToday) 'avui',
-      hasPlans ? 'amb plans' : 'sense plans',
+      if (isToday) context.l10n.agendaDayToday,
+      hasPlans
+          ? context.l10n.agendaDayWithPlans
+          : context.l10n.agendaDayWithoutPlans,
     ].join(', ');
 
     return Semantics(

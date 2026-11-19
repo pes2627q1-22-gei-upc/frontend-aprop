@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 
 import '../../models/discovery_feed.dart';
 import '../../repositories/discovery_repository.dart';
+import '../../../../core/l10n/locale_controller.dart';
 
 class DiscoverViewModel extends ChangeNotifier {
   DiscoverViewModel({required this.repository, required this.userId});
@@ -44,8 +45,7 @@ class DiscoverViewModel extends ChangeNotifier {
       }
     } catch (_) {
       if (!_isDisposed) {
-        _errorMessage =
-            'No hem pogut carregar les propostes. Torna-ho a provar.';
+        _errorMessage = currentL10n.discoverLoadError;
       }
     } finally {
       if (!_isDisposed) {
