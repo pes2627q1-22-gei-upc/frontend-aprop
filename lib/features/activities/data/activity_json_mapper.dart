@@ -60,6 +60,16 @@ Activity activityFromJson(Map<String, Object?> json) {
 
   final creatorUuid = _text(json['creator']);
   final creatorName = _text(json['creator-name']) ?? 'un usuari';
+  // An invalid value is ignored rather than failing the whole activity;
+  // 0 mirrors profileFromJson: no ratings yet, not a 0,0 score.
+  final rawReliability = json['creator-reliability'];
+  final reliability =
+      rawReliability is num &&
+          rawReliability.isFinite &&
+          rawReliability > 0 &&
+          rawReliability <= 5
+      ? rawReliability.toDouble()
+      : null;
   final hasFriends = json['has-friends'] as bool? ?? false;
 
   final rawPrice = json['price'];
@@ -87,6 +97,7 @@ Activity activityFromJson(Map<String, Object?> json) {
         : ActivityCreator(
             name: creatorName,
             userId: creatorUuid,
+            reliability: reliability,
             isFriend: hasFriends,
           ),
     description: _text(json['description']),
@@ -109,7 +120,7 @@ Activity activityFromJson(Map<String, Object?> json) {
 }
 
 /// Valors de `modality` al backend (un `enum` de la base de dades).
-// TODO(DP-051): no hi ha contracte escrit; són els valors de l'`enum`.
+// TODO(DP-055): no hi ha contracte escrit; són els valors de l'`enum`.
 const _modalityToJson = {
   ActivityModality.inPerson: 'Face-to-Face',
   ActivityModality.online: 'Online',

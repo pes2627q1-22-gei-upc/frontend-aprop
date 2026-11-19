@@ -431,6 +431,7 @@ void main() {
       final viewModel = editing(existing);
 
       expect(viewModel.isEditing, isTrue);
+      expect(viewModel.hasUnknownPrice, isFalse);
       expect(viewModel.category, 'Música');
       expect(viewModel.startsAt, DateTime(2026, 11, 1, 19));
       expect(viewModel.endsAt, DateTime(2026, 11, 1, 21));
@@ -489,8 +490,13 @@ void main() {
           source: ActivitySource.community,
         );
 
-        await editing(unknownPrice)
-            .publish(title: 'Obra', description: 'Descripció', price: '');
+        final viewModel = editing(unknownPrice);
+        expect(viewModel.hasUnknownPrice, isTrue);
+        await viewModel.publish(
+          title: 'Obra',
+          description: 'Descripció',
+          price: '',
+        );
 
         expect(repository.updated.single.$2.price, isNull);
       },

@@ -402,7 +402,10 @@ class _CreateActivityScreenState extends State<CreateActivityScreen> {
                     labelText: 'Preu (opcional)',
                     prefixIcon: const Icon(Icons.sell_outlined),
                     suffixText: '€',
-                    helperText: 'Deixa-ho buit si és gratuïta.',
+                    helperText: _viewModel.hasUnknownPrice
+                        ? 'Si el deixes buit, no es canvia. Escriu 0 si és '
+                              'gratuïta.'
+                        : 'Deixa-ho buit si és gratuïta.',
                     errorText: _viewModel.fieldError(CreateActivityField.price),
                   ),
                 ),

@@ -19,6 +19,7 @@ class ActivityCreator {
     required this.isFriend,
     this.avatarAsset,
     this.userId,
+    this.reliability,
   });
 
   final String name;
@@ -30,6 +31,9 @@ class ActivityCreator {
   /// Nul si la persona no té foto (per exemple, qui crea una activitat des de
   /// l'app): es mostra una icona.
   final String? avatarAsset;
+
+  /// Mitjana 0–5 de les valoracions de l'organitzador; nul si no en té.
+  final double? reliability;
 }
 
 class Activity {

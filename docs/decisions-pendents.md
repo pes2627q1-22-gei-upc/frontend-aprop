@@ -227,7 +227,7 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Opcions:** A) una sola categoria (com ara) · B) diverses categories (cal canviar `Activity.category` i la llista, la fitxa i l'agenda).
 - **Provisionalment:** una sola categoria triada d'una llista provisional (Música, Teatre, Exposicions) (`TODO(DP-018)`). L'usuari ho ha decidit així de moment per no canviar el model.
 - **Amb el backend (2026-10-26, Claude Code (Opus 5.5) amb confirmació de l'usuari):** amb backend, el formulari carrega `GET /categories` (`HttpActivityRepository.getCategories`) i només ofereix les de l'Agenda Cultural (`agenda:categories/…`), ordenades pel nom. No ofereix els àmbits (`agenda:ambits/…`) ni les que s'han creat escrivint un nom nou. S'envia l'etiqueta (p. ex. `agenda:categories/teatre`), perquè `POST /events` crea una categoria nova amb qualsevol nom que no existeixi. El nom que es veu surt de l'etiqueta i no porta accents («Conferencies», DP-029). Sense backend, continua la llista provisional. Els filtres d'Inici també carreguen `GET /categories` (DP-038) i filtren al servidor per l'ID de la categoria, així que una activitat creada amb una categoria de l'Agenda Cultural surt en filtrar per aquesta categoria.
-- **Diverses categories (2026-11-17, amb confirmació de l’usuari):** el formulari en deixa triar fins a 3; la primera és la que fa de distintiu a les targetes, que hi afegeixen «+N». La fitxa les mostra totes (DP-051).
+- **Diverses categories (2026-11-17, amb confirmació de l’usuari):** el formulari en deixa triar fins a 3; la primera és la que fa de distintiu a les targetes, que hi afegeixen «+N». La fitxa les mostra totes (DP-055).
 - **Qui decideix:** equip
 - **Resolució:**
 
@@ -269,6 +269,7 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Opcions:** A) vista inicial mapa · B) vista inicial llista (com ara); per a la zona: endpoint amb els límits del mapa o carregar-ho tot; per als grups: acceptar l'estil de Google o fer l'agrupació a Dart amb icones pròpies.
 - **Provisionalment:** la llista és la vista inicial (si Google Maps falla o no hi ha clau, Inici funciona igual); es mostren totes les activitats carregades; grups amb l'estil de Google (`TODO(DP-022)`).
 - **Targeta del marcador (2026-11-15, Claude Code (Opus 5.5) a petició de l'usuari):** tocar qualsevol lloc de la targeta obre la fitxa (com ja passa a les targetes de llista, l'assistent i l'Agenda), i el botó «Veure activitat» del mockup (fig. 7) es canvia pel d'apuntar-se («M’hi apunto» / «✓ Apuntat · Desapunta’m»). Desviació del mockup per confirmar amb l'equip.
+- **Grups propis (2026-11-16, Claude Code (Opus 5.5) a petició de l'usuari, Taiga #254):** els grups ja no els fa Google (`ClusterManager`), sinó l'app (`activity_map_groups.dart`): els marcadors que amb el zoom actual queden a menys de 64 px s'ajunten, i després s'ajunten també els grups que es tocarien segons la mida real del cercle, perquè mai no quedin l'un sobre l'altre. És igual a la web i al mòbil. El cercle és propi, amb el color principal de l'app, vora clara i el número total exacte (el cercle creix amb les xifres), en lloc dels cercles blaus i vermells de Google. Els grups es refan quan el mapa s'acaba de moure. Les activitats d'un mateix lloc sempre van en grup. El radi de 64 px i el disseny del cercle no surten del mockup (`TODO(DP-022)`).
 - **Qui decideix:** frontend + backend
 - **Resolució:**
 
@@ -363,7 +364,7 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
   - Apuntar-se des d'una fitxa del backend falla, perquè la inscripció de demostració no troba l'activitat (DP-010).
   - `TODO(DP-029)` marca aquestes adaptacions.
 - **Token (2026-10-25):** el backend ja exigeix `Authorization: Bearer` a totes les rutes (`feature/auth` fusionada). `HttpActivityMapRepository` l'envia si `AuthRepository.currentIdToken()` en retorna un; amb els comptes de demostració és nul i no s'envia. En ajuntar-ho amb el login de Firebase (`feature/autenticacio`, ja a `develop`), `FirebaseAuthRepository.currentIdToken()` retorna el token de Firebase de la sessió (`_auth.currentUser?.getIdToken()`), que Firebase renova sol.
-- **Hora (2026-11-17):** la fitxa, les targetes i l’Agenda ja no mostren «00.00 h»: llegeixen l’«Horari» (`schedule`), que el formulari omple amb l’hora triada (DP-051).
+- **Hora (2026-11-17):** la fitxa, les targetes i l’Agenda ja no mostren «00.00 h»: llegeixen l’«Horari» (`schedule`), que el formulari omple amb l’hora triada (DP-055).
 - **Apuntar-se des del mapa (2026-10-25):** la inscripció i l'Agenda buscaven l'activitat només al catàleg de demostració i fallaven amb les del backend. Amb `API_BASE_URL`, `CombinedActivityRepository` busca al backend els ID numèrics i al catàleg els `demo-…`.
 - **Qui decideix:** frontend + backend
 - **Resolució:**
@@ -393,7 +394,7 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 ### DP-034 · Mapa d'Inici: què fa tocar un grup de marcadors
 - **Estat:** oberta
 - **Obert per:** 2026-10-25 · Claude Code (Opus 5.5) amb confirmació de l'usuari · Taiga #79 / #21
-- **Context:** `ActivitiesMap` (`_onClusterTap`, `isSamePlace`, `_SamePlaceSheet`), llegenda del mapa. En provar-ho a l'emulador, tocar un grup no feia res.
+- **Context:** `ActivitiesMap` (`_onGroupTap`, `_SamePlaceSheet`), `isSamePlace` a `activity_map_groups.dart`, llegenda del mapa. En provar-ho a l'emulador, tocar un grup no feia res.
 - **Dubte:** no hi ha mockup de què passa en tocar un grup. A més, moltes activitats de l'Agenda Cultural comparteixen el mateix punt exacte (a la BD local, 2.019 de 2.335 activitats amb ubicació, en 603 llocs i fins a 32 en un de sol): apropar-s'hi no les separaria mai.
 - **Opcions:** A) només apropar-s'hi · B) apropar-s'hi i, si són al mateix lloc, mostrar-ne la llista · C) mostrar sempre la llista.
 - **Provisionalment:** B, triada per l'usuari («que t'augmenti la pantalla»). El mapa s'apropa fins que hi caben tots els marcadors del grup, amb 64 px de marge. Si les activitats són a menys de 0,0003° (uns 30 m) entre elles, surt un full inferior «N activitats en aquest lloc» amb el municipi, les activitats ordenades per data amb la data completa, i en tocar-ne una s'obre la fitxa. Molt a prop, Google deixa d'agrupar i els marcadors d'un mateix lloc queden apilats (provat a Girona: 4 activitats a l'Auditori i només se'n podia obrir una); per això tocar un marcador que en té d'altres al mateix lloc també mostra aquesta llista en lloc de la targeta. El llindar i el disseny del full són provisionals (`TODO(DP-034)`).
@@ -500,8 +501,24 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Qui decideix:** frontend/backend per a la neteja de dades i el contracte de categories del mapa. Guia `docs/inici-server-filters.md`.
 - **Resolució:**
 
-### DP-051 · Horari i informació extra de les activitats no oficials
+### DP-047 · Contrast del logotip sobre el fons de l’app
+- **Estat:** oberta · 2026-11-16 · Taiga #262 [FE] Ajustar contrast i color del logotip respecte al fons.
+- **Context:** el PNG original té fons crema texturat i marges amplis. Inici i Login el pintaven directament, amb un rectangle diferent del fons del tema i poca mida útil per al símbol.
+- **Provisionalment:** derivació transparent del recurs existent, conservant mapa, tres marcadors, text i paleta. S’elimina el fons i es redueix el marge sense canviar el tema global. L’original queda intacte. `APropLogo` centralitza la mateixa imatge i semàntica a les dues pantalles, mantenint alçades de 80 i 96 píxels lògics respectivament. El mode fosc queda fora d’aquesta tasca.
+- **Verificació:** dues proves reprodueixen el fons opac abans del canvi i comproven transparència i contrast del color majoritari del logo sobre les superfícies clares després. Revisió visual de captures renderitzades amb Flutter. Guia `docs/branding.md`.
+- **Qui decideix:** equip/PO per validar l’edició visual de marca; la representació és reversible perquè es conserva el recurs original.
+- **Resolució:**
+
+### DP-048 · Navegació de les fitxes obertes des del xat
+- **Estat:** oberta · 2026-11-16 · Taiga #261 [FE] Amagar menú de navegació inferior en obrir el xat.
+- **Context:** la tasca demana explícitament ocultar el menú en obrir l’Assistent. Les recomanacions poden obrir una fitxa sobre el xat, mentre que els mockups anteriors mostraven navegació inferior a les fitxes.
+- **Dubte:** mantenir el flux del xat sense barra també en aquestes fitxes o tornar-la a mostrar temporalment.
+- **Provisionalment:** mantenir-la amagada fins a sortir de `/assistant`. Això conserva la seqüència xat → fitxa → xat → Inici; les fitxes obertes des de les seccions habituals continuen amb barra. `TODO(DP-048)` a `MainShell._openAssistant`. La conversa i les inscripcions mantenen els ViewModels compartits.
+- **Verificació:** recorregut d’inscripció des del xat, fitxa i retorn; restauració de barra amb fletxa, retorn del sistema i dreceres a Agenda/Configuració.
+- **Qui decideix:** equip/PO a la revisió visual de #261. Ocultar la barra al xat ja és el requisit explícit; només queda oberta la fitxa que s’hi obre a sobre.
+### DP-055 · Horari i informació extra de les activitats no oficials
 - **Estat:** oberta · 2026-11-17 · Claude Code (Opus 5.5) amb confirmació de l’usuari · Taiga #189
+- **Identificador:** es va obrir com a DP-051; renumerada a DP-055 en integrar develop.
 - **Context:** formulari «Crea una activitat» / «Edita l’activitat» (`CreateActivityViewModel`), `activity_json_mapper.dart`, targetes, Agenda i fitxa. Backend consultat a `api-aprop@develop` sense modificar-lo: `POST /events` i `PUT /events/{id}` desen `schedule`, `modality`, `permanent` i `activity-url`.
 - **Decisions de l’usuari:**
   - **Hora:** `start-date` només desa el dia (DP-029), i l’app mostrava sempre «00.00 h». Ara es mostra l’«Horari» (`schedule`); si no n’hi ha i l’hora és 00.00, només surt el dia. En crear o editar, l’horari es genera amb les rodes («19.00 h», o «19.00 – 21.00 h» si acaba el mateix dia) i s’hi pot afegir un text opcional («19.00 h · Durada: 1 h», màxim 120 caràcters).
@@ -512,19 +529,19 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
   - La modalitat s’envia amb els valors de l’`enum` de la BD (`Face-to-Face`, `Online`, `Online and Face-to-Face`); no hi ha contracte escrit.
   - En editar, el text opcional es recupera traient del principi de l’horari l’hora generada. Si l’horari s’ha escrit d’una altra manera, es mostra sencer com a text.
   - Les activitats de l’Agenda Cultural tenen l’horari en text lliure i pot ser llarg: a les targetes se’n mostra la primera línia (màxim 40 caràcters).
-- **Codi:** `TODO(DP-051)` al mapper (valors de `modality`) i a la generació de l’horari.
+- **Codi:** `TODO(DP-055)` al mapper (valors de `modality`) i a la generació de l’horari.
 - **Qui decideix:** frontend + backend (valors de `modality`)
 - **Resolució:**
 
 ## Resoltes
 
-### DP-050 · Enllaços de la fitxa: obrir-los amb `url_launcher`
+### DP-054 · Enllaços de la fitxa: obrir-los amb `url_launcher`
 - **Estat:** resolta · 2026-11-17 · Claude Code (Opus 5.5) · Taiga #189 (feedback de l’edició d’esdeveniments)
-- **Identificador:** DP-047 (logo) ja és a `develop`, DP-048 el fan servir dues PR obertes i DP-049 queda reservada per a `feature/recuperar-contrasenya`.
+- **Identificador:** es va obrir com a DP-050; renumerada a DP-054 en integrar develop, on la DP-050 ja és la fiabilitat visible (#204).
 - **Context:** `activity_details_screen.dart` (`_ActivityLinkRow`). La fitxa mostra la secció «Enllaços»: l’enllaç per connectar-s’hi, la web de l’activitat (`url`), les entrades (`tickets-url`) i els enllaços relacionats (`related-urls` amb els noms d’`url-names`), sense repetir cap adreça.
 - **Dubte:** per obrir un enllaç al navegador cal el paquet `url_launcher`, i l’equip no hi ha afegit paquets sense una necessitat concreta.
 - **Opcions:** A) afegir `url_launcher` i obrir-los · B) només copiar-los al porta-retalls.
-- **Provisionalment (primer):** B, amb `TODO(DP-050)`.
+- **Provisionalment (primer):** B, amb `TODO(DP-054)`.
 - **Qui decideix:** equip
 - **Resolució:** A, per decisió de l’usuari (2026-11-17). S’afegeix `url_launcher` (`lib/core/links/open_external_link.dart`, injectat a `ActivityDetailsScreen` com a `openLink`). Tocar un enllaç l’obre fora de l’app (navegador o app que li correspon); si no es pot, surt «No s’ha pogut obrir l’enllaç.». El botó del costat el continua copiant. A Android s’hi declaren els `<queries>` d’`http`/`https`. Desapareix el botó desactivat «Consultar informació original»: la font continua a la fitxa com a text.
 
@@ -570,3 +587,31 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Dubte:** la targeta estàndard (~330 px) deixa veure només una activitat per pantalla al xat.
 - **Provisionalment:** fila compacta (miniatura 72 px, títol, municipi · data i la mateixa acció d'apuntar-se). Mateix estat d'inscripcions, mateix detall en tocar. Sense avatar del creador ni «Font». `TODO(DP-044)`: confirmar amb l'equip/mockup.
 - **Qui decideix:** equip frontend (UX)
+
+### DP-053 · Valoració d'activitats (#185): requisit d'assistència i contracte de #184
+- **Estat:** oberta 2026-11-17
+- **Context:** `features/ratings/`, `_buildRating` a `main_shell.dart`; R8–R10 (`docs/ai/20-model-domini.md`); mockup 13 «Com va anar?».
+- **Dubte:** (1) el `develop` del backend ja té `PATCH /events/{id}/enrollment/attendance` (`{"attendance": true|false|null}`), però el frontend encara no modela ni té UI per confirmar l'assistència («Sí, hi vaig anar»); R10 exigeix assistència certa per valorar. (2) #184 (`POST /events/{id}/ratings`, `{score}`) respon `409` (ja valorada), `403` (sense assistència) i `404` (no trobada) a `feature/event-rating` (PR #59), però encara no és desplegat a Render i no hi ha consulta prèvia de la valoració pròpia.
+- **Provisionalment:** les estrelles surten a la fitxa i a l'Agenda si l'usuari és inscrit i l'activitat ja ha començat (sense data de fi al model: `startsAt` fa de substitut, de manera que l'usuari pot valorar durant l'esdeveniment; R10 només es compleix al servidor); el servidor farà valdre R8–R10. `main.dart` injecta `HttpRatingRepository` quan `ApiConfig.isConfigured` és cert (mentre #184 no estigui desplegat, valorar mostrarà l'error de desament), i tradueix `409` a `AlreadyRatedException`. En mode Demo, `DemoRatingRepository` (en memòria) és el per defecte. Sense consulta prèvia de la valoració pròpia, l'estat «ja valorada» abans d'enviar només es coneix en Demo durant la sessió o en rebre `409`. `TODO(DP-053)` al codi.
+- **Qui decideix:** equip (frontend i backend)
+
+### DP-049 · Fiabilitat de l'organitzador (#203): recàlcul en Demo i contracte HTTP
+- **Estat:** oberta 2026-11-17
+- **Context:** `ActivityRating` (organitzador destacat), `DemoProfileRepository.organizerRating`; `/fiabilitat` = mitjana de les valoracions dels esdeveniments NoOficial creats per l'usuari (R9/R10, `docs/ai/20-model-domini.md`).
+- **Dubte:** (1) en Demo, què passa amb el 4,7 sembrat del compte d'exemple quan arriben valoracions reals; (2) amb HTTP no es coneix cap endpoint de valoració ni si `reliability` es recalcula al servidor en valorar (#184).
+- **Provisionalment:** Demo: `organizerRating` = mitjana de les puntuacions de `DemoRatingRepository` dels esdeveniments comunitaris creats per l'usuari; si cap no està valorat, queda el sembrat (4,7 només al compte d'exemple, `null` als altres). Amb la primera valoració real el sembrat se substitueix. Només compta el que es valora en aquesta sessió. HTTP: sense canvis; el perfil es torna a carregar en obrir la pestanya Perfil (`MainShell._selectDestination`) i mostra el `reliability` del servidor. `TODO(DP-049)` al codi. L'organitzador no pot valorar el seu propi esdeveniment (no hi ha cap regla R que ho digui; s'oculta per no inflar la pròpia fiabilitat, comparant `creator.userId` amb l'id de Firebase i el del servidor). Sense `creator.userId` es mostra el bloc genèric. El perfil de Demo depèn de `DemoRatingRepository` concret (cablejat provisional a `auth_gate`); caldria un contracte de lectura.
+- **Qui decideix:** equip (frontend i backend)
+
+### DP-050 · Fiabilitat visible (#204): contracte `creator-reliability` i valors deduïts
+- **Estat:** oberta 2026-11-18
+- **Context:** `ActivityCreator.reliability`, `activityFromJson`, bloc «Publicat per» de la fitxa (mockup 9) i tercer comptador de `ProfileHeader` (mockup 18).
+- **Dubte:** (1) `GET /events/{id}` publica `creator-name`/`creator-reliability` a `api-aprop` (`float32` nul·lable a `api/openapi.yaml` del `develop` del backend); (2) què vol dir un `0`; (3) l'etiqueta i el text del bloc.
+- **Provisionalment:** `creator-reliability` = nombre finit 0–5 o nul; un valor no vàlid s'ignora (`reliability` nul) en lloc de fer fallar tota l'activitat. Com al perfil, `0` es tracta com a «sense valoracions» (les valoracions són 1–5). Nul → «—» als dos llocs, sense estrella. Text del bloc: «Fiabilitat 4,7 ★»; etiquetes Semantics «Fiabilitat de l'organitzador: …». El tercer comptador del perfil ja existia («Valoració»); només s'hi ha afegit Semantics i el format compartit (`core/formatters/reliability_formatter.dart`). Demo: el 4,7 sembrat de Laia Soler a l'activitat demo coincideix amb el perfil, però no es recalcula amb les valoracions de la sessió (DP-049 queda oberta, no es resol).
+- **Qui decideix:** equip (frontend i backend)
+
+### DP-052 · Modificar o eliminar la valoració pròpia (#206): contracte de #205 i estat inicial
+- **Estat:** oberta 2026-11-18
+- **Context:** `features/ratings/` (`RatingRepository.updateRating`/`deleteRating`, `ActivityRating`), `ApiClient.put`/`putJson`; contracte `api-aprop-205/api/openapi.yaml` (`PUT`/`DELETE /events/{id}/ratings/me`, branca de #205 sense fusionar ni desplegada). Es basa en #185 (DP-053), ja a `develop`.
+- **Dubte:** (1) cap endpoint no retorna la valoració pròpia (DP-053): l'app no sap el `score` d'una valoració feta en una sessió anterior. (2) `GET /events/{id}` ja exposa `creator-reliability` (#204, DP-050), però no es torna a llegir en editar o eliminar la valoració.
+- **Provisionalment:** (1) «Modifica» i «Elimina» surten sempre que l'activitat consta com a valorada (sessió actual o `409`); si el `score` és desconegut, en editar es mostren les estrelles buides i el valor nou substitueix el del servidor. (2) Després d'editar/eliminar només s'actualitza `RatingViewModel`; quan #204 mostri la fiabilitat a la fitxa/perfil, caldrà tornar-la a llegir (cal verificar si el perfil recarrega la fiabilitat en obrir-lo). `404` → `RatingNotFoundException`: es deixa de mostrar com a valorada. `TODO(DP-052)` a `http_rating_repository.dart`. (3) «Modifica» i «Elimina» també apareixen a les targetes d'Agenda, perquè el bloc de valoració és el mateix que el de la fitxa (decidit: es deixen; el requisit de #61 només esmenta la fitxa).
+- **Qui decideix:** equip (frontend i backend)

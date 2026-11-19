@@ -68,6 +68,10 @@ class CreateActivityViewModel extends ChangeNotifier {
 
   bool get isEditing => editing != null;
 
+  /// S'edita una activitat de la qual no se sap el preu (DP-017): deixar el
+  /// camp buit el manté desconegut, i per fer-la gratuïta cal escriure 0.
+  bool get hasUnknownPrice => editing != null && editing!.price == null;
+
   final ActivityRepository _repository;
 
   /// D'on surten les categories. Si és nul, es fa servir la llista provisional.
@@ -307,8 +311,7 @@ class CreateActivityViewModel extends ChangeNotifier {
 
     // El backend no desa l'import: d'una activitat de pagament no se'n sap.
     // Si el camp es deixa buit, no es converteix en gratuïta.
-    final keepsUnknownPrice =
-        isEditing && editing!.price == null && price.trim().isEmpty;
+    final keepsUnknownPrice = hasUnknownPrice && price.trim().isEmpty;
     final parsedPrice = keepsUnknownPrice ? null : parseActivityPrice(price);
     final categories = _selectedCategories;
     final isOnline = _modality != ActivityModality.inPerson;
@@ -424,7 +427,7 @@ class CreateActivityViewModel extends ChangeNotifier {
 
   /// L'«Horari» que es desa: l'hora de les rodes i, si n'hi ha, la nota.
   /// El backend no desa l'hora de l'inici (DP-029).
-  // TODO(DP-051): l'hora es guarda dins de l'«Horari» en text.
+  // TODO(DP-055): l'hora es guarda dins de l'«Horari» en text.
   static String _scheduleFor(DateTime start, DateTime? end, String note) {
     final time = activityScheduleTime(start, end);
     final extra = note.trim();

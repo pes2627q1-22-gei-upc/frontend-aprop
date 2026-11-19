@@ -10,8 +10,8 @@ import '../formatters/activity_date_formatter.dart';
 import 'activity_badges.dart';
 import 'activity_information_row.dart';
 import 'activity_image.dart';
-
-const _clusterManagerId = ClusterManagerId('activities');
+import 'activity_map_groups.dart';
+import 'map_group_icon.dart';
 
 /// Durada de les transicions de la targeta i dels botons que s'hi aparten.
 const mapOverlayAnimationDuration = Duration(milliseconds: 280);
@@ -25,22 +25,6 @@ const _clusterPadding = 64.0;
 /// Temps durant el qual un toc al mapa es considera el mateix clic que s'ha
 /// fet sobre una cosa que el tapa (vegeu `_onMapTap`).
 const _cardClickEcho = Duration(milliseconds: 500);
-
-/// Diferència de latitud o longitud (uns 30 m) per sota de la qual les
-/// activitats d'un grup es consideren al mateix lloc.
-const _samePlaceDegrees = 0.0003;
-
-/// Si totes les activitats d'un grup són pràcticament al mateix punt (com un
-/// mateix teatre), apropar-s'hi no les separaria mai.
-// TODO(DP-034): llindar triat a ull; cal validar-lo amb l'equip.
-bool isSamePlace(LatLngBounds bounds) => _isSamePlace(
-  bounds.northeast.latitude - bounds.southwest.latitude,
-  bounds.northeast.longitude - bounds.southwest.longitude,
-);
-
-bool _isSamePlace(double latitudeDelta, double longitudeDelta) =>
-    latitudeDelta.abs() < _samePlaceDegrees &&
-    longitudeDelta.abs() < _samePlaceDegrees;
 
 /// Tipus de marcador: oficial (Agenda Cultural), d'un usuari o d'una amistat.
 enum ActivityMarkerKind { official, community, friend }
@@ -103,6 +87,32 @@ class _ActivitiesMapState extends State<ActivitiesMap> {
   String? _selectedId;
   double _cardHeight = 0;
   double _reportedOverlay = 0;
+
+  /// Zoom amb què s'agrupen els marcadors. Es posa al dia quan el mapa
+  /// s'acaba de moure, no a cada pas, perquè els grups no parpellegin.
+  double _zoom = _initialZoom;
+  double _cameraZoom = _initialZoom;
+
+  /// Cercles dels grups ja dibuixats. Es guarden pel text («5», «2019»...),
+  /// els colors i la densitat de píxels: si canvia el tema o la pantalla, es
+  /// tornen a dibuixar.
+  final Map<_GroupIconKey, BitmapDescriptor> _groupIcons = {};
+  final Set<_GroupIconKey> _drawingGroupIcons = {};
+
+  /// Últims grups calculats, perquè obrir o tancar la targeta no els torni a
+  /// calcular: amb milers d'activitats, és feina.
+  List<ActivityMapGroup> _groups = const [];
+  List<Activity>? _groupedActivities;
+  double? _groupedZoom;
+
+  List<ActivityMapGroup> _groupsFor(List<Activity> activities) {
+    if (!identical(activities, _groupedActivities) || _groupedZoom != _zoom) {
+      _groups = groupActivitiesForMap(activities, _zoom);
+      _groupedActivities = activities;
+      _groupedZoom = _zoom;
+    }
+    return _groups;
+  }
 
   double get _overlayHeight =>
       _selectedId == null ? 0 : _cardHeight + _cardMargin;
@@ -235,41 +245,63 @@ class _ActivitiesMapState extends State<ActivitiesMap> {
 
   /// Tocar un grup hi apropa el mapa fins que hi caben tots els marcadors, que
   /// així es van separant. Si són tots al mateix lloc, se'n mostra la llista.
-  void _onClusterTap(Cluster cluster) {
+  void _onGroupTap(ActivityMapGroup group) {
     if (!_acceptsTap) return;
     _clearSelection();
-    if (isSamePlace(cluster.bounds)) {
-      final ids = {for (final id in cluster.markerIds) id.value};
-      _showSamePlace([
-        for (final activity in widget.activities)
-          if (ids.contains(activity.id)) activity,
-      ]);
+    final bounds = group.bounds;
+    if (isSamePlace(bounds)) {
+      _showSamePlace(List.of(group.activities));
       return;
     }
     _controller?.animateCamera(
-      CameraUpdate.newLatLngBounds(cluster.bounds, _clusterPadding),
+      CameraUpdate.newLatLngBounds(
+        LatLngBounds(
+          southwest: _toLatLng(bounds.southWest),
+          northeast: _toLatLng(bounds.northEast),
+        ),
+        _clusterPadding,
+      ),
     );
   }
 
-  /// Molt a prop, Google deixa d'agrupar i els marcadors d'un mateix lloc
-  /// queden l'un sobre l'altre: només se'n podria tocar el de dalt.
-  void _onMarkerTap(Activity activity, List<Activity> located) {
-    if (!_acceptsTap) return;
-    final point = activity.location!;
-    final samePlace = [
-      for (final other in located)
-        if (_isSamePlace(
-          other.location!.latitude - point.latitude,
-          other.location!.longitude - point.longitude,
-        ))
-          other,
-    ];
-    if (samePlace.length > 1) {
-      _clearSelection();
-      _showSamePlace(samePlace);
-    } else {
-      _select(activity);
+  /// Les activitats d'un mateix lloc sempre van en grup: un marcador sol és
+  /// una sola activitat.
+  void _onMarkerTap(Activity activity) {
+    if (_acceptsTap) _select(activity);
+  }
+
+  /// Cercle del grup amb el text [label]. Mentre es dibuixa, un marcador del
+  /// color de l'app.
+  BitmapDescriptor _groupIcon(String label, ColorScheme colors) {
+    final key = (
+      label: label,
+      fill: colors.primary,
+      textColor: colors.onPrimary,
+      border: colors.surface,
+      devicePixelRatio: MediaQuery.devicePixelRatioOf(context),
+    );
+    final icon = _groupIcons[key];
+    if (icon != null) return icon;
+    if (_drawingGroupIcons.add(key)) {
+      drawMapGroupIcon(
+        label,
+        fill: key.fill,
+        textColor: key.textColor,
+        border: key.border,
+        devicePixelRatio: key.devicePixelRatio,
+      ).then(
+        (drawn) {
+          if (mounted) setState(() => _groupIcons[key] = drawn);
+        },
+        // Si no es pot dibuixar, es torna a provar en el proper redibuix.
+        onError: (Object _) {
+          _drawingGroupIcons.remove(key);
+        },
+      );
     }
+    return BitmapDescriptor.defaultMarkerWithHue(
+      HSVColor.fromColor(colors.primary).hue,
+    );
   }
 
   void _showSamePlace(List<Activity> activities) {
@@ -309,6 +341,8 @@ class _ActivitiesMapState extends State<ActivitiesMap> {
     ];
     final withoutLocation = widget.activities.length - located.length;
     final selected = located.where((a) => a.id == _selectedId).firstOrNull;
+    final groups = _groupsFor(widget.activities);
+    final colors = Theme.of(context).colorScheme;
     final overlay = selected == null ? 0.0 : _cardHeight + _cardMargin;
 
     return Stack(
@@ -325,7 +359,13 @@ class _ActivitiesMapState extends State<ActivitiesMap> {
                 _controller = controller;
                 _reportVisibleArea();
               },
-              onCameraIdle: _reportVisibleArea,
+              onCameraMove: (position) => _cameraZoom = position.zoom,
+              onCameraIdle: () {
+                if (_cameraZoom != _zoom) {
+                  setState(() => _zoom = _cameraZoom);
+                }
+                _reportVisibleArea();
+              },
               onTap: (_) {
                 _onMapTap();
               },
@@ -335,25 +375,38 @@ class _ActivitiesMapState extends State<ActivitiesMap> {
               zoomGesturesEnabled: _isInteractive,
               rotateGesturesEnabled: _isInteractive,
               tiltGesturesEnabled: _isInteractive,
-              clusterManagers: {
-                ClusterManager(
-                  clusterManagerId: _clusterManagerId,
-                  onClusterTap: _onClusterTap,
-                ),
-              },
+              // Els grups els fa l'app (activity_map_groups.dart) i no Google,
+              // perquè siguin iguals a la web i al mòbil i amb els colors de
+              // l'app.
               markers: {
-                for (final activity in located)
-                  Marker(
-                    markerId: MarkerId(activity.id),
-                    position: _toLatLng(activity.location!),
-                    clusterManagerId: _clusterManagerId,
-                    consumeTapEvents: true,
-                    icon: AssetMapBitmap(
-                      activityMarkerAssets[activityMarkerKind(activity)]!,
-                      width: 36,
+                for (final group in groups)
+                  if (group.isSingle)
+                    Marker(
+                      markerId: MarkerId(group.id),
+                      position: _toLatLng(group.center),
+                      consumeTapEvents: true,
+                      icon: AssetMapBitmap(
+                        activityMarkerAssets[activityMarkerKind(
+                          group.activities.single,
+                        )]!,
+                        width: 36,
+                      ),
+                      onTap: () => _onMarkerTap(group.activities.single),
+                    )
+                  else
+                    Marker(
+                      markerId: MarkerId(group.id),
+                      position: _toLatLng(group.center),
+                      anchor: const Offset(0.5, 0.5),
+                      // Per sobre dels marcadors sols que hi pugui haver a prop.
+                      zIndexInt: 1,
+                      consumeTapEvents: true,
+                      icon: _groupIcon(
+                        mapGroupLabel(group.activities.length),
+                        colors,
+                      ),
+                      onTap: () => _onGroupTap(group),
                     ),
-                    onTap: () => _onMarkerTap(activity, located),
-                  ),
               },
               myLocationButtonEnabled: false,
               mapToolbarEnabled: false,
@@ -765,3 +818,12 @@ class _RenderSizeReporter extends RenderProxyBox {
     WidgetsBinding.instance.addPostFrameCallback((_) => onChanged(reported));
   }
 }
+
+/// El que fa diferent el dibuix d'un grup.
+typedef _GroupIconKey = ({
+  String label,
+  Color fill,
+  Color textColor,
+  Color border,
+  double devicePixelRatio,
+});

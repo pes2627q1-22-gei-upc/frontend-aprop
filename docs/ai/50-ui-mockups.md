@@ -12,12 +12,18 @@
   `border #E3DED5`, `selectedBackground #E6EEE7`. Mostassa i tema fosc: `TODO` (encara no existeixen).
 - **NFR:** un únic `ThemeData` amb tokens de color, tipografia i espaiat; mode clar i fosc conforme a WCAG 2.1 AA.
 - **Interfície en català.** No hi ha vocabulari transaccional («comprar», «reservar») ni publicitat.
+- **Logotip (#262):** `APropLogo` compartit a Inici i Login, amb fons transparent i sense deformar-lo. Es conserva la composició Catalunya + tres marcadors + «AProp!», amb verd bosc, coral, mostassa i crema. Original conservat; detall i verificació a `docs/branding.md` (DP-047).
 
 ## Navegació
 
 Barra inferior fixa amb 5 seccions: **Inici · Agenda · Descobreix · Avisos · Perfil**. Cada secció conserva
 el seu historial; tornar d'una fitxa o perfil conserva els filtres, la cerca i la posició del desplaçament.
 Accés amb Google; en el primer accés es completa el perfil i es fa el test d'interessos.
+
+**Actualització #261 (2026-11-16):** en obrir el xat de l’Assistent s’amaga la barra inferior. La fletxa,
+el retorn del sistema i les dreceres recuperen la navegació habitual sense perdre l’estat de les seccions.
+La conversa es conserva en tornar d’una fitxa o reobrir l’Assistent. Les fitxes obertes des del xat també
+mantenen el flux sense barra, pendent de validar aquest detall de disseny a DP-048.
 
 ## Comportaments compartits
 

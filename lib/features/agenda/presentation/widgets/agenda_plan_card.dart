@@ -11,6 +11,7 @@ class AgendaPlanCard extends StatelessWidget {
     required this.activity,
     required this.onTap,
     this.participationAction,
+    this.rating,
   });
 
   final Activity activity;
@@ -19,6 +20,9 @@ class AgendaPlanCard extends StatelessWidget {
   /// The shared enrollment action («Apuntat» and «Desapunta’m»), as in the
   /// activity cards. Without it, only the «Apuntat» badge is shown.
   final Widget? participationAction;
+
+  /// Rating block, shown only for plans the app lets the user rate.
+  final Widget? rating;
 
   @override
   Widget build(BuildContext context) {
@@ -123,6 +127,7 @@ class AgendaPlanCard extends StatelessWidget {
                     Text(_sourceLabel(activity), style: secondaryStyle),
                     const SizedBox(height: 8),
                     participationAction ?? const EnrolledBadge(),
+                    ?rating,
                   ],
                 ),
               ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../../core/formatters/reliability_formatter.dart';
 import '../../../../core/links/open_external_link.dart';
 import '../../models/activity.dart';
 import '../../repositories/activity_details_repository.dart';
@@ -21,6 +22,7 @@ class ActivityDetailsScreen extends StatefulWidget {
     required this.activityId,
     required this.repository,
     required this.enrollmentViewModel,
+    this.ratingBuilder,
     this.canEdit,
     this.onEdit,
     this.openLink = openExternalLink,
@@ -29,6 +31,9 @@ class ActivityDetailsScreen extends StatefulWidget {
   final String activityId;
   final ActivityDetailsRepository repository;
   final EnrollmentViewModel enrollmentViewModel;
+
+  /// Rating block for the activity; the app decides when it can be rated.
+  final Widget Function(Activity activity)? ratingBuilder;
 
   /// Si qui mira la fitxa pot editar l'activitat (n'és qui l'ha creada).
   final bool Function(Activity activity)? canEdit;
@@ -145,6 +150,7 @@ class _ActivityDetailsScreenState extends State<ActivityDetailsScreen> {
                   child: _ActivityDetailsContent(
                     activity: activity,
                     enrollmentViewModel: widget.enrollmentViewModel,
+                    ratingBuilder: widget.ratingBuilder,
                     openLink: widget.openLink,
                   ),
                 ),
@@ -165,11 +171,13 @@ class _ActivityDetailsContent extends StatelessWidget {
   const _ActivityDetailsContent({
     required this.activity,
     required this.enrollmentViewModel,
+    this.ratingBuilder,
     required this.openLink,
   });
 
   final Activity activity;
   final EnrollmentViewModel enrollmentViewModel;
+  final Widget Function(Activity activity)? ratingBuilder;
   final Future<bool> Function(Uri uri) openLink;
 
   @override
@@ -213,6 +221,7 @@ class _ActivityDetailsContent extends StatelessWidget {
             fontWeight: FontWeight.w700,
           ),
         ),
+        if (ratingBuilder != null) ratingBuilder!(activity),
         const SizedBox(height: 16),
         ActivityInformationRow(
           icon: Icons.calendar_month_outlined,
@@ -361,7 +370,7 @@ List<ActivityLink> _linksOf(Activity activity) {
   ];
 }
 
-/// Un enllaç amb el nom i l'adreça. Tocar-lo l'obre fora de l'app (DP-050);
+/// Un enllaç amb el nom i l'adreça. Tocar-lo l'obre fora de l'app (DP-054);
 /// el botó del costat el copia.
 class _ActivityLinkRow extends StatelessWidget {
   const _ActivityLinkRow({required this.link, required this.openLink});
@@ -499,6 +508,31 @@ class _CreatorSection extends StatelessWidget {
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
                 if (creator.isFriend) const FriendshipBadge(),
+                Semantics(
+                  label: creator.reliability == null
+                      ? 'Fiabilitat de l’organitzador: sense valoracions'
+                      : 'Fiabilitat de l’organitzador: '
+                            '${formatReliability(creator.reliability)} sobre 5',
+                  excludeSemantics: true,
+                  child: Text.rich(
+                    TextSpan(
+                      text:
+                          'Fiabilitat ${formatReliability(creator.reliability)}',
+                      children: [
+                        if (creator.reliability != null)
+                          WidgetSpan(
+                            alignment: PlaceholderAlignment.middle,
+                            child: Icon(
+                              Icons.star,
+                              size: 18,
+                              color: theme.colorScheme.primary,
+                            ),
+                          ),
+                      ],
+                    ),
+                    style: theme.textTheme.labelLarge,
+                  ),
+                ),
                 Tooltip(
                   message: 'Perfil disponible properament',
                   child: TextButton.icon(

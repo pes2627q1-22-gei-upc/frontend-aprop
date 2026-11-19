@@ -10,6 +10,7 @@ Route<void> activityDetailsRoute({
   required String activityId,
   required ActivityDetailsRepository repository,
   required EnrollmentViewModel enrollmentViewModel,
+  Widget Function(Activity activity)? ratingBuilder,
   bool Function(Activity activity)? canEdit,
   Future<bool> Function(Activity activity)? onEdit,
 }) {
@@ -21,6 +22,7 @@ Route<void> activityDetailsRoute({
       activityId: activityId,
       repository: repository,
       enrollmentViewModel: enrollmentViewModel,
+      ratingBuilder: ratingBuilder,
       canEdit: canEdit,
       onEdit: onEdit,
     ),
