@@ -78,7 +78,7 @@ caducat o ja s'ha fet servir».
 «Has oblidat la contrasenya?» del login obre `ForgotPasswordScreen`, que crida `sendPasswordResetEmail`
 (Firebase envia el correu en català). L'enllaç obre la mateixa pàgina de Firebase que la verificació, on es
 tria la contrasenya nova, i després es pot entrar a l'app amb ella. La pantalla no diu mai si el correu té
-compte: el missatge és el mateix en tots dos casos (DP-047). Entre enviaments cal esperar 60 s.
+compte: el missatge és el mateix en tots dos casos (DP-056). Entre enviaments cal esperar 60 s.
 
 ## Backend: nom d'usuari (`POST /auth/sync`)
 

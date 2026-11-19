@@ -5,6 +5,7 @@ import '../features/activities/repositories/activity_map_repository.dart';
 import '../features/activities/repositories/activity_repository.dart';
 import '../features/activities/repositories/discovery_repository.dart';
 import '../features/activities/repositories/enrollment_repository.dart';
+import '../features/ratings/repositories/rating_repository.dart';
 import '../features/assistant/repositories/assistant_repository.dart';
 import '../features/auth/repositories/auth_repository.dart';
 import '../features/interest_test/repositories/interest_test_repository.dart';
@@ -22,6 +23,7 @@ class APropApp extends StatelessWidget {
     this.activityMapRepository,
     this.enrollmentRepository,
     this.assistantRepository,
+    this.ratingRepository,
     this.notificationRepository,
     this.discoveryRepository,
     this.profileRepository,
@@ -35,6 +37,7 @@ class APropApp extends StatelessWidget {
   final ActivityMapRepository? activityMapRepository;
   final EnrollmentRepository? enrollmentRepository;
   final AssistantRepository? assistantRepository;
+  final RatingRepository? ratingRepository;
   final NotificationRepository? notificationRepository;
   final DiscoveryRepository? discoveryRepository;
   final ProfileRepository? profileRepository;
@@ -54,6 +57,7 @@ class APropApp extends StatelessWidget {
         activityMapRepository,
         enrollmentRepository,
         assistantRepository,
+        ratingRepository,
         notificationRepository,
         discoveryRepository,
         profileRepository,
@@ -66,6 +70,7 @@ class APropApp extends StatelessWidget {
       activityMapRepository: activityMapRepository,
       enrollmentRepository: enrollmentRepository,
       assistantRepository: assistantRepository,
+      ratingRepository: ratingRepository,
       notificationRepository: notificationRepository,
       discoveryRepository: discoveryRepository,
       profileRepository: profileRepository,

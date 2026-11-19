@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../features/activities/models/activity.dart';
 import '../../features/activities/presentation/screens/activity_details_screen.dart';
 import '../../features/activities/repositories/activity_details_repository.dart';
 import '../../features/activities/presentation/view_models/enrollment_view_model.dart';
@@ -9,6 +10,9 @@ Route<void> activityDetailsRoute({
   required String activityId,
   required ActivityDetailsRepository repository,
   required EnrollmentViewModel enrollmentViewModel,
+  Widget Function(Activity activity)? ratingBuilder,
+  bool Function(Activity activity)? canEdit,
+  Future<bool> Function(Activity activity)? onEdit,
 }) {
   return MaterialPageRoute<void>(
     settings: RouteSettings(
@@ -18,6 +22,9 @@ Route<void> activityDetailsRoute({
       activityId: activityId,
       repository: repository,
       enrollmentViewModel: enrollmentViewModel,
+      ratingBuilder: ratingBuilder,
+      canEdit: canEdit,
+      onEdit: onEdit,
     ),
   );
 }

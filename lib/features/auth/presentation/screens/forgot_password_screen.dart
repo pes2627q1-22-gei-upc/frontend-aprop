@@ -8,7 +8,7 @@ import '../widgets/auth_submit_button.dart';
 
 /// «He oblidat la contrasenya»: envia un enllaç al correu per triar-ne una de
 /// nova. L'enllaç s'obre a la pàgina de Firebase, que la canvia.
-// TODO(DP-047): disseny i textos sense mockup.
+// TODO(DP-056): disseny i textos sense mockup.
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({
     super.key,

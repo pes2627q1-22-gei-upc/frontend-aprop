@@ -47,4 +47,9 @@ class CombinedActivityRepository implements ActivityRepository {
   Future<Activity> createActivity(NewActivity activity) {
     return catalogue.createActivity(activity);
   }
+
+  @override
+  Future<Activity> updateActivity(String id, NewActivity activity) {
+    return catalogue.updateActivity(id, activity);
+  }
 }

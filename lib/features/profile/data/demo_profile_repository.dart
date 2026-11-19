@@ -1,4 +1,5 @@
 import '../../activities/repositories/activity_repository.dart';
+import '../../ratings/data/demo_rating_repository.dart';
 import '../../auth/models/app_user.dart';
 import '../models/user_profile.dart';
 import '../models/profile_capabilities.dart';
@@ -8,9 +9,29 @@ import '../repositories/profile_repository.dart';
 
 // TODO(DP-032): Replace mockup statistics/attendance with the authenticated API.
 class DemoProfileRepository implements ProfileRepository {
-  DemoProfileRepository({required this.activityRepository});
+  DemoProfileRepository({
+    required this.activityRepository,
+    this.ratingRepository,
+  });
 
   final ActivityRepository activityRepository;
+
+  /// Shared demo ratings; without it `organizerRating` is only the seed.
+  final DemoRatingRepository? ratingRepository;
+
+  /// Mean of the scores of the community activities [userId] created (R9);
+  /// null if none was rated. Once one is rated it replaces the example seed.
+  // TODO(DP-049): HTTP gets `reliability` from the server instead.
+  double? _organizerRating(String userId, List<Activity> catalogue) {
+    final scores = [
+      for (final a in catalogue)
+        if (a.source == ActivitySource.community && a.creator?.userId == userId)
+          ...?ratingRepository?.scoresFor(a.id),
+    ];
+    if (scores.isEmpty) return null;
+    return scores.reduce((a, b) => a + b) / scores.length;
+  }
+
   @override
   ProfileCapabilities get capabilities => ProfileCapabilities.demo;
   final _details = <String, ({String biography, String municipality})>{};
@@ -38,7 +59,9 @@ class DemoProfileRepository implements ProfileRepository {
       municipality: details?.municipality ?? (isExampleAccount ? 'Girona' : ''),
       avatarAsset: isExampleAccount ? 'assets/images/laia_soler.jpg' : null,
       friendCount: isExampleAccount ? 14 : 0,
-      organizerRating: isExampleAccount ? 4.7 : null,
+      organizerRating:
+          _organizerRating(user.id, catalogue) ??
+          (isExampleAccount ? 4.7 : null),
       progress: isExampleAccount
           ? const ProfileProgress(
               level: ProfileLevel.explorer,

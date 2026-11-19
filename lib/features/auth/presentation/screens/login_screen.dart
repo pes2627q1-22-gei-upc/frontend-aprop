@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/widgets/aprop_logo.dart';
 import '../../repositories/auth_repository.dart';
 import '../view_models/login_view_model.dart';
 import '../widgets/auth_secondary_action.dart';
@@ -95,11 +96,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Image.asset(
-                        'assets/branding/aprop_logo.png',
-                        height: 96,
-                        semanticLabel: 'AProp!',
-                      ),
+                      const APropLogo(height: 96),
                       const SizedBox(height: 24),
                       Text(
                         'Inicia sessió',
