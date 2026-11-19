@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/locale_controller.dart';
+
 class ActivityListPagination extends StatelessWidget {
   const ActivityListPagination({
     super.key,
@@ -19,11 +21,7 @@ class ActivityListPagination extends StatelessWidget {
     padding: const EdgeInsets.symmetric(vertical: 12),
     child: Column(
       children: [
-        Text(
-          loadedCount == 1
-              ? '1 activitat carregada'
-              : '$loadedCount activitats carregades',
-        ),
+        Text(context.l10n.actLoadedCount(loadedCount)),
         const SizedBox(height: 8),
         if (errorMessage case final error?) ...[
           Semantics(
@@ -33,12 +31,12 @@ class ActivityListPagination extends StatelessWidget {
           const SizedBox(height: 8),
         ],
         if (isLoading)
-          const Padding(
-            padding: EdgeInsets.all(12),
+          Padding(
+            padding: const EdgeInsets.all(12),
             child: SizedBox.square(
               dimension: 24,
               child: CircularProgressIndicator(
-                semanticsLabel: 'Carregant més activitats',
+                semanticsLabel: context.l10n.actLoadingMore,
               ),
             ),
           )
@@ -49,8 +47,8 @@ class ActivityListPagination extends StatelessWidget {
             style: OutlinedButton.styleFrom(minimumSize: const Size(0, 48)),
             child: Text(
               errorMessage == null
-                  ? 'Carregar més activitats'
-                  : 'Tornar-ho a provar',
+                  ? context.l10n.actLoadMore
+                  : context.l10n.retry,
             ),
           ),
       ],

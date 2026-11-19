@@ -175,7 +175,7 @@ void main() {
     // L'hora és la de l'«Horari», no les 00.00 h de la data.
     expect(find.textContaining('De 18.00 a 19.30 h'), findsOneWidget);
     expect(find.textContaining('00.00 h'), findsNothing);
-    expect(find.textContaining('Fins al divendres 20'), findsOneWidget);
+    expect(find.text('Fins al 20 de novembre de 2026'), findsOneWidget);
     expect(find.text('Activitat permanent'), findsOneWidget);
     await tester.scrollUntilVisible(find.text('Presencial i en línia'), 150);
     expect(find.text('Entrada lliure'), findsOneWidget);

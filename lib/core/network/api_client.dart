@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import '../config/api_config.dart';
+import '../l10n/locale_controller.dart';
 
 /// The encoded multipart body exceeds an endpoint's complete request limit.
 class MultipartBodyTooLargeException implements Exception {
@@ -19,17 +20,17 @@ class ApiException extends StateError implements Exception {
     this.isNetworkError = false,
   });
 
-  ApiException.timeout([
-    super.message = 'El servidor està despertant o triga massa a respondre. Torna-ho a provar.',
-  ]) : statusCode = null,
-       isTimeout = true,
-       isNetworkError = false;
+  ApiException.timeout([String? message])
+    : statusCode = null,
+      isTimeout = true,
+      isNetworkError = false,
+      super(message ?? currentL10n.apiTimeout);
 
-  ApiException.network([
-    super.message = 'No s’ha pogut connectar amb el servidor.',
-  ]) : statusCode = null,
-       isTimeout = false,
-       isNetworkError = true;
+  ApiException.network([String? message])
+    : statusCode = null,
+      isTimeout = false,
+      isNetworkError = true,
+      super(message ?? currentL10n.apiNetwork);
 
   final int? statusCode;
   final bool isTimeout;
@@ -55,6 +56,7 @@ class ApiClient {
     Future<String?> Function()? idToken,
     http.Client? client,
     this.timeout = ApiConfig.connectTimeout,
+    this.language,
   }) : baseUrl = baseUrl ?? Uri.parse(ApiConfig.baseUrl),
        idTokenProvider = idToken,
        _client = client ?? http.Client();
@@ -64,15 +66,38 @@ class ApiClient {
   final http.Client _client;
   final Duration timeout;
 
+  /// Current UI language; sent as `lang` on the `events` endpoints so the
+  /// backend can return translated event texts.
+  final String Function()? language;
+
+  static final _translatedPaths = RegExp(
+    r'^(events(/|$)|users/[^/]+/(events|created-events)$)',
+  );
+
   /// Construeix la URI completa a partir d'un camí relatiu i paràmetres opcionals.
-  Uri resolveUri(String path, [Map<String, String>? queryParameters]) {
+  /// [withLanguage] afegeix `lang` (només les lectures, `GET`) als camins amb
+  /// esdeveniments.
+  Uri resolveUri(
+    String path, [
+    Map<String, String>? queryParameters,
+    bool withLanguage = false,
+  ]) {
     final normalizedBase = baseUrl.toString().replaceAll(RegExp(r'/+$'), '');
     final normalizedPath = path.replaceAll(RegExp(r'^/+'), '');
     final uri = Uri.parse('$normalizedBase/$normalizedPath');
-    if (queryParameters == null || queryParameters.isEmpty) {
-      return uri;
-    }
-    return uri.replace(queryParameters: queryParameters);
+    final lang = language?.call();
+    final isEventPath =
+        withLanguage &&
+        _translatedPaths.hasMatch(
+          uri.path.substring(Uri.parse(normalizedBase).path.length + 1),
+        );
+    final query = <String, String>{
+      ...uri.queryParameters,
+      ...?queryParameters,
+      if (lang != null && isEventPath) 'lang': lang,
+    };
+    if (query.isEmpty) return uri;
+    return uri.replace(queryParameters: query);
   }
 
   /// Construeix les capçaleres comunes i d'autenticació.
@@ -95,7 +120,7 @@ class ApiClient {
     Map<String, String>? queryParameters,
     Map<String, String>? headers,
   }) async {
-    final uri = resolveUri(path, queryParameters);
+    final uri = resolveUri(path, queryParameters, true);
     final resolvedHeaders = await buildHeaders(extraHeaders: headers);
     return _send(() => _client.get(uri, headers: resolvedHeaders));
   }

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../activities/models/activity.dart';
 import '../../models/assistant_message.dart';
 import 'assistant_activity_tile.dart';
+import '../../../../core/l10n/locale_controller.dart';
 
 class AssistantMessageBubble extends StatelessWidget {
   const AssistantMessageBubble({
@@ -58,7 +59,7 @@ class _UserBubble extends StatelessWidget {
           padding: const EdgeInsets.only(left: 32),
           child: Semantics(
             container: true,
-            label: 'Tu',
+            label: context.l10n.assistantYou,
             child: DecoratedBox(
               decoration: BoxDecoration(
                 color: colors.primary,
@@ -127,7 +128,7 @@ class _AssistantBubble extends StatelessWidget {
           children: [
             Semantics(
               container: true,
-              label: 'Assistent',
+              label: context.l10n.assistantTitle,
               child: DecoratedBox(
                 decoration: BoxDecoration(
                   color: colors.surface,
@@ -152,18 +153,23 @@ class _AssistantBubble extends StatelessWidget {
                             if (interpretation.category != null)
                               _InterpretationChip(
                                 icon: Icons.category_outlined,
-                                label: 'Tipus: ${interpretation.category}',
+                                label: context.l10n.assistantChipType(
+                                  interpretation.category!,
+                                ),
                               ),
                             if (interpretation.municipality != null)
                               _InterpretationChip(
                                 icon: Icons.location_on_outlined,
-                                label:
-                                    'Municipi: ${interpretation.municipality}',
+                                label: context.l10n.assistantChipMunicipality(
+                                  interpretation.municipality!,
+                                ),
                               ),
                             if (interpretation.dateRange != null)
                               _InterpretationChip(
                                 icon: Icons.date_range_outlined,
-                                label: 'Dates: ${interpretation.dateRange}',
+                                label: context.l10n.assistantChipDates(
+                                  interpretation.dateRange!,
+                                ),
                               ),
                           ],
                         ),
@@ -197,7 +203,7 @@ class _AssistantBubble extends StatelessWidget {
                   padding: const EdgeInsets.only(top: 8),
                   child: Semantics(
                     button: true,
-                    label: _screenLabel(action),
+                    label: _screenLabel(context, action),
                     excludeSemantics: true,
                     child: FilledButton.tonalIcon(
                       key: ValueKey('assistant-action-${message.id}'),
@@ -206,7 +212,7 @@ class _AssistantBubble extends StatelessWidget {
                         minimumSize: const Size(48, 48),
                       ),
                       icon: const Icon(Icons.open_in_new, size: 18),
-                      label: Text(_screenLabel(action)),
+                      label: Text(_screenLabel(context, action)),
                     ),
                   ),
                 ),
@@ -279,15 +285,18 @@ class _InterpretationChip extends StatelessWidget {
   }
 }
 
-String _screenLabel(AssistantScreenTarget target) => switch (target) {
-  AssistantScreenTarget.home => 'Obre Inici',
-  AssistantScreenTarget.agenda => 'Obre Agenda',
-  AssistantScreenTarget.discover => 'Obre Descobreix',
-  AssistantScreenTarget.notifications => 'Obre Avisos',
-  AssistantScreenTarget.profile => 'Obre Perfil',
-  AssistantScreenTarget.settings => 'Obre Configuració',
-  AssistantScreenTarget.interestTest => 'Obre el test d’interessos',
-};
+String _screenLabel(BuildContext context, AssistantScreenTarget target) =>
+    switch (target) {
+      AssistantScreenTarget.home => context.l10n.assistantOpenHome,
+      AssistantScreenTarget.agenda => context.l10n.assistantOpenAgenda,
+      AssistantScreenTarget.discover => context.l10n.assistantOpenDiscover,
+      AssistantScreenTarget.notifications =>
+        context.l10n.assistantOpenNotifications,
+      AssistantScreenTarget.profile => context.l10n.assistantOpenProfile,
+      AssistantScreenTarget.settings => context.l10n.assistantOpenSettings,
+      AssistantScreenTarget.interestTest =>
+        context.l10n.assistantOpenInterestTest,
+    };
 
 /// Thumb with a 48x48 target. The selected state changes the icon (filled vs
 /// outlined) and a tonal background, not only the colour.
@@ -305,7 +314,9 @@ class _ThumbButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final label = helpful ? 'Resposta útil' : 'Resposta poc útil';
+    final label = helpful
+        ? context.l10n.assistantHelpful
+        : context.l10n.assistantNotHelpful;
     final icon = helpful
         ? (selected ? Icons.thumb_up : Icons.thumb_up_outlined)
         : (selected ? Icons.thumb_down : Icons.thumb_down_outlined);
@@ -314,7 +325,7 @@ class _ThumbButton extends StatelessWidget {
       button: true,
       selected: selected,
       label: label,
-      value: selected ? 'Seleccionat' : null,
+      value: selected ? context.l10n.selected : null,
       excludeSemantics: true,
       child: IconButton.filledTonal(
         tooltip: label,

@@ -169,7 +169,7 @@ class HttpActivityRepository
       title: parsed.title.isNotEmpty ? parsed.title : activity.title,
       category: parsed.category != 'Activitat'
           ? parsed.category
-          : activity.category,
+          : activityCategoryLabel(activity.category),
       categories: parsed.category != 'Activitat'
           ? parsed.categories
           : [for (final tag in activity.categories) activityCategoryLabel(tag)],

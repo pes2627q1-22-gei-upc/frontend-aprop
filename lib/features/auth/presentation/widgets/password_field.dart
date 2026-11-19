@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/locale_controller.dart';
+
 /// Camp de contrasenya amb un botó per mostrar-ne o amagar-ne el text.
 class PasswordField extends StatefulWidget {
   const PasswordField({
@@ -52,8 +54,8 @@ class _PasswordFieldState extends State<PasswordField> {
         suffixIcon: ExcludeFocusTraversal(
           child: IconButton(
             tooltip: _isObscured
-                ? 'Mostra la contrasenya'
-                : 'Amaga la contrasenya',
+                ? context.l10n.authShowPassword
+                : context.l10n.authHidePassword,
             icon: Icon(
               _isObscured
                   ? Icons.visibility_outlined

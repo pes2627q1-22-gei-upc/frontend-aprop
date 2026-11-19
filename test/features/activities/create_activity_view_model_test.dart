@@ -590,7 +590,7 @@ void main() {
 
       expect(
         repository.created.single.schedule,
-        '19.30 – 21.00 h · Porta oberta mitja hora abans',
+        '19.30 h – 21.00 h · Porta oberta mitja hora abans',
       );
     });
 
@@ -751,6 +751,83 @@ void main() {
       );
 
       expect(viewModel.initialScheduleNote, isEmpty);
+    });
+  });
+  group('Editar una activitat del backend (sense hora a la data)', () {
+    // El backend només desa el dia: la data arriba a les 00.00 (DP-029).
+    Activity fromBackend(String? schedule, {DateTime? endsAt}) => Activity(
+      id: '506',
+      title: 'Concert',
+      category: 'Música',
+      municipality: 'Vic',
+      startsAt: DateTime(2026, 11, 1),
+      endsAt: endsAt,
+      imageAsset: jazzImage,
+      source: ActivitySource.community,
+      creator: creator,
+      schedule: schedule,
+    );
+
+    CreateActivityViewModel editing(Activity activity) {
+      final viewModel = CreateActivityViewModel(
+        repository: repository,
+        locationRepository: const DemoLocationRepository(),
+        creator: creator,
+        now: () => now,
+        editing: activity,
+      );
+      addTearDown(viewModel.dispose);
+      return viewModel;
+    }
+
+    test('Recupera l’hora de l’horari i no la repeteix en desar', () async {
+      final viewModel = editing(fromBackend('19.00 h · Durada: 1 h'));
+
+      expect(viewModel.startsAt, DateTime(2026, 11, 1, 19));
+      expect(viewModel.initialScheduleNote, 'Durada: 1 h');
+
+      await viewModel.publish(
+        title: 'Concert',
+        description: 'Música',
+        price: '',
+        scheduleNote: viewModel.initialScheduleNote,
+      );
+
+      final (_, sent) = repository.updated.single;
+      expect(sent.startsAt, DateTime(2026, 11, 1, 19));
+      expect(sent.schedule, '19.00 h · Durada: 1 h');
+    });
+
+    test('També en recupera l’hora de fi', () {
+      final viewModel = editing(
+        fromBackend('18.00 h – 20.30 h', endsAt: DateTime(2026, 11, 1)),
+      );
+
+      expect(viewModel.startsAt, DateTime(2026, 11, 1, 18));
+      expect(viewModel.endsAt, DateTime(2026, 11, 1, 20, 30));
+      expect(viewModel.initialScheduleNote, isEmpty);
+    });
+
+    test('Llegeix l’hora en el format de qualsevol idioma', () {
+      expect(parseActivityScheduleTime('19:00 h')?.start, (
+        hour: 19,
+        minute: 0,
+      ));
+      expect(parseActivityScheduleTime('7:05 – 9:00 · Nota'), (
+        start: (hour: 7, minute: 5),
+        end: (hour: 9, minute: 0),
+        note: 'Nota',
+      ));
+      // Un horari escrit a mà no és una hora generada.
+      expect(parseActivityScheduleTime('10.00 h a 14.00 h'), isNull);
+      expect(parseActivityScheduleTime('De dimarts a diumenge'), isNull);
+    });
+
+    test('Sense hora a l’horari, la data es queda com estava', () {
+      final viewModel = editing(fromBackend('De dimarts a diumenge'));
+
+      expect(viewModel.startsAt, DateTime(2026, 11, 1));
+      expect(viewModel.initialScheduleNote, 'De dimarts a diumenge');
     });
   });
 }

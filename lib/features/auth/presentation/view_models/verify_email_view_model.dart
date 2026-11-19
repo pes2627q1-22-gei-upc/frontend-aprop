@@ -5,11 +5,10 @@ import 'package:flutter/foundation.dart';
 import '../../models/auth_failure.dart';
 import '../../repositories/auth_repository.dart';
 import 'auth_failure_message.dart';
+import '../../../../core/l10n/locale_controller.dart';
 
-const emailNotVerifiedMessage =
-    "Encara no consta que hagis verificat el correu. Obre l'enllaç que t'hem "
-    'enviat i torna-ho a provar.';
-const verificationEmailSentMessage = "T'hem tornat a enviar el correu.";
+String get emailNotVerifiedMessage => currentL10n.authEmailNotVerified;
+String get verificationEmailSentMessage => currentL10n.authVerificationSent;
 
 class VerifyEmailViewModel extends ChangeNotifier {
   /// La pantalla s'obre just després d'enviar el correu (o d'entrar amb un

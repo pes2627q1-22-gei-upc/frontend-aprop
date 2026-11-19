@@ -120,7 +120,7 @@ Activity activityFromJson(Map<String, Object?> json) {
 }
 
 /// Valors de `modality` al backend (un `enum` de la base de dades).
-// TODO(DP-055): no hi ha contracte escrit; són els valors de l'`enum`.
+// TODO(DP-059): no hi ha contracte escrit; són els valors de l'`enum`.
 const _modalityToJson = {
   ActivityModality.inPerson: 'Face-to-Face',
   ActivityModality.online: 'Online',

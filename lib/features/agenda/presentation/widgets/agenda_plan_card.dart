@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
 import '../../../activities/models/activity.dart';
+import '../../../activities/presentation/formatters/activity_categories_formatter.dart';
 import '../../../activities/presentation/formatters/activity_date_formatter.dart';
 import '../../../activities/presentation/widgets/enrollment_badge.dart';
+import '../../../../core/l10n/locale_controller.dart';
 
 /// Compact plan of the selected day. The image and the title open the event.
 class AgendaPlanCard extends StatelessWidget {
@@ -61,7 +63,9 @@ class AgendaPlanCard extends StatelessWidget {
                     width: 72,
                     height: 72,
                     fit: BoxFit.cover,
-                    semanticLabel: 'Veure activitat: ${activity.title}',
+                    semanticLabel: context.l10n.assistantViewActivity(
+                      activity.title,
+                    ),
                     errorBuilder: (context, error, stackTrace) {
                       return ColoredBox(
                         color: colors.surfaceContainerHighest,
@@ -83,7 +87,7 @@ class AgendaPlanCard extends StatelessWidget {
                     Text(
                       [
                         ?activityTimeLabel(activity, short: true),
-                        activity.category,
+                        activityCategoriesLabel(activity),
                       ].join(' · '),
                       style: secondaryStyle,
                     ),
@@ -141,8 +145,8 @@ class AgendaPlanCard extends StatelessWidget {
   static String _sourceLabel(Activity activity) {
     final creator = activity.creator;
     if (activity.source == ActivitySource.community && creator != null) {
-      return 'Publicat per ${creator.name}';
+      return currentL10n.agendaPublishedBy(creator.name);
     }
-    return 'Font: Agenda Cultural · Generalitat';
+    return currentL10n.agendaSourceOfficial;
   }
 }

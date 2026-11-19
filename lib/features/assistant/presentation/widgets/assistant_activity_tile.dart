@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../activities/models/activity.dart';
 import '../../../activities/presentation/formatters/activity_date_formatter.dart';
 import '../../../activities/presentation/widgets/activity_image.dart';
+import '../../../../core/l10n/locale_controller.dart';
 
 // TODO(DP-044): confirm the compact layout against mockup 10.
 /// Compact activity row for assistant replies: a thumbnail, title,
@@ -54,7 +55,9 @@ class AssistantActivityTile extends StatelessWidget {
                     onTap: onTap,
                     child: ActivityImage(
                       activity: activity,
-                      semanticLabel: 'Veure activitat: ${activity.title}',
+                      semanticLabel: context.l10n.assistantViewActivity(
+                        activity.title,
+                      ),
                     ),
                   ),
                 ),

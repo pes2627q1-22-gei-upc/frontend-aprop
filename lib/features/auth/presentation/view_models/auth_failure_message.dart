@@ -1,23 +1,16 @@
 import '../../models/auth_failure.dart';
+import '../../../../core/l10n/locale_controller.dart';
 
-const unexpectedAuthErrorMessage =
-    "No hem pogut completar l'operació. Torna-ho a provar.";
+String get unexpectedAuthErrorMessage => currentL10n.authUnexpectedError;
 
 extension AuthFailureMessage on AuthFailure {
   String get message => switch (this) {
-    AuthFailure.invalidCredentials =>
-      "L'usuari o la contrasenya no són correctes.",
-    AuthFailure.emailAlreadyInUse => 'Ja hi ha un compte amb aquest correu.',
-    AuthFailure.usernameAlreadyInUse =>
-      "Aquest nom d'usuari ja està agafat. Prova'n un altre.",
-    AuthFailure.network =>
-      'No hi ha connexió. Comprova la xarxa i torna-ho a provar.',
-    AuthFailure.tooManyRequests =>
-      'Massa intents seguits. Espera una mica i torna-ho a provar.',
-    AuthFailure.emailRequired =>
-      'De moment només pots entrar amb el correu electrònic.',
-    AuthFailure.popupBlocked =>
-      "El navegador ha bloquejat la finestra de Google. Permet les finestres "
-          'emergents i torna-ho a provar.',
+    AuthFailure.invalidCredentials => currentL10n.authInvalidCredentials,
+    AuthFailure.emailAlreadyInUse => currentL10n.authEmailInUse,
+    AuthFailure.usernameAlreadyInUse => currentL10n.authUsernameInUse,
+    AuthFailure.network => currentL10n.authNetworkError,
+    AuthFailure.tooManyRequests => currentL10n.authTooManyRequests,
+    AuthFailure.emailRequired => currentL10n.authEmailRequired,
+    AuthFailure.popupBlocked => currentL10n.authPopupBlocked,
   };
 }

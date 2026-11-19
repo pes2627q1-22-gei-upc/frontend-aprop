@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/locale_controller.dart';
+
 /// Shared brand asset for the app's light surfaces.
 class APropLogo extends StatelessWidget {
   const APropLogo({
@@ -19,6 +21,6 @@ class APropLogo extends StatelessWidget {
     fit: BoxFit.contain,
     alignment: alignment,
     filterQuality: FilterQuality.high,
-    semanticLabel: 'AProp!',
+    semanticLabel: currentL10n.appTitle,
   );
 }

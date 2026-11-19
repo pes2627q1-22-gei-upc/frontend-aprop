@@ -11,6 +11,7 @@ import '../widgets/activity_badges.dart';
 import '../widgets/location_picker_map.dart';
 import '../view_models/create_activity_view_model.dart';
 import '../widgets/start_date_time_sheet.dart';
+import '../../../../core/l10n/locale_controller.dart';
 
 /// Formulari per publicar una activitat no oficial (Taiga #31).
 // TODO(DP-021): disseny sense mockup aprovat, pendent de validar.
@@ -142,12 +143,12 @@ class _CreateActivityScreenState extends State<CreateActivityScreen> {
 
   String _locationCaption() {
     if (_viewModel.location == null) {
-      return 'Escriu el municipi o toca el mapa per marcar el lloc.';
+      return context.l10n.createLocationEmpty;
     }
     if (_viewModel.isLocationApproximate) {
-      return 'Marcador al centre del municipi: toca el lloc exacte.';
+      return context.l10n.createLocationApproximate;
     }
-    return 'Lloc marcat. Pots tornar a tocar el mapa per canviar-lo.';
+    return context.l10n.createLocationMarked;
   }
 
   Future<void> _publish() async {
@@ -173,7 +174,9 @@ class _CreateActivityScreenState extends State<CreateActivityScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          _viewModel.isEditing ? 'Edita l’activitat' : 'Crea una activitat',
+          _viewModel.isEditing
+              ? context.l10n.createTitleEdit
+              : context.l10n.createTitleNew,
         ),
       ),
       body: SafeArea(
@@ -201,7 +204,7 @@ class _CreateActivityScreenState extends State<CreateActivityScreen> {
                   onChanged: (_) =>
                       _viewModel.onFieldChanged(CreateActivityField.title),
                   decoration: InputDecoration(
-                    labelText: 'Títol',
+                    labelText: context.l10n.createFieldTitle,
                     errorText: _viewModel.fieldError(CreateActivityField.title),
                   ),
                 ),
@@ -216,7 +219,7 @@ class _CreateActivityScreenState extends State<CreateActivityScreen> {
                     CreateActivityField.description,
                   ),
                   decoration: InputDecoration(
-                    labelText: 'Descripció',
+                    labelText: context.l10n.createFieldDescription,
                     alignLabelWithHint: true,
                     errorText: _viewModel.fieldError(
                       CreateActivityField.description,
@@ -224,17 +227,19 @@ class _CreateActivityScreenState extends State<CreateActivityScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                Text('Categories', style: theme.textTheme.titleMedium),
                 Text(
-                  'Tria’n fins a $maxActivityCategories. La primera és la que '
-                  'es veu a les targetes.',
+                  context.l10n.createFieldCategories,
+                  style: theme.textTheme.titleMedium,
+                ),
+                Text(
+                  context.l10n.createCategoriesHint(maxActivityCategories),
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: colors.onSurfaceVariant,
                   ),
                 ),
                 const SizedBox(height: 8),
                 if (_viewModel.isLoadingCategories)
-                  const SizedBox(
+                  SizedBox(
                     height: 48,
                     child: Align(
                       alignment: Alignment.centerLeft,
@@ -242,7 +247,7 @@ class _CreateActivityScreenState extends State<CreateActivityScreen> {
                         dimension: 24,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          semanticsLabel: 'Carregant les categories',
+                          semanticsLabel: context.l10n.createCategoriesLoading,
                         ),
                       ),
                     ),
@@ -260,7 +265,7 @@ class _CreateActivityScreenState extends State<CreateActivityScreen> {
                       ),
                       TextButton(
                         onPressed: _viewModel.loadCategories,
-                        child: const Text('Tornar-ho a provar'),
+                        child: Text(context.l10n.retry),
                       ),
                     ],
                   )
@@ -286,7 +291,7 @@ class _CreateActivityScreenState extends State<CreateActivityScreen> {
                   borderRadius: BorderRadius.circular(14),
                   child: InputDecorator(
                     decoration: InputDecoration(
-                      labelText: 'Data i hora d’inici',
+                      labelText: context.l10n.createFieldStart,
                       prefixIcon: const Icon(Icons.calendar_month_outlined),
                       errorText: _viewModel.fieldError(
                         CreateActivityField.startsAt,
@@ -294,7 +299,7 @@ class _CreateActivityScreenState extends State<CreateActivityScreen> {
                     ),
                     child: Text(
                       startsAt == null
-                          ? 'Tria la data i l’hora'
+                          ? context.l10n.createPickStart
                           : formatActivitySchedule(startsAt, includeDate: true),
                       style: startsAt == null
                           ? TextStyle(color: colors.onSurfaceVariant)
@@ -308,13 +313,13 @@ class _CreateActivityScreenState extends State<CreateActivityScreen> {
                   borderRadius: BorderRadius.circular(14),
                   child: InputDecorator(
                     decoration: InputDecoration(
-                      labelText: 'Data i hora de fi (opcional)',
+                      labelText: context.l10n.createFieldEnd,
                       prefixIcon: const Icon(Icons.event_available_outlined),
                       suffixIcon: endsAt == null
                           ? null
                           : IconButton(
                               onPressed: () => _viewModel.setEndsAt(null),
-                              tooltip: 'Treu la data de fi',
+                              tooltip: context.l10n.createRemoveEnd,
                               icon: const Icon(Icons.close),
                             ),
                       enabled: startsAt != null,
@@ -324,8 +329,8 @@ class _CreateActivityScreenState extends State<CreateActivityScreen> {
                     ),
                     child: Text(
                       switch ((startsAt, endsAt)) {
-                        (null, _) => 'Tria primer l’inici',
-                        (_, null) => 'Sense data de fi',
+                        (null, _) => context.l10n.createPickStartFirst,
+                        (_, null) => context.l10n.createNoEnd,
                         (_, final endsAt?) => formatActivitySchedule(
                           endsAt,
                           includeDate: true,
@@ -343,11 +348,11 @@ class _CreateActivityScreenState extends State<CreateActivityScreen> {
                   textCapitalization: TextCapitalization.sentences,
                   textInputAction: TextInputAction.next,
                   maxLength: maxActivityScheduleNoteLength,
-                  decoration: const InputDecoration(
-                    labelText: 'Més sobre l’horari (opcional)',
-                    prefixIcon: Icon(Icons.schedule),
-                    hintText: 'Per exemple: durada aproximada d’1 hora',
-                    helperText: 'L’hora d’inici i de fi ja s’hi afegeix sola.',
+                  decoration: InputDecoration(
+                    labelText: context.l10n.createScheduleNoteLabel,
+                    prefixIcon: const Icon(Icons.schedule),
+                    hintText: context.l10n.createScheduleNoteHint,
+                    helperText: context.l10n.createScheduleNoteHelper,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -356,9 +361,9 @@ class _CreateActivityScreenState extends State<CreateActivityScreen> {
                   textCapitalization: TextCapitalization.words,
                   textInputAction: TextInputAction.next,
                   onChanged: _viewModel.locateMunicipality,
-                  decoration: const InputDecoration(
-                    labelText: 'Municipi (opcional)',
-                    prefixIcon: Icon(Icons.location_on_outlined),
+                  decoration: InputDecoration(
+                    labelText: context.l10n.createFieldMunicipality,
+                    prefixIcon: const Icon(Icons.location_on_outlined),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -369,10 +374,10 @@ class _CreateActivityScreenState extends State<CreateActivityScreen> {
                   minLines: 1,
                   maxLines: 3,
                   maxLength: maxActivityDirectionsLength,
-                  decoration: const InputDecoration(
-                    labelText: 'Indicacions (opcional)',
-                    prefixIcon: Icon(Icons.signpost_outlined),
-                    hintText: 'Per exemple: entrada pel pati, 2n pis',
+                  decoration: InputDecoration(
+                    labelText: context.l10n.createFieldDirections,
+                    prefixIcon: const Icon(Icons.signpost_outlined),
+                    hintText: context.l10n.createDirectionsHint,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -399,34 +404,36 @@ class _CreateActivityScreenState extends State<CreateActivityScreen> {
                   onChanged: (_) =>
                       _viewModel.onFieldChanged(CreateActivityField.price),
                   decoration: InputDecoration(
-                    labelText: 'Preu (opcional)',
+                    labelText: context.l10n.createFieldPrice,
                     prefixIcon: const Icon(Icons.sell_outlined),
                     suffixText: '€',
                     helperText: _viewModel.hasUnknownPrice
-                        ? 'Si el deixes buit, no es canvia. Escriu 0 si és '
-                              'gratuïta.'
-                        : 'Deixa-ho buit si és gratuïta.',
+                        ? context.l10n.createPriceHelperUnknown
+                        : context.l10n.createPriceHelper,
                     errorText: _viewModel.fieldError(CreateActivityField.price),
                   ),
                 ),
                 const SizedBox(height: 16),
-                Text('Modalitat', style: theme.textTheme.titleMedium),
+                Text(
+                  context.l10n.createModality,
+                  style: theme.textTheme.titleMedium,
+                ),
                 const SizedBox(height: 8),
                 SegmentedButton<ActivityModality>(
                   showSelectedIcon: false,
-                  segments: const [
+                  segments: [
                     ButtonSegment(
                       value: ActivityModality.inPerson,
-                      label: Text('Presencial'),
+                      label: Text(context.l10n.modalityInPerson),
                     ),
                     ButtonSegment(
                       value: ActivityModality.online,
-                      label: Text('En línia'),
+                      label: Text(context.l10n.modalityOnline),
                     ),
                     ButtonSegment(
                       value: ActivityModality.mixed,
-                      label: Text('Les dues'),
-                      tooltip: 'Presencial i en línia',
+                      label: Text(context.l10n.createModalityBoth),
+                      tooltip: context.l10n.modalityMixed,
                     ),
                   ],
                   selected: {_viewModel.modality},
@@ -443,7 +450,7 @@ class _CreateActivityScreenState extends State<CreateActivityScreen> {
                       CreateActivityField.onlineUrl,
                     ),
                     decoration: InputDecoration(
-                      labelText: 'Enllaç per connectar-s’hi (opcional)',
+                      labelText: context.l10n.createOnlineUrlLabel,
                       prefixIcon: const Icon(Icons.link),
                       hintText: 'https://',
                       errorText: _viewModel.fieldError(
@@ -455,8 +462,8 @@ class _CreateActivityScreenState extends State<CreateActivityScreen> {
                 const SizedBox(height: 8),
                 SwitchListTile(
                   contentPadding: EdgeInsets.zero,
-                  title: const Text('Activitat permanent'),
-                  subtitle: const Text('Per exemple, una exposició fixa.'),
+                  title: Text(context.l10n.actPermanent),
+                  subtitle: Text(context.l10n.createPermanentHint),
                   value: _viewModel.isPermanent,
                   onChanged: _viewModel.setPermanent,
                 ),
@@ -477,15 +484,17 @@ class _CreateActivityScreenState extends State<CreateActivityScreen> {
                     minimumSize: const Size.fromHeight(52),
                   ),
                   child: _viewModel.isPublishing
-                      ? const SizedBox.square(
+                      ? SizedBox.square(
                           dimension: 22,
                           child: CircularProgressIndicator(
                             strokeWidth: 2.5,
-                            semanticsLabel: 'Publicant',
+                            semanticsLabel: context.l10n.createPublishing,
                           ),
                         )
                       : Text(
-                          _viewModel.isEditing ? 'Desa els canvis' : 'Publica',
+                          _viewModel.isEditing
+                              ? context.l10n.createSaveChanges
+                              : context.l10n.createPublish,
                         ),
                 ),
               ],
@@ -636,7 +645,7 @@ class _CoverImage extends StatelessWidget {
 
     return Semantics(
       button: true,
-      label: 'Imatge de portada. Canvia la imatge',
+      label: context.l10n.createCoverSemantics,
       excludeSemantics: true,
       child: GestureDetector(
         onTap: () => _change(context),
@@ -660,7 +669,7 @@ class _CoverImage extends StatelessWidget {
                   bottom: 12,
                   child: IconButton.filled(
                     onPressed: () => _change(context),
-                    tooltip: 'Canvia la imatge',
+                    tooltip: context.l10n.createChangeImage,
                     icon: const Icon(Icons.edit_outlined),
                     style: IconButton.styleFrom(
                       backgroundColor: colors.surface,
@@ -697,7 +706,7 @@ class _CoverImageSheet extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              'Imatge de portada',
+              context.l10n.createCoverTitle,
               style: theme.textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.w700,
               ),
@@ -705,12 +714,12 @@ class _CoverImageSheet extends StatelessWidget {
             const SizedBox(height: 16),
             // Preparat per a la tasca #94: de moment no es pot pujar.
             Tooltip(
-              message: 'Pujar fotos estarà disponible properament',
+              message: context.l10n.createUploadSoonTooltip,
               child: OutlinedButton.icon(
                 onPressed: null,
                 icon: const Icon(Icons.add_photo_alternate_outlined),
                 // TODO(DP-019): activar amb la tasca #94.
-                label: const Text('Puja una foto (properament)'),
+                label: Text(context.l10n.createUploadSoon),
                 style: OutlinedButton.styleFrom(
                   minimumSize: const Size.fromHeight(52),
                 ),
@@ -718,7 +727,7 @@ class _CoverImageSheet extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             Text(
-              'O tria una de les nostres',
+              context.l10n.createOrPickOurs,
               style: theme.textTheme.titleMedium?.copyWith(
                 color: colors.onSurfaceVariant,
               ),
@@ -730,7 +739,7 @@ class _CoverImageSheet extends StatelessWidget {
               children: [
                 for (final (index, asset) in activityImageTemplates.indexed)
                   _ImageOption(
-                    label: 'Imatge ${index + 1}',
+                    label: context.l10n.createImageOption(index + 1),
                     isSelected: selected == asset,
                     onTap: () => Navigator.of(context).pop(asset),
                     child: Image.asset(asset, fit: BoxFit.cover),

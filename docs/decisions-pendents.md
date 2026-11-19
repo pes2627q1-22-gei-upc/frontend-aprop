@@ -46,7 +46,7 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Opcions:** A) `flutter_localizations` + `intl` amb ARB (ca/es/en) · B) el mateix però només ca/es · C) ajornar-ho fins a la història «Canviar idioma»
 - **Provisionalment:** UI només en català; cap paquet afegit.
 - **Qui decideix:** equip
-- **Resolució:**
+- **Resolució:** 2026-11-19 · decidit per l'usuari (#28 «Canviar idioma»): opció A, ca/es/en, català per defecte. `flutter_localizations` + `intl` amb ARB (`lib/l10n/app_{ca,es,en}.arb`, plantilla `app_ca.arb`, `l10n.yaml`, `flutter: generate: true`). Els límits que queden són a DP-054 i DP-055.
 
 ### DP-002 · Llibreria de migracions de BD
 - **Estat:** oberta
@@ -227,7 +227,7 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Opcions:** A) una sola categoria (com ara) · B) diverses categories (cal canviar `Activity.category` i la llista, la fitxa i l'agenda).
 - **Provisionalment:** una sola categoria triada d'una llista provisional (Música, Teatre, Exposicions) (`TODO(DP-018)`). L'usuari ho ha decidit així de moment per no canviar el model.
 - **Amb el backend (2026-10-26, Claude Code (Opus 5.5) amb confirmació de l'usuari):** amb backend, el formulari carrega `GET /categories` (`HttpActivityRepository.getCategories`) i només ofereix les de l'Agenda Cultural (`agenda:categories/…`), ordenades pel nom. No ofereix els àmbits (`agenda:ambits/…`) ni les que s'han creat escrivint un nom nou. S'envia l'etiqueta (p. ex. `agenda:categories/teatre`), perquè `POST /events` crea una categoria nova amb qualsevol nom que no existeixi. El nom que es veu surt de l'etiqueta i no porta accents («Conferencies», DP-029). Sense backend, continua la llista provisional. Els filtres d'Inici també carreguen `GET /categories` (DP-038) i filtren al servidor per l'ID de la categoria, així que una activitat creada amb una categoria de l'Agenda Cultural surt en filtrar per aquesta categoria.
-- **Diverses categories (2026-11-17, amb confirmació de l’usuari):** el formulari en deixa triar fins a 3; la primera és la que fa de distintiu a les targetes, que hi afegeixen «+N». La fitxa les mostra totes (DP-055).
+- **Diverses categories (2026-11-17, amb confirmació de l’usuari):** el formulari en deixa triar fins a 3; la primera és la que fa de distintiu a les targetes, que hi afegeixen «+N». La fitxa les mostra totes (DP-059).
 - **Qui decideix:** equip
 - **Resolució:**
 
@@ -364,7 +364,7 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
   - Apuntar-se des d'una fitxa del backend falla, perquè la inscripció de demostració no troba l'activitat (DP-010).
   - `TODO(DP-029)` marca aquestes adaptacions.
 - **Token (2026-10-25):** el backend ja exigeix `Authorization: Bearer` a totes les rutes (`feature/auth` fusionada). `HttpActivityMapRepository` l'envia si `AuthRepository.currentIdToken()` en retorna un; amb els comptes de demostració és nul i no s'envia. En ajuntar-ho amb el login de Firebase (`feature/autenticacio`, ja a `develop`), `FirebaseAuthRepository.currentIdToken()` retorna el token de Firebase de la sessió (`_auth.currentUser?.getIdToken()`), que Firebase renova sol.
-- **Hora (2026-11-17):** la fitxa, les targetes i l’Agenda ja no mostren «00.00 h»: llegeixen l’«Horari» (`schedule`), que el formulari omple amb l’hora triada (DP-055).
+- **Hora (2026-11-17):** la fitxa, les targetes i l’Agenda ja no mostren «00.00 h»: llegeixen l’«Horari» (`schedule`), que el formulari omple amb l’hora triada (DP-059).
 - **Apuntar-se des del mapa (2026-10-25):** la inscripció i l'Agenda buscaven l'activitat només al catàleg de demostració i fallaven amb les del backend. Amb `API_BASE_URL`, `CombinedActivityRepository` busca al backend els ID numèrics i al catàleg els `demo-…`.
 - **Qui decideix:** frontend + backend
 - **Resolució:**
@@ -516,32 +516,32 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Provisionalment:** mantenir-la amagada fins a sortir de `/assistant`. Això conserva la seqüència xat → fitxa → xat → Inici; les fitxes obertes des de les seccions habituals continuen amb barra. `TODO(DP-048)` a `MainShell._openAssistant`. La conversa i les inscripcions mantenen els ViewModels compartits.
 - **Verificació:** recorregut d’inscripció des del xat, fitxa i retorn; restauració de barra amb fletxa, retorn del sistema i dreceres a Agenda/Configuració.
 - **Qui decideix:** equip/PO a la revisió visual de #261. Ocultar la barra al xat ja és el requisit explícit; només queda oberta la fitxa que s’hi obre a sobre.
-### DP-055 · Horari i informació extra de les activitats no oficials
+### DP-059 · Horari i informació extra de les activitats no oficials
 - **Estat:** oberta · 2026-11-17 · Claude Code (Opus 5.5) amb confirmació de l’usuari · Taiga #189
-- **Identificador:** es va obrir com a DP-051; renumerada a DP-055 en integrar develop.
+- **Identificador:** es va obrir com a DP-051; renumerada a DP-055 i després a DP-059 en integrar develop (la DP-054 i la DP-055 són de #28, idiomes).
 - **Context:** formulari «Crea una activitat» / «Edita l’activitat» (`CreateActivityViewModel`), `activity_json_mapper.dart`, targetes, Agenda i fitxa. Backend consultat a `api-aprop@develop` sense modificar-lo: `POST /events` i `PUT /events/{id}` desen `schedule`, `modality`, `permanent` i `activity-url`.
 - **Decisions de l’usuari:**
-  - **Hora:** `start-date` només desa el dia (DP-029), i l’app mostrava sempre «00.00 h». Ara es mostra l’«Horari» (`schedule`); si no n’hi ha i l’hora és 00.00, només surt el dia. En crear o editar, l’horari es genera amb les rodes («19.00 h», o «19.00 – 21.00 h» si acaba el mateix dia) i s’hi pot afegir un text opcional («19.00 h · Durada: 1 h», màxim 120 caràcters).
+  - **Hora:** `start-date` només desa el dia (DP-029), i l’app mostrava sempre «00.00 h». Ara es mostra l’«Horari» (`schedule`); si no n’hi ha i l’hora és 00.00, només surt el dia. En crear o editar, l’horari es genera amb les rodes, en el format d’hora de l’idioma actiu («19.00 h», o «19.00 h – 21.00 h» si acaba el mateix dia) i s’hi pot afegir un text opcional («19.00 h · Durada: 1 h», màxim 120 caràcters).
   - **Categories:** fins a 3 per activitat (DP-018). Les targetes i l’Agenda mostren la primera i «+N»; la fitxa, totes.
   - **Formulari:** «Modalitat» (Presencial / En línia / Les dues), amb un enllaç opcional per connectar-s’hi si no és presencial, i «Activitat permanent».
   - **Només es mostren (no al formulari):** web, enllaços relacionats, entrades, correu i telèfon. Correu i telèfon no es demanen a les activitats no oficials per privadesa.
 - **Dubtes:**
   - La modalitat s’envia amb els valors de l’`enum` de la BD (`Face-to-Face`, `Online`, `Online and Face-to-Face`); no hi ha contracte escrit.
-  - En editar, el text opcional es recupera traient del principi de l’horari l’hora generada. Si l’horari s’ha escrit d’una altra manera, es mostra sencer com a text.
+  - En editar, l’hora d’inici (i de fi) es llegeix del principi de l’horari (accepta «19.00 h», «19:00 h» i «19:00»), perquè el backend la torna a 00.00; el text que la segueix és la nota opcional. Si l’horari s’ha escrit d’una altra manera, es mostra sencer com a nota.
   - Les activitats de l’Agenda Cultural tenen l’horari en text lliure i pot ser llarg: a les targetes se’n mostra la primera línia (màxim 40 caràcters).
-- **Codi:** `TODO(DP-055)` al mapper (valors de `modality`) i a la generació de l’horari.
+- **Codi:** `TODO(DP-059)` al mapper (valors de `modality`) i a la generació de l’horari.
 - **Qui decideix:** frontend + backend (valors de `modality`)
 - **Resolució:**
 
 ## Resoltes
 
-### DP-054 · Enllaços de la fitxa: obrir-los amb `url_launcher`
+### DP-058 · Enllaços de la fitxa: obrir-los amb `url_launcher`
 - **Estat:** resolta · 2026-11-17 · Claude Code (Opus 5.5) · Taiga #189 (feedback de l’edició d’esdeveniments)
-- **Identificador:** es va obrir com a DP-050; renumerada a DP-054 en integrar develop, on la DP-050 ja és la fiabilitat visible (#204).
-- **Context:** `activity_details_screen.dart` (`_ActivityLinkRow`). La fitxa mostra la secció «Enllaços»: l’enllaç per connectar-s’hi, la web de l’activitat (`url`), les entrades (`tickets-url`) i els enllaços relacionats (`related-urls` amb els noms d’`url-names`), sense repetir cap adreça.
+- **Identificador:** es va obrir com a DP-050; renumerada a DP-054 i després a DP-058 en integrar develop (la DP-050 és la fiabilitat visible, #204, i la DP-054 és de #28, idiomes).
+- **Context:** `activity_details_screen.dart` (`_ActivityLinkRow`). La fitxa mostra la secció «Enllaços»: l’enllaç per connectar-s’hi, la web de l’activitat (`url`), «Informació d’accés» (`tickets-url`; no es diu «Entrades» per evitar vocabulari transaccional) i els enllaços relacionats (`related-urls` amb els noms d’`url-names`), sense repetir cap adreça.
 - **Dubte:** per obrir un enllaç al navegador cal el paquet `url_launcher`, i l’equip no hi ha afegit paquets sense una necessitat concreta.
 - **Opcions:** A) afegir `url_launcher` i obrir-los · B) només copiar-los al porta-retalls.
-- **Provisionalment (primer):** B, amb `TODO(DP-054)`.
+- **Provisionalment (primer):** B, amb `TODO(DP-058)`.
 - **Qui decideix:** equip
 - **Resolució:** A, per decisió de l’usuari (2026-11-17). S’afegeix `url_launcher` (`lib/core/links/open_external_link.dart`, injectat a `ActivityDetailsScreen` com a `openLink`). Tocar un enllaç l’obre fora de l’app (navegador o app que li correspon); si no es pot, surt «No s’ha pogut obrir l’enllaç.». El botó del costat el continua copiant. A Android s’hi declaren els `<queries>` d’`http`/`https`. Desapareix el botó desactivat «Consultar informació original»: la font continua a la fitxa com a text.
 
@@ -615,3 +615,17 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Dubte:** (1) cap endpoint no retorna la valoració pròpia (DP-053): l'app no sap el `score` d'una valoració feta en una sessió anterior. (2) `GET /events/{id}` ja exposa `creator-reliability` (#204, DP-050), però no es torna a llegir en editar o eliminar la valoració.
 - **Provisionalment:** (1) «Modifica» i «Elimina» surten sempre que l'activitat consta com a valorada (sessió actual o `409`); si el `score` és desconegut, en editar es mostren les estrelles buides i el valor nou substitueix el del servidor. (2) Després d'editar/eliminar només s'actualitza `RatingViewModel`; quan #204 mostri la fiabilitat a la fitxa/perfil, caldrà tornar-la a llegir (cal verificar si el perfil recarrega la fiabilitat en obrir-lo). `404` → `RatingNotFoundException`: es deixa de mostrar com a valorada. `TODO(DP-052)` a `http_rating_repository.dart`. (3) «Modifica» i «Elimina» també apareixen a les targetes d'Agenda, perquè el bloc de valoració és el mateix que el de la fitxa (decidit: es deixen; el requisit de #61 només esmenta la fitxa).
 - **Qui decideix:** equip (frontend i backend)
+
+### DP-054 · Canviar idioma (#28): contracte `language` al backend i sincronització
+- **Estat:** oberta 2026-11-19
+- **Context:** `ProfileSettingsRepository.updateLanguage`, `HttpProfileSettingsRepository`, `ApiClient.language`, `LocaleController` (`lib/core/l10n/`).
+- **Dubte:** (1) el backend afegeix `language` (`ca`/`es`/`en`) a la configuració d'usuari i al `PATCH /users/me`, i el paràmetre opcional `lang` als endpoints d'`events`; el contracte encara no és al `develop` del backend ni desplegat. (2) Si el valor del servidor ha de guanyar sobre el local en entrar des d'un altre dispositiu.
+- **Provisionalment:** l'idioma s'aplica a l'instant i es desa localment (`shared_preferences`, clau `ui-language`; per defecte `ca`); alhora s'envia `{"language": "<codi>"}` a `PATCH /users/me` (sense llegir-lo a la resposta). Si l'enviament falla, es manté el nou idioma i es mostra un avís. En Demo no s'envia res. No es llegeix `language` del servidor ni se sincronitza en iniciar sessió: el local és la font de veritat. `ApiClient` afegeix `?lang=<idioma actual>` a totes les peticions `events…` (si el servidor no el coneix, l'ignora). `TODO(DP-054)` a `http_profile_settings_repository.dart`.
+- **Qui decideix:** equip (frontend i backend)
+
+### DP-055 · Internacionalització (#28): textos que continuen en català
+- **Estat:** oberta 2026-11-19
+- **Context:** `lib/features/*/data/` (repositoris HTTP i Demo), `models/` (excepcions), ViewModels.
+- **Dubte:** els models i els contractes han de ser independents de Flutter (`AGENTS.md`), i els ViewModels no tenen `BuildContext`.
+- **Provisionalment:** (1) Els ViewModels, validadors i formatadors fan servir `currentL10n` (`LocaleController.active`, global) i els widgets `context.l10n`. Els missatges d'error que un ViewModel ja ha desat (p. ex. «No hem pogut carregar…») no es tornen a traduir fins al pròxim intent; els widgets sí que es redibuixen. El missatge de benvinguda de l'assistent es resol en cada renderitzat i els xips de suggeriments es tornen a demanar en canviar d'idioma. Els errors d'avatar (`AvatarSelectionException`) són un enum que el ViewModel tradueix. (2) Es queden en català: les dades de demostració (`demo_*_repository`: respostes de l'assistent, activitats, avisos), els missatges `ApiException`/`StateError` dels repositoris HTTP que no es mostren tal qual i els errors `{"error": "…"}` del backend. `updateLanguage` fa un `GET users/me` addicional abans del `PATCH` (acceptat, pendent de simplificar quan el backend ho permeti). (3) Els noms de categories i el contingut dels esdeveniments (títol, descripció) no van als ARB; la traducció d'esdeveniments és del backend (`?lang=`). (4) Mockup fig. 19 només mostrava ca/es: s'afegeix l'anglès per decisió de l'usuari.
+- **Qui decideix:** equip

@@ -7,6 +7,7 @@ import '../view_models/enrollment_view_model.dart';
 import '../widgets/activity_card.dart';
 import '../widgets/discovery_message.dart';
 import '../widgets/enrollment_action.dart';
+import '../../../../core/l10n/locale_controller.dart';
 
 /// Section content; MainShell owns its AppBar and the bottom navigation.
 class DiscoverScreen extends StatefulWidget {
@@ -95,7 +96,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                         const SizedBox(width: 12),
                         Expanded(
                           child: Text(
-                            'Cerca activitats',
+                            context.l10n.discoverSearchField,
                             style: theme.textTheme.bodyLarge,
                           ),
                         ),
@@ -105,12 +106,12 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                 ),
               ),
               if (_viewModel.isLoading && feed == null)
-                const SliverToBoxAdapter(
+                SliverToBoxAdapter(
                   child: Padding(
-                    padding: EdgeInsets.all(32),
+                    padding: const EdgeInsets.all(32),
                     child: Center(
                       child: CircularProgressIndicator(
-                        semanticsLabel: 'Carregant propostes',
+                        semanticsLabel: context.l10n.discoverLoading,
                       ),
                     ),
                   ),
@@ -127,40 +128,40 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                 ),
               if (feed != null)
                 if (feed.isEmpty && !feed.hasErrors && !feed.needsInterests)
-                  const SliverToBoxAdapter(
+                  SliverToBoxAdapter(
                     child: DiscoveryMessage(
                       icon: Icons.explore_outlined,
-                      title: 'Encara no hi ha propostes',
-                      description: 'Pots cercar activitats o tornar-ho a provar més tard.',
+                      title: context.l10n.discoverEmptyTitle,
+                      description: context.l10n.discoverEmptyBody,
                     ),
                   )
                 else ...[
                   ..._section(
-                    title: 'Per a tu',
+                    title: context.l10n.discoverForYou,
                     // TODO(DP-024): Show the interests subtitle only when the
                     // repository actually supplies personalized recommendations.
                     subtitle: feed.isPersonalized
-                        ? 'Segons els teus interessos'
+                        ? context.l10n.discoverByInterests
                         : feed.needsInterests || feed.recommendationsUnavailable
                         ? null
-                        : 'Una selecció per començar',
+                        : context.l10n.discoverStarter,
                     activities: feed.recommended,
                     keyPrefix: 'discover-recommended',
-                    emptyText: 'No hi ha recomanacions disponibles.',
+                    emptyText: context.l10n.discoverNoRecommendations,
                     message: feed.needsInterests
-                        ? 'Les recomanacions estaran disponibles quan hagis completat el test d’interessos.'
+                        ? context.l10n.discoverRecommendationsAfterTest
                         : null,
                     error: feed.recommendationsUnavailable
-                        ? 'No hem pogut carregar les recomanacions.'
+                        ? context.l10n.discoverRecommendationsError
                         : null,
                   ),
                   ..._section(
-                    title: 'Destacats',
+                    title: context.l10n.discoverFeatured,
                     activities: feed.featured,
                     keyPrefix: 'discover-featured',
-                    emptyText: 'No hi ha activitats destacades.',
+                    emptyText: context.l10n.discoverNoFeatured,
                     error: feed.featuredUnavailable
-                        ? 'No hem pogut carregar les activitats destacades.'
+                        ? context.l10n.discoverFeaturedError
                         : null,
                   ),
                 ],
@@ -215,7 +216,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
         SliverToBoxAdapter(
           child: DiscoveryMessage(
             icon: Icons.tune,
-            title: 'Coneguem els teus gustos',
+            title: context.l10n.discoverGetToKnowYou,
             description: message,
           ),
         ),

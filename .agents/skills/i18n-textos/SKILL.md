@@ -7,12 +7,11 @@ description: Redacta, revisa, extreu o tradueix textos de la interfície (catal�
 
 ## Estat i decisió pendent
 
-- La UI actual és **només en català**, amb cadenes dins de les pantalles i els ViewModels.
-- NFR: textos centralitzats en fitxers de traducció i idiomes ca/es/en (el mockup de Configuració mostra només
-  ca/es). Història «Canviar idioma» (5 SP).
-- `TODO(confirmar)` amb l'equip abans d'implementar-ho: `flutter_localizations` + `intl` amb fitxers ARB
-  (`lib/l10n/app_ca.arb` com a plantilla, `l10n.yaml`) i si l'anglès entra a l'abast. **No afegeixis els paquets
-  sense aquesta decisió** (regla de `AGENTS.md`). Quan es decideixi, registra-ho amb un ADR.
+- Decidit a #28 (DP-001, opció A): `flutter_localizations` + `intl`, idiomes ca/es/en, català per defecte.
+  Els textos són a `lib/l10n/app_{ca,es,en}.arb` (`app_ca.arb` és la plantilla; `l10n.yaml`; `flutter gen-l10n`).
+- Als widgets: `context.l10n.<clau>`. Sense context (ViewModels, validadors, formatadors): `currentL10n.<clau>`
+  (`lib/core/l10n/locale_controller.dart`). No hi deixis cadenes literals.
+- Els límits que queden (demo, excepcions de models, errors del backend) són a DP-055.
 
 ## Guia d'estil (NFR «Style of the Product»)
 

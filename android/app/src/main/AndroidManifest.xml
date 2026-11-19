@@ -49,7 +49,7 @@
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
         </intent>
-        <!-- Enllaços de les activitats (url_launcher, DP-050). -->
+        <!-- Enllaços de les activitats (url_launcher, DP-058). -->
         <intent>
             <action android:name="android.intent.action.VIEW" />
             <data android:scheme="https" />

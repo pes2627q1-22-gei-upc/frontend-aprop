@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import '../../../activities/models/activity.dart';
 import '../../../activities/repositories/activity_repository.dart';
 import '../../../activities/repositories/enrollment_repository.dart';
+import '../../../../core/l10n/locale_controller.dart';
 
 /// Month calendar of the signed-in user's own plans (confirmed enrollments).
 class AgendaViewModel extends ChangeNotifier {
@@ -148,7 +149,7 @@ class AgendaViewModel extends ChangeNotifier {
     if (_isDisposed || version != _subscriptionVersion) return;
     _resolveRequest++;
     _isLoading = false;
-    _errorMessage = 'No hem pogut carregar la teva agenda. Torna-ho a provar.';
+    _errorMessage = currentL10n.agendaLoadError;
     notifyListeners();
   }
 

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/locale_controller.dart';
+
 class AssistantInputBar extends StatefulWidget {
   const AssistantInputBar({
     super.key,
@@ -64,7 +66,7 @@ class _AssistantInputBarState extends State<AssistantInputBar> {
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             Tooltip(
-              message: 'Entrada per veu disponible properament',
+              message: context.l10n.assistantVoiceSoon,
               child: IconButton(
                 onPressed: null,
                 icon: const Icon(Icons.mic_none_outlined),
@@ -80,9 +82,9 @@ class _AssistantInputBarState extends State<AssistantInputBar> {
                 minLines: 1,
                 maxLines: 3,
                 onSubmitted: (_) => _submit(),
-                decoration: const InputDecoration(
-                  hintText: 'Escriu una consulta…',
-                  contentPadding: EdgeInsets.symmetric(
+                decoration: InputDecoration(
+                  hintText: context.l10n.assistantInputHint,
+                  contentPadding: const EdgeInsets.symmetric(
                     horizontal: 14,
                     vertical: 12,
                   ),
@@ -99,7 +101,7 @@ class _AssistantInputBarState extends State<AssistantInputBar> {
                   borderRadius: BorderRadius.circular(14),
                 ),
               ),
-              child: const Text('Enviar'),
+              child: Text(context.l10n.assistantSend),
             ),
           ],
         ),

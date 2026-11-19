@@ -5,6 +5,7 @@ import '../formatters/activity_date_formatter.dart';
 import 'activity_badges.dart';
 import 'activity_information_row.dart';
 import 'activity_image.dart';
+import '../../../../core/l10n/locale_controller.dart';
 
 class ActivityCard extends StatelessWidget {
   const ActivityCard({
@@ -65,7 +66,7 @@ class ActivityCard extends StatelessWidget {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        'Publicat per ${creator.name}',
+                        context.l10n.actPublishedByName(creator.name),
                         style: theme.textTheme.bodyMedium,
                       ),
                     ),
@@ -90,7 +91,9 @@ class ActivityCard extends StatelessWidget {
                           onTap: onTap,
                           child: ActivityImage(
                             activity: activity,
-                            semanticLabel: 'Veure activitat: ${activity.title}',
+                            semanticLabel: context.l10n.assistantViewActivity(
+                              activity.title,
+                            ),
                           ),
                         ),
                       ),
@@ -143,7 +146,7 @@ class ActivityCard extends StatelessWidget {
               if (activity.source == ActivitySource.culturalAgenda) ...[
                 const SizedBox(height: 12),
                 Text(
-                  'Font: Agenda Cultural · Generalitat',
+                  context.l10n.agendaSourceOfficial,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: colors.onSurfaceVariant,
                   ),

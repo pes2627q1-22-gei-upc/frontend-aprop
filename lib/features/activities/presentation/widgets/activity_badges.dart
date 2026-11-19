@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/locale_controller.dart';
+
 class ActivityCategoryBadge extends StatelessWidget {
   const ActivityCategoryBadge({super.key, required this.category});
 
@@ -59,7 +61,7 @@ class ActivityCategoriesSummary extends StatelessWidget {
         if (more > 0) ...[
           const SizedBox(width: 4),
           Semantics(
-            label: more == 1 ? '1 categoria més' : '$more categories més',
+            label: context.l10n.actMoreCategories(more),
             excludeSemantics: true,
             child: _ActivityBadge(
               label: '+$more',
@@ -78,8 +80,8 @@ class FriendshipBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const _ActivityBadge(
-      label: 'Amiga',
+    return _ActivityBadge(
+      label: context.l10n.actFriendBadge,
       background: Color(0xFFFFF1CC),
       foreground: Color(0xFF785400),
       icon: Icons.people_outline,
