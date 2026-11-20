@@ -9,6 +9,7 @@ import '../features/activities/repositories/activity_repository.dart';
 import '../features/activities/repositories/discovery_repository.dart';
 import '../features/activities/repositories/enrollment_repository.dart';
 import '../features/activities/repositories/user_location_repository.dart';
+import '../features/activity_chat/repositories/activity_chat_repository.dart';
 import '../features/ratings/repositories/rating_repository.dart';
 import '../features/assistant/repositories/assistant_repository.dart';
 import '../features/auth/repositories/auth_repository.dart';
@@ -35,6 +36,7 @@ class APropApp extends StatelessWidget {
     this.interestTestRepository,
     this.activityCategoryRepository,
     this.userLocationRepository,
+    this.activityChatRepository,
     this.localeController,
   });
 
@@ -45,6 +47,9 @@ class APropApp extends StatelessWidget {
 
   /// On és la persona, per al mapa d'Inici. Sense, el mapa no la mostra.
   final UserLocationRepository? userLocationRepository;
+
+  /// Xat de les activitats. Sense, se'n fa servir un de demostració.
+  final ActivityChatRepository? activityChatRepository;
   final ActivityRepository? activityRepository;
   final ActivityMapRepository? activityMapRepository;
   final EnrollmentRepository? enrollmentRepository;
@@ -77,6 +82,7 @@ class APropApp extends StatelessWidget {
         interestTestRepository,
         activityCategoryRepository,
         userLocationRepository,
+        activityChatRepository,
       )),
       authRepository: authRepository,
       activityRepository: activityRepository,
@@ -91,6 +97,7 @@ class APropApp extends StatelessWidget {
       interestTestRepository: interestTestRepository,
       activityCategoryRepository: activityCategoryRepository,
       userLocationRepository: userLocationRepository,
+      activityChatRepository: activityChatRepository,
     );
 
     final controller = localeController;

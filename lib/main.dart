@@ -9,6 +9,7 @@ import 'core/l10n/locale_controller.dart';
 import 'core/network/api_client.dart';
 import 'features/activities/data/geolocator_user_location_repository.dart';
 import 'features/activities/data/http_activity_map_repository.dart';
+import 'features/activity_chat/data/http_activity_chat_repository.dart';
 import 'features/activities/data/http_activity_repository.dart';
 import 'features/activities/data/http_discovery_repository.dart';
 import 'features/activities/data/http_enrollment_repository.dart';
@@ -76,6 +77,7 @@ Future<APropApp> createConfiguredApp() async {
     interestTestRepository: HttpInterestTestRepository(apiClient: apiClient),
     userLocationRepository: userLocationRepository,
     ratingRepository: HttpRatingRepository(apiClient: apiClient),
+    activityChatRepository: HttpActivityChatRepository(apiClient: apiClient),
   );
 }
 

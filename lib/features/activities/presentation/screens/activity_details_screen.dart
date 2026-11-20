@@ -28,10 +28,15 @@ class ActivityDetailsScreen extends StatefulWidget {
     this.ratingBuilder,
     this.canEdit,
     this.onEdit,
+    this.onOpenChat,
     this.openLink = openExternalLink,
   });
 
   final String activityId;
+
+  /// Obre el xat de l'activitat. Només s'hi pot entrar si s'hi està apuntat
+  /// (R11); sense, el botó queda desactivat.
+  final void Function(Activity activity)? onOpenChat;
   final ActivityDetailsRepository repository;
   final EnrollmentViewModel enrollmentViewModel;
 
@@ -154,6 +159,7 @@ class _ActivityDetailsScreenState extends State<ActivityDetailsScreen> {
                     activity: activity,
                     enrollmentViewModel: widget.enrollmentViewModel,
                     ratingBuilder: widget.ratingBuilder,
+                    onOpenChat: widget.onOpenChat,
                     openLink: widget.openLink,
                   ),
                 ),
@@ -175,12 +181,14 @@ class _ActivityDetailsContent extends StatelessWidget {
     required this.activity,
     required this.enrollmentViewModel,
     this.ratingBuilder,
+    this.onOpenChat,
     required this.openLink,
   });
 
   final Activity activity;
   final EnrollmentViewModel enrollmentViewModel;
   final Widget Function(Activity activity)? ratingBuilder;
+  final void Function(Activity activity)? onOpenChat;
   final Future<bool> Function(Uri uri) openLink;
 
   @override
@@ -333,20 +341,33 @@ class _ActivityDetailsContent extends StatelessWidget {
           ),
         ],
         const SizedBox(height: 20),
-        Tooltip(
-          message: context.l10n.actChatSoon,
-          child: OutlinedButton.icon(
-            onPressed: null,
-            icon: const Icon(Icons.chat_bubble_outline),
-            label: Text(context.l10n.actChat),
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          context.l10n.actChatHint,
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: colors.onSurfaceVariant,
-          ),
+        // Només qui s'hi ha apuntat pot fer servir el xat (R11).
+        ListenableBuilder(
+          listenable: enrollmentViewModel,
+          builder: (context, child) {
+            final openChat = onOpenChat;
+            final canChat =
+                openChat != null && enrollmentViewModel.isEnrolled(activity.id);
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                OutlinedButton.icon(
+                  onPressed: canChat ? () => openChat(activity) : null,
+                  icon: const Icon(Icons.chat_bubble_outline),
+                  label: Text(context.l10n.actChat),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  canChat
+                      ? context.l10n.actChatHint
+                      : context.l10n.actChatNeedsEnrollment,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: colors.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            );
+          },
         ),
       ],
     );

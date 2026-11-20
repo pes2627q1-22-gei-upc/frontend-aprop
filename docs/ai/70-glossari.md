@@ -32,7 +32,7 @@
 | Denúncia | Denuncia | `TODO` (report) | `TODO` | Usuari / Esdeveniment |
 | Administrador | Administrador | — | `TODO` (admin) | Web d'administració |
 | Xatbot / Assistent | Chatbot / Asistente | `AssistantRepository`, `AssistantViewModel`, `AssistantMessage`, `AssistantScreen` | `TODO` (gemini_client) | La UI diu «Assistent». Contracte backend pendent (DP-016) |
-| Xat de l'activitat | Chat del evento | `TODO` (eventChat) | `TODO` | Cal inscripció |
+| Xat de l'activitat | Chat del evento | `ActivityChatRepository`, `ActivityChatViewModel`, `ActivityChatScreen`, `ActivityMessage` (`Missatge`) | `message_handler` (`/events/{id}/messages`) | Cal inscripció (R11). Sense temps real (DP-061) |
 | Test d'interessos | Test de intereses | `TODO` (interestTest) | `TODO` | 25 esdeveniments |
 | Interès | Interés | `TODO` | `TODO` | /pes derivat |
 | Experiència (XP) | Experiencia | `ProfileProgress.experience` | `TODO` | Projecció de GuanyExperiència; no s’atorguen XP en aquesta tasca |

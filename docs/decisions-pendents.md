@@ -562,6 +562,27 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Qui decideix:** frontend + backend (valors de `modality`)
 - **Resolució:**
 
+### DP-061 · Xat de l’activitat (#26): sense temps real i disseny sense mockup
+- **Estat:** oberta
+- **Obert per:** 2026-11-20 · Claude Code (Opus 5.5) a petició de l'usuari · Taiga #26 / #148
+- **Identificador:** DP-056 a DP-060 ja són a altres branques sense fusionar; es fa servir DP-061 per no col·lidir-hi.
+- **Context:** `lib/features/activity_chat/` (`ActivityChatScreen`, `ActivityChatViewModel`, `HttpActivityChatRepository`), botó «Xat de l’activitat» d’`ActivityDetailsScreen`, `MainShell._openActivityChat`.
+- **Dubte:**
+  - El backend (`GET`/`POST /events/{id}/messages`, #147) no avisa dels missatges nous: no hi ha websockets ni cap altre mecanisme de temps real.
+  - Els missatges no tenen identificador.
+  - El mockup (fig. 9) només mostra el botó; no hi ha disseny de la pantalla del xat.
+- **Opcions:** A) demanar els missatges nous cada pocs segons mentre el xat és obert (fet) · B) temps real al backend (websockets o SSE), fora de l’abast actual.
+- **Provisionalment:** A.
+  - Cada 5 s es torna a demanar la pàgina més recent i s’hi afegeixen els missatges nous; quan es tanca el xat, s’atura. Si falla, es torna a provar sense avisar.
+  - Un missatge s’identifica per autor i data d’enviament: el backend no deixa enviar-ne dos al mateix instant (409).
+  - Pàgines de 50, de la més recent a la més antiga, amb «Veure missatges anteriors».
+  - Pantalla completa per sobre de la barra inferior, com el xat de l’Assistent (#261). Missatges propis a la dreta (color principal) i dels altres a l’esquerra amb el nom. Hora al peu: només l’hora si és d’avui, «Ahir · …» o la data si és més antic. No es mostra la foto de perfil.
+  - Màxim 1.000 caràcters (com el backend), amb el comptador només a prop del límit. Sense inscripció, el botó de la fitxa queda desactivat i el backend respon 403, que es mostra com a avís.
+  - Sense backend, un xat de demostració en memòria.
+  - Textos i disseny sense mockup. `TODO(DP-061)` al ViewModel.
+- **Qui decideix:** equip + disseny (temps real: backend)
+- **Resolució:**
+
 ## Resoltes
 
 ### DP-058 · Enllaços de la fitxa: obrir-los amb `url_launcher`
