@@ -1,6 +1,6 @@
 import 'package:aprop/app/aprop_app.dart';
+import 'package:aprop/features/activities/presentation/widgets/map_filter_bar.dart';
 import 'package:aprop/features/assistant/models/assistant_message.dart';
-import 'package:aprop/features/activities/presentation/widgets/activities_header.dart';
 import 'package:aprop/features/auth/data/demo_auth_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -46,7 +46,7 @@ void main() {
     expect(tester.getCenter(create).dx, lessThan(tester.getCenter(search).dx));
     expect(find.text('Assistent'), findsOneWidget);
     // El mapa i la llista no hi són.
-    expect(find.byType(ActivitiesHeader), findsNothing);
+    expect(find.byType(MapFilterBar), findsNothing);
   });
 
   testWidgets('Les pestanyes es diuen Inici i Mapa', (tester) async {
@@ -68,8 +68,10 @@ void main() {
     await openMapTab(tester);
 
     expect(navigationBar(tester).selectedIndex, 2);
-    expect(find.byType(ActivitiesHeader), findsOneWidget);
-    expect(find.text('Jazz al parc').hitTestable(), findsOneWidget);
+    // #274: només el mapa, amb la cerca i els filtres a sobre.
+    expect(find.byType(MapFilterBar), findsOneWidget);
+    expect(find.byKey(const ValueKey('map-search')), findsOneWidget);
+    expect(markerIds(tester), contains('demo-jazz'));
     expect(find.text('Assistent'), findsOneWidget);
     expect(find.byTooltip('Crear activitat'), findsNothing);
   });
@@ -82,6 +84,19 @@ void main() {
 
     expect(find.widgetWithText(AppBar, 'Cerca'), findsOneWidget);
     expect(navigationBar(tester).selectedIndex, 0);
+  });
+
+  testWidgets('La barra del mapa obre la cerca a la mateixa pestanya', (
+    tester,
+  ) async {
+    await pumpApp(tester);
+    await openMapTab(tester);
+
+    await tester.tap(find.byKey(const ValueKey('map-search')));
+    await tester.pumpAndSettle();
+
+    expect(find.widgetWithText(AppBar, 'Cerca'), findsOneWidget);
+    expect(navigationBar(tester).selectedIndex, 2);
   });
 
   Future<void> openAssistant(WidgetTester tester) async {
@@ -166,7 +181,7 @@ void main() {
       await openMapTab(tester);
       expect(find.widgetWithText(AppBar, 'Assistent'), findsNothing);
       expect(find.byType(NavigationBar), findsOneWidget);
-      expect(find.byType(ActivitiesHeader), findsOneWidget);
+      expect(find.byType(MapFilterBar), findsOneWidget);
     },
   );
 }

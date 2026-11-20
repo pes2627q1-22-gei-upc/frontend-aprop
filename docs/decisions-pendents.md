@@ -270,6 +270,7 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Provisionalment:** la llista és la vista inicial (si Google Maps falla o no hi ha clau, Inici funciona igual); es mostren totes les activitats carregades; grups amb l'estil de Google (`TODO(DP-022)`).
 - **Targeta del marcador (2026-11-15, Claude Code (Opus 5.5) a petició de l'usuari):** tocar qualsevol lloc de la targeta obre la fitxa (com ja passa a les targetes de llista, l'assistent i l'Agenda), i el botó «Veure activitat» del mockup (fig. 7) es canvia pel d'apuntar-se («M’hi apunto» / «✓ Apuntat · Desapunta’m»). Desviació del mockup per confirmar amb l'equip.
 - **Grups propis (2026-11-16, Claude Code (Opus 5.5) a petició de l'usuari, Taiga #254):** els grups ja no els fa Google (`ClusterManager`), sinó l'app (`activity_map_groups.dart`): els marcadors que amb el zoom actual queden a menys de 64 px s'ajunten, i després s'ajunten també els grups que es tocarien segons la mida real del cercle, perquè mai no quedin l'un sobre l'altre. És igual a la web i al mòbil. El cercle és propi, amb el color principal de l'app, vora clara i el número total exacte (el cercle creix amb les xifres), en lloc dels cercles blaus i vermells de Google. Els grups es refan quan el mapa s'acaba de moure. Les activitats d'un mateix lloc sempre van en grup. El radi de 64 px i el disseny del cercle no surten del mockup (`TODO(DP-022)`).
+- **Només mapa (2026-11-20, decisió de l’usuari, Taiga #274):** la pestanya Mapa ja no té selector Mapa / Llista: s’obre sempre amb el mapa (com la fig. 7 del mockup; la fig. 8 tenia el selector). La llista només surt, en lloc del mapa, si Google Maps no es pot dibuixar (vegeu DP-061), perquè es continuï complint el CA3 de la #21.
 - **Qui decideix:** frontend + backend
 - **Resolució:**
 
@@ -579,6 +580,21 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Qui decideix:** equip (disseny)
 - **Resolució:**
 
+### DP-061 · Mapa a pantalla completa (#274): sense llista ni capçalera
+- **Estat:** oberta · 2026-11-20 · Claude Code (Opus 5.5) amb confirmació de l’usuari · Taiga #274
+- **Context:** `ActivitiesScreen`, `MapFilterBar` (nou; substitueix `ActivitiesHeader`), `google_maps_availability*.dart`, `MainShell`.
+- **Decisions de l’usuari:**
+  - La pestanya Mapa és només el mapa, a tota la pantalla i sense capçalera. A sobre hi suren el camp «Cerca activitats» (obre la cerca, a la mateixa pestanya) i una sola fila de xips que es desplaça: Dates, Categories i, si hi ha filtres, un xip només amb la icona per treure’ls.
+  - Ja no hi ha llista ni selector Mapa / Llista. Per complir el CA3 de la #21 (si Google Maps falla, l’app no queda bloquejada), la llista surt en lloc del mapa quan Google Maps no es pot dibuixar.
+- **Deduït (sense confirmar):**
+  - «No es pot dibuixar» vol dir que a la web no s’ha carregat el script de Google Maps (`google.maps`, p. ex. sense clau). Al mòbil el mapa és del sistema i es considera sempre disponible: sense clau surt gris i no se’n pot detectar l’error.
+  - Els xips mostren la selecció en lloc del nom del filtre («Avui», «Música»), com a Google Maps.
+  - Desapareix el xip desactivat «Catalunya» (filtre d’ubicació encara no fet); el botó «La meva ubicació» ja és al mapa.
+  - L’avís d’activitats sense categoria ja no ofereix «Veure llista».
+  - `ActivitiesViewModel` continua carregant el catàleg per als filtres i per al mapa sense backend, encara que no hi hagi llista.
+- **Qui decideix:** equip (disseny)
+- **Resolució:**
+
 ## Resoltes
 
 ### DP-058 · Enllaços de la fitxa: obrir-los amb `url_launcher`
@@ -633,6 +649,22 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Dubte:** la targeta estàndard (~330 px) deixa veure només una activitat per pantalla al xat.
 - **Provisionalment:** fila compacta (miniatura 72 px, títol, municipi · data i la mateixa acció d'apuntar-se). Mateix estat d'inscripcions, mateix detall en tocar. Sense avatar del creador ni «Font». `TODO(DP-044)`: confirmar amb l'equip/mockup.
 - **Qui decideix:** equip frontend (UX)
+
+### DP-063 · Perfil d’una altra persona (#277): plans fets, privacitat i dades Demo
+- **Estat:** oberta · 2026-11-20 · Claude Code (Opus 5.5) amb confirmació de l’usuari · Taiga #277 (història #36, CA3)
+- **Context:** `PublicProfileScreen`, `HttpPublicProfileRepository` i `DemoPublicProfileRepository`. Backend consultat a `api-aprop@develop` sense modificar-lo: `GET /users/{id}` (amb `is-friend` i `plans-visible`), `GET /users/{id}/created-events` i `GET /users/{userId}/events`. No hi ha mockup del perfil d’una altra persona.
+- **Decisions de l’usuari:** es fa com la fig. 18, sense «Editar perfil» ni engranatge; «Compartir perfil» copia el `username`. S’obre des de «Veure perfil» de la fitxa i des dels avisos d’una persona. La cerca de persones continua desactivada (DP-024) i el botó d’amistat és la #160.
+- **Deduït (sense confirmar):**
+  - «Plans fets» són les inscripcions de `GET /users/{id}/events` que ja han començat, de més nova a més antiga: l’API no confirma l’assistència (com a DP-053).
+  - Els plans només es demanen si el servidor diu `plans-visible: true`; si el camp falta, es tracten com a privats. Si són privats, el text diu «no comparteix els seus plans» quan `is-friend` és cert i «només els poden veure els seus amics» si no.
+  - Sense plans visibles, el perfil s’obre a «Creats»; amb plans, a «Plans fets».
+  - No es mostren la barra d’XP ni les insígnies d’una altra persona; l’API només dona `level` com a identificador (DP-040).
+  - Si l’ID és el de la mateixa persona, «Veure perfil» porta a la pestanya Perfil.
+  - Demo: Laia (amiga, plans visibles), Marc (no amic) i Júlia (amiga, plans ocults) són exemples fixos, sense graf d’amistats.
+- **Risc del backend:** `GET /users/{userId}/events` no comprova la privacitat; qualsevol que cridi l’API veu els plans d’una altra persona. L’app respecta `plans-visible`, però la protecció ha de ser al servidor.
+- **Codi:** `TODO(DP-063)` a `http_public_profile_repository.dart`, `demo_public_profile_repository.dart` i `public_profile_screen.dart`.
+- **Qui decideix:** equip (què és un «pla fet») + backend (privacitat de `/users/{id}/events`)
+- **Resolució:**
 
 ### DP-053 · Valoració d'activitats (#185): requisit d'assistència i contracte de #184
 - **Estat:** oberta 2026-11-17

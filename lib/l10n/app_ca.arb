@@ -17,6 +17,42 @@
   "profileCreateHint": "Pots crear-ne una des d’Inici.",
   "profileLoadError": "No hem pogut carregar el perfil. Torna-ho a provar.",
   "profileCreatedLoadError": "No hem pogut carregar les activitats creades.",
+  "publicProfileLoadError": "No hem pogut carregar el perfil.",
+  "publicProfileNotFound": "Aquest perfil no existeix o ja no està disponible.",
+  "publicProfileTabCreated": "Creats",
+  "publicProfilePlansLoadError": "No hem pogut carregar els plans.",
+  "publicProfilePlansFriendsOnly": "Els plans de {name} només els poden veure els seus amics.",
+  "@publicProfilePlansFriendsOnly": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "publicProfilePlansHidden": "{name} no comparteix els seus plans.",
+  "@publicProfilePlansHidden": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "publicProfileNoPlans": "{name} encara no té plans fets.",
+  "@publicProfileNoPlans": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "publicProfileNoCreated": "{name} encara no ha creat cap activitat.",
+  "@publicProfileNoCreated": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "profileBiographyTooLong": "La biografia és massa llarga. Prova de fer-la més curta.",
   "profileMunicipalityTooLong": "Escriu com a màxim 80 caràcters.",
   "profileNameRequired": "Escriu el teu nom.",
@@ -766,38 +802,10 @@
   "actUpdating": "Actualitzant les activitats",
   "actNoneAvailable": "No hi ha activitats disponibles.",
   "actLoadingZone": "Carregant les activitats de la zona",
-  "actFilterLocation": "Catalunya",
   "actFilterDates": "Dates",
   "actFilterCategories": "Categories",
   "actClearAllFilters": "Netejar tots els filtres",
-  "actViewMap": "Mapa",
-  "actViewList": "Llista",
   "actCreate": "Crear activitat",
-  "actCreateSoon": "Crear activitat disponible properament",
-  "actViewSelected": "Vista {label} seleccionada",
-  "@actViewSelected": {
-    "placeholders": {
-      "label": {
-        "type": "String"
-      }
-    }
-  },
-  "actViewSoon": "Vista {label} disponible properament",
-  "@actViewSoon": {
-    "placeholders": {
-      "label": {
-        "type": "String"
-      }
-    }
-  },
-  "actViewShow": "Mostrar {label}",
-  "@actViewShow": {
-    "placeholders": {
-      "label": {
-        "type": "String"
-      }
-    }
-  },
   "actDetailsTitle": "Activitat",
   "actEdit": "Edita l’activitat",
   "actNotFound": "No hem trobat aquesta activitat.",
@@ -920,8 +928,6 @@
       }
     }
   },
-  "actSeeListHint": "Consulta la llista per veure els resultats per categoria.",
-  "actSeeList": "Veure llista",
   "actClear": "Netejar",
   "actApply": "Aplicar",
   "actLoadedCount": "{count, plural, one{1 activitat carregada} other{{count} activitats carregades}}",

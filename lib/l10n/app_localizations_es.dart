@@ -67,6 +67,40 @@ class AppLocalizationsEs extends AppLocalizations {
       'No hemos podido cargar las actividades creadas.';
 
   @override
+  String get publicProfileLoadError => 'No hemos podido cargar el perfil.';
+
+  @override
+  String get publicProfileNotFound =>
+      'Este perfil no existe o ya no está disponible.';
+
+  @override
+  String get publicProfileTabCreated => 'Creados';
+
+  @override
+  String get publicProfilePlansLoadError =>
+      'No hemos podido cargar los planes.';
+
+  @override
+  String publicProfilePlansFriendsOnly(String name) {
+    return 'Los planes de $name solo los pueden ver sus amigos.';
+  }
+
+  @override
+  String publicProfilePlansHidden(String name) {
+    return '$name no comparte sus planes.';
+  }
+
+  @override
+  String publicProfileNoPlans(String name) {
+    return '$name todavía no tiene planes hechos.';
+  }
+
+  @override
+  String publicProfileNoCreated(String name) {
+    return '$name todavía no ha creado ninguna actividad.';
+  }
+
+  @override
   String get profileBiographyTooLong =>
       'La biografía es demasiado larga. Prueba a acortarla.';
 
@@ -1204,9 +1238,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get actLoadingZone => 'Cargando las actividades de la zona';
 
   @override
-  String get actFilterLocation => 'Cataluña';
-
-  @override
   String get actFilterDates => 'Fechas';
 
   @override
@@ -1216,31 +1247,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get actClearAllFilters => 'Limpiar todos los filtros';
 
   @override
-  String get actViewMap => 'Mapa';
-
-  @override
-  String get actViewList => 'Lista';
-
-  @override
   String get actCreate => 'Crear actividad';
-
-  @override
-  String get actCreateSoon => 'Crear actividad disponible próximamente';
-
-  @override
-  String actViewSelected(String label) {
-    return 'Vista $label seleccionada';
-  }
-
-  @override
-  String actViewSoon(String label) {
-    return 'Vista $label disponible próximamente';
-  }
-
-  @override
-  String actViewShow(String label) {
-    return 'Mostrar $label';
-  }
 
   @override
   String get actDetailsTitle => 'Actividad';
@@ -1492,13 +1499,6 @@ class AppLocalizationsEs extends AppLocalizations {
     );
     return '$_temp0';
   }
-
-  @override
-  String get actSeeListHint =>
-      'Consulta la lista para ver los resultados por categoría.';
-
-  @override
-  String get actSeeList => 'Ver lista';
 
   @override
   String get actClear => 'Limpiar';

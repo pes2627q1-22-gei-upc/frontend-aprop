@@ -36,7 +36,9 @@ import '../../features/profile/presentation/screens/profile_screen.dart';
 import '../../features/profile/presentation/screens/profile_settings_screen.dart';
 import '../../features/profile/presentation/view_models/profile_view_model.dart';
 import '../../features/profile/data/gallery_profile_image_picker.dart';
+import '../../features/profile/presentation/screens/public_profile_screen.dart';
 import '../../features/profile/repositories/profile_repository.dart';
+import '../../features/profile/repositories/public_profile_repository.dart';
 import '../../features/profile/repositories/profile_settings_repository.dart';
 import '../../features/ratings/presentation/view_models/rating_view_model.dart';
 import '../../features/ratings/presentation/widgets/activity_rating.dart';
@@ -57,6 +59,7 @@ class MainShell extends StatefulWidget {
     this.activityMapRepository,
     required this.profileRepository,
     required this.profileSettingsRepository,
+    this.publicProfileRepository,
     this.interestTestRepository,
     this.activityCategoryRepository,
     this.userLocationRepository,
@@ -76,6 +79,9 @@ class MainShell extends StatefulWidget {
   final DiscoveryRepository discoveryRepository;
   final ProfileRepository profileRepository;
   final ProfileSettingsRepository profileSettingsRepository;
+
+  /// Perfils d'altres persones. Si no hi és, «Veure perfil» queda desactivat.
+  final PublicProfileRepository? publicProfileRepository;
 
   /// Si no hi és, «Tornar a fer el test d’interessos» queda pendent.
   final InterestTestRepository? interestTestRepository;
@@ -248,6 +254,7 @@ class _MainShellState extends State<MainShell> {
         ratingBuilder: _buildRating,
         canEdit: _canEdit,
         onEdit: _editActivity,
+        onCreatorSelected: _creatorProfileOpener,
       ),
     );
   }
@@ -368,6 +375,7 @@ class _MainShellState extends State<MainShell> {
                   ratingBuilder: _buildRating,
                   canEdit: _canEdit,
                   onEdit: _editActivity,
+                  onCreatorSelected: _creatorProfileOpener,
                 ),
               );
             },
@@ -385,8 +393,11 @@ class _MainShellState extends State<MainShell> {
   }
 
   void _openDiscoverySearch() {
-    final navigator = _sectionNavigatorKeys[_homeTab].currentState!;
-    if (_selectedIndex != _homeTab || navigator.canPop()) return;
+    // Des de la capçalera d'Inici o de la barra del mapa (#274).
+    final tab = _selectedIndex;
+    if (tab != _homeTab && tab != _mapTab) return;
+    final navigator = _sectionNavigatorKeys[tab].currentState!;
+    if (navigator.canPop()) return;
     navigator.push<void>(
       MaterialPageRoute<void>(
         settings: const RouteSettings(name: '/discover/search'),
@@ -395,7 +406,7 @@ class _MainShellState extends State<MainShell> {
           enrollmentViewModel: _enrollmentViewModel,
           onBack: () => Navigator.of(context).pop(),
           onActivitySelected: (activityId) {
-            if (_selectedIndex != _homeTab ||
+            if (_selectedIndex != tab ||
                 !(ModalRoute.of(context)?.isCurrent ?? false)) {
               return;
             }
@@ -407,6 +418,7 @@ class _MainShellState extends State<MainShell> {
                 ratingBuilder: _buildRating,
                 canEdit: _canEdit,
                 onEdit: _editActivity,
+                onCreatorSelected: _creatorProfileOpener,
               ),
             );
           },
@@ -506,14 +518,59 @@ class _MainShellState extends State<MainShell> {
     );
   }
 
-  // TODO(DP-032): Share a real public link when a profile route is agreed.
   void _shareOwnProfile() {
     final username =
         _profileViewModel.profile?.username ?? widget.user.username;
     if (username == null || username.isEmpty) return;
+    _shareProfile(username);
+  }
+
+  /// «Veure perfil» de la fitxa; nul si no es poden obrir perfils.
+  ValueChanged<String>? get _creatorProfileOpener =>
+      widget.publicProfileRepository == null ? null : _openUserProfile;
+
+  /// Obre el perfil d'una altra persona (#277) al navegador de la secció
+  /// activa, perquè en tornar enrere es torni on era. El propi obre Perfil.
+  void _openUserProfile(String userId) {
+    final repository = widget.publicProfileRepository;
+    if (repository == null) return;
+    if (userId == widget.user.id || userId == widget.user.serverId) {
+      _sectionNavigatorKeys[4].currentState?.popUntil((r) => r.isFirst);
+      _selectDestination(4);
+      return;
+    }
+    _sectionNavigatorKeys[_selectedIndex].currentState!.push<void>(
+      MaterialPageRoute<void>(
+        settings: RouteSettings(name: '/users/${Uri.encodeComponent(userId)}'),
+        builder: (context) => PublicProfileScreen(
+          userId: userId,
+          repository: repository,
+          onSharePressed: _shareProfile,
+          onActivitySelected: (activityId) {
+            if (!(ModalRoute.of(context)?.isCurrent ?? false)) return;
+            Navigator.of(context).push<void>(
+              activityDetailsRoute(
+                activityId: activityId,
+                repository: _activityRepository,
+                enrollmentViewModel: _enrollmentViewModel,
+                ratingBuilder: _buildRating,
+                canEdit: _canEdit,
+                onEdit: _editActivity,
+                onCreatorSelected: _creatorProfileOpener,
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  // TODO(DP-032): Share a real public link when a profile route is agreed.
+  void _shareProfile(String username) {
     var copying = false;
     showDialog<void>(
-      context: _sectionNavigatorKeys[4].currentState!.overlay!.context,
+      context:
+          _sectionNavigatorKeys[_selectedIndex].currentState!.overlay!.context,
       useRootNavigator: false,
       builder: (dialogContext) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
@@ -592,6 +649,7 @@ class _MainShellState extends State<MainShell> {
         ratingBuilder: _buildRating,
         canEdit: _canEdit,
         onEdit: _editActivity,
+        onCreatorSelected: _creatorProfileOpener,
       ),
     );
   }
@@ -720,6 +778,7 @@ class _MainShellState extends State<MainShell> {
                   onActivitySelected: _openActivityDetails,
                   mapViewModel: _activitiesMapViewModel,
                   userLocationViewModel: _userLocationViewModel,
+                  onSearchPressed: _openDiscoverySearch,
                   onMapActivitySelected: (activityId) => _openActivityDetails(
                     activityId,
                     repository: widget.activityMapRepository,
@@ -742,6 +801,11 @@ class _MainShellState extends State<MainShell> {
                     // A late read confirmation must not open another tab's route.
                     if (_selectedIndex == 3) _openActivityDetails(id);
                   },
+                  onPersonSelected: widget.publicProfileRepository == null
+                      ? null
+                      : (id) {
+                          if (_selectedIndex == 3) _openUserProfile(id);
+                        },
                 ),
               ),
             ),

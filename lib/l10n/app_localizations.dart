@@ -202,6 +202,54 @@ abstract class AppLocalizations {
   /// **'No hem pogut carregar les activitats creades.'**
   String get profileCreatedLoadError;
 
+  /// No description provided for @publicProfileLoadError.
+  ///
+  /// In ca, this message translates to:
+  /// **'No hem pogut carregar el perfil.'**
+  String get publicProfileLoadError;
+
+  /// No description provided for @publicProfileNotFound.
+  ///
+  /// In ca, this message translates to:
+  /// **'Aquest perfil no existeix o ja no està disponible.'**
+  String get publicProfileNotFound;
+
+  /// No description provided for @publicProfileTabCreated.
+  ///
+  /// In ca, this message translates to:
+  /// **'Creats'**
+  String get publicProfileTabCreated;
+
+  /// No description provided for @publicProfilePlansLoadError.
+  ///
+  /// In ca, this message translates to:
+  /// **'No hem pogut carregar els plans.'**
+  String get publicProfilePlansLoadError;
+
+  /// No description provided for @publicProfilePlansFriendsOnly.
+  ///
+  /// In ca, this message translates to:
+  /// **'Els plans de {name} només els poden veure els seus amics.'**
+  String publicProfilePlansFriendsOnly(String name);
+
+  /// No description provided for @publicProfilePlansHidden.
+  ///
+  /// In ca, this message translates to:
+  /// **'{name} no comparteix els seus plans.'**
+  String publicProfilePlansHidden(String name);
+
+  /// No description provided for @publicProfileNoPlans.
+  ///
+  /// In ca, this message translates to:
+  /// **'{name} encara no té plans fets.'**
+  String publicProfileNoPlans(String name);
+
+  /// No description provided for @publicProfileNoCreated.
+  ///
+  /// In ca, this message translates to:
+  /// **'{name} encara no ha creat cap activitat.'**
+  String publicProfileNoCreated(String name);
+
   /// No description provided for @profileBiographyTooLong.
   ///
   /// In ca, this message translates to:
@@ -2032,12 +2080,6 @@ abstract class AppLocalizations {
   /// **'Carregant les activitats de la zona'**
   String get actLoadingZone;
 
-  /// No description provided for @actFilterLocation.
-  ///
-  /// In ca, this message translates to:
-  /// **'Catalunya'**
-  String get actFilterLocation;
-
   /// No description provided for @actFilterDates.
   ///
   /// In ca, this message translates to:
@@ -2056,47 +2098,11 @@ abstract class AppLocalizations {
   /// **'Netejar tots els filtres'**
   String get actClearAllFilters;
 
-  /// No description provided for @actViewMap.
-  ///
-  /// In ca, this message translates to:
-  /// **'Mapa'**
-  String get actViewMap;
-
-  /// No description provided for @actViewList.
-  ///
-  /// In ca, this message translates to:
-  /// **'Llista'**
-  String get actViewList;
-
   /// No description provided for @actCreate.
   ///
   /// In ca, this message translates to:
   /// **'Crear activitat'**
   String get actCreate;
-
-  /// No description provided for @actCreateSoon.
-  ///
-  /// In ca, this message translates to:
-  /// **'Crear activitat disponible properament'**
-  String get actCreateSoon;
-
-  /// No description provided for @actViewSelected.
-  ///
-  /// In ca, this message translates to:
-  /// **'Vista {label} seleccionada'**
-  String actViewSelected(String label);
-
-  /// No description provided for @actViewSoon.
-  ///
-  /// In ca, this message translates to:
-  /// **'Vista {label} disponible properament'**
-  String actViewSoon(String label);
-
-  /// No description provided for @actViewShow.
-  ///
-  /// In ca, this message translates to:
-  /// **'Mostrar {label}'**
-  String actViewShow(String label);
 
   /// No description provided for @actDetailsTitle.
   ///
@@ -2493,18 +2499,6 @@ abstract class AppLocalizations {
   /// In ca, this message translates to:
   /// **'{count, plural, one{1 activitat sense categoria informada no s’inclou en aquest filtre.} other{{count} activitats sense categoria informada no s’inclouen en aquest filtre.}}'**
   String actUncategorised(int count);
-
-  /// No description provided for @actSeeListHint.
-  ///
-  /// In ca, this message translates to:
-  /// **'Consulta la llista per veure els resultats per categoria.'**
-  String get actSeeListHint;
-
-  /// No description provided for @actSeeList.
-  ///
-  /// In ca, this message translates to:
-  /// **'Veure llista'**
-  String get actSeeList;
 
   /// No description provided for @actClear.
   ///

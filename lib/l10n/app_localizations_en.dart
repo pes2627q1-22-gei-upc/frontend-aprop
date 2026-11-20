@@ -65,6 +65,39 @@ class AppLocalizationsEn extends AppLocalizations {
       'We couldn’t load the activities you created.';
 
   @override
+  String get publicProfileLoadError => 'We couldn’t load the profile.';
+
+  @override
+  String get publicProfileNotFound =>
+      'This profile doesn’t exist or is no longer available.';
+
+  @override
+  String get publicProfileTabCreated => 'Created';
+
+  @override
+  String get publicProfilePlansLoadError => 'We couldn’t load the plans.';
+
+  @override
+  String publicProfilePlansFriendsOnly(String name) {
+    return 'Only $name’s friends can see their plans.';
+  }
+
+  @override
+  String publicProfilePlansHidden(String name) {
+    return '$name doesn’t share their plans.';
+  }
+
+  @override
+  String publicProfileNoPlans(String name) {
+    return '$name has no past plans yet.';
+  }
+
+  @override
+  String publicProfileNoCreated(String name) {
+    return '$name hasn’t created any activity yet.';
+  }
+
+  @override
   String get profileBiographyTooLong =>
       'Your bio is too long. Try making it shorter.';
 
@@ -1196,9 +1229,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get actLoadingZone => 'Loading activities in this area';
 
   @override
-  String get actFilterLocation => 'Catalonia';
-
-  @override
   String get actFilterDates => 'Dates';
 
   @override
@@ -1208,31 +1238,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get actClearAllFilters => 'Clear all filters';
 
   @override
-  String get actViewMap => 'Map';
-
-  @override
-  String get actViewList => 'List';
-
-  @override
   String get actCreate => 'Create activity';
-
-  @override
-  String get actCreateSoon => 'Creating activities coming soon';
-
-  @override
-  String actViewSelected(String label) {
-    return '$label view selected';
-  }
-
-  @override
-  String actViewSoon(String label) {
-    return '$label view coming soon';
-  }
-
-  @override
-  String actViewShow(String label) {
-    return 'Show $label';
-  }
 
   @override
   String get actDetailsTitle => 'Activity';
@@ -1478,12 +1484,6 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
-
-  @override
-  String get actSeeListHint => 'Check the list to see results by category.';
-
-  @override
-  String get actSeeList => 'See list';
 
   @override
   String get actClear => 'Clear';

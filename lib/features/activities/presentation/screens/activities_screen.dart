@@ -7,13 +7,14 @@ import '../view_models/activities_map_view_model.dart';
 import '../view_models/activities_view_model.dart';
 import '../view_models/enrollment_view_model.dart';
 import '../view_models/user_location_view_model.dart';
-import '../widgets/activities_header.dart';
 import '../widgets/activities_map.dart';
 import '../widgets/activity_card.dart';
 import '../widgets/activity_categories_filter_sheet.dart';
 import '../widgets/activity_date_filter_sheet.dart';
 import '../widgets/activity_filter_feedback.dart';
 import '../widgets/activity_list_pagination.dart';
+import '../widgets/google_maps_availability.dart';
+import '../widgets/map_filter_bar.dart';
 import '../widgets/enrollment_action.dart';
 import '../../../../core/l10n/locale_controller.dart';
 
@@ -23,11 +24,12 @@ class ActivitiesScreen extends StatefulWidget {
     required this.viewModel,
     required this.enrollmentViewModel,
     required this.onActivitySelected,
-    this.onCreatePressed,
+    this.onSearchPressed,
     this.onMapOverlayChanged,
     this.mapViewModel,
     this.onMapActivitySelected,
     this.userLocationViewModel,
+    this.googleMapsAvailable,
     this.now = DateTime.now,
   });
 
@@ -37,7 +39,13 @@ class ActivitiesScreen extends StatefulWidget {
   final ActivitiesViewModel viewModel;
   final EnrollmentViewModel enrollmentViewModel;
   final ValueChanged<String> onActivitySelected;
-  final VoidCallback? onCreatePressed;
+
+  /// Obre la cerca des de la barra de dalt del mapa.
+  final VoidCallback? onSearchPressed;
+
+  /// Si Google Maps es pot dibuixar. Per defecte es comprova (a la web cal
+  /// que s'hagi carregat el script); les proves el poden fixar.
+  final bool? googleMapsAvailable;
   final DateTime Function() now;
 
   /// Si hi és, el mapa carrega les activitats per zona visible (backend) en
@@ -58,12 +66,9 @@ class ActivitiesScreen extends StatefulWidget {
 }
 
 class _ActivitiesScreenState extends State<ActivitiesScreen> {
-  // La llista és la vista inicial: si Google Maps falla (p. ex. sense clau), Inici continua
-  // funcionant (CA3 de la #21).
-  // TODO(DP-022): el mockup (fig. 7) obre Inici amb el mapa.
-  ActivitiesView _view = ActivitiesView.list;
-  late final _listController = ScrollController(onAttach: _onListAttached);
-  bool _resetListOnAttach = false;
+  // Només hi ha mapa (#274). Si Google Maps no es pot dibuixar, en el seu
+  // lloc surt la llista, perquè l'app no quedi bloquejada (CA3 de la #21).
+  final _listController = ScrollController();
   Route<dynamic>? _activeFilterRoute;
 
   @override
@@ -119,26 +124,10 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
 
   void _applyFilters(ActivityFilters filters) {
     if (filters == viewModel.filters) return;
-    _resetListOnAttach = true;
     viewModel.applyFilters(filters);
-    if (_listController.hasClients) {
-      _listController.jumpTo(0);
-      _resetListOnAttach = false;
-    }
-  }
-
-  void _onListAttached(ScrollPosition position) {
-    if (!_resetListOnAttach) return;
-    // The list may have been unmounted while filters changed on the map.
-    // Wait for layout before replacing its stored scroll position.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted &&
-          _resetListOnAttach &&
-          _listController.positions.contains(position)) {
-        position.jumpTo(0);
-        _resetListOnAttach = false;
-      }
-    });
+    // La llista de reserva sempre està muntada (no hi ha selector de vista):
+    // un filtre nou la torna a dalt.
+    if (_listController.hasClients) _listController.jumpTo(0);
   }
 
   void _clearFilters() => _applyFilters(ActivityFilters());
@@ -178,17 +167,6 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
     }
   }
 
-  String? get _filterSummary {
-    final filters = viewModel.filters;
-    if (!filters.isActive) return null;
-    return [
-      if (filters.dates != null)
-        formatFilterDateRange(filters.dates, year: widget.now().year),
-      if (filters.categories.isNotEmpty)
-        formatCategorySelection(filters.categories),
-    ].join(' · ');
-  }
-
   ActivitiesViewModel get viewModel => widget.viewModel;
   EnrollmentViewModel get enrollmentViewModel => widget.enrollmentViewModel;
 
@@ -200,60 +178,133 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
   );
   ValueChanged<String> get onActivitySelected => widget.onActivitySelected;
 
-  void _show(ActivitiesView view) {
-    if (view == _view) return;
-    setState(() => _view = view);
-    // A la llista no hi ha targeta del mapa: el botó torna a baix.
-    if (view == ActivitiesView.list) widget.onMapOverlayChanged?.call(0);
-  }
-
   @override
   Widget build(BuildContext context) {
-    final header = ListenableBuilder(
-      listenable: viewModel,
-      builder: (context, child) => ActivitiesHeader(
-        selectedView: _view,
-        onCreatePressed: widget.onCreatePressed,
-        onMapPressed: () => _show(ActivitiesView.map),
-        onListPressed: () => _show(ActivitiesView.list),
-        onDatesPressed: _openDates,
-        onCategoriesPressed: _openCategories,
-        datesSelected: viewModel.filters.dates != null,
-        categoriesSelected: viewModel.filters.categories.isNotEmpty,
-        filterSummary: _filterSummary,
-        onClearFilters: _clearFilters,
+    final bar = Padding(
+      padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
+      child: ListenableBuilder(
+        listenable: viewModel,
+        builder: (context, child) {
+          final filters = viewModel.filters;
+          return MapFilterBar(
+            onSearchPressed: widget.onSearchPressed,
+            onDatesPressed: _openDates,
+            onCategoriesPressed: _openCategories,
+            onClearFilters: filters.isActive ? _clearFilters : null,
+            datesLabel: filters.dates == null
+                ? null
+                : formatFilterDateRange(filters.dates, year: widget.now().year),
+            categoriesLabel: filters.categories.isEmpty
+                ? null
+                : formatCategorySelection(filters.categories),
+          );
+        },
       ),
     );
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final largeText = MediaQuery.textScalerOf(context).scale(14) > 18;
-        return Column(
-          children: [
-            if (largeText || constraints.maxHeight < 600)
-              ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxHeight: constraints.maxHeight * .6,
+    if (!(widget.googleMapsAvailable ?? isGoogleMapsAvailable)) {
+      return Column(
+        children: [
+          bar,
+          Expanded(child: _buildList()),
+        ],
+      );
+    }
+    final mapViewModel = widget.mapViewModel;
+    return mapViewModel == null
+        ? _buildCatalogueMap(bar)
+        : _buildAreaMap(mapViewModel, bar);
+  }
+
+  /// El mapa a tota la pantalla i, a sobre, la barra de filtres i els avisos.
+  /// Els espais buits de la capa de sobre deixen passar els tocs al mapa.
+  Widget _mapWithOverlay({
+    required Widget map,
+    required Widget bar,
+    bool isLoading = false,
+    String? loadingLabel,
+    String? errorMessage,
+    VoidCallback? onRetry,
+    Widget? feedback,
+  }) {
+    return Stack(
+      children: [
+        Positioned.fill(child: map),
+        Positioned.fill(
+          child: Column(
+            children: [
+              bar,
+              Expanded(
+                child: Stack(
+                  children: [
+                    if (isLoading)
+                      Positioned(
+                        top: 0,
+                        left: 12,
+                        right: 12,
+                        child: LinearProgressIndicator(
+                          semanticsLabel: loadingLabel,
+                        ),
+                      ),
+                    if (errorMessage != null)
+                      Positioned(
+                        top: 8,
+                        left: 12,
+                        right: 12,
+                        child: _MapErrorBanner(
+                          message: errorMessage,
+                          onRetry: onRetry,
+                        ),
+                      ),
+                    ?feedback,
+                  ],
                 ),
-                child: SingleChildScrollView(
-                  key: const ValueKey('activities-header-scroll'),
-                  child: header,
-                ),
-              )
-            else
-              header,
-            Expanded(child: _buildContent()),
-          ],
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Mapa amb les activitats del catàleg (sense mapa del backend).
+  Widget _buildCatalogueMap(Widget bar) {
+    return ListenableBuilder(
+      listenable: viewModel,
+      builder: (context, child) {
+        final activities = viewModel.activities;
+        return _mapWithOverlay(
+          bar: bar,
+          map: ActivitiesMap(
+            activities: activities,
+            onActivitySelected: onActivitySelected,
+            onOverlayHeightChanged: widget.onMapOverlayChanged,
+            interactive: _activeFilterRoute == null,
+            participationActionBuilder: _mapEnrollmentAction,
+            userLocation: widget.userLocationViewModel,
+          ),
+          isLoading: viewModel.isLoading,
+          loadingLabel: context.l10n.actUpdating,
+          errorMessage: viewModel.hasLoaded ? null : viewModel.errorMessage,
+          onRetry: viewModel.load,
+          feedback:
+              viewModel.filters.isActive &&
+                  viewModel.hasLoaded &&
+                  (activities.isEmpty || viewModel.missingCategoryCount > 0)
+              ? Positioned.fill(
+                  child: MapFilterFeedback(
+                    isEmpty: activities.isEmpty,
+                    missingCategories: viewModel.missingCategoryCount,
+                    onClear: _clearFilters,
+                  ),
+                )
+              : null,
         );
       },
     );
   }
 
-  Widget _buildContent() {
-    final mapViewModel = widget.mapViewModel;
-    if (_view == ActivitiesView.map && mapViewModel != null) {
-      return _buildAreaMap(mapViewModel);
-    }
-
+  /// La llista, només si Google Maps no es pot dibuixar.
+  Widget _buildList() {
     return ListenableBuilder(
       listenable: viewModel,
       builder: (context, child) {
@@ -283,35 +334,6 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
         }
 
         final activities = viewModel.activities;
-
-        if (_view == ActivitiesView.map) {
-          return Padding(
-            padding: const EdgeInsets.only(top: 12),
-            child: Stack(
-              children: [
-                Positioned.fill(
-                  child: ActivitiesMap(
-                    activities: activities,
-                    onActivitySelected: onActivitySelected,
-                    onOverlayHeightChanged: widget.onMapOverlayChanged,
-                    interactive: _activeFilterRoute == null,
-                    participationActionBuilder: _mapEnrollmentAction,
-                    userLocation: widget.userLocationViewModel,
-                  ),
-                ),
-                if (viewModel.filters.isActive &&
-                    (activities.isEmpty || viewModel.missingCategoryCount > 0))
-                  Positioned.fill(
-                    child: MapFilterFeedback(
-                      isEmpty: activities.isEmpty,
-                      missingCategories: viewModel.missingCategoryCount,
-                      onClear: _clearFilters,
-                    ),
-                  ),
-              ],
-            ),
-          );
-        }
 
         final contentCount = activities.isEmpty ? 1 : activities.length;
         final showPagination = viewModel.hasMore;
@@ -401,7 +423,7 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
 
   /// Mapa que carrega la zona visible. Mentre carrega o si falla, continua
   /// mostrant les activitats que ja tenia.
-  Widget _buildAreaMap(ActivitiesMapViewModel mapViewModel) {
+  Widget _buildAreaMap(ActivitiesMapViewModel mapViewModel, Widget bar) {
     return ListenableBuilder(
       listenable: Listenable.merge([mapViewModel, viewModel]),
       builder: (context, child) {
@@ -412,57 +434,37 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
           mapViewModel.activities,
         );
 
-        return Padding(
-          padding: const EdgeInsets.only(top: 12),
-          child: Stack(
-            children: [
-              Positioned.fill(
-                child: ActivitiesMap(
-                  activities: activities,
-                  onActivitySelected:
-                      widget.onMapActivitySelected ?? onActivitySelected,
-                  onOverlayHeightChanged: widget.onMapOverlayChanged,
-                  interactive: _activeFilterRoute == null,
-                  onVisibleAreaChanged: mapViewModel.loadArea,
-                  participationActionBuilder: _mapEnrollmentAction,
-                  userLocation: widget.userLocationViewModel,
-                ),
-              ),
-              if (mapViewModel.isLoading)
-                Positioned(
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  child: LinearProgressIndicator(
-                    semanticsLabel: context.l10n.actLoadingZone,
-                  ),
-                ),
-              if (errorMessage != null)
-                Positioned(
-                  top: 12,
-                  left: 12,
-                  right: 12,
-                  child: _MapErrorBanner(
-                    message: errorMessage,
-                    onRetry: mapViewModel.retry,
-                  ),
-                ),
-              if (!mapViewModel.isLoading &&
+        return _mapWithOverlay(
+          bar: bar,
+          map: ActivitiesMap(
+            activities: activities,
+            onActivitySelected:
+                widget.onMapActivitySelected ?? onActivitySelected,
+            onOverlayHeightChanged: widget.onMapOverlayChanged,
+            interactive: _activeFilterRoute == null,
+            onVisibleAreaChanged: mapViewModel.loadArea,
+            participationActionBuilder: _mapEnrollmentAction,
+            userLocation: widget.userLocationViewModel,
+          ),
+          isLoading: mapViewModel.isLoading,
+          loadingLabel: context.l10n.actLoadingZone,
+          errorMessage: errorMessage,
+          onRetry: mapViewModel.retry,
+          feedback:
+              !mapViewModel.isLoading &&
                   errorMessage == null &&
                   ((filters.isActive &&
                           activities.isEmpty &&
                           mapViewModel.hasLoaded) ||
-                      missingCategories > 0))
-                Positioned.fill(
+                      missingCategories > 0)
+              ? Positioned.fill(
                   child: MapFilterFeedback(
                     isEmpty: activities.isEmpty,
                     missingCategories: missingCategories,
                     onClear: _clearFilters,
-                    onShowList: () => _show(ActivitiesView.list),
                   ),
-                ),
-            ],
-          ),
+                )
+              : null,
         );
       },
     );
@@ -470,10 +472,10 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
 }
 
 class _MapErrorBanner extends StatelessWidget {
-  const _MapErrorBanner({required this.message, required this.onRetry});
+  const _MapErrorBanner({required this.message, this.onRetry});
 
   final String message;
-  final VoidCallback onRetry;
+  final VoidCallback? onRetry;
 
   @override
   Widget build(BuildContext context) {

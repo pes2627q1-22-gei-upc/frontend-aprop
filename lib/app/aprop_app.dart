@@ -16,6 +16,7 @@ import '../features/interest_test/repositories/interest_test_repository.dart';
 import '../features/notifications/repositories/notification_repository.dart';
 import '../features/profile/repositories/profile_repository.dart';
 import '../features/profile/repositories/profile_settings_repository.dart';
+import '../features/profile/repositories/public_profile_repository.dart';
 import 'navigation/auth_gate.dart';
 import 'theme/app_theme.dart';
 
@@ -32,6 +33,7 @@ class APropApp extends StatelessWidget {
     this.discoveryRepository,
     this.profileRepository,
     this.profileSettingsRepository,
+    this.publicProfileRepository,
     this.interestTestRepository,
     this.activityCategoryRepository,
     this.userLocationRepository,
@@ -54,6 +56,7 @@ class APropApp extends StatelessWidget {
   final DiscoveryRepository? discoveryRepository;
   final ProfileRepository? profileRepository;
   final ProfileSettingsRepository? profileSettingsRepository;
+  final PublicProfileRepository? publicProfileRepository;
   final InterestTestRepository? interestTestRepository;
 
   /// Categories per crear activitats. Si no hi és, el formulari fa servir la
@@ -74,6 +77,7 @@ class APropApp extends StatelessWidget {
         discoveryRepository,
         profileRepository,
         profileSettingsRepository,
+        publicProfileRepository,
         interestTestRepository,
         activityCategoryRepository,
         userLocationRepository,
@@ -88,6 +92,7 @@ class APropApp extends StatelessWidget {
       discoveryRepository: discoveryRepository,
       profileRepository: profileRepository,
       profileSettingsRepository: profileSettingsRepository,
+      publicProfileRepository: publicProfileRepository,
       interestTestRepository: interestTestRepository,
       activityCategoryRepository: activityCategoryRepository,
       userLocationRepository: userLocationRepository,
