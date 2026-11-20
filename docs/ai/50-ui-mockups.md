@@ -16,7 +16,8 @@
 
 ## Navegació
 
-Barra inferior fixa amb 5 seccions: **Inici · Agenda · Descobreix · Avisos · Perfil**. Cada secció conserva
+Barra inferior fixa amb 5 seccions: **Inici · Agenda · Mapa · Avisos · Perfil**. Des de la #273 (DP-060),
+Inici mostra el contingut de Descobreix i el mapa té la seva pestanya; al mockup, Inici era el mapa. Cada secció conserva
 el seu historial; tornar d'una fitxa o perfil conserva els filtres, la cerca i la posició del desplaçament.
 Accés amb Google; en el primer accés es completa el perfil i es fa el test d'interessos.
 
@@ -38,8 +39,8 @@ mantenen el flux sense barra, pendent de validar aquest detall de disseny a DP-0
 
 | Secció | Pantalla | Comportament clau |
 |---|---|---|
-| Inici | Mapa (fig. 7) | Marcadors diferents per a oficials i d'usuaris, distintiu d'amistat, agrupació numerada. En tocar-ne un surt una targeta («Veure activitat»). Botó «Crear activitat». Filtres de zona, dates i categories amb «Aplicar» (si tanques el panell sense aplicar, es conserva la selecció anterior). Accés a «Assistent». |
-| Inici | Llista (fig. 8) | Selector «Mapa / Llista» sobre el mateix conjunt de resultats, amb els mateixos filtres. |
+| Mapa | Mapa (fig. 7) | Marcadors diferents per a oficials i d'usuaris, distintiu d'amistat, agrupació numerada. En tocar-ne un surt una targeta («Veure activitat»). Botó «Crear activitat». Filtres de zona, dates i categories amb «Aplicar» (si tanques el panell sense aplicar, es conserva la selecció anterior). Accés a «Assistent». |
+| Mapa | Llista (fig. 8) | Selector «Mapa / Llista» sobre el mateix conjunt de resultats, amb els mateixos filtres. |
 | Inici | Fitxa (fig. 9) | Contingut desplaçable amb la franja de participació fixa. Bloc del creador («Veure perfil») o de la font oficial (enllaç a l'original). Després d'apuntar-se: «Apuntat» + «Xat de l'activitat». |
 | Inici | Assistent (fig. 10) | Bombolles diferenciades. Interpreta tipus, municipi i interval de dates i les mostra a la resposta. Resultats amb la targeta estàndard. Enviar desactivat si el camp és buit. Es conserva la conversa en tornar de la fitxa. |
 | Agenda | Calendari (fig. 11) | Mes amb un punt als dies que tenen plans propis, contorn al dia actual i fons verd al seleccionat. La llista del dia s'actualitza a l'instant. Fila «Recordatori» independent («No activat»). Missatge específic si el dia no té plans. |

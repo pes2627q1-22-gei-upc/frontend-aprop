@@ -65,7 +65,7 @@ class MainShell extends StatefulWidget {
 
   final AppUser user;
 
-  /// On és la persona, per al mapa d'Inici. Sense, el mapa no la mostra.
+  /// On és la persona, per al mapa. Sense, el mapa no la mostra.
   final UserLocationRepository? userLocationRepository;
   final Future<void> Function() onSignOut;
   final ActivityRepository activityRepository;
@@ -84,7 +84,7 @@ class MainShell extends StatefulWidget {
   /// llista provisional.
   final ActivityCategoryRepository? activityCategoryRepository;
 
-  /// Si hi és, el mapa d'Inici carrega per zona des d'aquí. Si no, mostra les
+  /// Si hi és, el mapa (pestanya Mapa) carrega per zona des d'aquí. Si no, mostra les
   /// activitats de la llista.
   final ActivityMapRepository? activityMapRepository;
 
@@ -449,7 +449,8 @@ class _MainShellState extends State<MainShell> {
         activity.startsAt.isAfter(DateTime.now());
   }
 
-  /// Obre el formulari amb l'activitat i, si es desa, posa al dia la llista,
+  /// Obre el formulari amb l'activitat i, si es desa, posa al dia Inici, la
+  /// llista,
   /// el mapa i l'Agenda. La fitxa es torna a carregar sola.
   Future<bool> _editActivity(Activity activity) async {
     final navigator = _sectionNavigatorKeys[_selectedIndex].currentState!;
@@ -472,6 +473,8 @@ class _MainShellState extends State<MainShell> {
     _activitiesMapViewModel?.refresh();
     _activitiesViewModel.load();
     _activitiesChanged.value++;
+    // Les recomanacions d'Inici es tornen a carregar amb els canvis.
+    setState(() => _discoverGeneration++);
     return true;
   }
 
@@ -570,12 +573,15 @@ class _MainShellState extends State<MainShell> {
   }
 
   /// Qui crea una activitat hi queda apuntat. Després es veu la seva fitxa en
-  /// lloc del formulari i, en tornar enrere, la llista ja la inclou.
+  /// lloc del formulari i, en tornar enrere, Inici i la pestanya Mapa ja la
+  /// tenen en compte.
   // TODO(DP-017): si el backend apunta la persona creadora en crear
   // l'activitat, aquesta crida a enroll sobrarà.
   void _showCreatedActivity(NavigatorState navigator, Activity activity) {
     _enrollmentViewModel.enroll(activity.id);
-    // Perquè l'activitat nova surti al mapa sense haver-lo de moure.
+    // Perquè l'activitat nova surti al mapa sense haver-lo de moure, i a les
+    // recomanacions d'Inici si hi correspon.
+    setState(() => _discoverGeneration++);
     _activitiesMapViewModel?.refresh();
     _activitiesViewModel.load();
     navigator.pushReplacement<void, void>(

@@ -20,7 +20,6 @@ void main() {
   late EnrollmentViewModel enrollment;
   late List<Activity> activities;
   String? opened;
-  var searchOpened = 0;
 
   setUp(() async {
     repository = FakeDiscoveryRepository();
@@ -34,7 +33,6 @@ void main() {
     enrollment = EnrollmentViewModel(userId: 'user', repository: enrollments);
     await enrollment.load();
     opened = null;
-    searchOpened = 0;
   });
   tearDown(() async {
     enrollment.dispose();
@@ -71,7 +69,6 @@ void main() {
                   userId: 'user',
                   repository: repository,
                   enrollmentViewModel: enrollment,
-                  onSearchPressed: () => searchOpened++,
                   onActivitySelected: (id) => opened = id,
                 ),
               ),
@@ -86,22 +83,19 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets(
-    'Feed exposes search, reusable cards and a truthful fallback subtitle',
-    (tester) async {
-      await pumpScreen(tester);
-      await tester.pumpAndSettle();
-      expect(find.text('Per a tu'), findsOneWidget);
-      expect(find.text('Una selecció per començar'), findsOneWidget);
-      expect(find.text('Segons els teus interessos'), findsNothing);
-      expect(find.text('Assistent'), findsNothing);
-      await tester.tap(find.byKey(const ValueKey('discover-search')));
-      expect(searchOpened, 1);
-      await tester.tap(find.text('Mirades de Catalunya'));
-      expect(opened, 'demo-exhibition');
-      expect(enrollments.enrolledRequests, isEmpty);
-    },
-  );
+  testWidgets('Feed exposes reusable cards and a truthful fallback subtitle', (
+    tester,
+  ) async {
+    await pumpScreen(tester);
+    await tester.pumpAndSettle();
+    expect(find.text('Per a tu'), findsOneWidget);
+    expect(find.text('Una selecció per començar'), findsOneWidget);
+    expect(find.text('Segons els teus interessos'), findsNothing);
+    expect(find.text('Assistent'), findsNothing);
+    await tester.tap(find.text('Mirades de Catalunya'));
+    expect(opened, 'demo-exhibition');
+    expect(enrollments.enrolledRequests, isEmpty);
+  });
 
   testWidgets(
     'Feed enrollment waits for confirmation without opening the detail',
@@ -146,7 +140,6 @@ void main() {
       await tester.tap(find.text('Tornar-ho a provar'));
       await tester.pumpAndSettle();
       expect(find.text('Encara no hi ha propostes'), findsOneWidget);
-      expect(find.byKey(const ValueKey('discover-search')), findsOneWidget);
     },
   );
 

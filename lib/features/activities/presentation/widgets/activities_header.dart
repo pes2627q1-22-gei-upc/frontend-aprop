@@ -111,6 +111,7 @@ class ActivitiesHeader extends StatelessWidget {
                 children: [
                   Expanded(
                     child: _ViewButton(
+                      key: const ValueKey('activities-view-map'),
                       label: context.l10n.actViewMap,
                       icon: Icons.map_outlined,
                       selected: selectedView == ActivitiesView.map,
@@ -119,6 +120,7 @@ class ActivitiesHeader extends StatelessWidget {
                   ),
                   Expanded(
                     child: _ViewButton(
+                      key: const ValueKey('activities-view-list'),
                       label: context.l10n.actViewList,
                       icon: Icons.format_list_bulleted,
                       selected: selectedView == ActivitiesView.list,
@@ -223,6 +225,7 @@ class _FilterButton extends StatelessWidget {
 
 class _ViewButton extends StatelessWidget {
   const _ViewButton({
+    super.key,
     required this.label,
     required this.icon,
     required this.selected,
