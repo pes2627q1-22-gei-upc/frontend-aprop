@@ -617,6 +617,22 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Provisionalment:** fila compacta (miniatura 72 px, títol, municipi · data i la mateixa acció d'apuntar-se). Mateix estat d'inscripcions, mateix detall en tocar. Sense avatar del creador ni «Font». `TODO(DP-044)`: confirmar amb l'equip/mockup.
 - **Qui decideix:** equip frontend (UX)
 
+### DP-063 · Perfil d’una altra persona (#277): plans fets, privacitat i dades Demo
+- **Estat:** oberta · 2026-11-20 · Claude Code (Opus 5.5) amb confirmació de l’usuari · Taiga #277 (història #36, CA3)
+- **Context:** `PublicProfileScreen`, `HttpPublicProfileRepository` i `DemoPublicProfileRepository`. Backend consultat a `api-aprop@develop` sense modificar-lo: `GET /users/{id}` (amb `is-friend` i `plans-visible`), `GET /users/{id}/created-events` i `GET /users/{userId}/events`. No hi ha mockup del perfil d’una altra persona.
+- **Decisions de l’usuari:** es fa com la fig. 18, sense «Editar perfil» ni engranatge; «Compartir perfil» copia el `username`. S’obre des de «Veure perfil» de la fitxa i des dels avisos d’una persona. La cerca de persones continua desactivada (DP-024) i el botó d’amistat és la #160.
+- **Deduït (sense confirmar):**
+  - «Plans fets» són les inscripcions de `GET /users/{id}/events` que ja han començat, de més nova a més antiga: l’API no confirma l’assistència (com a DP-053).
+  - Els plans només es demanen si el servidor diu `plans-visible: true`; si el camp falta, es tracten com a privats. Si són privats, el text diu «no comparteix els seus plans» quan `is-friend` és cert i «només els poden veure els seus amics» si no.
+  - Sense plans visibles, el perfil s’obre a «Creats»; amb plans, a «Plans fets».
+  - No es mostren la barra d’XP ni les insígnies d’una altra persona; l’API només dona `level` com a identificador (DP-040).
+  - Si l’ID és el de la mateixa persona, «Veure perfil» porta a la pestanya Perfil.
+  - Demo: Laia (amiga, plans visibles), Marc (no amic) i Júlia (amiga, plans ocults) són exemples fixos, sense graf d’amistats.
+- **Risc del backend:** `GET /users/{userId}/events` no comprova la privacitat; qualsevol que cridi l’API veu els plans d’una altra persona. L’app respecta `plans-visible`, però la protecció ha de ser al servidor.
+- **Codi:** `TODO(DP-063)` a `http_public_profile_repository.dart`, `demo_public_profile_repository.dart` i `public_profile_screen.dart`.
+- **Qui decideix:** equip (què és un «pla fet») + backend (privacitat de `/users/{id}/events`)
+- **Resolució:**
+
 ### DP-053 · Valoració d'activitats (#185): requisit d'assistència i contracte de #184
 - **Estat:** oberta 2026-11-17
 - **Context:** `features/ratings/`, `_buildRating` a `main_shell.dart`; R8–R10 (`docs/ai/20-model-domini.md`); mockup 13 «Com va anar?».

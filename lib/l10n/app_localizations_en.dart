@@ -65,6 +65,39 @@ class AppLocalizationsEn extends AppLocalizations {
       'We couldn’t load the activities you created.';
 
   @override
+  String get publicProfileLoadError => 'We couldn’t load the profile.';
+
+  @override
+  String get publicProfileNotFound =>
+      'This profile doesn’t exist or is no longer available.';
+
+  @override
+  String get publicProfileTabCreated => 'Created';
+
+  @override
+  String get publicProfilePlansLoadError => 'We couldn’t load the plans.';
+
+  @override
+  String publicProfilePlansFriendsOnly(String name) {
+    return 'Only $name’s friends can see their plans.';
+  }
+
+  @override
+  String publicProfilePlansHidden(String name) {
+    return '$name doesn’t share their plans.';
+  }
+
+  @override
+  String publicProfileNoPlans(String name) {
+    return '$name has no past plans yet.';
+  }
+
+  @override
+  String publicProfileNoCreated(String name) {
+    return '$name hasn’t created any activity yet.';
+  }
+
+  @override
   String get profileBiographyTooLong =>
       'Your bio is too long. Try making it shorter.';
 
