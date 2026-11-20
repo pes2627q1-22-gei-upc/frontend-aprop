@@ -2,6 +2,7 @@ import '../../activities/models/activity.dart';
 import '../../activities/repositories/activity_repository.dart';
 import '../models/public_profile.dart';
 import '../models/user_profile.dart';
+import '../models/user_summary.dart';
 import '../repositories/public_profile_repository.dart';
 
 /// Example people of the demo data: the creator of the catalogue's community
@@ -51,6 +52,16 @@ class DemoPublicProfileRepository implements PublicProfileRepository {
 
   /// Laia's example history, the same one her own profile shows.
   static const _laiaPlans = ['demo-jazz', 'demo-theatre', 'demo-exhibition'];
+
+  static List<UserSummary> get searchablePeople => List.unmodifiable([
+    for (final entry in _people.entries)
+      UserSummary(
+        id: entry.key,
+        username: entry.value.username,
+        displayName: entry.value.name,
+        avatarAsset: entry.value.avatar,
+      ),
+  ]);
 
   String _id(String userId) => _aliases[userId] ?? userId;
 

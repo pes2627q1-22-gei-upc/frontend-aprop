@@ -63,7 +63,7 @@ canviar-lo. Demo implementa el mateix contracte paginat i conserva la cerca loca
   cerca per categories. Confirmar la semàntica desitjada amb l’equip.
 - La consulta SQL pagina abans del join de categories i no explicita ordre al SELECT exterior. Hi ha
   deduplicació per ID al client, però cal garantir ordre estable i agrupació al servidor entre pàgines.
-- «Persones», graf social i perfils aliens continuen fora d’aquesta tasca/Sprint 1 segons l’acord existent.
+- La #96 no incloïa «Persones». La #162 l’integra amb el perfil públic de #277: vegeu [la guia actual](user-search.md). El graf social conserva el seu abast separat.
 - El test d’interessos té endpoints, però la seva pantalla, onboarding i accés per repetir-lo són una
   història separada. Aquí es consulten els gustos guardats, no se n’inventen ni es generen respostes.
 

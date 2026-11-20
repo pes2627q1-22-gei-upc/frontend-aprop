@@ -22,6 +22,7 @@ import 'features/auth/repositories/user_sync_repository.dart';
 import 'features/interest_test/data/http_interest_test_repository.dart';
 import 'features/notifications/data/http_notification_repository.dart';
 import 'features/profile/data/http_profile_repository.dart';
+import 'features/profile/data/http_user_search_repository.dart';
 import 'features/profile/data/http_profile_settings_repository.dart';
 import 'features/profile/data/http_public_profile_repository.dart';
 import 'features/ratings/data/http_rating_repository.dart';
@@ -72,6 +73,7 @@ Future<APropApp> createConfiguredApp() async {
     ),
     profileRepository: HttpProfileRepository(apiClient: apiClient),
     publicProfileRepository: HttpPublicProfileRepository(apiClient: apiClient),
+    userSearchRepository: HttpUserSearchRepository(apiClient: apiClient),
     profileSettingsRepository: HttpProfileSettingsRepository(
       apiClient: apiClient,
     ),
