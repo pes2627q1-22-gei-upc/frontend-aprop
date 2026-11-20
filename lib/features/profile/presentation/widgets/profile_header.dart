@@ -19,6 +19,7 @@ class ProfileHeader extends StatelessWidget {
     this.showAvatarAction = false,
     this.showEdit = true,
     this.primaryAction,
+    this.onFriendsPressed,
   });
 
   final UserProfile profile;
@@ -35,6 +36,9 @@ class ProfileHeader extends StatelessWidget {
   /// example, the friend button on another person's profile).
   final Widget? primaryAction;
 
+  /// Opens the friends list (#54); null leaves the counter as a number.
+  final VoidCallback? onFriendsPressed;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -46,8 +50,11 @@ class ProfileHeader extends StatelessWidget {
           label: context.l10n.statPlans,
         ),
         _Statistic(
+          key: const ValueKey('profile-friends-count'),
           value: '${profile.friendCount}',
           label: context.l10n.statFriends,
+          onTap: onFriendsPressed,
+          tapHint: context.l10n.friendsOpenList,
         ),
         _Statistic(
           value: formatReliability(profile.organizerRating),
@@ -208,48 +215,71 @@ class ProfileHeader extends StatelessWidget {
 
 class _Statistic extends StatelessWidget {
   const _Statistic({
+    super.key,
     required this.value,
     required this.label,
     this.star = false,
     this.semanticsLabel,
+    this.onTap,
+    this.tapHint,
   });
   final String value;
   final String? semanticsLabel;
   final String label;
   final bool star;
+  final VoidCallback? onTap;
+  final String? tapHint;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final content = Semantics(
+      label: semanticsLabel,
+      excludeSemantics: semanticsLabel != null,
+      child: Column(
+        children: [
+          Wrap(
+            alignment: WrapAlignment.center,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              Text(
+                value,
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              if (star)
+                Icon(
+                  Icons.star,
+                  size: 18,
+                  color: theme.extension<ProfilePalette>()!.goldInk,
+                ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(label, textAlign: TextAlign.center),
+        ],
+      ),
+    );
     return Expanded(
-      child: Semantics(
-        label: semanticsLabel,
-        excludeSemantics: semanticsLabel != null,
-        child: Column(
-          children: [
-            Wrap(
-              alignment: WrapAlignment.center,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: [
-                Text(
-                  value,
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
+      child: onTap == null
+          ? content
+          : Semantics(
+              button: true,
+              hint: tapHint,
+              child: InkWell(
+                onTap: onTap,
+                borderRadius: BorderRadius.circular(12),
+                child: ConstrainedBox(
+                  // 48 dp: superfície tàctil mínima.
+                  constraints: const BoxConstraints(minHeight: 48),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: content,
                   ),
                 ),
-                if (star)
-                  Icon(
-                    Icons.star,
-                    size: 18,
-                    color: theme.extension<ProfilePalette>()!.goldInk,
-                  ),
-              ],
+              ),
             ),
-            const SizedBox(height: 4),
-            Text(label, textAlign: TextAlign.center),
-          ],
-        ),
-      ),
     );
   }
 }

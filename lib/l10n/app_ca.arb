@@ -26,6 +26,19 @@
   "friendAlready": "Amics",
   "friendRequestError": "No hem pogut enviar la sol·licitud. Torna-ho a provar.",
   "friendRequestBlocked": "No pots enviar una sol·licitud d’amistat a aquesta persona.",
+  "friendsTitle": "Amics",
+  "friendsLoading": "Carregant els amics",
+  "friendsLoadError": "No hem pogut carregar els amics.",
+  "friendsEmptyOwn": "Encara no tens amics.",
+  "friendsEmptyOther": "{name} encara no té amics.",
+  "@friendsEmptyOther": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "friendsOpenList": "Veure els amics",
   "publicProfilePlansLoadError": "No hem pogut carregar els plans.",
   "publicProfilePlansFriendsOnly": "Els plans de {name} només els poden veure els seus amics.",
   "@publicProfilePlansFriendsOnly": {

@@ -94,4 +94,12 @@ Verificació després de la integració: `flutter pub get --enforce-lockfile` co
 - **Demo:** Laia (amiga, plans visibles), Marc (no amic) i Júlia (amiga, plans ocults).
 - **Botó d’amistat (#160, DP-064):** al lloc d’«Editar perfil». «Afegeix com a amic» envia `POST /users/{id}/friend-requests` i, quan el servidor ho confirma, passa a «Sol·licitud enviada» (desactivat). Si ja sou amics, «Amics» (desactivat). Si el servidor diu que ja hi ha una sol·licitud o que sou amics, el botó hi passa; amb un bloqueig desapareix i surt un avís. Un error deixa tornar-ho a provar.
 
-Prova manual: amb un compte nou, a la pestanya Mapa obrir «Teatre sota les estrelles» → «Veure perfil» (Laia, amb plans); a Avisos → Social, tocar la sol·licitud de Marc (plans privats) i prémer «Afegeix com a amic».
+## Llista d’amics (#54, DP-065)
+
+El comptador «Amics» de la capçalera és un botó (48 dp) que obre `FriendsListScreen`, al perfil propi i al d’altres persones. Cada fila (`UserRow`, la mateixa de la cerca de persones) mostra foto o inicials, nom i `@username`, i obre el perfil d’aquella persona; si ets tu, obre la pestanya Perfil.
+
+- **Dades:** `FriendsRepository.getFriends({userId})` (nul = la persona que ha iniciat sessió). En HTTP, `GET /users/{id|me}/friends` retorna només identificadors i l’adaptador demana el perfil de cada amic, de 4 en 4. Un amic eliminat (404) no surt.
+- **Estat:** `FriendsListViewModel`, creat i alliberat per la pantalla: càrrega, buit («Encara no tens amics» o «{nom} encara no té amics») i error amb reintent.
+- **Navegació:** `MainShell._openFriendsList` l’obre al navegador de la secció activa.
+
+Prova manual: amb un compte nou, a la pestanya Mapa obrir «Teatre sota les estrelles» → «Veure perfil» (Laia, amb plans); a Avisos → Social, tocar la sol·licitud de Marc (plans privats) i prémer «Afegeix com a amic»; al Perfil, tocar «Amics» i després Júlia.

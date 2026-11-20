@@ -652,6 +652,20 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Provisionalment:** fila compacta (miniatura 72 px, títol, municipi · data i la mateixa acció d'apuntar-se). Mateix estat d'inscripcions, mateix detall en tocar. Sense avatar del creador ni «Font». `TODO(DP-044)`: confirmar amb l'equip/mockup.
 - **Qui decideix:** equip frontend (UX)
 
+### DP-065 · Llista d’amics (#54): una petició per amic i sense privacitat
+- **Estat:** oberta · 2026-11-20 · Claude Code (Opus 5.5) amb confirmació de l’usuari · Taiga #197 (història #54)
+- **Context:** `FriendsListScreen`, `FriendsListViewModel`, `HttpFriendsRepository`, `DemoFriendsRepository`, `ProfileHeader` (comptador «Amics»). Backend consultat a `api-aprop@develop` sense modificar-lo: `GET /users/{id}/friends` (i `me`).
+- **Decisions de l’usuari:**
+  - L’API només retorna els identificadors dels amics. L’app demana el perfil de cada amic (`GET /users/{id}`, de 4 en 4, com els Avisos): 1 + N peticions. Si el backend retornés nom, `username` i foto, només canviaria `HttpFriendsRepository`.
+  - El comptador «Amics» obre la llista al perfil propi i també al d’altres persones. Qualsevol la pot veure: el backend no té cap opció de privacitat per als amics.
+- **Deduït (sense confirmar):**
+  - Un amic que ja no existeix (404) no surt a la llista; qualsevol altre error fa fallar la càrrega, amb reintent.
+  - A la pròpia llista no hi surts tu; a la d’una altra persona sí, si en sou amics, i en tocar-te s’obre la pestanya Perfil.
+  - Demo: els amics del compte són els exemples marcats com a amics (Laia i Júlia), i Laia i Júlia són amigues entre elles. El comptador de Laia (14) no coincideix amb la llista.
+- **Codi:** `TODO(DP-065)` a `http_friends_repository.dart` i `demo_public_profile_repository.dart`.
+- **Qui decideix:** backend (dades dels amics a `/users/{id}/friends`) + equip (privacitat de la llista)
+- **Resolució:**
+
 ### DP-064 · Botó d’amistat al perfil d’una altra persona (#160)
 - **Estat:** oberta · 2026-11-20 · Claude Code (Opus 5.5) amb confirmació de l’usuari · Taiga #160 (història #33)
 - **Context:** `PublicProfileScreen`, `PublicProfileViewModel`, `HttpPublicProfileRepository.sendFriendRequest`. Backend consultat a `api-aprop@develop` sense modificar-lo: `POST /users/{id}/friend-requests`.

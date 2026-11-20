@@ -39,6 +39,8 @@ import '../../features/profile/data/gallery_profile_image_picker.dart';
 import '../../features/profile/presentation/screens/public_profile_screen.dart';
 import '../../features/profile/repositories/profile_repository.dart';
 import '../../features/profile/repositories/public_profile_repository.dart';
+import '../../features/profile/presentation/screens/friends_list_screen.dart';
+import '../../features/profile/repositories/friends_repository.dart';
 import '../../features/profile/repositories/user_search_repository.dart';
 import '../../features/profile/repositories/profile_settings_repository.dart';
 import '../../features/ratings/presentation/view_models/rating_view_model.dart';
@@ -62,6 +64,7 @@ class MainShell extends StatefulWidget {
     required this.profileSettingsRepository,
     this.publicProfileRepository,
     this.userSearchRepository,
+    this.friendsRepository,
     this.interestTestRepository,
     this.activityCategoryRepository,
     this.userLocationRepository,
@@ -85,6 +88,10 @@ class MainShell extends StatefulWidget {
   /// Perfils d'altres persones. Si no hi és, «Veure perfil» queda desactivat.
   final PublicProfileRepository? publicProfileRepository;
   final UserSearchRepository? userSearchRepository;
+
+  /// Llistes d'amics (#54). Si no hi és, el comptador «Amics» és només un
+  /// número.
+  final FriendsRepository? friendsRepository;
 
   /// Si no hi és, «Tornar a fer el test d’interessos» queda pendent.
   final InterestTestRepository? interestTestRepository;
@@ -559,6 +566,9 @@ class _MainShellState extends State<MainShell> {
           userId: userId,
           repository: repository,
           onSharePressed: _shareProfile,
+          onFriendsPressed: widget.friendsRepository == null
+              ? null
+              : (id, name) => _openFriendsList(userId: id, ownerName: name),
           onActivitySelected: (activityId) {
             if (!(ModalRoute.of(context)?.isCurrent ?? false)) return;
             Navigator.of(context).push<void>(
@@ -573,6 +583,33 @@ class _MainShellState extends State<MainShell> {
               ),
             );
           },
+        ),
+      ),
+    );
+  }
+
+  /// Obre la llista d'amics (#54) al navegador de la secció activa: la
+  /// pròpia si [userId] és nul. Cada fila obre el perfil d'aquella persona.
+  void _openFriendsList({String? userId, String? ownerName}) {
+    final repository = widget.friendsRepository;
+    if (repository == null) return;
+    _sectionNavigatorKeys[_selectedIndex].currentState!.push<void>(
+      MaterialPageRoute<void>(
+        settings: RouteSettings(
+          name: userId == null
+              ? '/profile/friends'
+              : '/users/${Uri.encodeComponent(userId)}/friends',
+        ),
+        builder: (context) => FriendsListScreen(
+          repository: repository,
+          userId: userId,
+          ownerName: ownerName,
+          // A la pròpia llista no hi surt qui mira; a la d'una altra persona
+          // sí, si en sou amics (i obre la pestanya Perfil).
+          hiddenIds: userId == null
+              ? {widget.user.id, ?widget.user.serverId}
+              : const {},
+          onUserSelected: _openUserProfile,
         ),
       ),
     );
@@ -831,6 +868,16 @@ class _MainShellState extends State<MainShell> {
                     ? _shareOwnProfile
                     : null,
                 onActivitySelected: _openActivityDetails,
+                onFriendsPressed: widget.friendsRepository == null
+                    ? null
+                    : () {
+                        // Only from the root of Perfil, once per tap.
+                        final navigator =
+                            _sectionNavigatorKeys[4].currentState!;
+                        if (_selectedIndex == 4 && !navigator.canPop()) {
+                          _openFriendsList();
+                        }
+                      },
               ),
             ),
           ],
