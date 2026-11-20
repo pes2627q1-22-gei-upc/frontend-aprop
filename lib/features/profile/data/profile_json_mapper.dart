@@ -1,7 +1,14 @@
 import '../../auth/models/app_user.dart';
 import '../models/user_profile.dart';
 
-UserProfile profileFromJson(Map<String, Object?> json, AppUser account) {
+UserProfile profileFromJson(Map<String, Object?> json, AppUser account) =>
+    userProfileFromJson(json, userId: account.id);
+
+/// Same mapping for any person; [userId] is the ID the profile is kept under.
+UserProfile userProfileFromJson(
+  Map<String, Object?> json, {
+  required String userId,
+}) {
   String text(String field) {
     if (json[field] case final String value) return value.trim();
     throw FormatException('Expected profile $field');
@@ -37,7 +44,7 @@ UserProfile profileFromJson(Map<String, Object?> json, AppUser account) {
     throw const FormatException('Invalid organizer rating');
   }
   return UserProfile(
-    userId: account.id,
+    userId: userId,
     displayName: rawName.isEmpty ? username : rawName,
     username: username,
     biography: text('biography'),

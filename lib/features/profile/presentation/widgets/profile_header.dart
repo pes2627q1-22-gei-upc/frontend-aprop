@@ -17,6 +17,7 @@ class ProfileHeader extends StatelessWidget {
     this.onChangeAvatar,
     this.isChangingAvatar = false,
     this.showAvatarAction = false,
+    this.showEdit = true,
   });
 
   final UserProfile profile;
@@ -25,6 +26,9 @@ class ProfileHeader extends StatelessWidget {
   final VoidCallback? onChangeAvatar;
   final bool isChangingAvatar;
   final bool showAvatarAction;
+
+  /// False on another person's profile: only «Compartir perfil» is shown.
+  final bool showEdit;
 
   @override
   Widget build(BuildContext context) {
@@ -149,22 +153,24 @@ class ProfileHeader extends StatelessWidget {
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(
-              child: FilledButton(
-                onPressed: onEdit,
-                style: FilledButton.styleFrom(
-                  minimumSize: const Size(0, 48),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
+            if (showEdit) ...[
+              Expanded(
+                child: FilledButton(
+                  onPressed: onEdit,
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size(0, 48),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                  child: Text(
+                    context.l10n.editProfileTitle,
+                    textAlign: TextAlign.center,
                   ),
                 ),
-                child: Text(
-                  context.l10n.editProfileTitle,
-                  textAlign: TextAlign.center,
-                ),
               ),
-            ),
-            const SizedBox(width: 8),
+              const SizedBox(width: 8),
+            ],
             Expanded(
               child: Tooltip(
                 message: onShare == null

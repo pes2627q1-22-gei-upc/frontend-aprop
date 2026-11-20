@@ -1,4 +1,7 @@
-# Mapa d'Inici — Taiga #21 «Veure un mapa amb els esdeveniments»
+# Mapa — Taiga #21 «Veure un mapa amb els esdeveniments»
+
+> Des de la #273 (DP-060) el mapa té la seva pestanya, «Mapa», i Inici mostra Descobreix. On aquest
+> document diu «Inici», s'ha d'entendre la pestanya Mapa.
 
 ## Comportament
 

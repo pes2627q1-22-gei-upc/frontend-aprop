@@ -202,6 +202,54 @@ abstract class AppLocalizations {
   /// **'No hem pogut carregar les activitats creades.'**
   String get profileCreatedLoadError;
 
+  /// No description provided for @publicProfileLoadError.
+  ///
+  /// In ca, this message translates to:
+  /// **'No hem pogut carregar el perfil.'**
+  String get publicProfileLoadError;
+
+  /// No description provided for @publicProfileNotFound.
+  ///
+  /// In ca, this message translates to:
+  /// **'Aquest perfil no existeix o ja no està disponible.'**
+  String get publicProfileNotFound;
+
+  /// No description provided for @publicProfileTabCreated.
+  ///
+  /// In ca, this message translates to:
+  /// **'Creats'**
+  String get publicProfileTabCreated;
+
+  /// No description provided for @publicProfilePlansLoadError.
+  ///
+  /// In ca, this message translates to:
+  /// **'No hem pogut carregar els plans.'**
+  String get publicProfilePlansLoadError;
+
+  /// No description provided for @publicProfilePlansFriendsOnly.
+  ///
+  /// In ca, this message translates to:
+  /// **'Els plans de {name} només els poden veure els seus amics.'**
+  String publicProfilePlansFriendsOnly(String name);
+
+  /// No description provided for @publicProfilePlansHidden.
+  ///
+  /// In ca, this message translates to:
+  /// **'{name} no comparteix els seus plans.'**
+  String publicProfilePlansHidden(String name);
+
+  /// No description provided for @publicProfileNoPlans.
+  ///
+  /// In ca, this message translates to:
+  /// **'{name} encara no té plans fets.'**
+  String publicProfileNoPlans(String name);
+
+  /// No description provided for @publicProfileNoCreated.
+  ///
+  /// In ca, this message translates to:
+  /// **'{name} encara no ha creat cap activitat.'**
+  String publicProfileNoCreated(String name);
+
   /// No description provided for @profileBiographyTooLong.
   ///
   /// In ca, this message translates to:

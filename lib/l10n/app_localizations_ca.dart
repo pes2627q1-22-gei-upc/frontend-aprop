@@ -67,6 +67,39 @@ class AppLocalizationsCa extends AppLocalizations {
       'No hem pogut carregar les activitats creades.';
 
   @override
+  String get publicProfileLoadError => 'No hem pogut carregar el perfil.';
+
+  @override
+  String get publicProfileNotFound =>
+      'Aquest perfil no existeix o ja no està disponible.';
+
+  @override
+  String get publicProfileTabCreated => 'Creats';
+
+  @override
+  String get publicProfilePlansLoadError => 'No hem pogut carregar els plans.';
+
+  @override
+  String publicProfilePlansFriendsOnly(String name) {
+    return 'Els plans de $name només els poden veure els seus amics.';
+  }
+
+  @override
+  String publicProfilePlansHidden(String name) {
+    return '$name no comparteix els seus plans.';
+  }
+
+  @override
+  String publicProfileNoPlans(String name) {
+    return '$name encara no té plans fets.';
+  }
+
+  @override
+  String publicProfileNoCreated(String name) {
+    return '$name encara no ha creat cap activitat.';
+  }
+
+  @override
   String get profileBiographyTooLong =>
       'La biografia és massa llarga. Prova de fer-la més curta.';
 

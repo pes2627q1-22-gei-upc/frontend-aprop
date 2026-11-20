@@ -13,6 +13,7 @@ Route<void> activityDetailsRoute({
   Widget Function(Activity activity)? ratingBuilder,
   bool Function(Activity activity)? canEdit,
   Future<bool> Function(Activity activity)? onEdit,
+  ValueChanged<String>? onCreatorSelected,
 }) {
   return MaterialPageRoute<void>(
     settings: RouteSettings(
@@ -25,6 +26,7 @@ Route<void> activityDetailsRoute({
       ratingBuilder: ratingBuilder,
       canEdit: canEdit,
       onEdit: onEdit,
+      onCreatorSelected: onCreatorSelected,
     ),
   );
 }

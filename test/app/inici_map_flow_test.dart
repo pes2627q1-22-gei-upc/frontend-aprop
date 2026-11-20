@@ -20,9 +20,6 @@ void main() {
     await tester.pumpAndSettle();
     await openMapTab(tester);
 
-    // El primer «Mapa» és el de la capçalera (el segon, el de la pestanya).
-    await tester.tap(find.text('Mapa').first);
-    await tester.pumpAndSettle();
     final button = find.byType(FloatingActionButton);
     final restingTop = tester.getTopLeft(button).dy;
 
