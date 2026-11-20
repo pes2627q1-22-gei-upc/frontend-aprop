@@ -220,6 +220,42 @@ abstract class AppLocalizations {
   /// **'Creats'**
   String get publicProfileTabCreated;
 
+  /// No description provided for @friendAdd.
+  ///
+  /// In ca, this message translates to:
+  /// **'Afegeix com a amic'**
+  String get friendAdd;
+
+  /// No description provided for @friendSending.
+  ///
+  /// In ca, this message translates to:
+  /// **'Enviant…'**
+  String get friendSending;
+
+  /// No description provided for @friendRequestSent.
+  ///
+  /// In ca, this message translates to:
+  /// **'Sol·licitud enviada'**
+  String get friendRequestSent;
+
+  /// No description provided for @friendAlready.
+  ///
+  /// In ca, this message translates to:
+  /// **'Amics'**
+  String get friendAlready;
+
+  /// No description provided for @friendRequestError.
+  ///
+  /// In ca, this message translates to:
+  /// **'No hem pogut enviar la sol·licitud. Torna-ho a provar.'**
+  String get friendRequestError;
+
+  /// No description provided for @friendRequestBlocked.
+  ///
+  /// In ca, this message translates to:
+  /// **'No pots enviar una sol·licitud d’amistat a aquesta persona.'**
+  String get friendRequestBlocked;
+
   /// No description provided for @publicProfilePlansLoadError.
   ///
   /// In ca, this message translates to:

@@ -115,6 +115,13 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
                       profile: person.profile,
                       showEdit: false,
                       onEdit: null,
+                      primaryAction: switch (model.friendship) {
+                        null || FriendshipAction.unavailable => null,
+                        final action => _FriendButton(
+                          action: action,
+                          onPressed: model.sendFriendRequest,
+                        ),
+                      },
                       onShare: switch ((username, widget.onSharePressed)) {
                         (final name?, final share?) when name.isNotEmpty =>
                           () => share(name),
@@ -123,6 +130,27 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
                     ),
                   ),
                 ),
+                if (model.friendRequestError ??
+                        (model.friendship == FriendshipAction.unavailable
+                            ? context.l10n.friendRequestBlocked
+                            : null)
+                    case final message?)
+                  SliverPadding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                    sliver: SliverToBoxAdapter(
+                      child: Semantics(
+                        liveRegion: true,
+                        child: Text(
+                          message,
+                          style: model.friendRequestError == null
+                              ? null
+                              : TextStyle(
+                                  color: Theme.of(context).colorScheme.error,
+                                ),
+                        ),
+                      ),
+                    ),
+                  ),
                 SliverToBoxAdapter(
                   child: DefaultTabController(
                     // A new key applies the initial tab once the profile says
@@ -208,6 +236,49 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
           onActivitySelected: widget.onActivitySelected,
         ),
     ];
+  }
+}
+
+/// «Afegeix com a amic» and the states that follow it (#160).
+class _FriendButton extends StatelessWidget {
+  const _FriendButton({required this.action, required this.onPressed});
+
+  final FriendshipAction action;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final (icon, label) = switch (action) {
+      FriendshipAction.add => (
+        Icons.person_add_alt_1_outlined,
+        context.l10n.friendAdd,
+      ),
+      FriendshipAction.sending => (null, context.l10n.friendSending),
+      FriendshipAction.requestSent => (
+        Icons.schedule_send_outlined,
+        context.l10n.friendRequestSent,
+      ),
+      FriendshipAction.friends || FriendshipAction.unavailable => (
+        Icons.people_alt_outlined,
+        context.l10n.friendAlready,
+      ),
+    };
+    return FilledButton.icon(
+      key: const ValueKey('public-profile-friend'),
+      onPressed: action == FriendshipAction.add ? onPressed : null,
+      style: FilledButton.styleFrom(
+        minimumSize: const Size(0, 48),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      ),
+      icon: icon == null
+          ? const SizedBox(
+              width: 18,
+              height: 18,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          : Icon(icon),
+      label: Text(label, textAlign: TextAlign.center),
+    );
   }
 }
 

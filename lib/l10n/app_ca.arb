@@ -20,6 +20,12 @@
   "publicProfileLoadError": "No hem pogut carregar el perfil.",
   "publicProfileNotFound": "Aquest perfil no existeix o ja no està disponible.",
   "publicProfileTabCreated": "Creats",
+  "friendAdd": "Afegeix com a amic",
+  "friendSending": "Enviant…",
+  "friendRequestSent": "Sol·licitud enviada",
+  "friendAlready": "Amics",
+  "friendRequestError": "No hem pogut enviar la sol·licitud. Torna-ho a provar.",
+  "friendRequestBlocked": "No pots enviar una sol·licitud d’amistat a aquesta persona.",
   "publicProfilePlansLoadError": "No hem pogut carregar els plans.",
   "publicProfilePlansFriendsOnly": "Els plans de {name} només els poden veure els seus amics.",
   "@publicProfilePlansFriendsOnly": {

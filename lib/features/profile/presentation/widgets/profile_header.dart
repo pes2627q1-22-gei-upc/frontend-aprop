@@ -18,6 +18,7 @@ class ProfileHeader extends StatelessWidget {
     this.isChangingAvatar = false,
     this.showAvatarAction = false,
     this.showEdit = true,
+    this.primaryAction,
   });
 
   final UserProfile profile;
@@ -29,6 +30,10 @@ class ProfileHeader extends StatelessWidget {
 
   /// False on another person's profile: only «Compartir perfil» is shown.
   final bool showEdit;
+
+  /// Takes the place of «Editar perfil» when [showEdit] is false (for
+  /// example, the friend button on another person's profile).
+  final Widget? primaryAction;
 
   @override
   Widget build(BuildContext context) {
@@ -169,6 +174,9 @@ class ProfileHeader extends StatelessWidget {
                   ),
                 ),
               ),
+              const SizedBox(width: 8),
+            ] else if (primaryAction case final action?) ...[
+              Expanded(child: action),
               const SizedBox(width: 8),
             ],
             Expanded(

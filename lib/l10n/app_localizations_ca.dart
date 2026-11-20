@@ -77,6 +77,26 @@ class AppLocalizationsCa extends AppLocalizations {
   String get publicProfileTabCreated => 'Creats';
 
   @override
+  String get friendAdd => 'Afegeix com a amic';
+
+  @override
+  String get friendSending => 'Enviant…';
+
+  @override
+  String get friendRequestSent => 'Sol·licitud enviada';
+
+  @override
+  String get friendAlready => 'Amics';
+
+  @override
+  String get friendRequestError =>
+      'No hem pogut enviar la sol·licitud. Torna-ho a provar.';
+
+  @override
+  String get friendRequestBlocked =>
+      'No pots enviar una sol·licitud d’amistat a aquesta persona.';
+
+  @override
   String get publicProfilePlansLoadError => 'No hem pogut carregar els plans.';
 
   @override

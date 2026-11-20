@@ -78,6 +78,31 @@ class HttpPublicProfileRepository implements PublicProfileRepository {
     return List.unmodifiable(past);
   }
 
+  @override
+  Future<FriendRequestResult> sendFriendRequest(String userId) async {
+    try {
+      await apiClient.postJson(
+        'users/${Uri.encodeComponent(userId)}/friend-requests',
+        headers: await apiClient.buildHeaders(),
+      );
+      return FriendRequestResult.sent;
+    } on ApiException catch (error) {
+      if (error.statusCode == 404) throw const PublicProfileNotFound();
+      if (error.statusCode != 400) rethrow;
+      // TODO(DP-064): every refusal is a 400; only the server's text tells
+      // them apart.
+      final message = error.message.toLowerCase();
+      if (message.contains('pending friend request')) {
+        return FriendRequestResult.alreadyPending;
+      }
+      if (message.contains('already friends')) {
+        return FriendRequestResult.alreadyFriends;
+      }
+      if (message.contains('blocked')) return FriendRequestResult.blocked;
+      rethrow;
+    }
+  }
+
   Future<List<Activity>> _activities(String path) async {
     final decoded = await apiClient.getJson(
       path,
