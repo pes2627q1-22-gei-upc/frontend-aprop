@@ -3051,6 +3051,150 @@ abstract class AppLocalizations {
   /// In ca, this message translates to:
   /// **'No s’ha pogut connectar amb el servidor.'**
   String get apiNetwork;
+
+  /// No description provided for @createFieldCategories.
+  ///
+  /// In ca, this message translates to:
+  /// **'Categories'**
+  String get createFieldCategories;
+
+  /// No description provided for @createCategoriesHint.
+  ///
+  /// In ca, this message translates to:
+  /// **'Tria’n fins a {max}. La primera és la que es veu a les targetes.'**
+  String createCategoriesHint(int max);
+
+  /// No description provided for @createCategoriesMax.
+  ///
+  /// In ca, this message translates to:
+  /// **'Pots triar fins a {max} categories.'**
+  String createCategoriesMax(int max);
+
+  /// No description provided for @createScheduleNoteLabel.
+  ///
+  /// In ca, this message translates to:
+  /// **'Més sobre l’horari (opcional)'**
+  String get createScheduleNoteLabel;
+
+  /// No description provided for @createScheduleNoteHint.
+  ///
+  /// In ca, this message translates to:
+  /// **'Per exemple: durada aproximada d’1 hora'**
+  String get createScheduleNoteHint;
+
+  /// No description provided for @createScheduleNoteHelper.
+  ///
+  /// In ca, this message translates to:
+  /// **'L’hora d’inici i de fi ja s’hi afegeix sola.'**
+  String get createScheduleNoteHelper;
+
+  /// No description provided for @createModality.
+  ///
+  /// In ca, this message translates to:
+  /// **'Modalitat'**
+  String get createModality;
+
+  /// No description provided for @createModalityBoth.
+  ///
+  /// In ca, this message translates to:
+  /// **'Les dues'**
+  String get createModalityBoth;
+
+  /// No description provided for @createOnlineUrlLabel.
+  ///
+  /// In ca, this message translates to:
+  /// **'Enllaç per connectar-s’hi (opcional)'**
+  String get createOnlineUrlLabel;
+
+  /// No description provided for @createOnlineUrlInvalid.
+  ///
+  /// In ca, this message translates to:
+  /// **'Introdueix un enllaç que comenci per https://.'**
+  String get createOnlineUrlInvalid;
+
+  /// No description provided for @createPermanentHint.
+  ///
+  /// In ca, this message translates to:
+  /// **'Per exemple, una exposició fixa.'**
+  String get createPermanentHint;
+
+  /// No description provided for @actPermanent.
+  ///
+  /// In ca, this message translates to:
+  /// **'Activitat permanent'**
+  String get actPermanent;
+
+  /// No description provided for @modalityInPerson.
+  ///
+  /// In ca, this message translates to:
+  /// **'Presencial'**
+  String get modalityInPerson;
+
+  /// No description provided for @modalityOnline.
+  ///
+  /// In ca, this message translates to:
+  /// **'En línia'**
+  String get modalityOnline;
+
+  /// No description provided for @modalityMixed.
+  ///
+  /// In ca, this message translates to:
+  /// **'Presencial i en línia'**
+  String get modalityMixed;
+
+  /// No description provided for @actUntil.
+  ///
+  /// In ca, this message translates to:
+  /// **'Fins al {date}'**
+  String actUntil(String date);
+
+  /// No description provided for @actLinks.
+  ///
+  /// In ca, this message translates to:
+  /// **'Enllaços'**
+  String get actLinks;
+
+  /// No description provided for @actLinkJoin.
+  ///
+  /// In ca, this message translates to:
+  /// **'Enllaç per connectar-s’hi'**
+  String get actLinkJoin;
+
+  /// No description provided for @actLinkWebsite.
+  ///
+  /// In ca, this message translates to:
+  /// **'Web de l’activitat'**
+  String get actLinkWebsite;
+
+  /// No description provided for @actLinkAccess.
+  ///
+  /// In ca, this message translates to:
+  /// **'Informació d’accés'**
+  String get actLinkAccess;
+
+  /// No description provided for @actLinkCopy.
+  ///
+  /// In ca, this message translates to:
+  /// **'Copia l’enllaç: {name}'**
+  String actLinkCopy(String name);
+
+  /// No description provided for @actLinkCopied.
+  ///
+  /// In ca, this message translates to:
+  /// **'Enllaç copiat.'**
+  String get actLinkCopied;
+
+  /// No description provided for @actLinkOpenError.
+  ///
+  /// In ca, this message translates to:
+  /// **'No s’ha pogut obrir l’enllaç.'**
+  String get actLinkOpenError;
+
+  /// No description provided for @actMoreCategories.
+  ///
+  /// In ca, this message translates to:
+  /// **'{count, plural, one{1 categoria més} other{{count} categories més}}'**
+  String actMoreCategories(int count);
 }
 
 class _AppLocalizationsDelegate

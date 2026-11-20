@@ -130,7 +130,7 @@ void main() {
       NewActivity(
         title: 'Concert a la plaça',
         description: 'Una nit de música',
-        category: 'Música',
+        categories: ['Música'],
         startsAt: DateTime(soon.year, soon.month, soon.day, 19),
         imageAsset: 'assets/images/jazz_al_parc.jpg',
         creator: const ActivityCreator(
@@ -186,6 +186,8 @@ void main() {
       200,
       scrollable: find.byType(Scrollable).first,
     );
+    await tester.ensureVisible(find.text('Desa els canvis'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Desa els canvis'));
     await tester.pumpAndSettle();
 

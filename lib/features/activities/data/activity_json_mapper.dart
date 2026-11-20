@@ -106,7 +106,65 @@ Activity activityFromJson(Map<String, Object?> json) {
         ? null
         : GeoPoint(latitude: latitude, longitude: longitude),
     price: price,
+    schedule: _text(json['schedule']),
+    modality: _modalityFromJson[_text(json['modality'])],
+    isPermanent: json['permanent'] == true,
+    onlineUrl: _url(json['activity-url']),
+    website: _url(json['url']),
+    links: _links(json['related-urls'], json['url-names']),
+    tickets: _text(json['tickets']),
+    ticketsUrl: _url(json['tickets-url']),
+    email: _text(json['email']),
+    phone: _text(json['phone']),
   );
+}
+
+/// Valors de `modality` al backend (un `enum` de la base de dades).
+// TODO(DP-059): no hi ha contracte escrit; són els valors de l'`enum`.
+const _modalityToJson = {
+  ActivityModality.inPerson: 'Face-to-Face',
+  ActivityModality.online: 'Online',
+  ActivityModality.mixed: 'Online and Face-to-Face',
+};
+final _modalityFromJson = {
+  for (final MapEntry(:key, :value) in _modalityToJson.entries) value: key,
+};
+
+/// Només adreces web completes; la resta no es pot obrir ni copiar com a
+/// enllaç.
+String? _url(Object? value) {
+  final text = _text(value);
+  final uri = text == null ? null : Uri.tryParse(text);
+  if (uri == null || !(uri.scheme == 'http' || uri.scheme == 'https')) {
+    return null;
+  }
+  return uri.host.isEmpty ? null : text;
+}
+
+/// `related-urls` i `url-names` són dues llistes separades per comes. Les
+/// adreces se separen davant de cada `http`; si els noms no hi quadren (un nom
+/// també pot portar comes), es fa servir el domini com a nom.
+List<ActivityLink> _links(Object? rawUrls, Object? rawNames) {
+  final urls = [
+    for (final part in (_text(rawUrls) ?? '').split(
+      RegExp(r',\s*(?=https?://)'),
+    ))
+      ?_url(part),
+  ];
+  final names = (_text(rawNames) ?? '')
+      .split(',')
+      .map((name) => name.trim())
+      .toList();
+  final namesMatch = names.length == urls.length;
+  return [
+    for (final (index, url) in urls.indexed)
+      ActivityLink(
+        name: namesMatch && names[index].isNotEmpty
+            ? names[index]
+            : Uri.parse(url).host.replaceFirst(RegExp(r'^www\.'), ''),
+        url: url,
+      ),
+  ];
 }
 
 /// Converteix un [NewActivity] al cos JSON en `kebab-case` que espera `POST /events`.
@@ -118,7 +176,7 @@ Map<String, Object?> newActivityToJson(NewActivity activity) {
     'description': activity.description,
     // L'etiqueta del backend (`agenda:categories/teatre`): amb un nom que no
     // existeix, el backend en crearia una categoria nova.
-    'categories': <String>[activity.category],
+    'categories': activity.categories,
     'municipality': activity.municipality,
     // En llegir-la, lloc i adreça s'ajunten com a indicacions: si totes dues
     // portessin el mateix text, sortiria repetit.
@@ -134,6 +192,11 @@ Map<String, Object?> newActivityToJson(NewActivity activity) {
     'longitude': activity.location?.longitude ?? 0.0,
     // Sense preu no se sap si és gratuïta.
     if (activity.price case final price?) 'free': price == 0,
+    // El backend només desa el dia: l'hora es llegeix de l'«Horari».
+    'schedule': activity.schedule ?? '',
+    'modality': _modalityToJson[activity.modality],
+    'permanent': activity.isPermanent,
+    'activity-url': activity.onlineUrl ?? '',
     'is-official': false,
   };
 }

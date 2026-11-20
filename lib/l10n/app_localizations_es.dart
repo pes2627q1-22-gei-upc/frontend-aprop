@@ -1804,4 +1804,95 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get apiNetwork => 'No se ha podido conectar con el servidor.';
+
+  @override
+  String get createFieldCategories => 'Categorías';
+
+  @override
+  String createCategoriesHint(int max) {
+    return 'Elige hasta $max. La primera es la que se ve en las tarjetas.';
+  }
+
+  @override
+  String createCategoriesMax(int max) {
+    return 'Puedes elegir hasta $max categorías.';
+  }
+
+  @override
+  String get createScheduleNoteLabel => 'Más sobre el horario (opcional)';
+
+  @override
+  String get createScheduleNoteHint =>
+      'Por ejemplo: duración aproximada de 1 hora';
+
+  @override
+  String get createScheduleNoteHelper =>
+      'La hora de inicio y de fin ya se añade sola.';
+
+  @override
+  String get createModality => 'Modalidad';
+
+  @override
+  String get createModalityBoth => 'Las dos';
+
+  @override
+  String get createOnlineUrlLabel => 'Enlace para conectarse (opcional)';
+
+  @override
+  String get createOnlineUrlInvalid =>
+      'Introduce un enlace que empiece por https://.';
+
+  @override
+  String get createPermanentHint => 'Por ejemplo, una exposición fija.';
+
+  @override
+  String get actPermanent => 'Actividad permanente';
+
+  @override
+  String get modalityInPerson => 'Presencial';
+
+  @override
+  String get modalityOnline => 'En línea';
+
+  @override
+  String get modalityMixed => 'Presencial y en línea';
+
+  @override
+  String actUntil(String date) {
+    return 'Hasta el $date';
+  }
+
+  @override
+  String get actLinks => 'Enlaces';
+
+  @override
+  String get actLinkJoin => 'Enlace para conectarse';
+
+  @override
+  String get actLinkWebsite => 'Web de la actividad';
+
+  @override
+  String get actLinkAccess => 'Información de acceso';
+
+  @override
+  String actLinkCopy(String name) {
+    return 'Copiar el enlace: $name';
+  }
+
+  @override
+  String get actLinkCopied => 'Enlace copiado.';
+
+  @override
+  String get actLinkOpenError => 'No se ha podido abrir el enlace.';
+
+  @override
+  String actMoreCategories(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count categorías más',
+      one: '1 categoría más',
+    );
+    return '$_temp0';
+  }
 }

@@ -9,6 +9,7 @@ import 'package:aprop/features/activities/presentation/screens/activity_details_
 import 'package:aprop/features/activities/presentation/view_models/enrollment_view_model.dart';
 import 'package:aprop/features/activities/repositories/activity_repository.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'fake_activity_repository.dart';
@@ -20,6 +21,7 @@ void main() {
     String id = 'demo-jazz',
     ActivityRepository? repository,
     double textScale = 1,
+    Future<bool> Function(Uri uri)? openLink,
   }) async {
     tester.view.physicalSize = const Size(390, 844);
     tester.view.devicePixelRatio = 1;
@@ -47,10 +49,36 @@ void main() {
           activityId: id,
           repository: repository ?? DemoActivityRepository(),
           enrollmentViewModel: enrollmentViewModel,
+          openLink: openLink ?? (uri) async => true,
         ),
       ),
     );
   }
+
+  FakeActivityRepository extraInfoRepository() =>
+      FakeActivityRepository()
+        ..findActivity = (id) async => Activity(
+          id: id,
+          title: 'Xerrada sobre jazz',
+          category: 'Música',
+          categories: const ['Música', 'Conferències'],
+          municipality: 'Girona',
+          startsAt: DateTime(2026, 11, 14),
+          endsAt: DateTime(2026, 11, 20),
+          imageAsset: '',
+          source: ActivitySource.culturalAgenda,
+          schedule: 'De 18.00 a 19.30 h',
+          modality: ActivityModality.mixed,
+          isPermanent: true,
+          tickets: 'Entrada lliure',
+          email: 'info@example.cat',
+          onlineUrl: 'https://meet.example.cat/jazz',
+          website: 'https://auditori.cat/jazz',
+          links: const [
+            ActivityLink(name: 'Programa', url: 'https://auditori.cat/jazz'),
+            ActivityLink(name: 'Fitxa', url: 'https://example.cat/fitxa'),
+          ],
+        );
 
   test('Demo details reuse catalogue IDs and handle unknown IDs', () async {
     final repository = DemoActivityRepository();
@@ -124,6 +152,110 @@ void main() {
     expect(find.text('Amiga'), findsOneWidget);
     expect(find.text('Font: Agenda Cultural · Generalitat'), findsNothing);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Mostra totes les categories, l’horari i la informació extra', (
+    tester,
+  ) async {
+    final repository = extraInfoRepository();
+    final opened = <Uri>[];
+    await pumpDetails(
+      tester,
+      id: '101',
+      repository: repository,
+      openLink: (uri) async {
+        opened.add(uri);
+        return true;
+      },
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Música'), findsOneWidget);
+    expect(find.text('Conferències'), findsOneWidget);
+    // L'hora és la de l'«Horari», no les 00.00 h de la data.
+    expect(find.textContaining('De 18.00 a 19.30 h'), findsOneWidget);
+    expect(find.textContaining('00.00 h'), findsNothing);
+    expect(find.text('Fins al 20 de novembre de 2026'), findsOneWidget);
+    expect(find.text('Activitat permanent'), findsOneWidget);
+    await tester.scrollUntilVisible(find.text('Presencial i en línia'), 150);
+    expect(find.text('Entrada lliure'), findsOneWidget);
+    expect(find.text('info@example.cat'), findsOneWidget);
+
+    await tester.scrollUntilVisible(find.text('Fitxa'), 150);
+    expect(find.text('Enllaç per connectar-s’hi'), findsOneWidget);
+    expect(find.text('Web de l’activitat'), findsOneWidget);
+    // La mateixa adreça no surt dues vegades.
+    expect(find.text('Programa'), findsNothing);
+
+    String? copied;
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.platform,
+      (call) async {
+        if (call.method == 'Clipboard.setData') {
+          copied = (call.arguments as Map)['text'] as String?;
+        }
+        return null;
+      },
+    );
+    addTearDown(
+      () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        null,
+      ),
+    );
+    final copy = find.byTooltip('Copia l’enllaç: Fitxa');
+    await tester.ensureVisible(copy);
+    await tester.pumpAndSettle();
+    await tester.tap(copy);
+    await tester.pumpAndSettle();
+    expect(find.text('Enllaç copiat.'), findsOneWidget);
+    expect(copied, 'https://example.cat/fitxa');
+
+    // Tocar l'enllaç l'obre fora de l'app.
+    await tester.ensureVisible(find.text('Fitxa'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Fitxa'));
+    await tester.pumpAndSettle();
+    expect(opened, [Uri.parse('https://example.cat/fitxa')]);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Si un enllaç no es pot obrir, ho diu', (tester) async {
+    await pumpDetails(
+      tester,
+      id: '101',
+      repository: extraInfoRepository(),
+      openLink: (uri) async => false,
+    );
+    await tester.pumpAndSettle();
+
+    final link = find.text('Web de l’activitat');
+    await tester.scrollUntilVisible(link, 150);
+    await tester.ensureVisible(link);
+    await tester.pumpAndSettle();
+    await tester.tap(link);
+    await tester.pumpAndSettle();
+
+    expect(find.text('No s’ha pogut obrir l’enllaç.'), findsOneWidget);
+  });
+
+  testWidgets('Sense hora coneguda, no mostra les 00.00 h', (tester) async {
+    final repository = FakeActivityRepository()
+      ..findActivity = (id) async => Activity(
+        id: id,
+        title: 'Exposició',
+        category: 'Exposicions',
+        municipality: 'Vic',
+        startsAt: DateTime(2026, 11, 14),
+        imageAsset: '',
+        source: ActivitySource.culturalAgenda,
+      );
+    await pumpDetails(tester, id: '102', repository: repository);
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('14 de novembre de 2026'), findsOneWidget);
+    expect(find.textContaining('00.00 h'), findsNothing);
+    expect(find.text('Enllaços'), findsNothing);
   });
 
   testWidgets('Creator block shows the organizer reliability or a dash', (

@@ -109,7 +109,7 @@ void main() {
         NewActivity(
           title: 'Castellers a Vic',
           description: 'Una diada',
-          category: 'Teatre',
+          categories: ['Teatre'],
           startsAt: DateTime(2026, 12, 1),
           municipality: 'Vic',
           imageAsset: 'assets/images/teatre_sota_les_estrelles.jpg',

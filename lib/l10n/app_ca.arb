@@ -1047,5 +1047,64 @@
   "shareCopy": "Copiar nom d’usuari",
   "assistantOpenTooltip": "Obrir l’assistent",
   "apiTimeout": "El servidor està despertant o triga massa a respondre. Torna-ho a provar.",
-  "apiNetwork": "No s’ha pogut connectar amb el servidor."
+  "apiNetwork": "No s’ha pogut connectar amb el servidor.",
+  "createFieldCategories": "Categories",
+  "createCategoriesHint": "Tria’n fins a {max}. La primera és la que es veu a les targetes.",
+  "@createCategoriesHint": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "createCategoriesMax": "Pots triar fins a {max} categories.",
+  "@createCategoriesMax": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "createScheduleNoteLabel": "Més sobre l’horari (opcional)",
+  "createScheduleNoteHint": "Per exemple: durada aproximada d’1 hora",
+  "createScheduleNoteHelper": "L’hora d’inici i de fi ja s’hi afegeix sola.",
+  "createModality": "Modalitat",
+  "createModalityBoth": "Les dues",
+  "createOnlineUrlLabel": "Enllaç per connectar-s’hi (opcional)",
+  "createOnlineUrlInvalid": "Introdueix un enllaç que comenci per https://.",
+  "createPermanentHint": "Per exemple, una exposició fixa.",
+  "actPermanent": "Activitat permanent",
+  "modalityInPerson": "Presencial",
+  "modalityOnline": "En línia",
+  "modalityMixed": "Presencial i en línia",
+  "actUntil": "Fins al {date}",
+  "@actUntil": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "actLinks": "Enllaços",
+  "actLinkJoin": "Enllaç per connectar-s’hi",
+  "actLinkWebsite": "Web de l’activitat",
+  "actLinkAccess": "Informació d’accés",
+  "actLinkCopy": "Copia l’enllaç: {name}",
+  "@actLinkCopy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "actLinkCopied": "Enllaç copiat.",
+  "actLinkOpenError": "No s’ha pogut obrir l’enllaç.",
+  "actMoreCategories": "{count, plural, one{1 categoria més} other{{count} categories més}}",
+  "@actMoreCategories": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }
