@@ -110,4 +110,42 @@ void main() {
       throwsA(isA<ApiException>()),
     );
   });
+
+  test('Un missatge mal format no amaga la resta de la pàgina', () async {
+    final repo = repository(
+      (_) => json({
+        'messages': [
+          message(text: 'Bé'),
+          {...message(text: 'Sense data'), 'date-sent': null},
+          {...message(text: 'Data dolenta'), 'date-sent': 'ahir'},
+          'no és un missatge',
+        ],
+        'total': 4,
+      }),
+    );
+
+    final page = await repo.getMessages('1282');
+
+    expect(page.messages.map((m) => m.text), ['Bé']);
+  });
+
+  test(
+    'Si el backend rebutja el text (400), no és un error per reintentar',
+    () async {
+      final repo = repository(
+        (_) => json({'error': 'text must be 1-1000 characters'}, 400),
+      );
+
+      expect(
+        repo.sendMessage('1282', 'Hola'),
+        throwsA(isA<MessageRejectedException>()),
+      );
+    },
+  );
+
+  test('Un missatge enviat sense data vàlida és un error', () async {
+    final repo = repository((_) => json({...message(), 'date-sent': 'ahir'}));
+
+    expect(repo.sendMessage('1282', 'Hola'), throwsA(isA<ApiException>()));
+  });
 }

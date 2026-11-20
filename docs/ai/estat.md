@@ -10,6 +10,7 @@
 
 | Taiga | Tasca | Branca | Estat |
 |---|---|---|---|
+| #148 | [FE] Xat de l'activitat | `feature/xat-activitat` | PR #59; correccions de la revisió (límit en runes, refresc sense encavalcar-se i pausat en segon pla, proves d'estats, documentació); DP-062 oberta |
 | #197 | [FE] `FriendsListScreen` + `FriendsListViewModel` connectada des de `ProfileScreen` + tests (història #54) | `feature/llista-amics` | Implementada (HTTP i Demo); DP-065 oberta; pendent revisió humana |
 | #160 | [FE] Botó d'acció d'amistat al perfil aliè + integració al ViewModel + tests | `feature/boto-amistat` | Implementada (HTTP i Demo); DP-064 oberta; pendent revisió humana |
 | #162 | [FE] Vista y `UserSearchViewModel` integrada en el buscador de Descobreix (fig. 16) + navegación al perfil conservando estado + tests | `feature/user-search-162` | Implementada amb HTTP/Demo; 725 proves, anàlisi i revisió tècnica correctes; sense commit/push |

@@ -364,6 +364,8 @@
   "chatInputHint": "Write a message",
   "chatSend": "Send",
   "chatSendError": "The message couldn’t be sent. Try again.",
+  "chatMessageTooLong": "The message is too long. Make it shorter.",
+  "chatBackToActivity": "Back to the activity",
   "chatYou": "You",
   "actPublishedBy": "Published by",
   "actReliabilityNone": "Organiser reliability: no ratings yet",

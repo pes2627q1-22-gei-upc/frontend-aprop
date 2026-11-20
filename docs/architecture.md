@@ -26,14 +26,18 @@ Les tasques #75 i #82 afegeixen el detall i les inscripcions compartides entre l
 | `features/auth/` | Inici de sessió, registre i sessió, amb les mateixes capes que `activities/`. |
 | `features/assistant/` | Conversa amb l'assistent cultural («Assistent»), interpretació de consultes i recomanació d'activitats. |
 | `features/profile/` | Perfil propi, edició de detalls i preferències de Configuració, amb les mateixes capes i repositoris per compte. |
+| `features/activity_chat/` | Xat de cada activitat entre les persones apuntades (#148): missatges, enviament i refresc periòdic. Vegeu [Xat de l’activitat](activity-chat.md). |
 | `features/notifications/` | Bústia d'Avisos, filtres, lectura i resposta a sol·licituds de demostració, separats de l'enviament de notificacions. |
 | `assets/images/` | Fotografies i imatges de contingut. |
 | `assets/branding/` | Logotip i recursos d’identitat d’AProp!. |
 | `assets/icons/` | Icones de tercers que no ofereix Material, com el logotip de Google. |
 | `test/features/activities/` | Proves del model de presentació i la UI d’activitats. |
 | `test/features/assistant/` | Proves del model (R12), repositori de demostració, ViewModel i pantalla de l'assistent. |
+| `test/features/activity_chat/` | Proves del repositori HTTP, el ViewModel (refresc, pausa, paginació, límit en runes) i la pantalla del xat. |
 | `test/features/auth/` | Proves dels ViewModels, validacions, repositori de demostració i pantalles d'accés. |
 | `test/app/` | Proves del recorregut complet de l'aplicació, com entrar, registrar-se i tancar la sessió. |
+
+El xat d’una activitat s’obre des de la fitxa: `MainShell._openActivityChat` posa `ActivityChatScreen` al navegador arrel, per sobre de la barra inferior, com el xat de l’Assistent.
 
 `AuthGate` mostra `LoginScreen` si no hi ha sessió, `VerifyEmailScreen` si l'usuari encara no ha verificat el correu i `MainShell` si tot és correcte; el detall és a [Accés i sessió](#accés-i-sessió).
 

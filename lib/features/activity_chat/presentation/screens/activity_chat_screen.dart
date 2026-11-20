@@ -40,8 +40,23 @@ class _ActivityChatScreenState extends State<ActivityChatScreen> {
   final _text = TextEditingController();
   final _scroll = ScrollController();
 
+  /// En segon pla el xat deixa de demanar missatges nous.
+  late final _lifecycle = AppLifecycleListener(
+    onPause: _viewModel.pause,
+    onHide: _viewModel.pause,
+    onShow: _viewModel.resume,
+    onResume: _viewModel.resume,
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    _lifecycle;
+  }
+
   @override
   void dispose() {
+    _lifecycle.dispose();
     _viewModel.dispose();
     _text.dispose();
     _scroll.dispose();
@@ -123,7 +138,17 @@ class _ActivityChatScreenState extends State<ActivityChatScreen> {
             children: [
               Text(error, textAlign: TextAlign.center),
               const SizedBox(height: 16),
-              FilledButton(onPressed: _viewModel.load, child: Text(l10n.retry)),
+              // Sense inscripció, tornar-ho a provar no serveix de res.
+              if (_viewModel.isNotEnrolled)
+                OutlinedButton(
+                  onPressed: () => Navigator.of(context).maybePop(),
+                  child: Text(l10n.chatBackToActivity),
+                )
+              else
+                FilledButton(
+                  onPressed: _viewModel.load,
+                  child: Text(l10n.retry),
+                ),
             ],
           ),
         ),
@@ -348,18 +373,9 @@ class _ChatInputBar extends StatelessWidget {
                         enabled: enabled,
                         minLines: 1,
                         maxLines: 4,
-                        maxLength: maxActivityMessageLength,
-                        maxLengthEnforcement: MaxLengthEnforcement.enforced,
-                        // El comptador només surt quan s'acosta al límit.
-                        buildCounter:
-                            (
-                              context, {
-                              required currentLength,
-                              required isFocused,
-                              required maxLength,
-                            }) => currentLength > (maxLength ?? 0) - 100
-                            ? Text('$currentLength/$maxLength')
-                            : null,
+                        // Límit en runes, com el backend (no en caràcters
+                        // visibles: un emoji compost en compta més d'una).
+                        inputFormatters: const [_RuneLimitFormatter()],
                         textCapitalization: TextCapitalization.sentences,
                         textInputAction: TextInputAction.send,
                         onSubmitted: (_) {
@@ -367,6 +383,15 @@ class _ChatInputBar extends StatelessWidget {
                         },
                         decoration: InputDecoration(
                           hintText: l10n.chatInputHint,
+                          // El comptador només surt quan s'acosta al límit.
+                          counterText: switch (activityMessageLength(
+                            value.text,
+                          )) {
+                            final length
+                                when length > maxActivityMessageLength - 100 =>
+                              '$length/$maxActivityMessageLength',
+                            _ => null,
+                          },
                           filled: true,
                           isDense: true,
                           border: OutlineInputBorder(
@@ -397,6 +422,32 @@ class _ChatInputBar extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Talla el text a [maxActivityMessageLength] runes sense partir cap caràcter.
+class _RuneLimitFormatter extends TextInputFormatter {
+  const _RuneLimitFormatter();
+
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    if (activityMessageLength(newValue.text) <= maxActivityMessageLength) {
+      return newValue;
+    }
+    // Es treuen caràcters visibles sencers del final fins que hi cap.
+    final characters = newValue.text.characters.toList();
+    var length = activityMessageLength(newValue.text);
+    while (characters.isNotEmpty && length > maxActivityMessageLength) {
+      length -= activityMessageLength(characters.removeLast());
+    }
+    final text = characters.join();
+    return TextEditingValue(
+      text: text,
+      selection: TextSelection.collapsed(offset: text.length),
     );
   }
 }

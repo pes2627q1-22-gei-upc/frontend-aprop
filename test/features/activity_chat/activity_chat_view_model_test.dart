@@ -108,20 +108,6 @@ void main() {
     expect(viewModel.messages, isEmpty);
   });
 
-  test('Els missatges nous arriben sols mentre el xat és obert', () async {
-    create(pollInterval: const Duration(milliseconds: 20));
-    await viewModel.load();
-    await viewModel.send('Hola!');
-
-    repository.messages.add(
-      chatMessage('Ens veiem allà', sentAt: DateTime(2026, 11, 20, 18, 31)),
-    );
-    await Future<void>.delayed(const Duration(milliseconds: 60));
-
-    // El propi missatge no surt dues vegades.
-    expect(viewModel.messages.map((m) => m.text), ['Hola!', 'Ens veiem allà']);
-  });
-
   test('Carrega els missatges anteriors per pàgines', () async {
     repository.messages = [
       for (var i = 0; i < activityMessagePageSize + 5; i++)
@@ -155,4 +141,187 @@ void main() {
     expect(await first, isTrue);
     expect(repository.sent, ['Un']);
   });
+
+  group('Refresc periòdic (amb el rellotge de les proves)', () {
+    /// Without [create]: the test disposes it so no timer is left running.
+    ActivityChatViewModel polling() => ActivityChatViewModel(
+      activityId: '1282',
+      userId: 'me',
+      repository: repository,
+      pollInterval: const Duration(seconds: 5),
+    );
+
+    testWidgets('Els missatges nous arriben sols mentre el xat és obert', (
+      tester,
+    ) async {
+      final model = polling();
+      await model.load();
+      await model.send('Hola!');
+      repository.messages.add(
+        chatMessage('Ens veiem allà', sentAt: DateTime(2026, 11, 20, 18, 31)),
+      );
+
+      await tester.pump(const Duration(seconds: 5));
+
+      // El propi missatge no surt dues vegades.
+      expect(model.messages.map((m) => m.text), ['Hola!', 'Ens veiem allà']);
+      model.dispose();
+    });
+
+    testWidgets('Amb una xarxa lenta, els refrescos no s’encavalquen', (
+      tester,
+    ) async {
+      final model = polling();
+      await model.load();
+      repository.requestedPages.clear();
+      repository.pendingLoad = Completer<void>();
+
+      // Tres tics mentre la primera petició encara no ha acabat.
+      await tester.pump(const Duration(seconds: 15));
+      expect(repository.requestedPages, [0]);
+
+      repository.pendingLoad!.complete();
+      await tester.pump();
+      model.dispose();
+    });
+
+    testWidgets('En segon pla no demana res; en tornar, refresca de seguida', (
+      tester,
+    ) async {
+      final model = polling();
+      await model.load();
+      repository.requestedPages.clear();
+
+      model.pause();
+      await tester.pump(const Duration(minutes: 1));
+      expect(repository.requestedPages, isEmpty);
+
+      repository.messages.add(
+        chatMessage('Ja hi soc', sentAt: DateTime(2026, 11, 20, 19)),
+      );
+      model.resume();
+      await tester.pump();
+      expect(repository.requestedPages, [0]);
+      expect(model.messages.single.text, 'Ja hi soc');
+
+      await tester.pump(const Duration(seconds: 5));
+      expect(repository.requestedPages, [0, 0]);
+      model.dispose();
+    });
+  });
+
+  test(
+    'Si falla un refresc, els missatges es queden i no surt cap error',
+    () async {
+      repository.messages = [
+        chatMessage('Hola', sentAt: DateTime(2026, 11, 20, 10)),
+      ];
+      create();
+      await viewModel.load();
+
+      repository.loadError = Exception('sense connexió');
+      await viewModel.refresh();
+
+      expect(viewModel.messages.single.text, 'Hola');
+      expect(viewModel.errorMessage, isNull);
+    },
+  );
+
+  test(
+    'Si falla carregar els anteriors, ho diu i es pot tornar a provar',
+    () async {
+      repository.messages = [
+        for (var i = 0; i < activityMessagePageSize + 5; i++)
+          chatMessage(
+            '$i',
+            sentAt: DateTime(2026, 11, 20).add(Duration(minutes: i)),
+          ),
+      ];
+      create();
+      await viewModel.load();
+
+      repository.loadError = Exception('sense connexió');
+      await viewModel.loadOlder();
+      expect(viewModel.olderError, isNotNull);
+      expect(viewModel.messages, hasLength(activityMessagePageSize));
+
+      repository.loadError = null;
+      await viewModel.loadOlder();
+      expect(viewModel.olderError, isNull);
+      expect(viewModel.messages.first.text, '0');
+    },
+  );
+
+  test(
+    'Si n’han arribat de nous, «anteriors» encara porta els anteriors',
+    () async {
+      DateTime at(int minute) =>
+          DateTime(2026, 11, 20).add(Duration(minutes: minute));
+      repository.messages = [
+        for (var i = 0; i < activityMessagePageSize + 5; i++)
+          chatMessage('$i', sentAt: at(i)),
+      ];
+      create();
+      await viewModel.load();
+      // Arriben tres missatges nous i el refresc els afegeix.
+      for (var i = 0; i < 3; i++) {
+        repository.messages.add(
+          chatMessage('nou $i', sentAt: at(activityMessagePageSize + 5 + i)),
+        );
+      }
+      await viewModel.refresh();
+
+      await viewModel.loadOlder();
+
+      expect(viewModel.messages.first.text, '0');
+      expect(viewModel.messages, hasLength(activityMessagePageSize + 8));
+      expect(viewModel.hasOlder, isFalse);
+    },
+  );
+
+  test(
+    'Un text massa llarg es compta com el backend (runes) i no s’envia',
+    () async {
+      create();
+      await viewModel.load();
+      // 👍🏽 és un sol caràcter visible però dues runes.
+      final tooLong = '👍🏽' * (maxActivityMessageLength ~/ 2 + 1);
+
+      expect(await viewModel.send(tooLong), isFalse);
+
+      expect(repository.sent, isEmpty);
+      expect(
+        viewModel.sendError,
+        'El missatge és massa llarg. Fes-lo més curt.',
+      );
+    },
+  );
+
+  test(
+    'Si el backend rebutja el text, no convida a tornar-ho a provar',
+    () async {
+      repository.sendError = const MessageRejectedException();
+      create();
+      await viewModel.load();
+
+      expect(await viewModel.send('Hola'), isFalse);
+
+      expect(
+        viewModel.sendError,
+        'El missatge és massa llarg. Fes-lo més curt.',
+      );
+    },
+  );
+
+  test(
+    'Sense inscripció, el ViewModel ho indica per no oferir reintent',
+    () async {
+      repository.loadError = const NotEnrolledInChatException();
+      create();
+
+      await viewModel.load();
+
+      expect(viewModel.isNotEnrolled, isTrue);
+    },
+  );
 }

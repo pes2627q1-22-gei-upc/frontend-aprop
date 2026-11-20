@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:aprop/app/theme/app_theme.dart';
 import 'package:aprop/features/activity_chat/presentation/screens/activity_chat_screen.dart';
 import 'package:aprop/features/activity_chat/repositories/activity_chat_repository.dart';
@@ -118,5 +120,118 @@ void main() {
       tester.widget<TextField>(find.byType(TextField)).controller!.text,
       'Hola!',
     );
+  });
+
+  testWidgets('Mentre carrega, mostra la roda', (tester) async {
+    repository.pendingLoad = Completer<void>();
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.light,
+        home: ActivityChatScreen(
+          activityId: '1282',
+          activityTitle: 'Jazz al parc',
+          userId: 'me',
+          repository: repository,
+          pollInterval: const Duration(hours: 1),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+
+    repository.pendingLoad!.complete();
+    await tester.pumpAndSettle();
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+  });
+
+  testWidgets('Si falla la càrrega, «Tornar-ho a provar» la recupera', (
+    tester,
+  ) async {
+    repository
+      ..messages = [chatMessage('Hola', sentAt: DateTime(2026, 11, 20, 10))]
+      ..loadError = Exception('sense connexió');
+    await pumpChat(tester);
+    expect(find.text('Hola'), findsNothing);
+
+    repository.loadError = null;
+    await tester.tap(find.widgetWithText(FilledButton, 'Tornar-ho a provar'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Hola'), findsOneWidget);
+  });
+
+  testWidgets('Sense inscripció no ofereix reintent sinó tornar a la fitxa', (
+    tester,
+  ) async {
+    repository.loadError = const NotEnrolledInChatException();
+    await pumpChat(tester);
+
+    expect(find.text('Tornar-ho a provar'), findsNothing);
+    expect(find.text('Tornar a la fitxa'), findsOneWidget);
+  });
+
+  testWidgets('«Veure missatges anteriors» els carrega, i si falla ho diu', (
+    tester,
+  ) async {
+    repository.messages = [
+      for (var i = 0; i < activityMessagePageSize + 2; i++)
+        chatMessage(
+          'Missatge $i',
+          sentAt: DateTime(2026, 11, 20).add(Duration(minutes: i)),
+        ),
+    ];
+    await pumpChat(tester);
+    final older = find.widgetWithText(TextButton, 'Veure missatges anteriors');
+    final list = find
+        .descendant(
+          of: find.byType(ListView),
+          matching: find.byType(Scrollable),
+        )
+        .first;
+    await tester.scrollUntilVisible(older, 400, scrollable: list);
+
+    repository.loadError = Exception('sense connexió');
+    await tester.tap(older);
+    await tester.pumpAndSettle();
+    expect(
+      find.text('No hem pogut carregar els missatges. Torna-ho a provar.'),
+      findsOneWidget,
+    );
+
+    repository.loadError = null;
+    await tester.tap(older);
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.text('Missatge 0'),
+      400,
+      scrollable: list,
+    );
+    expect(find.text('Missatge 0'), findsOneWidget);
+  });
+
+  testWidgets('El camp talla el text a 1.000 runes sense partir cap emoji', (
+    tester,
+  ) async {
+    await pumpChat(tester);
+
+    // 501 × 👍🏽 són 1.002 runes: en cap 500.
+    await tester.enterText(
+      find.byType(TextField),
+      '👍🏽' * (maxActivityMessageLength ~/ 2 + 1),
+    );
+    await tester.pump();
+
+    final text = tester
+        .widget<TextField>(find.byType(TextField))
+        .controller!
+        .text;
+    expect(text.runes.length, maxActivityMessageLength);
+    expect(text, '👍🏽' * (maxActivityMessageLength ~/ 2));
+    expect(find.text('1000/1000'), findsOneWidget);
   });
 }

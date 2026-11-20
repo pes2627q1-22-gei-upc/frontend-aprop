@@ -12,12 +12,15 @@
     l'hora: «18.30 h» si és d'avui, «Ahir · 18.30 h» o la data si és més antic. Els propis van a la
     dreta i no repeteixen el nom.
   - En obrir-lo surten els 50 més recents; «Veure missatges anteriors» carrega els anteriors.
-  - Enviar: el text no pot ser buit (el botó queda desactivat) i té un màxim de 1.000 caràcters. Si no
-    s'envia, el text es conserva i surt un avís.
+  - Enviar: el text no pot ser buit (el botó queda desactivat) i té un màxim de 1.000 runes, comptades
+    com el backend (un emoji compost en pot ocupar més d'una); el camp talla el text sense partir cap
+    caràcter. Si no s'envia, el text es conserva i surt un avís; si el backend el rebutja (400), diu que
+    és massa llarg.
   - Estats: carregant, buit («Encara no hi ha missatges…»), error amb «Tornar-ho a provar» i sense
-    inscripció (el backend respon 403).
+    inscripció (el backend respon 403), amb «Tornar a la fitxa» en lloc de reintentar.
 - **Missatges nous**: el backend no avisa en temps real. Mentre el xat és obert, cada 5 s es tornen a demanar
-  els més recents i s'hi afegeixen els nous sense repetir-ne cap (DP-062).
+  els més recents i s'hi afegeixen els nous sense repetir-ne cap (DP-062). No hi ha mai dues peticions
+  alhora; en segon pla s'atura i, en tornar, es refresca de seguida.
 
 ## Backend
 
@@ -46,9 +49,11 @@ El botó és a `ActivityDetailsScreen` (`onOpenChat`) i el xat l'obre `MainShell
 
 ## Proves
 
-- `test/features/activity_chat/`: repositori HTTP (pàgina, autor, enviament, 403 i errors), ViewModel
-  (ordre, buit, R11, reintent, enviament, text buit, error d'enviament, missatges nous sense repetir,
-  pàgines anteriors i un sol enviament alhora) i pantalla (autor i hora, buit, sense inscripció, enviar i
-  error d'enviament).
+- `test/features/activity_chat/`: repositori HTTP (pàgina, autor, enviament, 403, 400, missatges mal
+  formats i errors), ViewModel (ordre, buit, R11, reintent, enviament, text buit, error d'enviament,
+  missatges nous sense repetir, refresc sense encavalcar-se, pausa en segon pla, refresc fallit, pàgines
+  anteriors amb missatges nous i amb error, límit en runes i un sol enviament alhora) i pantalla (autor i
+  hora, càrrega, buit, error amb reintent, sense inscripció, anteriors amb error, límit en runes, enviar
+  i error d'enviament). Les proves de temps fan servir el rellotge simulat de `testWidgets`.
 - `test/features/activities/activity_details_screen_test.dart`: el botó només s'activa amb la inscripció i
   obre el xat de l'activitat.

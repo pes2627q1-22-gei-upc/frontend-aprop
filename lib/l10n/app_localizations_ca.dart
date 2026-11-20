@@ -1344,6 +1344,13 @@ class AppLocalizationsCa extends AppLocalizations {
       'No s’ha pogut enviar el missatge. Torna-ho a provar.';
 
   @override
+  String get chatMessageTooLong =>
+      'El missatge és massa llarg. Fes-lo més curt.';
+
+  @override
+  String get chatBackToActivity => 'Tornar a la fitxa';
+
+  @override
   String get chatYou => 'Tu';
 
   @override

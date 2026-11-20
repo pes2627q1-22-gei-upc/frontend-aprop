@@ -843,6 +843,8 @@
   "chatInputHint": "Escriu un missatge",
   "chatSend": "Enviar",
   "chatSendError": "No s’ha pogut enviar el missatge. Torna-ho a provar.",
+  "chatMessageTooLong": "El missatge és massa llarg. Fes-lo més curt.",
+  "chatBackToActivity": "Tornar a la fitxa",
   "chatYou": "Tu",
   "actPublishedBy": "Publicat per",
   "actReliabilityNone": "Fiabilitat de l’organitzador: sense valoracions",

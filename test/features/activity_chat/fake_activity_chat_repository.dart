@@ -28,6 +28,9 @@ class FakeActivityChatRepository implements ActivityChatRepository {
   /// Si no és nul, [sendMessage] espera que es completi.
   Completer<void>? pendingSend;
 
+  /// Si no és nul, [getMessages] espera que es completi.
+  Completer<void>? pendingLoad;
+
   final requestedPages = <int>[];
   final sent = <String>[];
 
@@ -41,6 +44,7 @@ class FakeActivityChatRepository implements ActivityChatRepository {
     int pageSize = activityMessagePageSize,
   }) async {
     requestedPages.add(page);
+    await pendingLoad?.future;
     if (loadError case final error?) throw error;
     final newestFirst = messages.reversed.toList();
     return ActivityMessagePage(

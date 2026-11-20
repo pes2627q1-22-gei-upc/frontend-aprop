@@ -2284,6 +2284,18 @@ abstract class AppLocalizations {
   /// **'No s’ha pogut enviar el missatge. Torna-ho a provar.'**
   String get chatSendError;
 
+  /// No description provided for @chatMessageTooLong.
+  ///
+  /// In ca, this message translates to:
+  /// **'El missatge és massa llarg. Fes-lo més curt.'**
+  String get chatMessageTooLong;
+
+  /// No description provided for @chatBackToActivity.
+  ///
+  /// In ca, this message translates to:
+  /// **'Tornar a la fitxa'**
+  String get chatBackToActivity;
+
   /// No description provided for @chatYou.
   ///
   /// In ca, this message translates to:

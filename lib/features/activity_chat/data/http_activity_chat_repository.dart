@@ -25,9 +25,10 @@ class HttpActivityChatRepository implements ActivityChatRepository {
       throw ApiException('Resposta invàlida en carregar el xat.');
     }
     return ActivityMessagePage(
+      // Un missatge mal format no amaga la resta de la pàgina.
       messages: [
         for (final message in decoded['messages'] as List)
-          _messageFrom(message),
+          ?_messageFrom(message),
       ],
       total: (decoded['total'] as num?)?.toInt() ?? 0,
     );
@@ -35,13 +36,20 @@ class HttpActivityChatRepository implements ActivityChatRepository {
 
   @override
   Future<ActivityMessage> sendMessage(String activityId, String text) async {
-    final decoded = await _call(
-      () => apiClient.postJson(
-        'events/$activityId/messages',
-        body: {'text': text},
-      ),
-    );
-    return _messageFrom(decoded);
+    final Object? decoded;
+    try {
+      decoded = await _call(
+        () => apiClient.postJson(
+          'events/$activityId/messages',
+          body: {'text': text},
+        ),
+      );
+    } on ApiException catch (error) {
+      if (error.statusCode == 400) throw const MessageRejectedException();
+      rethrow;
+    }
+    return _messageFrom(decoded) ??
+        (throw ApiException('Missatge del xat invàlid.'));
   }
 
   /// El backend respon 403 a qui no s'hi ha apuntat (R11).
@@ -54,16 +62,33 @@ class HttpActivityChatRepository implements ActivityChatRepository {
     }
   }
 
-  static ActivityMessage _messageFrom(Object? json) {
-    if (json is! Map<String, Object?>) {
-      throw ApiException('Missatge del xat invàlid.');
-    }
-    final name = (json['name'] as String?)?.trim() ?? '';
+  /// Nul si el missatge no és vàlid (sense data d'enviament, per exemple).
+  static ActivityMessage? _messageFrom(Object? json) {
+    if (json is! Map<String, Object?>) return null;
+    final sentAt = switch (json['date-sent']) {
+      final String date => DateTime.tryParse(date),
+      _ => null,
+    };
+    if (sentAt == null) return null;
+    final name = switch (json['name']) {
+      final String name => name.trim(),
+      _ => '',
+    };
+    final username = switch (json['username']) {
+      final String username => username,
+      _ => '',
+    };
     return ActivityMessage(
-      authorId: json['user-id'] as String? ?? '',
-      authorName: name.isNotEmpty ? name : json['username'] as String? ?? '',
-      text: json['text'] as String? ?? '',
-      sentAt: DateTime.parse(json['date-sent'] as String).toLocal(),
+      authorId: switch (json['user-id']) {
+        final String id => id,
+        _ => '',
+      },
+      authorName: name.isNotEmpty ? name : username,
+      text: switch (json['text']) {
+        final String text => text,
+        _ => '',
+      },
+      sentAt: sentAt.toLocal(),
     );
   }
 }

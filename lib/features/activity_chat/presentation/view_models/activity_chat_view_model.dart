@@ -9,7 +9,7 @@ import '../../repositories/activity_chat_repository.dart';
 /// Xat d'una activitat: l'historial, els missatges nous i l'enviament.
 ///
 /// El backend no avisa dels missatges nous, així que mentre el xat és obert
-/// es tornen a demanar cada [pollInterval].
+/// (i l'app és en primer pla) es tornen a demanar cada [pollInterval].
 // TODO(DP-062): sense temps real al backend.
 class ActivityChatViewModel extends ChangeNotifier {
   ActivityChatViewModel({
@@ -29,8 +29,10 @@ class ActivityChatViewModel extends ChangeNotifier {
   /// Del més antic al més nou, com es llegeixen.
   List<ActivityMessage> _messages = const [];
   int _total = 0;
-  int _nextPage = 1;
   bool _hasLoaded = false;
+  bool _isRefreshing = false;
+  bool _isPaused = false;
+  bool _notEnrolled = false;
   bool _isLoading = false;
   bool _isLoadingOlder = false;
   bool _isSending = false;
@@ -49,6 +51,9 @@ class ActivityChatViewModel extends ChangeNotifier {
   String? get olderError => _olderError;
   String? get sendError => _sendError;
 
+  /// La persona no hi està apuntada (R11): tornar-ho a provar no serveix.
+  bool get isNotEnrolled => _notEnrolled;
+
   /// Hi ha missatges més antics que encara no s'han carregat.
   bool get hasOlder => _hasLoaded && _messages.length < _total;
 
@@ -59,6 +64,7 @@ class ActivityChatViewModel extends ChangeNotifier {
     if (_isLoading || _isDisposed) return;
     _isLoading = true;
     _errorMessage = null;
+    _notEnrolled = false;
     notifyListeners();
 
     try {
@@ -66,11 +72,11 @@ class ActivityChatViewModel extends ChangeNotifier {
       if (_isDisposed) return;
       _messages = _merge(const [], page.messages);
       _total = page.total;
-      _nextPage = 1;
       _hasLoaded = true;
-      _poll ??= Timer.periodic(pollInterval, (_) => refresh());
+      _startPolling();
     } on NotEnrolledInChatException {
       if (_isDisposed) return;
+      _notEnrolled = true;
       _errorMessage = currentL10n.chatNotEnrolled;
     } catch (_) {
       if (_isDisposed) return;
@@ -86,7 +92,9 @@ class ActivityChatViewModel extends ChangeNotifier {
   /// Afegeix els missatges nous. Si falla, es torna a provar la propera
   /// vegada sense molestar la persona.
   Future<void> refresh() async {
-    if (_isDisposed || _isLoading || !_hasLoaded) return;
+    // Amb una xarxa lenta, una petició no se'n troba una altra pel camí.
+    if (_isDisposed || _isLoading || _isRefreshing || !_hasLoaded) return;
+    _isRefreshing = true;
     try {
       final page = await _repository.getMessages(activityId);
       if (_isDisposed) return;
@@ -98,7 +106,30 @@ class ActivityChatViewModel extends ChangeNotifier {
       }
     } catch (_) {
       // Sense connexió: els missatges ja carregats continuen a la pantalla.
+    } finally {
+      _isRefreshing = false;
     }
+  }
+
+  /// L'app passa a segon pla: deixa de demanar missatges (bateria i dades).
+  void pause() {
+    _isPaused = true;
+    _poll?.cancel();
+    _poll = null;
+  }
+
+  /// L'app torna: demana els missatges nous de seguida i continua.
+  void resume() {
+    if (!_isPaused || _isDisposed) return;
+    _isPaused = false;
+    if (!_hasLoaded) return;
+    _startPolling();
+    refresh();
+  }
+
+  void _startPolling() {
+    if (_isPaused || _isDisposed) return;
+    _poll ??= Timer.periodic(pollInterval, (_) => refresh());
   }
 
   Future<void> loadOlder() async {
@@ -108,13 +139,28 @@ class ActivityChatViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final page = await _repository.getMessages(activityId, page: _nextPage);
-      if (_isDisposed) return;
-      // Si n'han arribat de nous, la pàgina es desplaça i repeteix algun
-      // missatge: es descarten en ajuntar-los.
-      _messages = _merge(_messages, page.messages);
-      _total = page.total;
-      _nextPage++;
+      // Les pàgines van per posició des del més nou. Amb els refrescos, els
+      // ja carregats són els més recents, així que la pàgina on acaben és la
+      // que té els anteriors (si n'han arribat de nous, en repeteix alguns,
+      // que es descarten en ajuntar-los).
+      // TODO(DP-062): si n'arriben més d'una pàgina entre dos refrescos, pot
+      // quedar un forat a l'historial.
+      final first = _messages.firstOrNull;
+      var pageIndex = _messages.length ~/ activityMessagePageSize;
+      var added = false;
+      while (!added) {
+        final page = await _repository.getMessages(activityId, page: pageIndex);
+        if (_isDisposed) return;
+        final merged = _merge(_messages, page.messages);
+        _total = page.total;
+        added = first == null
+            ? merged.isNotEmpty
+            : merged.first.sentAt.isBefore(first.sentAt);
+        _messages = merged;
+        // Una pàgina sense res d'anterior: la següent segur que en té.
+        if (added || page.messages.isEmpty || !hasOlder) break;
+        pageIndex++;
+      }
     } catch (_) {
       if (_isDisposed) return;
       _olderError = currentL10n.chatLoadError;
@@ -131,6 +177,11 @@ class ActivityChatViewModel extends ChangeNotifier {
   Future<bool> send(String text) async {
     final trimmed = text.trim();
     if (trimmed.isEmpty || _isSending || _isDisposed) return false;
+    if (activityMessageLength(trimmed) > maxActivityMessageLength) {
+      _sendError = currentL10n.chatMessageTooLong;
+      notifyListeners();
+      return false;
+    }
     _isSending = true;
     _sendError = null;
     notifyListeners();
@@ -144,6 +195,9 @@ class ActivityChatViewModel extends ChangeNotifier {
       return true;
     } on NotEnrolledInChatException {
       if (!_isDisposed) _sendError = currentL10n.chatNotEnrolled;
+      return false;
+    } on MessageRejectedException {
+      if (!_isDisposed) _sendError = currentL10n.chatMessageTooLong;
       return false;
     } catch (_) {
       if (!_isDisposed) _sendError = currentL10n.chatSendError;
