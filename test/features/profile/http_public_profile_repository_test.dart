@@ -144,4 +144,69 @@ void main() {
       throwsFormatException,
     );
   });
+
+  group('Friend requests (#160)', () {
+    test('Posts the request with the session token', () async {
+      final repo = repository((request) async {
+        expect(request.method, 'POST');
+        expect(
+          request.url.path,
+          '/users/$otherProfileServerId/friend-requests',
+        );
+        expect(request.headers['Authorization'], 'Bearer profile-token');
+        return _json({
+          'sender-id': profileServerId,
+          'receiver-id': otherProfileServerId,
+          'state': 'Pendent',
+        });
+      });
+
+      expect(
+        await repo.sendFriendRequest(otherProfileServerId),
+        FriendRequestResult.sent,
+      );
+    });
+
+    test('The server text tells the 400 refusals apart', () async {
+      for (final (text, expected) in [
+        (
+          'pending friend request exists between these users',
+          FriendRequestResult.alreadyPending,
+        ),
+        (
+          'requester is already friends with target user',
+          FriendRequestResult.alreadyFriends,
+        ),
+        (
+          'requester has blocked or been blocked by target user',
+          FriendRequestResult.blocked,
+        ),
+      ]) {
+        final repo = repository((request) async => _json({'error': text}, 400));
+        expect(
+          await repo.sendFriendRequest(otherProfileServerId),
+          expected,
+          reason: text,
+        );
+      }
+    });
+
+    test('Other failures are errors, not a sent request', () async {
+      expect(
+        repository((request) async => _json({'error': 'something else'}, 400))
+            .sendFriendRequest(otherProfileServerId),
+        throwsA(isA<ApiException>()),
+      );
+      expect(
+        repository((request) async => _json({'error': 'boom'}, 500))
+            .sendFriendRequest(otherProfileServerId),
+        throwsA(isA<ApiException>()),
+      );
+      expect(
+        repository((request) async => _json({'error': 'user not found'}, 404))
+            .sendFriendRequest(otherProfileServerId),
+        throwsA(isA<PublicProfileNotFound>()),
+      );
+    });
+  });
 }

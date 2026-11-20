@@ -75,6 +75,26 @@ class AppLocalizationsEn extends AppLocalizations {
   String get publicProfileTabCreated => 'Created';
 
   @override
+  String get friendAdd => 'Add friend';
+
+  @override
+  String get friendSending => 'Sending…';
+
+  @override
+  String get friendRequestSent => 'Request sent';
+
+  @override
+  String get friendAlready => 'Friends';
+
+  @override
+  String get friendRequestError =>
+      'We couldn’t send the request. Please try again.';
+
+  @override
+  String get friendRequestBlocked =>
+      'You can’t send a friend request to this person.';
+
+  @override
   String get publicProfilePlansLoadError => 'We couldn’t load the plans.';
 
   @override

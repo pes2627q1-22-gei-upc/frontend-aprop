@@ -10,6 +10,7 @@
 
 | Taiga | Tasca | Branca | Estat |
 |---|---|---|---|
+| #160 | [FE] Botó d'acció d'amistat al perfil aliè + integració al ViewModel + tests | `feature/boto-amistat` | Implementada (HTTP i Demo); DP-064 oberta; pendent revisió humana |
 | #162 | [FE] Vista y `UserSearchViewModel` integrada en el buscador de Descobreix (fig. 16) + navegación al perfil conservando estado + tests | `feature/user-search-162` | Implementada amb HTTP/Demo; 725 proves, anàlisi i revisió tècnica correctes; sense commit/push |
 | #274 | [FE] Mapa a pantalla completa estil Google Maps | `feature/mapa-pantalla-completa` | PR #58; correccions de la revisió (proves, xips de 48 px, documentació, codi sense ús); només mapa per decisió de l’usuari (DP-061) |
 | #273 | [FE] Intercanviar Inici i Descobreix | `feature/intercanviar-inici-descobreix` | PR #57; correccions de la revisió (marge de l'assistent, documentació, proves); DP-060 oberta |

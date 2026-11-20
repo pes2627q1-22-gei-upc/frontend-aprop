@@ -652,6 +652,20 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Provisionalment:** fila compacta (miniatura 72 px, títol, municipi · data i la mateixa acció d'apuntar-se). Mateix estat d'inscripcions, mateix detall en tocar. Sense avatar del creador ni «Font». `TODO(DP-044)`: confirmar amb l'equip/mockup.
 - **Qui decideix:** equip frontend (UX)
 
+### DP-064 · Botó d’amistat al perfil d’una altra persona (#160)
+- **Estat:** oberta · 2026-11-20 · Claude Code (Opus 5.5) amb confirmació de l’usuari · Taiga #160 (història #33)
+- **Context:** `PublicProfileScreen`, `PublicProfileViewModel`, `HttpPublicProfileRepository.sendFriendRequest`. Backend consultat a `api-aprop@develop` sense modificar-lo: `POST /users/{id}/friend-requests`.
+- **Decisions de l’usuari:** botó amb tres estats: «Afegeix com a amic» → (enviant) → «Sol·licitud enviada» (desactivat); «Amics» (desactivat) si ja ho sou. No surt al perfil propi ni amb un bloqueig. Si el servidor diu que ja hi ha una sol·licitud, passa a «Sol·licitud enviada».
+- **Dubtes (contracte del backend):**
+  - Tots els rebuigs (sol·licitud pendent, ja amics, bloqueig, a un mateix) són un 400; l’app els distingeix pel text de l’error. Si el backend canvia el text, el rebuig es mostra com un error que es pot tornar a provar. Caldria un codi d’estat (p. ex. 409) o un camp `code`.
+  - `GET /users/{id}` no diu si hi ha una sol·licitud pendent ni si hi ha un bloqueig. En obrir el perfil surt «Afegeix com a amic» i l’app ho descobreix quan el servidor la rebutja. La pantalla recorda la sol·licitud mentre és oberta.
+  - «Ja hi ha una sol·licitud» pot ser una que t’ha enviat l’altra persona; també es mostra «Sol·licitud enviada». Es podria indicar que la responguis a Avisos amb `GET /users/me/friend-requests`.
+  - Amb bloqueig no hi ha botó i un text diu que no hi pots enviar una sol·licitud.
+- **Deduït:** en Demo, les sol·licituds enviades es recorden durant l’execució; Laia i Júlia ja són amigues.
+- **Codi:** `TODO(DP-064)` a `http_public_profile_repository.dart` i `public_profile_view_model.dart`.
+- **Qui decideix:** backend (codis d’error i estat de la sol·licitud a `GET /users/{id}`)
+- **Resolució:**
+
 ### DP-063 · Perfil d’una altra persona (#277): plans fets, privacitat i dades Demo
 - **Estat:** oberta · 2026-11-20 · Claude Code (Opus 5.5) amb confirmació de l’usuari · Taiga #277 (història #36, CA3)
 - **Context:** `PublicProfileScreen`, `HttpPublicProfileRepository` i `DemoPublicProfileRepository`. Backend consultat a `api-aprop@develop` sense modificar-lo: `GET /users/{id}` (amb `is-friend` i `plans-visible`), `GET /users/{id}/created-events` i `GET /users/{userId}/events`. No hi ha mockup del perfil d’una altra persona.

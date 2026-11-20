@@ -92,5 +92,6 @@ Verificació després de la integració: `flutter pub get --enforce-lockfile` co
 - **Estat:** `PublicProfileViewModel`, creat i alliberat per la pantalla. La capçalera i les dues llistes carreguen per separat, amb error i reintent propis.
 - **Navegació:** `MainShell._openUserProfile` l’obre al navegador de la secció activa des de «Veure perfil» de la fitxa i des dels avisos d’una persona. Si és la mateixa persona, obre la pestanya Perfil. Des del perfil, una activitat obre la seva fitxa.
 - **Demo:** Laia (amiga, plans visibles), Marc (no amic) i Júlia (amiga, plans ocults).
+- **Botó d’amistat (#160, DP-064):** al lloc d’«Editar perfil». «Afegeix com a amic» envia `POST /users/{id}/friend-requests` i, quan el servidor ho confirma, passa a «Sol·licitud enviada» (desactivat). Si ja sou amics, «Amics» (desactivat). Si el servidor diu que ja hi ha una sol·licitud o que sou amics, el botó hi passa; amb un bloqueig desapareix i surt un avís. Un error deixa tornar-ho a provar.
 
-Prova manual: amb un compte nou, a la pestanya Mapa obrir «Teatre sota les estrelles» → «Veure perfil» (Laia, amb plans); a Avisos → Social, tocar la sol·licitud de Marc (plans privats).
+Prova manual: amb un compte nou, a la pestanya Mapa obrir «Teatre sota les estrelles» → «Veure perfil» (Laia, amb plans); a Avisos → Social, tocar la sol·licitud de Marc (plans privats) i prémer «Afegeix com a amic».

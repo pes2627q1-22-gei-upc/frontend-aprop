@@ -65,6 +65,9 @@ class DemoPublicProfileRepository implements PublicProfileRepository {
 
   String _id(String userId) => _aliases[userId] ?? userId;
 
+  /// Requests sent during this run of the app.
+  final _sentRequests = <String>{};
+
   @override
   Future<PublicProfile> getPublicProfile(String userId) async {
     final id = _id(userId);
@@ -97,6 +100,17 @@ class DemoPublicProfileRepository implements PublicProfileRepository {
         (a) => a.source == ActivitySource.community && a.creator?.userId == id,
       ),
     );
+  }
+
+  @override
+  Future<FriendRequestResult> sendFriendRequest(String userId) async {
+    final id = _id(userId);
+    final person = _people[id];
+    if (person == null) throw const PublicProfileNotFound();
+    if (person.isFriend) return FriendRequestResult.alreadyFriends;
+    return _sentRequests.add(id)
+        ? FriendRequestResult.sent
+        : FriendRequestResult.alreadyPending;
   }
 
   @override

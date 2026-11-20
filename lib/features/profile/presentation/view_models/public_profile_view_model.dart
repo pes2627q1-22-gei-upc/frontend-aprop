@@ -20,6 +20,8 @@ class PublicProfileViewModel extends ChangeNotifier {
   final _created = _ListState();
   final _plans = _ListState();
   bool _isDisposed = false;
+  FriendshipAction? _friendship;
+  String? _friendRequestError;
 
   PublicProfile? get profile => _profile;
   bool get isLoading => _isLoading;
@@ -37,6 +39,12 @@ class PublicProfileViewModel extends ChangeNotifier {
   bool get isLoadingPlans => _plans.isLoading;
   String? get plansError => _plans.error;
 
+  /// The friend button (#160); null hides it (no session, or unknown).
+  FriendshipAction? get friendship => _friendship;
+
+  /// Why the last request could not be sent; the button allows a retry.
+  String? get friendRequestError => _friendRequestError;
+
   Future<void> load() async {
     if (_isDisposed || _isLoading) return;
     _isLoading = true;
@@ -48,6 +56,14 @@ class PublicProfileViewModel extends ChangeNotifier {
       if (_isDisposed) return;
       _profile = result;
       _notFound = false;
+      _friendship = switch ((result.isFriend, _friendship)) {
+        (true, _) => FriendshipAction.friends,
+        // The profile does not say whether a request is pending: keep what
+        // this screen already knows.
+        (false, final known?) when known != FriendshipAction.friends => known,
+        (false, _) => FriendshipAction.add,
+        (null, _) => null,
+      };
     } on PublicProfileNotFound {
       if (_isDisposed) return;
       _profile = null;
@@ -85,6 +101,31 @@ class PublicProfileViewModel extends ChangeNotifier {
     );
   }
 
+  // TODO(DP-064): the profile cannot say that a request is pending or that
+  // someone is blocked; the button learns it when the server refuses.
+  Future<void> sendFriendRequest() async {
+    if (_isDisposed || _friendship != FriendshipAction.add) return;
+    _friendship = FriendshipAction.sending;
+    _friendRequestError = null;
+    notifyListeners();
+    try {
+      final result = await repository.sendFriendRequest(userId);
+      if (_isDisposed) return;
+      _friendship = switch (result) {
+        FriendRequestResult.sent ||
+        FriendRequestResult.alreadyPending => FriendshipAction.requestSent,
+        FriendRequestResult.alreadyFriends => FriendshipAction.friends,
+        FriendRequestResult.blocked => FriendshipAction.unavailable,
+      };
+    } catch (_) {
+      if (_isDisposed) return;
+      _friendship = FriendshipAction.add;
+      _friendRequestError = currentL10n.friendRequestError;
+    } finally {
+      if (!_isDisposed) notifyListeners();
+    }
+  }
+
   Future<void> _loadList(
     _ListState state,
     Future<List<Activity>> Function() fetch,
@@ -115,6 +156,22 @@ class PublicProfileViewModel extends ChangeNotifier {
     _isDisposed = true;
     super.dispose();
   }
+}
+
+/// What the friend button shows and allows.
+enum FriendshipAction {
+  /// «Afegeix com a amic».
+  add,
+  sending,
+
+  /// «Sol·licitud enviada», disabled.
+  requestSent,
+
+  /// «Amics», disabled.
+  friends,
+
+  /// A block between both: no button.
+  unavailable,
 }
 
 class _ListState {

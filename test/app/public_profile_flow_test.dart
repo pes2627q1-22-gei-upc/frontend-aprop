@@ -70,6 +70,13 @@ void main() {
     expect(find.text('Laia Soler'), findsOneWidget);
     expect(find.text('Compartir perfil'), findsOneWidget);
     expect(find.text('Editar perfil'), findsNothing);
+    // Already friends (#160): the button cannot send a request.
+    final friend = find.byKey(const ValueKey('public-profile-friend'));
+    expect(
+      find.descendant(of: friend, matching: find.text('Amics')),
+      findsOneWidget,
+    );
+    expect(tester.widget<ButtonStyleButton>(friend).onPressed, isNull);
     // Laia is a friend who shares her plans: «Plans fets» opens first.
     expect(
       find.byKey(const ValueKey('public-profile-activity-demo-jazz')),
@@ -121,6 +128,17 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.widgetWithText(AppBar, 'marcvidal'), findsOneWidget);
+      // Not friends (#160): send a request; it cannot be sent twice.
+      final friend = find.byKey(const ValueKey('public-profile-friend'));
+      await tester.tap(
+        find.descendant(of: friend, matching: find.text('Afegeix com a amic')),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        find.descendant(of: friend, matching: find.text('Sol·licitud enviada')),
+        findsOneWidget,
+      );
+      expect(tester.widget<ButtonStyleButton>(friend).onPressed, isNull);
       // Private plans: the profile opens on «Creats».
       expect(
         find.text('Marc Vidal encara no ha creat cap activitat.'),

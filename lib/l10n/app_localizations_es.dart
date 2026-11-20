@@ -77,6 +77,26 @@ class AppLocalizationsEs extends AppLocalizations {
   String get publicProfileTabCreated => 'Creados';
 
   @override
+  String get friendAdd => 'Añadir como amigo';
+
+  @override
+  String get friendSending => 'Enviando…';
+
+  @override
+  String get friendRequestSent => 'Solicitud enviada';
+
+  @override
+  String get friendAlready => 'Amigos';
+
+  @override
+  String get friendRequestError =>
+      'No hemos podido enviar la solicitud. Vuelve a intentarlo.';
+
+  @override
+  String get friendRequestBlocked =>
+      'No puedes enviar una solicitud de amistad a esta persona.';
+
+  @override
   String get publicProfilePlansLoadError =>
       'No hemos podido cargar los planes.';
 
