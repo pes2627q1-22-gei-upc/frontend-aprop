@@ -3100,6 +3100,12 @@ abstract class AppLocalizations {
   /// **'Descobreix'**
   String get navDiscover;
 
+  /// No description provided for @navMap.
+  ///
+  /// In ca, this message translates to:
+  /// **'Mapa'**
+  String get navMap;
+
   /// No description provided for @navNotifications.
   ///
   /// In ca, this message translates to:

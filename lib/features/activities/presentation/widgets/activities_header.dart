@@ -158,8 +158,8 @@ class _ActivitiesBrand extends StatelessWidget {
     return Row(
       children: [
         const Expanded(child: APropLogo(alignment: Alignment.centerLeft)),
-        const SizedBox(width: 8),
-        create,
+        // Al mapa no es crea res: el «+» és a la capçalera d'Inici (#273).
+        if (onCreatePressed != null) ...[const SizedBox(width: 8), create],
       ],
     );
   }

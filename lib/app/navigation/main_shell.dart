@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../core/l10n/locale_controller.dart';
+import '../../core/widgets/aprop_logo.dart';
 import '../../features/activities/data/demo_location_repository.dart';
 import '../../features/activities/models/activity.dart';
 import '../../features/activities/presentation/screens/activities_screen.dart';
@@ -123,10 +124,15 @@ class _MainShellState extends State<MainShell> {
   late final AssistantViewModel _assistantViewModel;
   late final ProfileViewModel _profileViewModel;
 
+  /// Pestanyes de la barra inferior. Inici mostra les recomanacions
+  /// (Descobreix) i el mapa, amb la llista, té la seva pestanya (#273).
+  static const _homeTab = 0;
+  static const _mapTab = 2;
+
   static String _title(BuildContext context, int index) => [
     context.l10n.appTitle,
     context.l10n.navAgenda,
-    context.l10n.navDiscover,
+    context.l10n.navMap,
     context.l10n.navNotifications,
     context.l10n.navProfile,
   ][index];
@@ -278,11 +284,14 @@ class _MainShellState extends State<MainShell> {
 
   /// Leaves the assistant and shows the screen one of its replies suggested.
   void _openAssistantTarget(AssistantScreenTarget target) {
-    _sectionNavigatorKeys[0].currentState!.popUntil((r) => r.isFirst);
+    _sectionNavigatorKeys[_assistantTab].currentState!.popUntil(
+      (r) => r.isFirst,
+    );
     final index = switch (target) {
-      AssistantScreenTarget.home => 0,
+      // Inici ja mostra el que era Descobreix (#273).
+      // TODO(DP-060): cap enllaç de l'assistent no porta al Mapa.
+      AssistantScreenTarget.home || AssistantScreenTarget.discover => _homeTab,
       AssistantScreenTarget.agenda => 1,
-      AssistantScreenTarget.discover => 2,
       AssistantScreenTarget.notifications => 3,
       AssistantScreenTarget.profile ||
       AssistantScreenTarget.settings ||
@@ -313,9 +322,13 @@ class _MainShellState extends State<MainShell> {
     );
   }
 
+  /// Pestanya des d'on s'ha obert l'assistent (Inici o Mapa).
+  int _assistantTab = _homeTab;
+
   Future<void> _openAssistant() async {
-    final navigator = _sectionNavigatorKeys[0].currentState!;
+    final navigator = _sectionNavigatorKeys[_selectedIndex].currentState!;
     if (_isAssistantOpen || navigator.canPop()) return;
+    _assistantTab = _selectedIndex;
     // TODO(DP-048): Confirm that details opened from chat keep this full-body
     // flow. The section's history and shared ViewModels remain mounted.
     setState(() => _isAssistantOpen = true);
@@ -372,8 +385,8 @@ class _MainShellState extends State<MainShell> {
   }
 
   void _openDiscoverySearch() {
-    final navigator = _sectionNavigatorKeys[2].currentState!;
-    if (_selectedIndex != 2 || navigator.canPop()) return;
+    final navigator = _sectionNavigatorKeys[_homeTab].currentState!;
+    if (_selectedIndex != _homeTab || navigator.canPop()) return;
     navigator.push<void>(
       MaterialPageRoute<void>(
         settings: const RouteSettings(name: '/discover/search'),
@@ -382,7 +395,7 @@ class _MainShellState extends State<MainShell> {
           enrollmentViewModel: _enrollmentViewModel,
           onBack: () => Navigator.of(context).pop(),
           onActivitySelected: (activityId) {
-            if (_selectedIndex != 2 ||
+            if (_selectedIndex != _homeTab ||
                 !(ModalRoute.of(context)?.isCurrent ?? false)) {
               return;
             }
@@ -410,7 +423,7 @@ class _MainShellState extends State<MainShell> {
   );
 
   void _openCreateActivity() {
-    final navigator = _sectionNavigatorKeys[0].currentState!;
+    final navigator = _sectionNavigatorKeys[_homeTab].currentState!;
     if (navigator.canPop()) return;
     navigator.push<void>(
       MaterialPageRoute<void>(
@@ -599,29 +612,53 @@ class _MainShellState extends State<MainShell> {
   }
 
   Widget _sectionRoot(int index, Widget child) {
+    final appBar = switch (index) {
+      // El mapa porta la seva pròpia capçalera amb els filtres.
+      _mapTab => null,
+      _homeTab => AppBar(
+        leading: IconButton(
+          onPressed: _openCreateActivity,
+          tooltip: context.l10n.actCreate,
+          icon: const Icon(Icons.add),
+        ),
+        title: const APropLogo(height: 40),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            key: const ValueKey('discover-search'),
+            onPressed: _openDiscoverySearch,
+            tooltip: context.l10n.discoverSearchField,
+            icon: const Icon(Icons.search),
+          ),
+        ],
+      ),
+      _ => AppBar(title: Text(_title(context, index)), centerTitle: false),
+    };
+    final assistantButton = FloatingActionButton.extended(
+      heroTag: 'assistant-$index',
+      onPressed: _openAssistant,
+      tooltip: context.l10n.assistantOpenTooltip,
+      icon: const Icon(Icons.smart_toy_outlined, size: 20),
+      label: Text(context.l10n.assistantTitle),
+    );
     return Scaffold(
-      appBar: index == 0
-          ? null
-          : AppBar(title: Text(_title(context, index)), centerTitle: false),
+      appBar: appBar,
       body: child,
-      floatingActionButton: index == 0
-          ? ValueListenableBuilder<double>(
-              valueListenable: _assistantButtonLift,
-              // Puja suaument fins a sobre de la targeta, en lloc de saltar.
-              builder: (context, lift, child) => AnimatedPadding(
-                duration: mapOverlayAnimationDuration,
-                curve: Curves.easeOutCubic,
-                padding: EdgeInsets.only(bottom: lift),
-                child: child,
-              ),
-              child: FloatingActionButton.extended(
-                onPressed: _openAssistant,
-                tooltip: context.l10n.assistantOpenTooltip,
-                icon: const Icon(Icons.smart_toy_outlined, size: 20),
-                label: Text(context.l10n.assistantTitle),
-              ),
-            )
-          : null,
+      floatingActionButton: switch (index) {
+        _homeTab => assistantButton,
+        _mapTab => ValueListenableBuilder<double>(
+          valueListenable: _assistantButtonLift,
+          // Puja suaument fins a sobre de la targeta, en lloc de saltar.
+          builder: (context, lift, child) => AnimatedPadding(
+            duration: mapOverlayAnimationDuration,
+            curve: Curves.easeOutCubic,
+            padding: EdgeInsets.only(bottom: lift),
+            child: child,
+          ),
+          child: assistantButton,
+        ),
+        _ => null,
+      },
     );
   }
 
@@ -635,24 +672,15 @@ class _MainShellState extends State<MainShell> {
           sizing: StackFit.expand,
           children: [
             _buildSectionNavigator(
-              0,
+              _homeTab,
               (context) => _sectionRoot(
-                0,
-                ActivitiesScreen(
-                  viewModel: _activitiesViewModel,
+                _homeTab,
+                DiscoverScreen(
+                  key: ValueKey(_discoverGeneration),
+                  userId: widget.user.id,
+                  repository: widget.discoveryRepository,
                   enrollmentViewModel: _enrollmentViewModel,
                   onActivitySelected: _openActivityDetails,
-                  mapViewModel: _activitiesMapViewModel,
-                  userLocationViewModel: _userLocationViewModel,
-                  onMapActivitySelected: (activityId) => _openActivityDetails(
-                    activityId,
-                    repository: widget.activityMapRepository,
-                  ),
-                  onCreatePressed: _openCreateActivity,
-                  // El botó ja té 16 de marge: amb 12 menys queda a 12 de la
-                  // targeta, com la llegenda.
-                  onMapOverlayChanged: (overlay) => _assistantButtonLift.value =
-                      overlay == 0 ? 0 : overlay - 4,
                 ),
               ),
             ),
@@ -677,16 +705,23 @@ class _MainShellState extends State<MainShell> {
               ),
             ),
             _buildSectionNavigator(
-              2,
+              _mapTab,
               (context) => _sectionRoot(
-                2,
-                DiscoverScreen(
-                  key: ValueKey(_discoverGeneration),
-                  userId: widget.user.id,
-                  repository: widget.discoveryRepository,
+                _mapTab,
+                ActivitiesScreen(
+                  viewModel: _activitiesViewModel,
                   enrollmentViewModel: _enrollmentViewModel,
-                  onSearchPressed: _openDiscoverySearch,
                   onActivitySelected: _openActivityDetails,
+                  mapViewModel: _activitiesMapViewModel,
+                  userLocationViewModel: _userLocationViewModel,
+                  onMapActivitySelected: (activityId) => _openActivityDetails(
+                    activityId,
+                    repository: widget.activityMapRepository,
+                  ),
+                  // El botó ja té 16 de marge: amb 12 menys queda a 12 de la
+                  // targeta, com la llegenda.
+                  onMapOverlayChanged: (overlay) => _assistantButtonLift.value =
+                      overlay == 0 ? 0 : overlay - 4,
                 ),
               ),
             ),
@@ -736,9 +771,9 @@ class _MainShellState extends State<MainShell> {
                   label: context.l10n.navAgenda,
                 ),
                 NavigationDestination(
-                  icon: const Icon(Icons.search_outlined),
-                  selectedIcon: const Icon(Icons.search),
-                  label: context.l10n.navDiscover,
+                  icon: const Icon(Icons.map_outlined),
+                  selectedIcon: const Icon(Icons.map),
+                  label: context.l10n.navMap,
                 ),
                 NavigationDestination(
                   icon: const Icon(Icons.notifications_outlined),

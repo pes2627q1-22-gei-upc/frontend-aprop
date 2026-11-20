@@ -120,7 +120,7 @@ void main() {
       await tester.tap(find.byTooltip('Tornar enrere'));
       await tester.pumpAndSettle();
       expect(tester.getTopLeft(card).dy, closeTo(before, 1));
-      await tester.tap(destination('Inici'));
+      await tester.tap(destination('Mapa'));
       await tester.pumpAndSettle();
       await tester.tap(destination('Avisos'));
       await tester.pumpAndSettle();
@@ -137,7 +137,7 @@ void main() {
       notices.onRead = () => pending.future;
       await tester.tap(find.text(notificationMessage(eventNotice())));
       await tester.pump();
-      await tester.tap(destination('Inici'));
+      await tester.tap(destination('Mapa'));
       await tester.pumpAndSettle();
       pending.complete();
       await tester.pumpAndSettle();
@@ -145,7 +145,7 @@ void main() {
       expect(find.text('Jazz al parc'), findsOneWidget);
       expect(
         tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex,
-        0,
+        2, // Mapa
       );
     },
   );

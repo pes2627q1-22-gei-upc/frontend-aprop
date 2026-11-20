@@ -8,6 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../features/activities/fake_enrollment_repository.dart';
 import '../features/auth/fake_auth_repository.dart';
+import 'app_navigation.dart';
 
 void main() {
   late DemoAuthRepository auth;
@@ -40,6 +41,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
+    await openMapTab(tester);
   }
 
   testWidgets(
@@ -184,6 +186,7 @@ void main() {
     );
     await auth.checkEmailVerified();
     await tester.pumpAndSettle();
+    await openMapTab(tester);
     expect(cardLabel('demo-jazz', 'M’hi apunto'), findsOneWidget);
     expect(cardLabel('demo-jazz', 'Apuntat'), findsNothing);
 
@@ -191,6 +194,7 @@ void main() {
     await tester.pumpAndSettle();
     await auth.signIn(usernameOrEmail: 'laiasoler', password: 'Aprop2026!');
     await tester.pumpAndSettle();
+    await openMapTab(tester);
     expect(cardLabel('demo-jazz', 'Apuntat'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
@@ -218,6 +222,7 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
+      await openMapTab(tester);
     }
 
     testWidgets(
@@ -269,6 +274,7 @@ void main() {
       await tester.pumpAndSettle();
       confirmation.complete();
       await tester.pumpAndSettle();
+      await openMapTab(tester);
       expect(cardLabel('demo-jazz', 'Apuntat'), findsNothing);
       expect(cardLabel('demo-jazz', 'M’hi apunto'), findsOneWidget);
       expect(

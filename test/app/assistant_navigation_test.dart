@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../features/assistant/fake_assistant_repository.dart';
+import 'app_navigation.dart';
 
 Future<DemoAuthRepository> _pumpApp(
   WidgetTester tester, {
@@ -22,6 +23,7 @@ Future<DemoAuthRepository> _pumpApp(
     APropApp(authRepository: auth, assistantRepository: assistant),
   );
   await tester.pumpAndSettle();
+  await openMapTab(tester);
   return auth;
 }
 
@@ -98,7 +100,7 @@ void main() {
           tester
               .widget<NavigationBar>(find.byType(NavigationBar))
               .selectedIndex,
-          0,
+          2, // Mapa
         );
         expect(
           tester.state<ScrollableState>(scrollable).position.pixels,
