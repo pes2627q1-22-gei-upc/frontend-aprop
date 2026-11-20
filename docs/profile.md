@@ -93,4 +93,4 @@ Verificació després de la integració: `flutter pub get --enforce-lockfile` co
 - **Navegació:** `MainShell._openUserProfile` l’obre al navegador de la secció activa des de «Veure perfil» de la fitxa i des dels avisos d’una persona. Si és la mateixa persona, obre la pestanya Perfil. Des del perfil, una activitat obre la seva fitxa.
 - **Demo:** Laia (amiga, plans visibles), Marc (no amic) i Júlia (amiga, plans ocults).
 
-Prova manual: amb un compte nou, obrir «Teatre sota les estrelles» → «Veure perfil» (Laia, amb plans); a Avisos → Social, tocar la sol·licitud de Marc (plans privats).
+Prova manual: amb un compte nou, a la pestanya Mapa obrir «Teatre sota les estrelles» → «Veure perfil» (Laia, amb plans); a Avisos → Social, tocar la sol·licitud de Marc (plans privats).

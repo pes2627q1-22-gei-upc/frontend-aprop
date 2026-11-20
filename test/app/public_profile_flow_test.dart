@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../features/activities/fake_enrollment_repository.dart';
+import 'app_navigation.dart';
 
 /// #277: another person's profile from an activity's creator and a notice.
 void main() {
@@ -39,6 +40,8 @@ void main() {
 
   /// Opens «Teatre sota les estrelles», created by Laia, and its creator.
   Future<void> openTheatreCreator(WidgetTester tester) async {
+    // Since #273 the activity list is in the Mapa tab.
+    await openMapTab(tester);
     final card = find.byKey(const ValueKey('demo-theatre'));
     await tester.scrollUntilVisible(
       card,
@@ -82,7 +85,7 @@ void main() {
       findsOneWidget,
     );
 
-    // Back to the activity, still in Inici.
+    // Back to the activity, still in the Mapa tab.
     await tester.tap(find.byTooltip('Tornar enrere'));
     await tester.pumpAndSettle();
     expect(find.widgetWithText(AppBar, 'Activitat'), findsOneWidget);
