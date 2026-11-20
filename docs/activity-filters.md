@@ -10,8 +10,8 @@ El panell de zona/municipi continua pendent d'abast i disseny.
 - Cada panell edita un esborrany local. Resultats i capçalera només canvien amb **Aplicar**.
 - **Netejar** esborra només l'esborrany d'aquell panell. Aplicar-lo buit elimina aquella restricció i
   conserva l'altre filtre. La creu, el fons, el gest de tancar i el retorn descarten els canvis.
-- La capçalera mostra marca, contorn i resum dels filtres aplicats; permet netejar-los tots.
-- Una selecció nova porta la llista al principi. Tornar d'una fitxa o canviar Mapa/Llista/secció conserva
+- Des de la #274, els filtres són xips a sobre del mapa (`MapFilterBar`): mostren la selecció i, si n'hi ha, un xip per netejar-los tots.
+- Una selecció nova porta la llista al principi. Tornar d'una fitxa o canviar de secció conserva
   els filtres. Una sessió nova els reinicia. No afecten Descobreix, cerca, Agenda ni inscripcions.
 - Sense coincidències hi ha un missatge i «Netejar filtres», diferenciat d'error o catàleg buit.
 
@@ -75,8 +75,8 @@ després del frame. El botó «Crear activitat» torna al seu lloc; netejar no r
 Dates amb nom complet, selecció i acció semàntica; caselles amb estat explícit. Les cel·les de dia
 tenen superfícies mínimes de 48 px i la graella admet desplaçament horitzontal si no hi caben set columnes.
 Amb text ampliat, subtítol i resum poden desplaçar-se amb el contingut; les accions es mantenen fixes
-i passen a una columna. La capçalera d'Inici es pot desplaçar en espais petits per deixar lloc als
-resultats. Colors del tema compartit i textos catalans.
+i passen a una columna. La fila de xips del mapa es desplaça de costat si no hi cap, i cada xip té
+una superfície tàctil de 48 px. Colors del tema compartit i textos catalans.
 Els missatges superposats al mapa també admeten desplaçament si el text ampliat supera l'espai disponible.
 
 ## Backend i límits (DP-035)

@@ -393,8 +393,11 @@ class _MainShellState extends State<MainShell> {
   }
 
   void _openDiscoverySearch() {
-    final navigator = _sectionNavigatorKeys[_homeTab].currentState!;
-    if (_selectedIndex != _homeTab || navigator.canPop()) return;
+    // Des de la capçalera d'Inici o de la barra del mapa (#274).
+    final tab = _selectedIndex;
+    if (tab != _homeTab && tab != _mapTab) return;
+    final navigator = _sectionNavigatorKeys[tab].currentState!;
+    if (navigator.canPop()) return;
     navigator.push<void>(
       MaterialPageRoute<void>(
         settings: const RouteSettings(name: '/discover/search'),
@@ -403,7 +406,7 @@ class _MainShellState extends State<MainShell> {
           enrollmentViewModel: _enrollmentViewModel,
           onBack: () => Navigator.of(context).pop(),
           onActivitySelected: (activityId) {
-            if (_selectedIndex != _homeTab ||
+            if (_selectedIndex != tab ||
                 !(ModalRoute.of(context)?.isCurrent ?? false)) {
               return;
             }
@@ -775,6 +778,7 @@ class _MainShellState extends State<MainShell> {
                   onActivitySelected: _openActivityDetails,
                   mapViewModel: _activitiesMapViewModel,
                   userLocationViewModel: _userLocationViewModel,
+                  onSearchPressed: _openDiscoverySearch,
                   onMapActivitySelected: (activityId) => _openActivityDetails(
                     activityId,
                     repository: widget.activityMapRepository,

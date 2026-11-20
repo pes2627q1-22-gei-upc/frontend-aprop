@@ -32,7 +32,7 @@ L’assistent cultural («Assistent», fig. 10) s’obre des del botó flotant d
 
 Crear activitat (**Taiga #31**): el botó «Crear activitat» d'Inici obre un formulari per publicar una activitat no oficial amb títol, descripció, una categoria, data i hora d'inici, municipi, indicacions i preu opcionals, i una imatge de portada (una plantilla per defecte que es pot canviar). En publicar s'obre la fitxa, la persona creadora hi queda apuntada i l'activitat surt a la llista amb «Publicat per». Funciona amb dades de demostració; consulta [la guia](docs/create-activity.md).
 
-Mapa d'Inici (**Taiga #21**): el selector «Mapa / Llista» mostra les activitats en un mapa de Google amb marcadors diferents per a les oficials, les d'usuaris i les d'amistats, agrupats amb un número quan són a prop. Tocar-ne un mostra una targeta amb «Veure activitat». Sense clau de Google Maps el mapa surt en gris; consulta [la guia](docs/inici-map.md).
+Mapa (**Taiga #21**, pestanya Mapa a pantalla completa des de la #274): mostra les activitats en un mapa de Google, amb la cerca i els filtres en xips a sobre, amb marcadors diferents per a les oficials, les d'usuaris i les d'amistats, agrupats amb un número quan són a prop. Tocar-ne un mostra una targeta amb «Veure activitat». Sense clau de Google Maps el mapa surt en gris; consulta [la guia](docs/inici-map.md).
 
 See [the event details guide](docs/activity-details.md), [the enrollment walkthrough](docs/event-enrollment.md) and [the calendar guide](docs/calendar.md) for the implementation flows.
 

@@ -18,6 +18,7 @@ void main() {
     await tester.pumpWidget(APropApp(authRepository: auth));
     await tester.pumpAndSettle();
     await openMapTab(tester);
+    await tapMarker(tester, 'demo-jazz');
 
     final jazzCard = find.byKey(const ValueKey('demo-jazz'));
     await tester.tap(
@@ -71,6 +72,7 @@ void main() {
     await tester.pumpWidget(APropApp(authRepository: auth));
     await tester.pumpAndSettle();
     await openMapTab(tester);
+    await tapMarker(tester, 'demo-jazz');
 
     final jazzCard = find.byKey(const ValueKey('demo-jazz'));
     await tester.tap(
@@ -120,6 +122,7 @@ void main() {
     await tester.pumpWidget(APropApp(authRepository: auth));
     await tester.pumpAndSettle();
     await openMapTab(tester);
+    await tapMarker(tester, 'demo-jazz');
 
     final jazzCard = find.byKey(const ValueKey('demo-jazz'));
     await tester.tap(

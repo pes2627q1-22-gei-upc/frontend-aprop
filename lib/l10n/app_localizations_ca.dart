@@ -1232,9 +1232,6 @@ class AppLocalizationsCa extends AppLocalizations {
   String get actLoadingZone => 'Carregant les activitats de la zona';
 
   @override
-  String get actFilterLocation => 'Catalunya';
-
-  @override
   String get actFilterDates => 'Dates';
 
   @override
@@ -1244,31 +1241,7 @@ class AppLocalizationsCa extends AppLocalizations {
   String get actClearAllFilters => 'Netejar tots els filtres';
 
   @override
-  String get actViewMap => 'Mapa';
-
-  @override
-  String get actViewList => 'Llista';
-
-  @override
   String get actCreate => 'Crear activitat';
-
-  @override
-  String get actCreateSoon => 'Crear activitat disponible properament';
-
-  @override
-  String actViewSelected(String label) {
-    return 'Vista $label seleccionada';
-  }
-
-  @override
-  String actViewSoon(String label) {
-    return 'Vista $label disponible properament';
-  }
-
-  @override
-  String actViewShow(String label) {
-    return 'Mostrar $label';
-  }
 
   @override
   String get actDetailsTitle => 'Activitat';
@@ -1520,13 +1493,6 @@ class AppLocalizationsCa extends AppLocalizations {
     );
     return '$_temp0';
   }
-
-  @override
-  String get actSeeListHint =>
-      'Consulta la llista per veure els resultats per categoria.';
-
-  @override
-  String get actSeeList => 'Veure llista';
 
   @override
   String get actClear => 'Netejar';

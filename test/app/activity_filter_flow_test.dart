@@ -1,6 +1,4 @@
 import 'package:aprop/app/aprop_app.dart';
-import 'package:aprop/features/activities/presentation/widgets/activities_header.dart';
-import 'package:aprop/features/activities/presentation/widgets/activity_card.dart';
 import 'package:aprop/features/activities/presentation/widgets/activity_categories_filter_sheet.dart';
 import 'package:aprop/features/auth/data/demo_auth_repository.dart';
 import 'package:flutter/material.dart';
@@ -46,7 +44,8 @@ void main() {
       expect(destination('Perfil').hitTestable(), findsNothing);
       await tester.tap(find.text('Aplicar'));
       await tester.pumpAndSettle();
-      expect(find.byType(ActivityCard), findsOneWidget);
+      expect(markerIds(tester), {'demo-theatre'});
+      await tapMarker(tester, 'demo-theatre');
       expect(find.text('Teatre sota les estrelles'), findsOneWidget);
       await tester.tap(find.text('M’hi apunto'));
       await tester.pumpAndSettle();
@@ -57,37 +56,26 @@ void main() {
       expect(find.text('Apuntat'), findsOneWidget);
       await tester.tap(find.byTooltip('Tornar enrere'));
       await tester.pumpAndSettle();
-      expect(find.byType(ActivityCard), findsOneWidget);
       await tester.tap(destination('Inici'));
       await tester.pumpAndSettle();
       expect(find.text('Mirades de Catalunya'), findsOneWidget);
       await tester.tap(destination('Mapa'));
       await tester.pumpAndSettle();
-      expect(
-        tester
-            .widget<ActivitiesHeader>(find.byType(ActivitiesHeader))
-            .categoriesSelected,
-        isTrue,
-      );
-      expect(find.byType(ActivityCard), findsOneWidget);
-      await tester.tap(find.byTooltip('Netejar tots els filtres'));
-      await tester.pumpAndSettle();
-      await tester.scrollUntilVisible(
-        find.text('Teatre sota les estrelles'),
-        200,
-        scrollable: find.descendant(
-          of: find.byKey(const PageStorageKey('activities-list')),
-          matching: find.byType(Scrollable),
-        ),
-      );
-      await tester.pumpAndSettle();
+      // El filtre es manté: el xip mostra la categoria triada.
       expect(
         find.descendant(
-          of: find.widgetWithText(ActivityCard, 'Teatre sota les estrelles'),
-          matching: find.text('Apuntat'),
+          of: find.byKey(const ValueKey('activities-filter-categories')),
+          matching: find.text('Teatre'),
         ),
         findsOneWidget,
       );
+      expect(markerIds(tester), {'demo-theatre'});
+      await closeMapCard(tester);
+      await tester.tap(find.byTooltip('Netejar tots els filtres'));
+      await tester.pumpAndSettle();
+      expect(markerIds(tester), containsAll(['demo-jazz', 'demo-theatre']));
+      await tapMarker(tester, 'demo-theatre');
+      expect(find.text('Apuntat'), findsOneWidget);
       expect(tester.takeException(), isNull);
     },
   );
@@ -105,10 +93,11 @@ void main() {
       await tester.pumpAndSettle();
       await openMapTab(tester);
       expect(
-        tester
-            .widget<ActivitiesHeader>(find.byType(ActivitiesHeader))
-            .categoriesSelected,
-        isFalse,
+        find.descendant(
+          of: find.byKey(const ValueKey('activities-filter-categories')),
+          matching: find.text('Categories'),
+        ),
+        findsOneWidget,
       );
       expect(find.byTooltip('Netejar tots els filtres'), findsNothing);
       expect(tester.takeException(), isNull);

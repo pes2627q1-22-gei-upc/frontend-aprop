@@ -40,16 +40,14 @@ void main() {
 
   /// Opens «Teatre sota les estrelles», created by Laia, and its creator.
   Future<void> openTheatreCreator(WidgetTester tester) async {
-    // Since #273 the activity list is in the Mapa tab.
+    // Since #274 the Mapa tab only has the map: open its marker's card.
     await openMapTab(tester);
-    final card = find.byKey(const ValueKey('demo-theatre'));
-    await tester.scrollUntilVisible(
-      card,
-      300,
-      scrollable: find.byType(Scrollable).first,
-    );
+    await tapMarker(tester, 'demo-theatre');
     await tester.tap(
-      find.descendant(of: card, matching: find.byType(Image)).first,
+      find.descendant(
+        of: find.byKey(const ValueKey('demo-theatre')),
+        matching: find.text('Teatre sota les estrelles'),
+      ),
     );
     await tester.pumpAndSettle();
     final button = find.byKey(const ValueKey('activity-creator-profile'));

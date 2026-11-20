@@ -1,7 +1,7 @@
 import 'dart:ui' as ui;
 
 import 'package:aprop/app/theme/app_theme.dart';
-import 'package:aprop/features/activities/presentation/widgets/activities_header.dart';
+import 'package:aprop/core/widgets/aprop_logo.dart';
 import 'package:aprop/features/auth/presentation/screens/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -62,11 +62,8 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
       final child = screen == 'Inici'
-          ? const Scaffold(
-              body: SafeArea(
-                child: ActivitiesHeader(selectedView: ActivitiesView.list),
-              ),
-            )
+          // El logotip de la capçalera d'Inici (#273).
+          ? const Scaffold(body: SafeArea(child: APropLogo(height: 40)))
           : LoginScreen(repository: FakeAuthRepository());
       await tester.pumpWidget(MaterialApp(theme: AppTheme.light, home: child));
       await tester.pumpAndSettle();

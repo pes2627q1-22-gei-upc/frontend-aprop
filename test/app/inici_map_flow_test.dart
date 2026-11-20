@@ -20,9 +20,6 @@ void main() {
     await tester.pumpAndSettle();
     await openMapTab(tester);
 
-    // El selector de la vista (també hi ha la pestanya «Mapa»).
-    await tester.tap(find.byKey(const ValueKey('activities-view-map')));
-    await tester.pumpAndSettle();
     final button = find.byType(FloatingActionButton);
     final restingTop = tester.getTopLeft(button).dy;
 

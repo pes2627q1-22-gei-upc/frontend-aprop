@@ -802,38 +802,10 @@
   "actUpdating": "Actualitzant les activitats",
   "actNoneAvailable": "No hi ha activitats disponibles.",
   "actLoadingZone": "Carregant les activitats de la zona",
-  "actFilterLocation": "Catalunya",
   "actFilterDates": "Dates",
   "actFilterCategories": "Categories",
   "actClearAllFilters": "Netejar tots els filtres",
-  "actViewMap": "Mapa",
-  "actViewList": "Llista",
   "actCreate": "Crear activitat",
-  "actCreateSoon": "Crear activitat disponible properament",
-  "actViewSelected": "Vista {label} seleccionada",
-  "@actViewSelected": {
-    "placeholders": {
-      "label": {
-        "type": "String"
-      }
-    }
-  },
-  "actViewSoon": "Vista {label} disponible properament",
-  "@actViewSoon": {
-    "placeholders": {
-      "label": {
-        "type": "String"
-      }
-    }
-  },
-  "actViewShow": "Mostrar {label}",
-  "@actViewShow": {
-    "placeholders": {
-      "label": {
-        "type": "String"
-      }
-    }
-  },
   "actDetailsTitle": "Activitat",
   "actEdit": "Edita l’activitat",
   "actNotFound": "No hem trobat aquesta activitat.",
@@ -956,8 +928,6 @@
       }
     }
   },
-  "actSeeListHint": "Consulta la llista per veure els resultats per categoria.",
-  "actSeeList": "Veure llista",
   "actClear": "Netejar",
   "actApply": "Aplicar",
   "actLoadedCount": "{count, plural, one{1 activitat carregada} other{{count} activitats carregades}}",

@@ -10,6 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../features/activities/fake_enrollment_repository.dart';
 import '../features/notifications/fake_notification_repository.dart';
 import '../features/notifications/notification_test_data.dart';
+import 'app_navigation.dart';
 
 void main() {
   late DemoAuthRepository auth;
@@ -142,7 +143,7 @@ void main() {
       pending.complete();
       await tester.pumpAndSettle();
       expect(find.widgetWithText(AppBar, 'Activitat'), findsNothing);
-      expect(find.text('Jazz al parc'), findsOneWidget);
+      expect(markerIds(tester), isNotEmpty);
       expect(
         tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex,
         2, // Mapa

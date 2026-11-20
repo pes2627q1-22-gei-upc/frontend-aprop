@@ -270,6 +270,7 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Provisionalment:** la llista és la vista inicial (si Google Maps falla o no hi ha clau, Inici funciona igual); es mostren totes les activitats carregades; grups amb l'estil de Google (`TODO(DP-022)`).
 - **Targeta del marcador (2026-11-15, Claude Code (Opus 5.5) a petició de l'usuari):** tocar qualsevol lloc de la targeta obre la fitxa (com ja passa a les targetes de llista, l'assistent i l'Agenda), i el botó «Veure activitat» del mockup (fig. 7) es canvia pel d'apuntar-se («M’hi apunto» / «✓ Apuntat · Desapunta’m»). Desviació del mockup per confirmar amb l'equip.
 - **Grups propis (2026-11-16, Claude Code (Opus 5.5) a petició de l'usuari, Taiga #254):** els grups ja no els fa Google (`ClusterManager`), sinó l'app (`activity_map_groups.dart`): els marcadors que amb el zoom actual queden a menys de 64 px s'ajunten, i després s'ajunten també els grups que es tocarien segons la mida real del cercle, perquè mai no quedin l'un sobre l'altre. És igual a la web i al mòbil. El cercle és propi, amb el color principal de l'app, vora clara i el número total exacte (el cercle creix amb les xifres), en lloc dels cercles blaus i vermells de Google. Els grups es refan quan el mapa s'acaba de moure. Les activitats d'un mateix lloc sempre van en grup. El radi de 64 px i el disseny del cercle no surten del mockup (`TODO(DP-022)`).
+- **Només mapa (2026-11-20, decisió de l’usuari, Taiga #274):** la pestanya Mapa ja no té selector Mapa / Llista: s’obre sempre amb el mapa (com la fig. 7 del mockup; la fig. 8 tenia el selector). La llista només surt, en lloc del mapa, si Google Maps no es pot dibuixar (vegeu DP-061), perquè es continuï complint el CA3 de la #21.
 - **Qui decideix:** frontend + backend
 - **Resolució:**
 
@@ -576,6 +577,21 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
   - El logotip de la capçalera d’Inici fa 40 px d’alçada (cap en una barra de 56 px); DP-047 fixava 80 px quan era a la pantalla. Validació de marca pendent.
   - En crear o editar una activitat, les recomanacions d’Inici es tornen a carregar; en tornar del formulari es veu Inici, no la llista.
   - El feed d’Inici deixa 96 px al final perquè el botó «Assistent» no tapi l’última targeta.
+- **Qui decideix:** equip (disseny)
+- **Resolució:**
+
+### DP-061 · Mapa a pantalla completa (#274): sense llista ni capçalera
+- **Estat:** oberta · 2026-11-20 · Claude Code (Opus 5.5) amb confirmació de l’usuari · Taiga #274
+- **Context:** `ActivitiesScreen`, `MapFilterBar` (nou; substitueix `ActivitiesHeader`), `google_maps_availability*.dart`, `MainShell`.
+- **Decisions de l’usuari:**
+  - La pestanya Mapa és només el mapa, a tota la pantalla i sense capçalera. A sobre hi suren el camp «Cerca activitats» (obre la cerca, a la mateixa pestanya) i una sola fila de xips que es desplaça: Dates, Categories i, si hi ha filtres, un xip només amb la icona per treure’ls.
+  - Ja no hi ha llista ni selector Mapa / Llista. Per complir el CA3 de la #21 (si Google Maps falla, l’app no queda bloquejada), la llista surt en lloc del mapa quan Google Maps no es pot dibuixar.
+- **Deduït (sense confirmar):**
+  - «No es pot dibuixar» vol dir que a la web no s’ha carregat el script de Google Maps (`google.maps`, p. ex. sense clau). Al mòbil el mapa és del sistema i es considera sempre disponible: sense clau surt gris i no se’n pot detectar l’error.
+  - Els xips mostren la selecció en lloc del nom del filtre («Avui», «Música»), com a Google Maps.
+  - Desapareix el xip desactivat «Catalunya» (filtre d’ubicació encara no fet); el botó «La meva ubicació» ja és al mapa.
+  - L’avís d’activitats sense categoria ja no ofereix «Veure llista».
+  - `ActivitiesViewModel` continua carregant el catàleg per als filtres i per al mapa sense backend, encara que no hi hagi llista.
 - **Qui decideix:** equip (disseny)
 - **Resolució:**
 
