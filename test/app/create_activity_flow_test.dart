@@ -2,11 +2,11 @@ import 'package:aprop/app/aprop_app.dart';
 import 'package:aprop/features/activities/data/demo_activity_repository.dart';
 import 'package:aprop/features/activities/models/new_activity.dart';
 import 'package:aprop/features/activities/models/activity.dart';
-import 'package:aprop/features/activities/presentation/widgets/activity_card.dart';
-import 'package:aprop/features/activities/presentation/widgets/activity_image.dart';
+import 'package:aprop/features/activities/models/geo_point.dart';
 import 'package:aprop/features/auth/data/demo_auth_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import 'app_navigation.dart';
 
@@ -76,22 +76,13 @@ void main() {
       await tester.tap(find.byTooltip('Tornar enrere'));
       await tester.pumpAndSettle();
       expect(find.widgetWithText(AppBar, 'Crea una activitat'), findsNothing);
+      // Surt al mapa, a Vic (#274: ja no hi ha llista).
       await openMapTab(tester);
-      await tester.scrollUntilVisible(
-        find.widgetWithText(ActivityCard, 'Concert a la plaça'),
-        300,
-        scrollable: find.descendant(
-          of: find.byKey(const PageStorageKey<String>('activities-list')),
-          matching: find.byType(Scrollable),
-        ),
-      );
-      expect(
-        find.descendant(
-          of: find.widgetWithText(ActivityCard, 'Concert a la plaça'),
-          matching: find.text('Publicat per Laia Soler'),
-        ),
-        findsOneWidget,
-      );
+      await zoomMapTo(tester, const LatLng(41.9301, 2.2549), 14);
+      expect(markerIds(tester), contains('demo-created-1'));
+      await tapMarker(tester, 'demo-created-1');
+      expect(find.text('Concert a la plaça'), findsOneWidget);
+      await closeMapCard(tester);
       expect(tester.takeException(), isNull);
       await tester.tap(find.widgetWithText(NavigationDestination, 'Perfil'));
       await tester.pumpAndSettle();
@@ -141,6 +132,7 @@ void main() {
           userId: 'demo-laiasoler',
           isFriend: false,
         ),
+        location: const GeoPoint(latitude: 41.9301, longitude: 2.2549),
       ),
     );
     await tester.pumpWidget(
@@ -150,30 +142,18 @@ void main() {
     await openMapTab(tester);
 
     // Una activitat oficial no es pot editar.
+    await tapMarker(tester, 'demo-jazz');
     await tester.tap(find.text('Jazz al parc'));
     await tester.pumpAndSettle();
     expect(find.byTooltip('Edita l’activitat'), findsNothing);
     await tester.tap(find.byTooltip('Tornar enrere'));
     await tester.pumpAndSettle();
+    await closeMapCard(tester);
 
-    await tester.scrollUntilVisible(
-      find.text('Concert a la plaça'),
-      300,
-      scrollable: find.descendant(
-        of: find.byKey(const PageStorageKey<String>('activities-list')),
-        matching: find.byType(Scrollable),
-      ),
-    );
-    final card = find.widgetWithText(ActivityCard, 'Concert a la plaça');
-    await tester.ensureVisible(card);
-    await tester.pumpAndSettle();
-    // A la dreta hi ha el botó de l'assistent: es toca la imatge.
-    await tester.tap(
-      find.descendant(
-        of: find.widgetWithText(ActivityCard, 'Concert a la plaça'),
-        matching: find.byType(ActivityImage),
-      ),
-    );
+    // La de la creadora s'obre des del seu marcador, a Vic.
+    await zoomMapTo(tester, const LatLng(41.9301, 2.2549), 14);
+    await tapMarker(tester, 'demo-created-1');
+    await tester.tap(find.text('Concert a la plaça'));
     await tester.pumpAndSettle();
     await tester.tap(find.byTooltip('Edita l’activitat'));
     await tester.pumpAndSettle();

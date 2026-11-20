@@ -109,9 +109,7 @@ void main() {
       tester.widget<TextField>(find.byType(TextField)).controller!.text,
       'girona',
     );
-    await tester.tap(destination('Mapa'));
-    await tester.pumpAndSettle();
-    expect(find.text('Apuntat'), findsOneWidget);
+    // L'Agenda comparteix l'estat de la inscripció.
     await tester.tap(destination('Agenda'));
     await tester.pumpAndSettle();
     expect(find.text('Mirades de Catalunya'), findsOneWidget);

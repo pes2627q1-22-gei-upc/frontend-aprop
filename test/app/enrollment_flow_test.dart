@@ -42,6 +42,9 @@ void main() {
     );
     await tester.pumpAndSettle();
     await openMapTab(tester);
+    // Des de la #274 no hi ha llista: la targeta del marcador té el mateix
+    // botó per apuntar-se.
+    await tapMarker(tester, 'demo-jazz');
   }
 
   testWidgets(
@@ -187,6 +190,9 @@ void main() {
     await auth.checkEmailVerified();
     await tester.pumpAndSettle();
     await openMapTab(tester);
+    // Des de la #274 no hi ha llista: la targeta del marcador té el mateix
+    // botó per apuntar-se.
+    await tapMarker(tester, 'demo-jazz');
     expect(cardLabel('demo-jazz', 'M’hi apunto'), findsOneWidget);
     expect(cardLabel('demo-jazz', 'Apuntat'), findsNothing);
 
@@ -195,6 +201,9 @@ void main() {
     await auth.signIn(usernameOrEmail: 'laiasoler', password: 'Aprop2026!');
     await tester.pumpAndSettle();
     await openMapTab(tester);
+    // Des de la #274 no hi ha llista: la targeta del marcador té el mateix
+    // botó per apuntar-se.
+    await tapMarker(tester, 'demo-jazz');
     expect(cardLabel('demo-jazz', 'Apuntat'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
@@ -223,6 +232,9 @@ void main() {
       );
       await tester.pumpAndSettle();
       await openMapTab(tester);
+      // Des de la #274 no hi ha llista: la targeta del marcador té el mateix
+      // botó per apuntar-se.
+      await tapMarker(tester, 'demo-jazz');
     }
 
     testWidgets(
@@ -275,6 +287,9 @@ void main() {
       confirmation.complete();
       await tester.pumpAndSettle();
       await openMapTab(tester);
+      // Des de la #274 no hi ha llista: la targeta del marcador té el mateix
+      // botó per apuntar-se.
+      await tapMarker(tester, 'demo-jazz');
       expect(cardLabel('demo-jazz', 'Apuntat'), findsNothing);
       expect(cardLabel('demo-jazz', 'M’hi apunto'), findsOneWidget);
       expect(

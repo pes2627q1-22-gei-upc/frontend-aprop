@@ -32,6 +32,7 @@ void main() {
     ActivitiesMapViewModel? mapViewModel,
     UserLocationViewModel? userLocation,
     Set<String> enrolled = const {},
+    bool googleMapsAvailable = true,
   }) async {
     tester.view.physicalSize = const Size(390, 844);
     tester.view.devicePixelRatio = 1;
@@ -64,6 +65,7 @@ void main() {
             mapViewModel: mapViewModel,
             onMapActivitySelected: openedFromMap.add,
             userLocationViewModel: userLocation,
+            googleMapsAvailable: googleMapsAvailable,
           ),
         ),
       ),
@@ -71,10 +73,8 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  Future<void> openMap(WidgetTester tester) async {
-    await tester.tap(find.text('Mapa'));
-    await tester.pumpAndSettle();
-  }
+  /// Des de la #274 la pantalla ja obre amb el mapa: no cal canviar de vista.
+  Future<void> openMap(WidgetTester tester) => tester.pumpAndSettle();
 
   GoogleMap map(WidgetTester tester) =>
       tester.widget<GoogleMap>(find.byType(GoogleMap));
@@ -82,21 +82,32 @@ void main() {
   Marker marker(WidgetTester tester, String id) =>
       map(tester).markers.singleWhere((m) => m.markerId.value == id);
 
-  testWidgets('Inici obre la llista i el botó «Mapa» mostra el mapa', (
+  testWidgets('Obre directament el mapa, sense canvi a la llista', (
     tester,
   ) async {
     await pumpInici(tester);
-    expect(find.byType(GoogleMap), findsNothing);
-    expect(find.text('Jazz al parc'), findsOneWidget);
 
-    await openMap(tester);
     expect(find.byType(GoogleMap), findsOneWidget);
+    expect(find.text('Llista'), findsNothing);
+    expect(find.byKey(const ValueKey('map-search')), findsNothing);
+    expect(
+      find.byKey(const ValueKey('activities-filter-dates')),
+      findsOneWidget,
+    );
+  });
 
-    // CA3: la llista sempre es pot tornar a obrir.
-    await tester.tap(find.text('Llista'));
-    await tester.pumpAndSettle();
+  testWidgets('Sense Google Maps, en lloc del mapa surt la llista (CA3)', (
+    tester,
+  ) async {
+    await pumpInici(tester, googleMapsAvailable: false);
+
     expect(find.byType(GoogleMap), findsNothing);
     expect(find.text('Jazz al parc'), findsOneWidget);
+    // Els filtres continuen a dalt.
+    expect(
+      find.byKey(const ValueKey('activities-filter-dates')),
+      findsOneWidget,
+    );
   });
 
   testWidgets('Cada activitat té el seu marcador, agrupable i del seu tipus', (
