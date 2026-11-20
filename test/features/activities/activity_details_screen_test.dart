@@ -22,12 +22,14 @@ void main() {
     ActivityRepository? repository,
     double textScale = 1,
     Future<bool> Function(Uri uri)? openLink,
+    Set<String> enrolled = const {},
+    void Function(Activity activity)? onOpenChat,
   }) async {
     tester.view.physicalSize = const Size(390, 844);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
-    final enrollments = FakeEnrollmentRepository();
+    final enrollments = FakeEnrollmentRepository()..emit('test-user', enrolled);
     final enrollmentViewModel = EnrollmentViewModel(
       userId: 'test-user',
       repository: enrollments,
@@ -50,6 +52,7 @@ void main() {
           repository: repository ?? DemoActivityRepository(),
           enrollmentViewModel: enrollmentViewModel,
           openLink: openLink ?? (uri) async => true,
+          onOpenChat: onOpenChat,
         ),
       ),
     );
@@ -139,6 +142,47 @@ void main() {
       200,
     );
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('El xat només està actiu per a qui s’hi ha apuntat (R11)', (
+    tester,
+  ) async {
+    final opened = <String>[];
+    await pumpDetails(
+      tester,
+      onOpenChat: (activity) => opened.add(activity.id),
+    );
+    await tester.pumpAndSettle();
+    final chat = find.widgetWithText(OutlinedButton, 'Xat de l’activitat');
+    await tester.scrollUntilVisible(chat, 200);
+
+    expect(tester.widget<OutlinedButton>(chat).onPressed, isNull);
+    expect(
+      find.text('Apunta’t a l’activitat per poder parlar al xat.'),
+      findsOneWidget,
+    );
+    expect(opened, isEmpty);
+  });
+
+  testWidgets('Amb la inscripció, el botó obre el xat de l’activitat', (
+    tester,
+  ) async {
+    final opened = <String>[];
+    await pumpDetails(
+      tester,
+      enrolled: {'demo-jazz'},
+      onOpenChat: (activity) => opened.add(activity.id),
+    );
+    await tester.pumpAndSettle();
+    final chat = find.widgetWithText(OutlinedButton, 'Xat de l’activitat');
+    await tester.scrollUntilVisible(chat, 200);
+
+    expect(
+      find.text('Parla amb les persones que també s’hi han apuntat.'),
+      findsOneWidget,
+    );
+    await tester.tap(chat);
+    expect(opened, ['demo-jazz']);
   });
 
   testWidgets('Shows the community creator and friendship badge', (

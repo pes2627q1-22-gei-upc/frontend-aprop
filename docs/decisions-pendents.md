@@ -548,6 +548,7 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Provisionalment:** mantenir-la amagada fins a sortir de `/assistant`. Això conserva la seqüència xat → fitxa → xat → Inici; les fitxes obertes des de les seccions habituals continuen amb barra. `TODO(DP-048)` a `MainShell._openAssistant`. La conversa i les inscripcions mantenen els ViewModels compartits.
 - **Verificació:** recorregut d’inscripció des del xat, fitxa i retorn; restauració de barra amb fletxa, retorn del sistema i dreceres a Agenda/Configuració.
 - **Qui decideix:** equip/PO a la revisió visual de #261. Ocultar la barra al xat ja és el requisit explícit; només queda oberta la fitxa que s’hi obre a sobre.
+
 ### DP-059 · Horari i informació extra de les activitats no oficials
 - **Estat:** oberta · 2026-11-17 · Claude Code (Opus 5.5) amb confirmació de l’usuari · Taiga #189
 - **Identificador:** es va obrir com a DP-051; renumerada a DP-055 i després a DP-059 en integrar develop (la DP-054 i la DP-055 són de #28, idiomes).
@@ -626,7 +627,6 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Qui decideix:** equip
 - **Resolució:** C, a Google Cloud (2026-11-07, l'usuari). S'ha restaurat la clau antiga, la que Firebase posa als enllaços, i s'ha restringit a llocs web (`aprop-919ec.firebaseapp.com`, `aprop-919ec.web.app`, `frontend-aprop.onrender.com`) i a les API Identity Toolkit i Token Service. Ara la pàgina de Firebase verifica el correu en fer clic a l'enllaç. També s'ha configurat un SMTP propi amb un Gmail de l'equip, però no desbloqueja l'URL d'acció (`EMAIL_TEMPLATE_UPDATE_NOT_ALLOWED`, pla Spark): E no és possible. El 2026-11-09 (Taiga #73) s'esborren l'opció d'enganxar l'enllaç (D) i la pàgina pròpia (E): `EmailActionScreen`, `EmailAction`, `AuthRepository.verifyEmailWithLink`, `confirmEmailVerification`, `verificationCodeFromLink` i `AuthFailure.invalidVerificationLink`. **No esborreu la clau restaurada:** sense ella, els enllaços tornarien a fallar.
 
-
 ### DP-036 · Format UUID de `X-User-ID` i sincronització d'UID de Firebase a Render
 - **Estat:** resolta 2026-10-26
 - **Obert per:** 2026-10-25 · Antigravity · Taiga #231
@@ -694,6 +694,30 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Risc del backend:** `GET /users/{userId}/events` no comprova la privacitat; qualsevol que cridi l’API veu els plans d’una altra persona. L’app respecta `plans-visible`, però la protecció ha de ser al servidor.
 - **Codi:** `TODO(DP-063)` a `http_public_profile_repository.dart`, `demo_public_profile_repository.dart` i `public_profile_screen.dart`.
 - **Qui decideix:** equip (què és un «pla fet») + backend (privacitat de `/users/{id}/events`)
+- **Resolució:**
+
+### DP-062 · Xat de l’activitat (#26): sense temps real i disseny sense mockup
+- **Estat:** oberta
+- **Obert per:** 2026-11-20 · Claude Code (Opus 5.5) a petició de l'usuari · Taiga #26 / #148
+- **Identificador:** la DP-060 (#273) i la DP-061 (#274) són a branques sense fusionar; es fa servir DP-062 per no col·lidir-hi.
+- **Context:** `lib/features/activity_chat/` (`ActivityChatScreen`, `ActivityChatViewModel`, `HttpActivityChatRepository`), botó «Xat de l’activitat» d’`ActivityDetailsScreen`, `MainShell._openActivityChat`.
+- **Dubte:**
+  - El backend (`GET`/`POST /events/{id}/messages`, #147) no avisa dels missatges nous: no hi ha websockets ni cap altre mecanisme de temps real.
+  - Els missatges no tenen identificador.
+  - El mockup (fig. 9) només mostra el botó; no hi ha disseny de la pantalla del xat.
+- **Opcions:** A) demanar els missatges nous cada pocs segons mentre el xat és obert (fet) · B) temps real al backend (websockets o SSE), fora de l’abast actual.
+- **Provisionalment:** A.
+  - Cada 5 s es torna a demanar la pàgina més recent i s’hi afegeixen els missatges nous; quan es tanca el xat, s’atura. Si falla, es torna a provar sense avisar. Mai no hi ha dues peticions de refresc alhora, i mentre l’app és en segon pla no se’n fa cap; en tornar, es refresca de seguida (revisió de la PR #59).
+  - Un missatge s’identifica per autor i data d’enviament: el backend no deixa enviar-ne dos al mateix instant (409).
+  - Pàgines de 50, de la més recent a la més antiga, amb «Veure missatges anteriors». Les pàgines van per posició: la que es demana es calcula amb els missatges que ja es tenen, perquè els nous no la desplacin. Si n’arriben més de 50 entre dos refrescos (per exemple, després d’un tall llarg), pot quedar un forat a l’historial sense cap avís; ho resoldria una paginació per data al backend (`before=<date-sent>`), que no existeix.
+  - Si arriben missatges mentre es llegeix l’historial, la llista es desplaça (els nous entren a baix). Es podria mostrar «Missatges nous ↓» en lloc de moure-la; queda per a la revisió visual.
+  - Pantalla completa per sobre de la barra inferior, com el xat de l’Assistent (#261). Missatges propis a la dreta (color principal) i dels altres a l’esquerra amb el nom. Hora al peu: només l’hora si és d’avui, «Ahir · …» o la data si és més antic. No es mostra la foto de perfil.
+  - Màxim 1.000 runes (punts de codi), com compta el backend: un emoji compost en pot ocupar més d’una. El camp talla el text sense partir cap caràcter i el comptador només surt a prop del límit. Si el backend rebutja el text (400), es diu que és massa llarg, no que es torni a provar.
+  - Sense inscripció, el botó de la fitxa queda desactivat i el backend respon 403, que es mostra com a avís amb «Tornar a la fitxa» en lloc de reintentar.
+  - Un missatge sense data vàlida es descarta i no amaga la resta de la pàgina.
+  - Sense backend, un xat de demostració en memòria.
+  - Textos i disseny sense mockup. `TODO(DP-062)` al ViewModel.
+- **Qui decideix:** equip + disseny (temps real: backend)
 - **Resolució:**
 
 ### DP-053 · Valoració d'activitats (#185): requisit d'assistència i contracte de #184

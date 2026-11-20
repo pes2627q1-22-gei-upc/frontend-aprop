@@ -2224,11 +2224,11 @@ abstract class AppLocalizations {
   /// **'Consultar informació original'**
   String get actOriginalLink;
 
-  /// No description provided for @actChatSoon.
+  /// No description provided for @actChatNeedsEnrollment.
   ///
   /// In ca, this message translates to:
-  /// **'Xat disponible properament'**
-  String get actChatSoon;
+  /// **'Apunta’t a l’activitat per poder parlar al xat.'**
+  String get actChatNeedsEnrollment;
 
   /// No description provided for @actChat.
   ///
@@ -2241,6 +2241,66 @@ abstract class AppLocalizations {
   /// In ca, this message translates to:
   /// **'Parla amb les persones que també s’hi han apuntat.'**
   String get actChatHint;
+
+  /// No description provided for @chatEmpty.
+  ///
+  /// In ca, this message translates to:
+  /// **'Encara no hi ha missatges. Saluda les persones que hi aniran!'**
+  String get chatEmpty;
+
+  /// No description provided for @chatLoadError.
+  ///
+  /// In ca, this message translates to:
+  /// **'No hem pogut carregar els missatges. Torna-ho a provar.'**
+  String get chatLoadError;
+
+  /// No description provided for @chatNotEnrolled.
+  ///
+  /// In ca, this message translates to:
+  /// **'Només les persones apuntades a l’activitat poden fer servir el xat.'**
+  String get chatNotEnrolled;
+
+  /// No description provided for @chatOlder.
+  ///
+  /// In ca, this message translates to:
+  /// **'Veure missatges anteriors'**
+  String get chatOlder;
+
+  /// No description provided for @chatInputHint.
+  ///
+  /// In ca, this message translates to:
+  /// **'Escriu un missatge'**
+  String get chatInputHint;
+
+  /// No description provided for @chatSend.
+  ///
+  /// In ca, this message translates to:
+  /// **'Enviar'**
+  String get chatSend;
+
+  /// No description provided for @chatSendError.
+  ///
+  /// In ca, this message translates to:
+  /// **'No s’ha pogut enviar el missatge. Torna-ho a provar.'**
+  String get chatSendError;
+
+  /// No description provided for @chatMessageTooLong.
+  ///
+  /// In ca, this message translates to:
+  /// **'El missatge és massa llarg. Fes-lo més curt.'**
+  String get chatMessageTooLong;
+
+  /// No description provided for @chatBackToActivity.
+  ///
+  /// In ca, this message translates to:
+  /// **'Tornar a la fitxa'**
+  String get chatBackToActivity;
+
+  /// No description provided for @chatYou.
+  ///
+  /// In ca, this message translates to:
+  /// **'Tu'**
+  String get chatYou;
 
   /// No description provided for @actPublishedBy.
   ///

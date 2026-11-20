@@ -22,6 +22,9 @@ import '../../features/activities/presentation/view_models/user_location_view_mo
 import '../../features/activities/repositories/activity_repository.dart';
 import '../../features/activities/repositories/discovery_repository.dart';
 import '../../features/activities/repositories/enrollment_repository.dart';
+import '../../features/activity_chat/data/demo_activity_chat_repository.dart';
+import '../../features/activity_chat/presentation/screens/activity_chat_screen.dart';
+import '../../features/activity_chat/repositories/activity_chat_repository.dart';
 import '../../features/agenda/presentation/screens/agenda_screen.dart';
 import '../../features/assistant/models/assistant_message.dart';
 import '../../features/assistant/presentation/screens/assistant_screen.dart';
@@ -68,10 +71,14 @@ class MainShell extends StatefulWidget {
     this.interestTestRepository,
     this.activityCategoryRepository,
     this.userLocationRepository,
+    this.activityChatRepository,
     this.now,
   });
 
   final AppUser user;
+
+  /// Xat de les activitats. Si no hi és, se'n fa servir un de demostració.
+  final ActivityChatRepository? activityChatRepository;
 
   /// On és la persona, per al mapa. Sense, el mapa no la mostra.
   final UserLocationRepository? userLocationRepository;
@@ -264,6 +271,7 @@ class _MainShellState extends State<MainShell> {
         ratingBuilder: _buildRating,
         canEdit: _canEdit,
         onEdit: _editActivity,
+        onOpenChat: _openActivityChat,
         onCreatorSelected: _creatorProfileOpener,
       ),
     );
@@ -296,6 +304,33 @@ class _MainShellState extends State<MainShell> {
               : null,
         );
       },
+    );
+  }
+
+  late final ActivityChatRepository _activityChatRepository =
+      widget.activityChatRepository ??
+      DemoActivityChatRepository(
+        authorId: _enrollmentUserId,
+        authorName: '${widget.user.firstName} ${widget.user.lastName}'.trim(),
+      );
+
+  /// Xat de l'activitat (#26), a pantalla completa per sobre de la barra
+  /// inferior, com el de l'Assistent (#261). «Enrere» torna a la fitxa.
+  void _openActivityChat(Activity activity) {
+    Navigator.of(context, rootNavigator: true).push<void>(
+      MaterialPageRoute<void>(
+        settings: RouteSettings(
+          name: '/activities/${Uri.encodeComponent(activity.id)}/chat',
+        ),
+        builder: (context) => ActivityChatScreen(
+          activityId: activity.id,
+          activityTitle: activity.title,
+          // Els missatges del backend porten l'UUID de l'usuari, com les
+          // inscripcions.
+          userId: _enrollmentUserId,
+          repository: _activityChatRepository,
+        ),
+      ),
     );
   }
 
@@ -385,6 +420,7 @@ class _MainShellState extends State<MainShell> {
                   ratingBuilder: _buildRating,
                   canEdit: _canEdit,
                   onEdit: _editActivity,
+                  onOpenChat: _openActivityChat,
                   onCreatorSelected: _creatorProfileOpener,
                 ),
               );
@@ -438,6 +474,7 @@ class _MainShellState extends State<MainShell> {
                 ratingBuilder: _buildRating,
                 canEdit: _canEdit,
                 onEdit: _editActivity,
+                onOpenChat: _openActivityChat,
                 onCreatorSelected: _creatorProfileOpener,
               ),
             );
@@ -579,6 +616,7 @@ class _MainShellState extends State<MainShell> {
                 ratingBuilder: _buildRating,
                 canEdit: _canEdit,
                 onEdit: _editActivity,
+                onOpenChat: _openActivityChat,
                 onCreatorSelected: _creatorProfileOpener,
               ),
             );
@@ -699,6 +737,7 @@ class _MainShellState extends State<MainShell> {
         ratingBuilder: _buildRating,
         canEdit: _canEdit,
         onEdit: _editActivity,
+        onOpenChat: _openActivityChat,
         onCreatorSelected: _creatorProfileOpener,
       ),
     );
