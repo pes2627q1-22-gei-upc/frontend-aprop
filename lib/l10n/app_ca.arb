@@ -1004,7 +1004,7 @@
   "actLoadZoneError": "No hem pogut carregar les activitats d’aquesta zona. Torna-ho a provar.",
   "actLoadDetailError": "No hem pogut carregar l’activitat. Torna-ho a provar.",
   "actSearchError": "No hem pogut cercar les activitats. Torna-ho a provar.",
-  "discoverSearchField": "Cerca activitats",
+  "discoverSearchField": "Cerca activitats o persones",
   "discoverLoading": "Carregant propostes",
   "discoverEmptyTitle": "Encara no hi ha propostes",
   "discoverEmptyBody": "Pots cercar activitats o tornar-ho a provar més tard.",
@@ -1142,6 +1142,40 @@
   "@actMoreCategories": {
     "placeholders": {
       "count": {
+        "type": "int"
+      }
+    }
+  },
+  "userSearchHint": "Nom o nom d’usuari",
+  "userSearchLabel": "Cerca persones",
+  "userSearchPromptTitle": "A qui vols trobar?",
+  "userSearchPromptBody": "Escriu un nom o un nom d’usuari.",
+  "userSearchSearching": "Cercant persones",
+  "userSearchError": "No hem pogut cercar persones. Torna-ho a provar.",
+  "userSearchNoResultsTitle": "No hem trobat cap persona",
+  "userSearchNoResultsBody": "Prova un altre nom o nom d’usuari.",
+  "userSearchCount": "{count, plural, =1{1 persona trobada} other{{count} persones trobades}}",
+  "@userSearchCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "userSearchLoaded": "{count, plural, =1{1 persona carregada} other{{count} persones carregades}}",
+  "@userSearchLoaded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "userSearchLoadMore": "Carregar més persones",
+  "userSearchMoreError": "No hem pogut carregar més persones. Torna-ho a provar.",
+  "userSearchTooLong": "La cerca pot tenir com a màxim {limit} caràcters.",
+  "@userSearchTooLong": {
+    "placeholders": {
+      "limit": {
         "type": "int"
       }
     }

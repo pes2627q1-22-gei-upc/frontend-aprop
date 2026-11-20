@@ -39,6 +39,7 @@ import '../../features/profile/data/gallery_profile_image_picker.dart';
 import '../../features/profile/presentation/screens/public_profile_screen.dart';
 import '../../features/profile/repositories/profile_repository.dart';
 import '../../features/profile/repositories/public_profile_repository.dart';
+import '../../features/profile/repositories/user_search_repository.dart';
 import '../../features/profile/repositories/profile_settings_repository.dart';
 import '../../features/ratings/presentation/view_models/rating_view_model.dart';
 import '../../features/ratings/presentation/widgets/activity_rating.dart';
@@ -60,6 +61,7 @@ class MainShell extends StatefulWidget {
     required this.profileRepository,
     required this.profileSettingsRepository,
     this.publicProfileRepository,
+    this.userSearchRepository,
     this.interestTestRepository,
     this.activityCategoryRepository,
     this.userLocationRepository,
@@ -82,6 +84,7 @@ class MainShell extends StatefulWidget {
 
   /// Perfils d'altres persones. Si no hi és, «Veure perfil» queda desactivat.
   final PublicProfileRepository? publicProfileRepository;
+  final UserSearchRepository? userSearchRepository;
 
   /// Si no hi és, «Tornar a fer el test d’interessos» queda pendent.
   final InterestTestRepository? interestTestRepository;
@@ -403,6 +406,16 @@ class _MainShellState extends State<MainShell> {
         settings: const RouteSettings(name: '/discover/search'),
         builder: (context) => ActivitySearchScreen(
           repository: widget.discoveryRepository,
+          userSearchRepository: widget.userSearchRepository,
+          onUserSelected: widget.publicProfileRepository == null
+              ? null
+              : (id) {
+                  if (_selectedIndex != tab ||
+                      !(ModalRoute.of(context)?.isCurrent ?? false)) {
+                    return;
+                  }
+                  _openUserProfile(id);
+                },
           enrollmentViewModel: _enrollmentViewModel,
           onBack: () => Navigator.of(context).pop(),
           onActivitySelected: (activityId) {

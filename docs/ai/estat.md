@@ -4,13 +4,14 @@
 
 ## Sprint
 
-- Sprint 2 · només frontend. Tasques actives: #261 (menú inferior al xat) i #28 (canviar idioma).
+- Sprint 2 · només frontend. Tasca activa #162: cerca de persones i navegació al perfil amb estat conservat.
 
 ## En curs
 
 | Taiga | Tasca | Branca | Estat |
 |---|---|---|---|
 | #160 | [FE] Botó d'acció d'amistat al perfil aliè + integració al ViewModel + tests | `feature/boto-amistat` | Implementada (HTTP i Demo); DP-064 oberta; pendent revisió humana |
+| #162 | [FE] Vista y `UserSearchViewModel` integrada en el buscador de Descobreix (fig. 16) + navegación al perfil conservando estado + tests | `feature/user-search-162` | Implementada amb HTTP/Demo; 725 proves, anàlisi i revisió tècnica correctes; sense commit/push |
 | #274 | [FE] Mapa a pantalla completa estil Google Maps | `feature/mapa-pantalla-completa` | PR #58; correccions de la revisió (proves, xips de 48 px, documentació, codi sense ús); només mapa per decisió de l’usuari (DP-061) |
 | #273 | [FE] Intercanviar Inici i Descobreix | `feature/intercanviar-inici-descobreix` | PR #57; correccions de la revisió (marge de l'assistent, documentació, proves); DP-060 oberta |
 | #28 | [FE] Canviar idioma (ca/es/en) | `feature/change-language-28` | Implementada (ARB + gen-l10n, selector a Configuració, `language` al backend, `?lang=`); DP-001 resolta; DP-054 i DP-055 obertes; pendent revisió humana i contracte backend |
@@ -22,28 +23,25 @@
 
 ## Base i abast
 
-- Integració de `origin/develop@6988d40` a la branca de #261, sense reescriure historial ni publicar el merge.
-- #262 ja fusionada a develop (PR #43): es conserven el PNG transparent, `APropLogo`, els dos usos i les proves de marca. DP-047 i DP-048 es mantenen amb els seus identificadors.
-- `MainShell` conserva el navegador d’Inici i els ViewModels compartits. Només gestiona la visibilitat del menú durant `/assistant`.
-- `_openAssistant` espera el final de la ruta i restaura la barra a `finally`, amb comprovació de `mounted`.
-- Fletxa, retorn del sistema i dreceres restauren la navegació; conversa i inscripcions es conserven.
-- Les fitxes obertes des del xat mantenen el flux sense barra (DP-048); les altres fitxes conserven el menú.
-- Sense paquets, endpoints ni canvis al backend. No es modifica el contracte HTTP ni el ViewModel de l’assistent.
-- Flux i límits a `docs/architecture.md`, `docs/ai/50-ui-mockups.md` i DP-048.
+- Branca independent des de `origin/develop@9245291`; backend contrastat a `454e22b`, sense modificar-lo.
+- `GET /users` de #161 i perfil públic de #277 disponibles. Autenticació Bearer, paginació des de zero, 20 files i límit de 100 punts de codi segons el contracte actual.
+- Models/contracte/adaptadors de dades d’usuaris a Perfil; `UserSearchViewModel` i files a la presentació del cercador existent. Sense dependències entre ViewModels de diferents features.
+- `main.dart` injecta HTTP; AuthGate disposa d’un adaptador Demo sobre les mateixes identitats que els perfils ficticis.
+- Mateix cercador des d’Inici i Mapa, respectant #273/#274. Consulta compartida entre modes i resultats independents.
+- Navegació al perfil al navegador de la secció; text, mode, pàgines i scroll conservats. El resultat propi obre Perfil sense destruir la cerca.
+- Textos ca/es/en als ARB i fitxers generats amb `flutter gen-l10n`; sense paquets nous ni canvis al backend.
+- Guia: `docs/user-search.md`; DP-024 actualitzada amb l’ampliació #162.
 
-## Verificació (2026-11-18)
+## Verificació (2026-11-20)
 
-- Les noves proves de navegació i el recorregut existent reproduïen la barra visible abans de corregir-la.
-- 7 proves de recorregut superades després: fletxa/sistema, scroll, teclat, Agenda/Configuració, resposta tardana, fi de sessió i inscripció des de la recomanació.
-- Abans del merge: 530 proves. Després d’integrar #262: 532 proves superades i `flutter analyze` sense incidències.
-- Conflictes limitats a `docs/ai/estat.md` i `docs/decisions-pendents.md`; el codi s’ha integrat automàticament.
-- Format: 245 fitxers, cap canvi. `git diff --cached --check` correcte; sense fitxers pendents de resolució ni marcadors de conflicte.
-- Captures reals amb Flutter, fonts Roboto i dades Demo a `PES/output/frontend/task-261-{assistent,conversa,retorn-inici}.png`; script de renderitzat superat.
-- Revisió tècnica independent de la resolució sense bloquejos: codi i proves del xat idèntics a HEAD; logo, consumidors i proves idèntics a develop; DP-047/048 conservades íntegres. La revisió humana i la prova al dispositiu continuen pendents.
-- Merge pendent de commit/push. L’usuari executa personalment aquests passos amb els comandos que se li facilitaran.
+- 48 proves focalitzades superades: repositoris, ViewModel, pantalla i recorreguts de cerca/perfil; també es mantenen les de cerca d’activitats.
+- Comprovats debounce, Unicode, respostes tardanes, neteja, continuació, error/reintent, dispose, mode, scroll, perfil propi/aliè, accés des de Mapa, ca/es/en i 320 px amb text ×2.
+- Suite completa: 725 proves superades. `flutter analyze` sense incidències; format de 310 fitxers sense canvis; `git diff --check` correcte.
+- Revisió tècnica independent sense bloquejos. Captures Flutter amb fonts Roboto i dades Demo a `PES/output/frontend/task-162-{persones,perfil,retorn}.png`, renderitzat i retorn comprovats visualment. El script temporal reutilitza el mapa substituït de les proves del projecte.
+- No s’han executat peticions autenticades a Render ni el backend. Cap commit/push; l’usuari executa personalment aquests passos.
 
 ## Pendents / següents passos
 
-1. Revisió humana, commit de resolució i push a la mateixa branca per actualitzar la PR existent de #261; després CI i aprovació. Sense publicació automàtica.
-2. Repassar el xat al dispositiu Android i validar DP-048.
+1. Revisió humana, commit de #162, PR a develop i CI. Sense publicació automàtica.
+2. Comprovar la cerca/perfil amb una sessió real al desplegament i en Android.
 3. La resta de funcionalitats i contractes pendents es conserven a les seves guies/DP.

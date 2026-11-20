@@ -1652,7 +1652,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'We couldn’t search the activities. Please try again.';
 
   @override
-  String get discoverSearchField => 'Search activities';
+  String get discoverSearchField => 'Search activities or people';
 
   @override
   String get discoverLoading => 'Loading suggestions';
@@ -1964,5 +1964,62 @@ class AppLocalizationsEn extends AppLocalizations {
       one: '1 more category',
     );
     return '$_temp0';
+  }
+
+  @override
+  String get userSearchHint => 'Name or username';
+
+  @override
+  String get userSearchLabel => 'Search people';
+
+  @override
+  String get userSearchPromptTitle => 'Who are you looking for?';
+
+  @override
+  String get userSearchPromptBody => 'Enter a name or username.';
+
+  @override
+  String get userSearchSearching => 'Searching people';
+
+  @override
+  String get userSearchError => 'We couldn’t search for people. Try again.';
+
+  @override
+  String get userSearchNoResultsTitle => 'No people found';
+
+  @override
+  String get userSearchNoResultsBody => 'Try another name or username.';
+
+  @override
+  String userSearchCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count people found',
+      one: '1 person found',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String userSearchLoaded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count people loaded',
+      one: '1 person loaded',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get userSearchLoadMore => 'Load more people';
+
+  @override
+  String get userSearchMoreError => 'We couldn’t load more people. Try again.';
+
+  @override
+  String userSearchTooLong(int limit) {
+    return 'Search can contain up to $limit characters.';
   }
 }

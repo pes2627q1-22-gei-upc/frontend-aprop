@@ -178,7 +178,15 @@ La descoberta i la cerca viuen dins de `features/activities/`, reutilitzant `Act
 
 `ActivitySearchViewModel` espera 350 ms mentre s’escriu i permet enviar immediatament. Cerca des de 0, total del servidor, continuacions serialitzades, deduplicació per ID, error/reintent de pàgina i invalidació per revisió. Canviar/esborrar la consulta o sortir invalida respostes; refrescar també invalida una continuació pendent. Les pantalles creen/alliberen els ViewModels i la UI reutilitza `ActivityListPagination`.
 
-`AuthGate` injecta el repositori a `MainShell`, que compon Descobreix, `/discover/search` i les rutes de detall dins del mateix navegador de secció. Tornar conserva consulta, pàgines i scroll. Les dues pantalles reben el mateix `EnrollmentViewModel`; apuntar-se es confirma amb la font compartida d’Inici, detall i Agenda. «Persones» i el test d’interessos requereixen les seves històries. Vegeu `docs/discovery-backend.md`, DP-041/DP-024 per al contracte i els límits del ranking del servidor.
+`AuthGate` injecta el repositori a `MainShell`, que compon Descobreix, `/discover/search` i les rutes de detall dins del mateix navegador de secció. Tornar conserva consulta, pàgines i scroll. Les dues pantalles reben el mateix `EnrollmentViewModel`; apuntar-se es confirma amb la font compartida d’Inici, detall i Agenda. «Persones» s’incorpora a #162; el test d’interessos conserva el seu flux separat. Vegeu `docs/discovery-backend.md`, DP-041/DP-024 per al contracte i els límits del ranking del servidor.
+
+### Cerca de persones — Taiga #162
+
+`UserSummary`, `UserSearchPage` i el contracte `UserSearchRepository` viuen a `features/profile/`, perquè representen dades públiques d’usuaris. Els adaptadors HTTP i Demo són a `profile/data/`; Demo reutilitza les mateixes identitats que `DemoPublicProfileRepository`.
+
+La presentació es manté al cercador existent de `features/activities/`: `ActivitySearchScreen` crea/allibera `ActivitySearchViewModel` i `UserSearchViewModel`, i els observa amb un `Listenable` compartit. Només importa models/contractes de Perfil, no pantalles, ViewModels o adaptadors d’una altra feature. Cada cerca té estat i revisions pròpies; la consulta visible es comparteix en canviar de mode i s’invalida l’estat d’aquell mode només si ha canviat. `UserSearchResults` mostra resum, files accessibles i continuació, sense crides HTTP ni càrrega de perfils per fila.
+
+`main.dart` injecta l’adaptador HTTP passant per `APropApp` → `AuthGate` → `MainShell`. El callback `onUserSelected` obre el perfil públic dins del mateix navegador de secció, amb comprovació de ruta activa; el cercador queda muntat. El resultat propi obre la pestanya Perfil i conserva la pila d’origen. Els `PageStorageKey` dels resultats conserven el scroll. La selecció de persones només s’habilita amb repositori i destinació de perfil disponibles. Vegeu [el contracte i els recorreguts](user-search.md).
 
 ## Perfil propi i Configuració
 
