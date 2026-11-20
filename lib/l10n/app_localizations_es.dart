@@ -1838,6 +1838,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get navDiscover => 'Descubre';
 
   @override
+  String get navMap => 'Mapa';
+
+  @override
   String get navNotifications => 'Avisos';
 
   @override

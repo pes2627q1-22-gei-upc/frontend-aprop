@@ -562,6 +562,23 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Qui decideix:** frontend + backend (valors de `modality`)
 - **Resolució:**
 
+### DP-060 · Pestanyes Inici i Mapa (#273): desviació del mockup
+- **Estat:** oberta · 2026-11-20 · Claude Code (Opus 5.5) amb confirmació de l’usuari · Taiga #273
+- **Context:** `MainShell` (barra inferior, capçaleres i botons flotants), `DiscoverScreen`, `ActivitiesHeader`.
+- **Dubte:** al mockup, Inici és el mapa/llista i Descobreix és una pestanya a part. La tasca #273 els intercanvia.
+- **Decisions de l’usuari:**
+  - Pestanyes: «Inici» (icona de casa) mostra les recomanacions de Descobreix; «Mapa» (icona de mapa), al lloc on era Descobreix, mostra el mapa i la llista. Clau nova `navMap`.
+  - Capçalera d’Inici: «AProp!» (el logotip) al centre, el «+» per crear una activitat a l’esquerra i la lupa de la cerca a la dreta. El camp de cerca que hi havia a dalt de les recomanacions desapareix, perquè ja hi és la lupa.
+  - El botó «Assistent» surt a Inici i al Mapa; l’assistent s’obre a la pestanya on es prem. El «+» ja no surt al Mapa.
+- **Deduït (sense confirmar):**
+  - Els enllaços de l’assistent `home` i `discover` porten tots dos a Inici, perquè ara Inici mostra Descobreix. Cap enllaç no porta al Mapa.
+  - La pestanya «Mapa» continua obrint-se amb la llista (DP-022: si Google Maps falla, l’app no queda bloquejada). La #274 la deixa només amb el mapa i la llista com a reserva.
+  - El logotip de la capçalera d’Inici fa 40 px d’alçada (cap en una barra de 56 px); DP-047 fixava 80 px quan era a la pantalla. Validació de marca pendent.
+  - En crear o editar una activitat, les recomanacions d’Inici es tornen a carregar; en tornar del formulari es veu Inici, no la llista.
+  - El feed d’Inici deixa 96 px al final perquè el botó «Assistent» no tapi l’última targeta.
+- **Qui decideix:** equip (disseny)
+- **Resolució:**
+
 ## Resoltes
 
 ### DP-058 · Enllaços de la fitxa: obrir-los amb `url_launcher`

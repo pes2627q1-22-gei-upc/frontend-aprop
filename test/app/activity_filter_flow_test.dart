@@ -6,6 +6,8 @@ import 'package:aprop/features/auth/data/demo_auth_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'app_navigation.dart';
+
 void main() {
   late DemoAuthRepository auth;
 
@@ -18,6 +20,7 @@ void main() {
     await auth.signIn(usernameOrEmail: 'laiasoler', password: 'Aprop2026!');
     await tester.pumpWidget(APropApp(authRepository: auth));
     await tester.pumpAndSettle();
+    await openMapTab(tester);
   }
 
   Finder destination(String label) =>
@@ -55,10 +58,10 @@ void main() {
       await tester.tap(find.byTooltip('Tornar enrere'));
       await tester.pumpAndSettle();
       expect(find.byType(ActivityCard), findsOneWidget);
-      await tester.tap(destination('Descobreix'));
+      await tester.tap(destination('Inici'));
       await tester.pumpAndSettle();
       expect(find.text('Mirades de Catalunya'), findsOneWidget);
-      await tester.tap(destination('Inici'));
+      await tester.tap(destination('Mapa'));
       await tester.pumpAndSettle();
       expect(
         tester
@@ -100,6 +103,7 @@ void main() {
       expect(find.text('Inicia sessió'), findsOneWidget);
       await auth.signIn(usernameOrEmail: 'laiasoler', password: 'Aprop2026!');
       await tester.pumpAndSettle();
+      await openMapTab(tester);
       expect(
         tester
             .widget<ActivitiesHeader>(find.byType(ActivitiesHeader))

@@ -39,8 +39,9 @@
 | Nivell | Nivel | `ProfileLevel`, `ProfileProgress` | `TODO` | Curiós/a … Ambaixador/a cultural; llindars pendents (DP-032) |
 | Configuració | Configuración | `ProfileSettings`, `ProfilePreference`, `ProfileSettingsRepository` | `TODO` | Preferències demo per compte (DP-033) |
 | «Mostrar els meus plans» | Mostrar mis planes | `ProfileSettings.showMyPlans` | `TODO` | Privacitat; valor inicial fals; aplicació al servidor pendent |
-| Descobreix | Descubre | secció 2 de `MainShell` | — | |
-| Inici | Inicio | secció 0 de `MainShell` | — | Mapa / Llista |
+| Descobreix | Descubre | secció 0 de `MainShell` (pestanya «Inici») | — | Des de la #273 (DP-060) |
+| Inici | Inicio | secció 0 de `MainShell` | — | Mostra Descobreix (DP-060) |
+| Mapa | Mapa | secció 2 de `MainShell` (`navMap`) | — | Mapa / Llista (abans era Inici) |
 | Filtres d’esdeveniments | Filtros de eventos | `ActivityFilters`, `ActivitiesViewModel.filters` | — | Selecció confirmada d’Inici; dates AND categories (DP-035) |
 | Interval de dates | Intervalo de fechas | `ActivityDateRange` | — | Dies civils inclusius segons l’inici de l’activitat |
 | Perfil | Perfil | `UserProfile`, `ProfileRepository`, `ProfileViewModel`, secció 4 de `MainShell` | `TODO` | Perfil propi; perfils aliens pendents |

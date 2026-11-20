@@ -41,7 +41,7 @@ void main() {
     await fill(tester, 'Contrasenya', 'Aprop2026!');
     await tapButton(tester, 'Entra');
 
-    expect(find.text('Jazz al parc').hitTestable(), findsOneWidget);
+    expect(find.byKey(const ValueKey('discover-search')), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -52,7 +52,7 @@ void main() {
     await fill(tester, 'Contrasenya', 'Aprop2026!');
     await tapButton(tester, 'Entra');
 
-    expect(find.text('Jazz al parc').hitTestable(), findsOneWidget);
+    expect(find.byKey(const ValueKey('discover-search')), findsOneWidget);
   });
 
   testWidgets('Avisa si les credencials no són correctes', (tester) async {
@@ -121,7 +121,7 @@ void main() {
 
     await tapButton(tester, "Ja l'he verificat");
 
-    expect(find.text('Jazz al parc').hitTestable(), findsOneWidget);
+    expect(find.byKey(const ValueKey('discover-search')), findsOneWidget);
 
     await tester.tap(find.widgetWithText(NavigationDestination, 'Perfil'));
     await tester.pumpAndSettle();
@@ -168,7 +168,7 @@ void main() {
     await fill(tester, "Nom d'usuari", 'jordipuig');
     await tapButton(tester, 'Continua');
 
-    expect(find.text('Jazz al parc').hitTestable(), findsOneWidget);
+    expect(find.byKey(const ValueKey('discover-search')), findsOneWidget);
 
     await tester.tap(find.widgetWithText(NavigationDestination, 'Perfil'));
     await tester.pumpAndSettle();

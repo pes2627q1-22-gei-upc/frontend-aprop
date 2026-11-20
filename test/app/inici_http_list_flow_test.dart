@@ -11,6 +11,7 @@ import 'package:http/testing.dart';
 
 import '../features/activities/backend_event_fixture.dart';
 import '../features/activities/fake_enrollment_repository.dart';
+import 'app_navigation.dart';
 
 void main() {
   testWidgets(
@@ -60,6 +61,7 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
+      await openMapTab(tester);
       await tester.tap(
         find.byKey(const ValueKey('activities-filter-categories')),
       );
@@ -140,6 +142,7 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
+      await openMapTab(tester);
       expect(find.text('Activitat 2'), findsOneWidget);
       final list = find.byKey(const PageStorageKey<String>('activities-list'));
       final scrollable = find.descendant(

@@ -110,6 +110,7 @@ void main() {
         },
         {'show-plans': true},
       ]);
+      // El «+» és a la capçalera d'Inici (#273).
       await tester.tap(destination('Inici'));
       await tester.pumpAndSettle();
       await tester.tap(find.byTooltip('Crear activitat'));

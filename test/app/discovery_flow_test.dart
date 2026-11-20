@@ -68,7 +68,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    await tester.tap(destination('Descobreix'));
+    await tester.tap(destination('Inici'));
     await tester.pumpAndSettle();
   }
 
@@ -84,8 +84,9 @@ void main() {
     tester,
   ) async {
     await pumpApp(tester);
-    expect(find.widgetWithText(AppBar, 'Descobreix'), findsOneWidget);
-    expect(find.text('Assistent'), findsNothing);
+    expect(find.byKey(const ValueKey('discover-search')), findsOneWidget);
+    // Des de la #273 l'assistent també és a Inici.
+    expect(find.text('Assistent'), findsOneWidget);
     await search(tester, 'girona');
     expect(find.text('1 activitat trobada'), findsOneWidget);
     await tester.ensureVisible(find.text('M’hi apunto'));
@@ -100,7 +101,7 @@ void main() {
     expect(find.text('Apuntat'), findsOneWidget);
     expect(
       tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex,
-      2,
+      0, // Inici (Descobreix)
     );
     await tester.tap(find.byTooltip('Tornar enrere'));
     await tester.pumpAndSettle();
@@ -108,7 +109,7 @@ void main() {
       tester.widget<TextField>(find.byType(TextField)).controller!.text,
       'girona',
     );
-    await tester.tap(destination('Inici'));
+    await tester.tap(destination('Mapa'));
     await tester.pumpAndSettle();
     expect(find.text('Apuntat'), findsOneWidget);
     await tester.tap(destination('Agenda'));
@@ -127,9 +128,9 @@ void main() {
       expect(enrollments.enrolledRequests, isEmpty);
       await tester.tap(find.byTooltip('Tornar enrere'));
       await tester.pumpAndSettle();
-      await tester.tap(destination('Inici'));
+      await tester.tap(destination('Mapa'));
       await tester.pumpAndSettle();
-      await tester.tap(destination('Descobreix'));
+      await tester.tap(destination('Inici'));
       await tester.pumpAndSettle();
       expect(find.widgetWithText(AppBar, 'Cerca'), findsOneWidget);
       expect(
@@ -140,7 +141,7 @@ void main() {
       expect(discovery.queries, ['girona']);
       await tester.tap(find.byTooltip('Tornar enrere'));
       await tester.pumpAndSettle();
-      expect(find.widgetWithText(AppBar, 'Descobreix'), findsOneWidget);
+      expect(find.byKey(const ValueKey('discover-search')), findsOneWidget);
       expect(find.text('Per a tu'), findsOneWidget);
     },
   );
@@ -183,9 +184,9 @@ void main() {
     await tester.tap(find.byTooltip('Tornar enrere'));
     await tester.pumpAndSettle();
     expect(tester.getTopLeft(card).dy, closeTo(before, 1));
-    await tester.tap(destination('Inici'));
+    await tester.tap(destination('Mapa'));
     await tester.pumpAndSettle();
-    await tester.tap(destination('Descobreix'));
+    await tester.tap(destination('Inici'));
     await tester.pumpAndSettle();
     expect(tester.getTopLeft(card).dy, closeTo(before, 1));
   });
@@ -227,9 +228,9 @@ void main() {
     await tester.tap(find.byTooltip('Tornar enrere'));
     await tester.pumpAndSettle();
     expect(tester.getTopLeft(card).dy, closeTo(before, 1));
-    await tester.tap(destination('Inici'));
+    await tester.tap(destination('Mapa'));
     await tester.pumpAndSettle();
-    await tester.tap(destination('Descobreix'));
+    await tester.tap(destination('Inici'));
     await tester.pumpAndSettle();
     expect(tester.getTopLeft(card).dy, closeTo(before, 1));
     expect(
@@ -264,7 +265,7 @@ void main() {
     );
     await auth.checkEmailVerified();
     await tester.pumpAndSettle();
-    await tester.tap(destination('Descobreix'));
+    await tester.tap(destination('Inici'));
     await tester.pumpAndSettle();
     pending.complete([exhibition]);
     await tester.pumpAndSettle();
@@ -286,7 +287,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    await tester.tap(destination('Descobreix'));
+    await tester.tap(destination('Inici'));
     await tester.pumpAndSettle();
     expect(find.text('Mirades de Catalunya'), findsOneWidget);
     await search(tester, 'teatre');
