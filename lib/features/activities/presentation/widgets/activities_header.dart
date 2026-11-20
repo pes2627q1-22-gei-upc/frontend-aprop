@@ -111,6 +111,7 @@ class ActivitiesHeader extends StatelessWidget {
                 children: [
                   Expanded(
                     child: _ViewButton(
+                      key: const ValueKey('activities-view-map'),
                       label: context.l10n.actViewMap,
                       icon: Icons.map_outlined,
                       selected: selectedView == ActivitiesView.map,
@@ -119,6 +120,7 @@ class ActivitiesHeader extends StatelessWidget {
                   ),
                   Expanded(
                     child: _ViewButton(
+                      key: const ValueKey('activities-view-list'),
                       label: context.l10n.actViewList,
                       icon: Icons.format_list_bulleted,
                       selected: selectedView == ActivitiesView.list,
@@ -158,8 +160,8 @@ class _ActivitiesBrand extends StatelessWidget {
     return Row(
       children: [
         const Expanded(child: APropLogo(alignment: Alignment.centerLeft)),
-        const SizedBox(width: 8),
-        create,
+        // Al mapa no es crea res: el «+» és a la capçalera d'Inici (#273).
+        if (onCreatePressed != null) ...[const SizedBox(width: 8), create],
       ],
     );
   }
@@ -223,6 +225,7 @@ class _FilterButton extends StatelessWidget {
 
 class _ViewButton extends StatelessWidget {
   const _ViewButton({
+    super.key,
     required this.label,
     required this.icon,
     required this.selected,

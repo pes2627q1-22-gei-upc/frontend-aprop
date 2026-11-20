@@ -1865,6 +1865,9 @@ class AppLocalizationsCa extends AppLocalizations {
   String get navDiscover => 'Descobreix';
 
   @override
+  String get navMap => 'Mapa';
+
+  @override
   String get navNotifications => 'Avisos';
 
   @override

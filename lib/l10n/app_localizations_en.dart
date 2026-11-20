@@ -1853,6 +1853,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navDiscover => 'Discover';
 
   @override
+  String get navMap => 'Map';
+
+  @override
   String get navNotifications => 'Alerts';
 
   @override

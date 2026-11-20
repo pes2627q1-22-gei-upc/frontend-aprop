@@ -16,14 +16,13 @@ class DiscoverScreen extends StatefulWidget {
     required this.userId,
     required this.repository,
     required this.enrollmentViewModel,
-    required this.onSearchPressed,
     required this.onActivitySelected,
   });
 
   final String userId;
   final DiscoveryRepository repository;
   final EnrollmentViewModel enrollmentViewModel;
-  final VoidCallback onSearchPressed;
+
   final ValueChanged<String> onActivitySelected;
 
   @override
@@ -64,7 +63,6 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return ListenableBuilder(
       listenable: _viewModel,
       builder: (context, child) {
@@ -75,36 +73,6 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
             key: const PageStorageKey('discover-feed'),
             physics: const AlwaysScrollableScrollPhysics(),
             slivers: [
-              SliverPadding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-                sliver: SliverToBoxAdapter(
-                  child: OutlinedButton(
-                    key: const ValueKey('discover-search'),
-                    onPressed: widget.onSearchPressed,
-                    style: OutlinedButton.styleFrom(
-                      minimumSize: const Size.fromHeight(56),
-                      padding: const EdgeInsets.all(16),
-                      backgroundColor: theme.colorScheme.surface,
-                      side: BorderSide(color: theme.colorScheme.outlineVariant),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.search),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            context.l10n.discoverSearchField,
-                            style: theme.textTheme.bodyLarge,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
               if (_viewModel.isLoading && feed == null)
                 SliverToBoxAdapter(
                   child: Padding(
@@ -165,7 +133,9 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                         : null,
                   ),
                 ],
-              const SliverToBoxAdapter(child: SizedBox(height: 24)),
+              // Espai perquè el botó «Assistent» no tapi l'última targeta (com
+              // a la llista del mapa).
+              const SliverToBoxAdapter(child: SizedBox(height: 96)),
             ],
           ),
         );

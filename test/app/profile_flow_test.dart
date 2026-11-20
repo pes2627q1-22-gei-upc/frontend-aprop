@@ -100,7 +100,7 @@ void main() {
       await tester.tap(find.byTooltip('Tornar enrere'));
       await tester.pumpAndSettle();
       expect(tester.getTopLeft(tile).dy, closeTo(before, 1));
-      await tester.tap(destination('Inici'));
+      await tester.tap(destination('Mapa'));
       await tester.pumpAndSettle();
       await tester.tap(destination('Perfil'));
       await tester.pumpAndSettle();

@@ -8,6 +8,8 @@ import 'package:aprop/features/auth/data/demo_auth_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'app_navigation.dart';
+
 void main() {
   testWidgets(
     'Crea una activitat des d’Inici, n’obre la fitxa i surt a la llista',
@@ -74,6 +76,7 @@ void main() {
       await tester.tap(find.byTooltip('Tornar enrere'));
       await tester.pumpAndSettle();
       expect(find.widgetWithText(AppBar, 'Crea una activitat'), findsNothing);
+      await openMapTab(tester);
       await tester.scrollUntilVisible(
         find.widgetWithText(ActivityCard, 'Concert a la plaça'),
         300,
@@ -144,6 +147,7 @@ void main() {
       APropApp(authRepository: auth, activityRepository: catalogue),
     );
     await tester.pumpAndSettle();
+    await openMapTab(tester);
 
     // Una activitat oficial no es pot editar.
     await tester.tap(find.text('Jazz al parc'));

@@ -4,6 +4,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:aprop/app/aprop_app.dart';
 import 'package:aprop/features/auth/data/demo_auth_repository.dart';
 
+import 'app/app_navigation.dart';
+
 Future<APropApp> signedInApp() async {
   final repository = DemoAuthRepository();
   await repository.signIn(
@@ -21,6 +23,7 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
     await tester.pumpWidget(await signedInApp());
     await tester.pumpAndSettle();
+    await openMapTab(tester);
 
     expect(tester.takeException(), isNull);
     expect(find.bySemanticsLabel('AProp!'), findsOneWidget);
@@ -45,6 +48,7 @@ void main() {
   testWidgets('Permet anar a Agenda i tornar a la llista', (tester) async {
     await tester.pumpWidget(await signedInApp());
     await tester.pumpAndSettle();
+    await openMapTab(tester);
 
     await tester.tap(find.widgetWithText(NavigationDestination, 'Agenda'));
     await tester.pumpAndSettle();
@@ -52,7 +56,7 @@ void main() {
     expect(find.widgetWithText(AppBar, 'Agenda'), findsOneWidget);
     expect(find.byTooltip('Mes següent').hitTestable(), findsOneWidget);
 
-    await tester.tap(find.widgetWithText(NavigationDestination, 'Inici'));
+    await tester.tap(find.widgetWithText(NavigationDestination, 'Mapa'));
     await tester.pumpAndSettle();
 
     expect(find.text('Jazz al parc').hitTestable(), findsOneWidget);
@@ -68,6 +72,7 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
     await tester.pumpWidget(await signedInApp());
     await tester.pumpAndSettle();
+    await openMapTab(tester);
 
     final list = find.byKey(const PageStorageKey<String>('activities-list'));
     await tester.drag(list, const Offset(0, -500));
@@ -84,13 +89,13 @@ void main() {
     expect(find.text('Tarragona'), findsOneWidget);
     expect(
       tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex,
-      0,
+      2, // Mapa
     );
 
     await tester.tap(find.widgetWithText(NavigationDestination, 'Agenda'));
     await tester.pumpAndSettle();
     expect(find.widgetWithText(AppBar, 'Agenda'), findsOneWidget);
-    await tester.tap(find.widgetWithText(NavigationDestination, 'Inici'));
+    await tester.tap(find.widgetWithText(NavigationDestination, 'Mapa'));
     await tester.pumpAndSettle();
     expect(find.widgetWithText(AppBar, 'Activitat'), findsOneWidget);
 
