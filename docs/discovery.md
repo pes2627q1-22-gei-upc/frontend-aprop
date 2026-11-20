@@ -8,7 +8,7 @@ Implementació del recorregut Descobreix → Cerca d'activitats → Fitxa, amb l
 
 Des de la #273 (DP-060), Descobreix és la pestanya «Inici»: la capçalera de l'app porta el logotip «AProp!», el «+» per crear una activitat i la lupa de la cerca, i hi ha el botó «Assistent». La pantalla mostra «Per a tu» i «Destacats», sense els filtres del mapa. Comparteix les targetes, la fitxa i les inscripcions existents. La barra inferior continua sent única, propietat de `MainShell`.
 
-DP-024 registra el contracte pendent i les adaptacions: les seleccions demo són l'exposició i el teatre del catàleg compartit, amb les seves dates històriques. No representen interessos persistits ni un rànquing real. El subtítol és «Una selecció per començar»; només un feed amb `isPersonalized: true` mostra «Segons els teus interessos». «Persones» és una opció desactivada amb una explicació; la cerca de persones, els perfils i les amistats no s'implementen en aquesta tasca.
+DP-024 registra el contracte pendent i les adaptacions: les seleccions demo són l'exposició i el teatre del catàleg compartit, amb les seves dates històriques. No representen interessos persistits ni un rànquing real. El subtítol és «Una selecció per començar»; només un feed amb `isPersonalized: true` mostra «Segons els teus interessos». La #96 deixava «Persones» desactivada; la #162 l’habilita amb `UserSearchViewModel`, repositoris HTTP/Demo i retorn del perfil públic de #277. Vegeu [la cerca de persones](user-search.md). Les accions d’amistat continuen sent una altra funcionalitat.
 
 ## Fitxers i responsabilitats
 

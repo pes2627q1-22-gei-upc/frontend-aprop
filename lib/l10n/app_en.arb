@@ -442,7 +442,7 @@
   "actLoadZoneError": "We couldn’t load the activities in this area. Please try again.",
   "actLoadDetailError": "We couldn’t load the activity. Please try again.",
   "actSearchError": "We couldn’t search the activities. Please try again.",
-  "discoverSearchField": "Search activities",
+  "discoverSearchField": "Search activities or people",
   "discoverLoading": "Loading suggestions",
   "discoverEmptyTitle": "No suggestions yet",
   "discoverEmptyBody": "You can search for activities or try again later.",
@@ -534,5 +534,18 @@
   "actLinkCopy": "Copy link: {name}",
   "actLinkCopied": "Link copied.",
   "actLinkOpenError": "The link could not be opened.",
-  "actMoreCategories": "{count, plural, one{1 more category} other{{count} more categories}}"
+  "actMoreCategories": "{count, plural, one{1 more category} other{{count} more categories}}",
+  "userSearchHint": "Name or username",
+  "userSearchLabel": "Search people",
+  "userSearchPromptTitle": "Who are you looking for?",
+  "userSearchPromptBody": "Enter a name or username.",
+  "userSearchSearching": "Searching people",
+  "userSearchError": "We couldn’t search for people. Try again.",
+  "userSearchNoResultsTitle": "No people found",
+  "userSearchNoResultsBody": "Try another name or username.",
+  "userSearchCount": "{count, plural, =1{1 person found} other{{count} people found}}",
+  "userSearchLoaded": "{count, plural, =1{1 person loaded} other{{count} people loaded}}",
+  "userSearchLoadMore": "Load more people",
+  "userSearchMoreError": "We couldn’t load more people. Try again.",
+  "userSearchTooLong": "Search can contain up to {limit} characters."
 }

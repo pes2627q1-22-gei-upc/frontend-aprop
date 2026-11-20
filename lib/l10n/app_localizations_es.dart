@@ -1649,7 +1649,7 @@ class AppLocalizationsEs extends AppLocalizations {
       'No hemos podido buscar las actividades. Vuelve a intentarlo.';
 
   @override
-  String get discoverSearchField => 'Busca actividades';
+  String get discoverSearchField => 'Busca actividades o personas';
 
   @override
   String get discoverLoading => 'Cargando propuestas';
@@ -1963,5 +1963,66 @@ class AppLocalizationsEs extends AppLocalizations {
       one: '1 categoría más',
     );
     return '$_temp0';
+  }
+
+  @override
+  String get userSearchHint => 'Nombre o nombre de usuario';
+
+  @override
+  String get userSearchLabel => 'Buscar personas';
+
+  @override
+  String get userSearchPromptTitle => '¿A quién quieres encontrar?';
+
+  @override
+  String get userSearchPromptBody =>
+      'Escribe un nombre o un nombre de usuario.';
+
+  @override
+  String get userSearchSearching => 'Buscando personas';
+
+  @override
+  String get userSearchError =>
+      'No hemos podido buscar personas. Vuelve a intentarlo.';
+
+  @override
+  String get userSearchNoResultsTitle => 'No hemos encontrado a nadie';
+
+  @override
+  String get userSearchNoResultsBody =>
+      'Prueba otro nombre o nombre de usuario.';
+
+  @override
+  String userSearchCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count personas encontradas',
+      one: '1 persona encontrada',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String userSearchLoaded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count personas cargadas',
+      one: '1 persona cargada',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get userSearchLoadMore => 'Cargar más personas';
+
+  @override
+  String get userSearchMoreError =>
+      'No hemos podido cargar más personas. Vuelve a intentarlo.';
+
+  @override
+  String userSearchTooLong(int limit) {
+    return 'La búsqueda puede tener como máximo $limit caracteres.';
   }
 }

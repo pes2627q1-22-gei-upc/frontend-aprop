@@ -298,6 +298,8 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 
 - **Actualització 2026-10-27:** integració HTTP de recomanacions/populars/cerca amb el contracte real de `api-aprop@be6c25e`. Total i pàgines des de 0, disponibilitat/error per secció i preferències absents. Els límits nous s’especifiquen a DP-041; Demo conserva la seva semàntica local.
 
+- **Actualització 2026-11-20 (#162):** cerca de persones amb el contracte implementat de #161 (`GET /users?q=&pageNum=&pageSize=`) i perfil públic de #277. S’habilita el selector amb dades i destinació disponibles, consulta per nom/username, total/pàgines del servidor i retorn amb estat conservat. Es respecten els límits actuals del backend (100 punts de codi Unicode, 20 files per petició, màxim 50 configurable). L’adaptador només consumeix el resum públic; bloquejos i comptes visibles els filtra el servidor. No s’implementen amistats noves. La resta de límits de la cerca d’activitats es manté a DP-041. Guia `docs/user-search.md`; pendent prova autenticada del desplegament.
+
 ### DP-025 · Primer accés amb Google: nom d'usuari i contracte amb el backend
 - **Estat:** oberta
 - **Obert per:** 2026-10-21 · Claude Code (Opus 5.5) amb confirmació de l'usuari · Taiga #7

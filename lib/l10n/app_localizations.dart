@@ -2755,7 +2755,7 @@ abstract class AppLocalizations {
   /// No description provided for @discoverSearchField.
   ///
   /// In ca, this message translates to:
-  /// **'Cerca activitats'**
+  /// **'Cerca activitats o persones'**
   String get discoverSearchField;
 
   /// No description provided for @discoverLoading.
@@ -3309,6 +3309,84 @@ abstract class AppLocalizations {
   /// In ca, this message translates to:
   /// **'{count, plural, one{1 categoria més} other{{count} categories més}}'**
   String actMoreCategories(int count);
+
+  /// No description provided for @userSearchHint.
+  ///
+  /// In ca, this message translates to:
+  /// **'Nom o nom d’usuari'**
+  String get userSearchHint;
+
+  /// No description provided for @userSearchLabel.
+  ///
+  /// In ca, this message translates to:
+  /// **'Cerca persones'**
+  String get userSearchLabel;
+
+  /// No description provided for @userSearchPromptTitle.
+  ///
+  /// In ca, this message translates to:
+  /// **'A qui vols trobar?'**
+  String get userSearchPromptTitle;
+
+  /// No description provided for @userSearchPromptBody.
+  ///
+  /// In ca, this message translates to:
+  /// **'Escriu un nom o un nom d’usuari.'**
+  String get userSearchPromptBody;
+
+  /// No description provided for @userSearchSearching.
+  ///
+  /// In ca, this message translates to:
+  /// **'Cercant persones'**
+  String get userSearchSearching;
+
+  /// No description provided for @userSearchError.
+  ///
+  /// In ca, this message translates to:
+  /// **'No hem pogut cercar persones. Torna-ho a provar.'**
+  String get userSearchError;
+
+  /// No description provided for @userSearchNoResultsTitle.
+  ///
+  /// In ca, this message translates to:
+  /// **'No hem trobat cap persona'**
+  String get userSearchNoResultsTitle;
+
+  /// No description provided for @userSearchNoResultsBody.
+  ///
+  /// In ca, this message translates to:
+  /// **'Prova un altre nom o nom d’usuari.'**
+  String get userSearchNoResultsBody;
+
+  /// No description provided for @userSearchCount.
+  ///
+  /// In ca, this message translates to:
+  /// **'{count, plural, =1{1 persona trobada} other{{count} persones trobades}}'**
+  String userSearchCount(int count);
+
+  /// No description provided for @userSearchLoaded.
+  ///
+  /// In ca, this message translates to:
+  /// **'{count, plural, =1{1 persona carregada} other{{count} persones carregades}}'**
+  String userSearchLoaded(int count);
+
+  /// No description provided for @userSearchLoadMore.
+  ///
+  /// In ca, this message translates to:
+  /// **'Carregar més persones'**
+  String get userSearchLoadMore;
+
+  /// No description provided for @userSearchMoreError.
+  ///
+  /// In ca, this message translates to:
+  /// **'No hem pogut carregar més persones. Torna-ho a provar.'**
+  String get userSearchMoreError;
+
+  /// No description provided for @userSearchTooLong.
+  ///
+  /// In ca, this message translates to:
+  /// **'La cerca pot tenir com a màxim {limit} caràcters.'**
+  String userSearchTooLong(int limit);
 }
 
 class _AppLocalizationsDelegate
