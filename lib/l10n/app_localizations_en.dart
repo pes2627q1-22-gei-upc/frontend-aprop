@@ -514,6 +514,40 @@ class AppLocalizationsEn extends AppLocalizations {
   String get authEmailInvalid => 'The email isn\'t valid.';
 
   @override
+  String get forgotTitle => 'Reset your password';
+
+  @override
+  String get forgotLink => 'Forgot your password?';
+
+  @override
+  String get forgotIntro =>
+      'Enter your account email and we’ll send you a link to choose a new one.';
+
+  @override
+  String get forgotEmailLabel => 'Email';
+
+  @override
+  String get forgotSend => 'Send the link';
+
+  @override
+  String forgotResendIn(int seconds) {
+    return 'Send the link again ($seconds s)';
+  }
+
+  @override
+  String get forgotResend => 'Send the link again';
+
+  @override
+  String get forgotRemember => 'Remember it?';
+
+  @override
+  String get forgotBackToLogin => 'Back to sign in';
+
+  @override
+  String get forgotSent =>
+      'If there is an account with this email, we’ve sent it a link to choose a new password. If you can’t find it, check your spam folder.';
+
+  @override
   String get authUsernameRequired => 'Enter a username.';
 
   @override

@@ -75,6 +75,15 @@ class FakeAuthRepository implements AuthRepository {
     verificationEmailsSent++;
   }
 
+  /// Correus als quals s'ha demanat l'enllaç per canviar la contrasenya.
+  final List<String> passwordResetEmails = [];
+
+  @override
+  Future<void> sendPasswordResetEmail(String email) async {
+    await _respond();
+    passwordResetEmails.add(email);
+  }
+
   @override
   Future<bool> checkEmailVerified() async {
     await _respond();

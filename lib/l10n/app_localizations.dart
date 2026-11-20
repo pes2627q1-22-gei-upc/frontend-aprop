@@ -994,6 +994,66 @@ abstract class AppLocalizations {
   /// **'El correu no és vàlid.'**
   String get authEmailInvalid;
 
+  /// No description provided for @forgotTitle.
+  ///
+  /// In ca, this message translates to:
+  /// **'Recupera la contrasenya'**
+  String get forgotTitle;
+
+  /// No description provided for @forgotLink.
+  ///
+  /// In ca, this message translates to:
+  /// **'Has oblidat la contrasenya?'**
+  String get forgotLink;
+
+  /// No description provided for @forgotIntro.
+  ///
+  /// In ca, this message translates to:
+  /// **'Escriu el correu del teu compte i t’enviarem un enllaç per triar-ne una de nova.'**
+  String get forgotIntro;
+
+  /// No description provided for @forgotEmailLabel.
+  ///
+  /// In ca, this message translates to:
+  /// **'Correu'**
+  String get forgotEmailLabel;
+
+  /// No description provided for @forgotSend.
+  ///
+  /// In ca, this message translates to:
+  /// **'Envia l’enllaç'**
+  String get forgotSend;
+
+  /// No description provided for @forgotResendIn.
+  ///
+  /// In ca, this message translates to:
+  /// **'Torna a enviar l’enllaç ({seconds} s)'**
+  String forgotResendIn(int seconds);
+
+  /// No description provided for @forgotResend.
+  ///
+  /// In ca, this message translates to:
+  /// **'Torna a enviar l’enllaç'**
+  String get forgotResend;
+
+  /// No description provided for @forgotRemember.
+  ///
+  /// In ca, this message translates to:
+  /// **'Ja la recordes?'**
+  String get forgotRemember;
+
+  /// No description provided for @forgotBackToLogin.
+  ///
+  /// In ca, this message translates to:
+  /// **'Torna a l’inici de sessió'**
+  String get forgotBackToLogin;
+
+  /// No description provided for @forgotSent.
+  ///
+  /// In ca, this message translates to:
+  /// **'Si hi ha un compte amb aquest correu, t’hi hem enviat un enllaç per triar una contrasenya nova. Si no el trobes, mira el correu brossa.'**
+  String get forgotSent;
+
   /// No description provided for @authUsernameRequired.
   ///
   /// In ca, this message translates to:

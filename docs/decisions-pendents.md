@@ -509,6 +509,15 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Qui decideix:** equip/PO per validar l’edició visual de marca; la representació és reversible perquè es conserva el recurs original.
 - **Resolució:**
 
+### DP-056 · Recuperar la contrasenya: disseny i textos sense mockup
+- **Estat:** oberta
+- **Identificador:** es va obrir com a DP-047; renumerada a DP-056 en integrar develop (la DP-047 és el logotip i de la DP-048 a la DP-055 ja estan agafades).
+- **Obert per:** 2026-11-16 · Claude Code (Opus 5.5) amb confirmació de l'usuari · Taiga #263 (US #11)
+- **Context:** `ForgotPasswordScreen`, `ForgotPasswordViewModel`, enllaç «Has oblidat la contrasenya?» de `LoginScreen`, `AuthRepository.sendPasswordResetEmail`.
+- **Dubte:** no hi ha mockup de la pantalla. La tasca #118 (Arnau) descrivia el mateix frontend; l'usuari ho fa tot a la #263 i avisa l'Arnau.
+- **Provisionalment:** pantalla pròpia amb el mateix estil que «Verifica el teu correu». Si al login hi ha escrit un correu, ja hi ve. Després d'enviar, sempre es mostra el mateix missatge («Si hi ha un compte amb aquest correu…»), sense revelar si el compte existeix (CA2): si Firebase respon `user-not-found`, es tracta com un enviament correcte. Espera de 60 s entre enviaments, com a la verificació. La contrasenya nova es tria a la pàgina de Firebase que obre l'enllaç (correu en català). `TODO(DP-056)` a la pantalla.
+- **Qui decideix:** equip (disseny)
+
 ### DP-048 · Navegació de les fitxes obertes des del xat
 - **Estat:** oberta · 2026-11-16 · Taiga #261 [FE] Amagar menú de navegació inferior en obrir el xat.
 - **Context:** la tasca demana explícitament ocultar el menú en obrir l’Assistent. Les recomanacions poden obrir una fitxa sobre el xat, mentre que els mockups anteriors mostraven navegació inferior a les fitxes.

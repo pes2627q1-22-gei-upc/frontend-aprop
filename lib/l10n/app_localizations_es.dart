@@ -522,6 +522,40 @@ class AppLocalizationsEs extends AppLocalizations {
   String get authEmailInvalid => 'El correo no es válido.';
 
   @override
+  String get forgotTitle => 'Recupera la contraseña';
+
+  @override
+  String get forgotLink => '¿Has olvidado la contraseña?';
+
+  @override
+  String get forgotIntro =>
+      'Escribe el correo de tu cuenta y te enviaremos un enlace para elegir una nueva.';
+
+  @override
+  String get forgotEmailLabel => 'Correo';
+
+  @override
+  String get forgotSend => 'Envía el enlace';
+
+  @override
+  String forgotResendIn(int seconds) {
+    return 'Vuelve a enviar el enlace ($seconds s)';
+  }
+
+  @override
+  String get forgotResend => 'Vuelve a enviar el enlace';
+
+  @override
+  String get forgotRemember => '¿Ya la recuerdas?';
+
+  @override
+  String get forgotBackToLogin => 'Vuelve al inicio de sesión';
+
+  @override
+  String get forgotSent =>
+      'Si hay una cuenta con este correo, te hemos enviado un enlace para elegir una contraseña nueva. Si no lo encuentras, mira la carpeta de spam.';
+
+  @override
   String get authUsernameRequired => 'Escribe un nombre de usuario.';
 
   @override

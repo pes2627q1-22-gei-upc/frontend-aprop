@@ -263,6 +263,23 @@
   "authPopupBlocked": "El navegador ha bloquejat la finestra de Google. Permet les finestres emergents i torna-ho a provar.",
   "authEmailRequiredField": "Introdueix el correu.",
   "authEmailInvalid": "El correu no és vàlid.",
+  "forgotTitle": "Recupera la contrasenya",
+  "forgotLink": "Has oblidat la contrasenya?",
+  "forgotIntro": "Escriu el correu del teu compte i t’enviarem un enllaç per triar-ne una de nova.",
+  "forgotEmailLabel": "Correu",
+  "forgotSend": "Envia l’enllaç",
+  "forgotResendIn": "Torna a enviar l’enllaç ({seconds} s)",
+  "@forgotResendIn": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "forgotResend": "Torna a enviar l’enllaç",
+  "forgotRemember": "Ja la recordes?",
+  "forgotBackToLogin": "Torna a l’inici de sessió",
+  "forgotSent": "Si hi ha un compte amb aquest correu, t’hi hem enviat un enllaç per triar una contrasenya nova. Si no el trobes, mira el correu brossa.",
   "authUsernameRequired": "Introdueix un nom d'usuari.",
   "authUsernameRules": "Entre 3 i 20 caràcters: minúscules, números, punt o guió baix.",
   "authPasswordRequired": "Introdueix una contrasenya.",

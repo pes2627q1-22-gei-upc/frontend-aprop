@@ -519,6 +519,40 @@ class AppLocalizationsCa extends AppLocalizations {
   String get authEmailInvalid => 'El correu no és vàlid.';
 
   @override
+  String get forgotTitle => 'Recupera la contrasenya';
+
+  @override
+  String get forgotLink => 'Has oblidat la contrasenya?';
+
+  @override
+  String get forgotIntro =>
+      'Escriu el correu del teu compte i t’enviarem un enllaç per triar-ne una de nova.';
+
+  @override
+  String get forgotEmailLabel => 'Correu';
+
+  @override
+  String get forgotSend => 'Envia l’enllaç';
+
+  @override
+  String forgotResendIn(int seconds) {
+    return 'Torna a enviar l’enllaç ($seconds s)';
+  }
+
+  @override
+  String get forgotResend => 'Torna a enviar l’enllaç';
+
+  @override
+  String get forgotRemember => 'Ja la recordes?';
+
+  @override
+  String get forgotBackToLogin => 'Torna a l’inici de sessió';
+
+  @override
+  String get forgotSent =>
+      'Si hi ha un compte amb aquest correu, t’hi hem enviat un enllaç per triar una contrasenya nova. Si no el trobes, mira el correu brossa.';
+
+  @override
   String get authUsernameRequired => 'Introdueix un nom d\'usuari.';
 
   @override

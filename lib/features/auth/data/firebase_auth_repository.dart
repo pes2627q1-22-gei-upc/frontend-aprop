@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../core/l10n/locale_controller.dart';
 import '../models/app_user.dart';
 import '../models/auth_failure.dart';
 import '../models/user_profile.dart';
@@ -28,8 +29,9 @@ class FirebaseAuthRepository implements AuthRepository {
        _googleSignIn = googleSignIn ?? GoogleSignIn.instance,
        _preferences = preferences ?? SharedPreferencesAsync();
 
-  /// Idioma dels correus que envia Firebase (verificació del compte).
-  static const _emailLanguage = 'ca';
+  /// Idioma dels correus que envia Firebase (verificació del compte i
+  /// restabliment de la contrasenya): el de l'app en aquell moment.
+  static String get _emailLanguage => LocaleController.active.languageCode;
 
   final UserSyncRepository _userSync;
   final FirebaseAuth _auth;
@@ -187,6 +189,21 @@ class FirebaseAuthRepository implements AuthRepository {
   @override
   Future<void> sendEmailVerification() {
     return _run(() => _sendEmailVerification(_requireCurrentUser()));
+  }
+
+  @override
+  Future<void> sendPasswordResetEmail(String email) async {
+    try {
+      await _run(() async {
+        await _auth.setLanguageCode(_emailLanguage);
+        await _auth.sendPasswordResetEmail(email: email);
+      });
+    } on FirebaseAuthException catch (e) {
+      // Sense compte amb aquest correu, com si s'hagués enviat: no es pot
+      // revelar quins correus estan registrats.
+      if (e.code == 'user-not-found') return;
+      rethrow;
+    }
   }
 
   @override
