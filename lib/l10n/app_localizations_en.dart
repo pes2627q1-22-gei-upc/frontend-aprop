@@ -84,7 +84,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get friendRequestSent => 'Request sent';
 
   @override
-  String get friendAlready => 'Friends';
+  String get friendAlready => 'Friend';
+
+  @override
+  String get friendAccepting => 'Accepting…';
+
+  @override
+  String get friendAcceptError => 'We couldn’t accept the request. Try again.';
+
+  @override
+  String get friendStatusError =>
+      'We couldn’t load friend requests. Try again.';
 
   @override
   String get friendRequestError =>

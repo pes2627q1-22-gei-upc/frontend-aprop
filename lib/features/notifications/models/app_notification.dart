@@ -1,4 +1,7 @@
 import '../../activities/models/activity.dart';
+import '../../profile/models/received_friend_request.dart';
+export '../../profile/models/received_friend_request.dart'
+    show FriendRequestStatus;
 
 enum NotificationCategory { social, reminders, recommendations }
 
@@ -20,8 +23,6 @@ enum NotificationType {
     _ => NotificationCategory.social,
   };
 }
-
-enum FriendRequestStatus { pending, accepted, rejected }
 
 class NotificationPerson {
   const NotificationPerson({
@@ -182,12 +183,15 @@ class AppNotification {
 
   AppNotification markRead() => _copy(isRead: true);
 
-  AppNotification resolveRequest(FriendRequestStatus status) {
+  AppNotification resolveRequest(
+    FriendRequestStatus status, {
+    bool markRead = true,
+  }) {
     if (type != NotificationType.friendRequest ||
         status == FriendRequestStatus.pending) {
       throw ArgumentError('Only a received request can be resolved.');
     }
-    return _copy(isRead: true, requestStatus: status);
+    return _copy(isRead: markRead ? true : isRead, requestStatus: status);
   }
 
   AppNotification _copy({bool? isRead, FriendRequestStatus? requestStatus}) =>

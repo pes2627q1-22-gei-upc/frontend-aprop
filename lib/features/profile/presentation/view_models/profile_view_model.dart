@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
@@ -8,6 +9,8 @@ import '../../models/profile_capabilities.dart';
 import '../../models/user_profile.dart';
 import '../../repositories/profile_image_picker.dart';
 import '../../repositories/profile_repository.dart';
+import '../../repositories/friendship_repository.dart';
+import '../../models/received_friend_request.dart';
 import '../../models/profile_failure.dart';
 import '../../../../core/l10n/locale_controller.dart';
 
@@ -16,7 +19,33 @@ class ProfileViewModel extends ChangeNotifier {
     required this.user,
     required this.repository,
     this._imagePicker,
-  });
+    FriendshipRepository? friendshipRepository,
+  }) {
+    _friendChanges = friendshipRepository?.watchChanges(user.id).listen((
+      change,
+    ) {
+      if (_isDisposed || change.status != FriendRequestStatus.accepted) return;
+      _friendRevision++;
+      _refreshPending = true;
+      _flushFriendRefresh();
+    });
+  }
+  StreamSubscription<FriendRequestResolution>? _friendChanges;
+  bool _refreshPending = false;
+  int _friendRevision = 0;
+
+  void _flushFriendRefresh() {
+    if (_isDisposed ||
+        !_refreshPending ||
+        _isLoading ||
+        _isLoadingCreated ||
+        isSaving) {
+      return;
+    }
+    _refreshPending = false;
+    unawaited(load());
+  }
+
   final AppUser user;
   final ProfileRepository repository;
   final ProfileImagePicker? _imagePicker;
@@ -49,6 +78,7 @@ class ProfileViewModel extends ChangeNotifier {
 
   Future<void> load() async {
     if (_isDisposed || _isLoading || _isLoadingCreated || isSaving) return;
+    final revision = _friendRevision;
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
@@ -57,6 +87,7 @@ class ProfileViewModel extends ChangeNotifier {
       final result = await repository.getProfile(user);
       if (_isDisposed) return;
       if (result.userId != user.id) throw StateError('Profile account changed');
+      if (revision != _friendRevision) return;
       _profile = _profile == null
           ? result
           : result.withCreatedActivities(_profile!.createdActivities);
@@ -69,6 +100,7 @@ class ProfileViewModel extends ChangeNotifier {
       if (!_isDisposed) {
         _isLoading = false;
         notifyListeners();
+        _flushFriendRefresh();
       }
     }
     if (received) await loadCreatedActivities();
@@ -94,6 +126,7 @@ class ProfileViewModel extends ChangeNotifier {
       if (!_isDisposed) {
         _isLoadingCreated = false;
         notifyListeners();
+        _flushFriendRefresh();
       }
     }
   }
@@ -169,6 +202,7 @@ class ProfileViewModel extends ChangeNotifier {
       if (!_isDisposed) {
         _isSavingDetails = false;
         notifyListeners();
+        _flushFriendRefresh();
       }
     }
   }
@@ -214,6 +248,7 @@ class ProfileViewModel extends ChangeNotifier {
       if (!_isDisposed) {
         _isChangingAvatar = false;
         notifyListeners();
+        _flushFriendRefresh();
       }
     }
   }
@@ -227,6 +262,7 @@ class ProfileViewModel extends ChangeNotifier {
       if (!_isDisposed && action == _avatarAction && interrupted) {
         _avatarError = currentL10n.profileAvatarInterrupted;
         notifyListeners();
+        _flushFriendRefresh();
       }
     } catch (_) {
       // Recovery failure must not upload a stale file or block the profile.
@@ -236,6 +272,7 @@ class ProfileViewModel extends ChangeNotifier {
   @override
   void dispose() {
     _isDisposed = true;
+    unawaited(_friendChanges?.cancel());
     super.dispose();
   }
 }

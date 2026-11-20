@@ -4,12 +4,25 @@ import '../models/public_profile.dart';
 import '../models/user_profile.dart';
 import '../models/user_summary.dart';
 import '../repositories/public_profile_repository.dart';
+import 'demo_friendship_repository.dart';
 
 /// Example people of the demo data: the creator of the catalogue's community
 /// activity and the people in the example notices.
 // TODO(DP-063): Demo friendship and privacy are fixed examples, not a graph.
 class DemoPublicProfileRepository implements PublicProfileRepository {
-  DemoPublicProfileRepository({required this.activityRepository});
+  DemoPublicProfileRepository({
+    required this.activityRepository,
+    this.friendshipRepository,
+    this.currentUserId,
+  });
+  final DemoFriendshipRepository? friendshipRepository;
+  final String? Function()? currentUserId;
+
+  bool _accepted(String peer) {
+    final viewer = currentUserId?.call();
+    return viewer != null &&
+        (friendshipRepository?.hasAccepted(viewer, peer) ?? false);
+  }
 
   final ActivityRepository activityRepository;
 
@@ -82,11 +95,11 @@ class DemoPublicProfileRepository implements PublicProfileRepository {
         biography: person.biography,
         avatarAsset: person.avatar,
         planCount: plans,
-        friendCount: person.friends,
+        friendCount: person.friends + (_accepted(id) ? 1 : 0),
         organizerRating: person.rating,
         progress: const ProfileProgress(level: null, experience: 0),
       ),
-      isFriend: person.isFriend,
+      isFriend: person.isFriend || _accepted(id),
       plansVisible: person.plansVisible,
     );
   }
@@ -107,8 +120,10 @@ class DemoPublicProfileRepository implements PublicProfileRepository {
     final id = _id(userId);
     final person = _people[id];
     if (person == null) throw const PublicProfileNotFound();
-    if (person.isFriend) return FriendRequestResult.alreadyFriends;
-    return _sentRequests.add(id)
+    if (person.isFriend || _accepted(id)) {
+      return FriendRequestResult.alreadyFriends;
+    }
+    return _sentRequests.add('${currentUserId?.call() ?? ''}/$id')
         ? FriendRequestResult.sent
         : FriendRequestResult.alreadyPending;
   }

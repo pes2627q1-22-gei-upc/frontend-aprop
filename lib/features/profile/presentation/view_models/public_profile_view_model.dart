@@ -1,14 +1,52 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 
 import '../../../activities/models/activity.dart';
 import '../../../../core/l10n/locale_controller.dart';
 import '../../models/public_profile.dart';
 import '../../repositories/public_profile_repository.dart';
+import '../../repositories/friendship_repository.dart';
+import '../../models/received_friend_request.dart';
 
 /// Another person's profile. Its two lists load separately, so one failing
 /// does not hide the other or the header.
 class PublicProfileViewModel extends ChangeNotifier {
-  PublicProfileViewModel({required this.userId, required this.repository});
+  PublicProfileViewModel({
+    required this.userId,
+    required this.repository,
+    this.friendshipRepository,
+    this.currentUserId,
+  }) {
+    if (friendshipRepository != null && currentUserId != null) {
+      _friendChanges = friendshipRepository!
+          .watchChanges(currentUserId!)
+          .listen((change) {
+            if (_isDisposed || change.request.senderId != userId) return;
+            _incoming = null;
+            _friendship = change.status == FriendRequestStatus.accepted
+                ? FriendshipAction.friends
+                : FriendshipAction.add;
+            _friendRequestError = null;
+            _revision++;
+            _reloadPending = true;
+            notifyListeners();
+            _flushRefresh();
+          });
+    }
+  }
+  final FriendshipRepository? friendshipRepository;
+  final String? currentUserId;
+  StreamSubscription<FriendRequestResolution>? _friendChanges;
+  ReceivedFriendRequest? _incoming;
+  int _revision = 0;
+  bool _reloadPending = false;
+
+  void _flushRefresh() {
+    if (_isDisposed || !_reloadPending || _isLoading) return;
+    _reloadPending = false;
+    unawaited(load());
+  }
 
   final String userId;
   final PublicProfileRepository repository;
@@ -47,6 +85,7 @@ class PublicProfileViewModel extends ChangeNotifier {
 
   Future<void> load() async {
     if (_isDisposed || _isLoading) return;
+    final revision = _revision;
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
@@ -54,16 +93,10 @@ class PublicProfileViewModel extends ChangeNotifier {
     try {
       result = await repository.getPublicProfile(userId);
       if (_isDisposed) return;
+      if (revision != _revision) return;
       _profile = result;
       _notFound = false;
-      _friendship = switch ((result.isFriend, _friendship)) {
-        (true, _) => FriendshipAction.friends,
-        // The profile does not say whether a request is pending: keep what
-        // this screen already knows.
-        (false, final known?) when known != FriendshipAction.friends => known,
-        (false, _) => FriendshipAction.add,
-        (null, _) => null,
-      };
+      await _loadFriendship(result);
     } on PublicProfileNotFound {
       if (_isDisposed) return;
       _profile = null;
@@ -75,6 +108,7 @@ class PublicProfileViewModel extends ChangeNotifier {
       if (!_isDisposed) {
         _isLoading = false;
         notifyListeners();
+        _flushRefresh();
       }
     }
     if (result == null || _isDisposed) return;
@@ -84,6 +118,95 @@ class PublicProfileViewModel extends ChangeNotifier {
       loadCreatedActivities(),
       if (result.plansVisible) loadPastPlans(),
     ]);
+  }
+
+  Future<void> _loadFriendship(PublicProfile profile) async {
+    final friends = friendshipRepository;
+    final account = currentUserId;
+    if (profile.isFriend == true ||
+        (account != null &&
+            friends
+                    ?.resolutions(account)
+                    .any(
+                      (r) =>
+                          r.request.senderId == userId &&
+                          r.status == FriendRequestStatus.accepted,
+                    ) ==
+                true)) {
+      _friendship = FriendshipAction.friends;
+      _incoming = null;
+      return;
+    }
+    if (friends == null || account == null) {
+      if (profile.isFriend == false &&
+          _friendship != FriendshipAction.requestSent &&
+          _friendship != FriendshipAction.unavailable) {
+        _friendship = FriendshipAction.add;
+      }
+      return;
+    }
+    final revision = _revision;
+    _friendship = FriendshipAction.checking;
+    _friendRequestError = null;
+    notifyListeners();
+    try {
+      final requests = await friends.getReceivedRequests(account);
+      if (_isDisposed || revision != _revision) return;
+      _incoming = requests.where((r) => r.senderId == userId).firstOrNull;
+      _friendship = _incoming != null
+          ? FriendshipAction.incoming
+          : _outgoingState;
+    } catch (_) {
+      if (_isDisposed || revision != _revision) return;
+      _friendship = FriendshipAction.retry;
+      _friendRequestError = currentL10n.friendStatusError;
+    }
+  }
+
+  FriendshipAction _outgoingState = FriendshipAction.add;
+
+  /// One entry point for the button; the widget never decides business actions.
+  Future<void> performFriendAction() async {
+    switch (_friendship) {
+      case FriendshipAction.add:
+        await sendFriendRequest();
+      case FriendshipAction.incoming:
+        await acceptFriendRequest();
+      case FriendshipAction.retry:
+        await load();
+      default:
+        break;
+    }
+  }
+
+  Future<void> acceptFriendRequest() async {
+    final request = _incoming;
+    final friends = friendshipRepository;
+    final account = currentUserId;
+    if (_isDisposed ||
+        _friendship != FriendshipAction.incoming ||
+        request == null ||
+        friends == null ||
+        account == null) {
+      return;
+    }
+    _friendship = FriendshipAction.accepting;
+    _friendRequestError = null;
+    notifyListeners();
+    try {
+      await friends.respond(
+        userId: account,
+        requestId: request.id,
+        accept: true,
+      );
+      // The shared confirmation subscription updates all open profiles/inbox.
+    } catch (_) {
+      if (_isDisposed) return;
+      _friendship = FriendshipAction.incoming;
+      _friendRequestError = currentL10n.friendAcceptError;
+    } finally {
+      if (!_isDisposed) notifyListeners();
+    }
   }
 
   Future<void> loadCreatedActivities() => _loadList(
@@ -105,20 +228,21 @@ class PublicProfileViewModel extends ChangeNotifier {
   // someone is blocked; the button learns it when the server refuses.
   Future<void> sendFriendRequest() async {
     if (_isDisposed || _friendship != FriendshipAction.add) return;
+    final revision = _revision;
     _friendship = FriendshipAction.sending;
     _friendRequestError = null;
     notifyListeners();
     try {
       final result = await repository.sendFriendRequest(userId);
-      if (_isDisposed) return;
-      _friendship = switch (result) {
+      if (_isDisposed || revision != _revision) return;
+      _friendship = _outgoingState = switch (result) {
         FriendRequestResult.sent ||
         FriendRequestResult.alreadyPending => FriendshipAction.requestSent,
         FriendRequestResult.alreadyFriends => FriendshipAction.friends,
         FriendRequestResult.blocked => FriendshipAction.unavailable,
       };
     } catch (_) {
-      if (_isDisposed) return;
+      if (_isDisposed || revision != _revision) return;
       _friendship = FriendshipAction.add;
       _friendRequestError = currentL10n.friendRequestError;
     } finally {
@@ -154,6 +278,7 @@ class PublicProfileViewModel extends ChangeNotifier {
   @override
   void dispose() {
     _isDisposed = true;
+    unawaited(_friendChanges?.cancel());
     super.dispose();
   }
 }
@@ -162,6 +287,10 @@ class PublicProfileViewModel extends ChangeNotifier {
 enum FriendshipAction {
   /// «Afegeix com a amic».
   add,
+  checking,
+  retry,
+  incoming,
+  accepting,
   sending,
 
   /// «Sol·licitud enviada», disabled.

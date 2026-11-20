@@ -22,6 +22,7 @@ import 'features/auth/repositories/user_sync_repository.dart';
 import 'features/interest_test/data/http_interest_test_repository.dart';
 import 'features/notifications/data/http_notification_repository.dart';
 import 'features/profile/data/http_profile_repository.dart';
+import 'features/profile/data/http_friendship_repository.dart';
 import 'features/profile/data/http_user_search_repository.dart';
 import 'features/profile/data/http_profile_settings_repository.dart';
 import 'features/profile/data/http_public_profile_repository.dart';
@@ -57,6 +58,7 @@ Future<APropApp> createConfiguredApp() async {
   );
 
   final activityRepository = HttpActivityRepository(apiClient: apiClient);
+  final friendshipRepository = HttpFriendshipRepository(apiClient: apiClient);
 
   return APropApp(
     authRepository: authRepository,
@@ -67,7 +69,9 @@ Future<APropApp> createConfiguredApp() async {
     enrollmentRepository: HttpEnrollmentRepository(apiClient: apiClient),
     discoveryRepository: HttpDiscoveryRepository(apiClient: apiClient),
     assistantRepository: HttpAssistantRepository(apiClient: apiClient),
+    friendshipRepository: friendshipRepository,
     notificationRepository: HttpNotificationRepository(
+      friendshipRepository: friendshipRepository,
       apiClient: apiClient,
       activityRepository: activityRepository,
     ),
