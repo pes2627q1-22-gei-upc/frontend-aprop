@@ -23,6 +23,8 @@ Set<String> markerIds(WidgetTester tester) => {
 Future<void> tapMarker(WidgetTester tester, String id) async {
   // Un toc al mapa just després d'un clic a sobre seu (un botó, un panell) es
   // pren pel mateix clic (DP-045): la persona no toca tan de pressa.
+  // Són 600 ms reals per crida: allarga la suite, però cal mentre DP-045
+  // estigui oberta.
   await tester.runAsync(
     () => Future<void>.delayed(const Duration(milliseconds: 600)),
   );

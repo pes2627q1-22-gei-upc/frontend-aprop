@@ -1229,9 +1229,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get actLoadingZone => 'Loading activities in this area';
 
   @override
-  String get actFilterLocation => 'Catalonia';
-
-  @override
   String get actFilterDates => 'Dates';
 
   @override
@@ -1241,31 +1238,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get actClearAllFilters => 'Clear all filters';
 
   @override
-  String get actViewMap => 'Map';
-
-  @override
-  String get actViewList => 'List';
-
-  @override
   String get actCreate => 'Create activity';
-
-  @override
-  String get actCreateSoon => 'Creating activities coming soon';
-
-  @override
-  String actViewSelected(String label) {
-    return '$label view selected';
-  }
-
-  @override
-  String actViewSoon(String label) {
-    return '$label view coming soon';
-  }
-
-  @override
-  String actViewShow(String label) {
-    return 'Show $label';
-  }
 
   @override
   String get actDetailsTitle => 'Activity';
@@ -1511,12 +1484,6 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
-
-  @override
-  String get actSeeListHint => 'Check the list to see results by category.';
-
-  @override
-  String get actSeeList => 'See list';
 
   @override
   String get actClear => 'Clear';

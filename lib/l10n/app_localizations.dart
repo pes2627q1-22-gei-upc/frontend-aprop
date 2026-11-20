@@ -2080,12 +2080,6 @@ abstract class AppLocalizations {
   /// **'Carregant les activitats de la zona'**
   String get actLoadingZone;
 
-  /// No description provided for @actFilterLocation.
-  ///
-  /// In ca, this message translates to:
-  /// **'Catalunya'**
-  String get actFilterLocation;
-
   /// No description provided for @actFilterDates.
   ///
   /// In ca, this message translates to:
@@ -2104,47 +2098,11 @@ abstract class AppLocalizations {
   /// **'Netejar tots els filtres'**
   String get actClearAllFilters;
 
-  /// No description provided for @actViewMap.
-  ///
-  /// In ca, this message translates to:
-  /// **'Mapa'**
-  String get actViewMap;
-
-  /// No description provided for @actViewList.
-  ///
-  /// In ca, this message translates to:
-  /// **'Llista'**
-  String get actViewList;
-
   /// No description provided for @actCreate.
   ///
   /// In ca, this message translates to:
   /// **'Crear activitat'**
   String get actCreate;
-
-  /// No description provided for @actCreateSoon.
-  ///
-  /// In ca, this message translates to:
-  /// **'Crear activitat disponible properament'**
-  String get actCreateSoon;
-
-  /// No description provided for @actViewSelected.
-  ///
-  /// In ca, this message translates to:
-  /// **'Vista {label} seleccionada'**
-  String actViewSelected(String label);
-
-  /// No description provided for @actViewSoon.
-  ///
-  /// In ca, this message translates to:
-  /// **'Vista {label} disponible properament'**
-  String actViewSoon(String label);
-
-  /// No description provided for @actViewShow.
-  ///
-  /// In ca, this message translates to:
-  /// **'Mostrar {label}'**
-  String actViewShow(String label);
 
   /// No description provided for @actDetailsTitle.
   ///
@@ -2541,18 +2499,6 @@ abstract class AppLocalizations {
   /// In ca, this message translates to:
   /// **'{count, plural, one{1 activitat sense categoria informada no s’inclou en aquest filtre.} other{{count} activitats sense categoria informada no s’inclouen en aquest filtre.}}'**
   String actUncategorised(int count);
-
-  /// No description provided for @actSeeListHint.
-  ///
-  /// In ca, this message translates to:
-  /// **'Consulta la llista per veure els resultats per categoria.'**
-  String get actSeeListHint;
-
-  /// No description provided for @actSeeList.
-  ///
-  /// In ca, this message translates to:
-  /// **'Veure llista'**
-  String get actSeeList;
 
   /// No description provided for @actClear.
   ///

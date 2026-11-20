@@ -198,54 +198,47 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  // Des de la #274 només hi ha el mapa.
-  {
-    const view = 'Mapa';
-    testWidgets(
-      '$view shows valid HTTP categories when the catalogue contains unnamed rows',
-      (tester) async {
-        final requestedIds = <String?>[];
-        final repository = HttpActivityRepository(
-          apiClient: ApiClient(
-            client: MockClient((request) async {
-              final Object body;
-              if (request.url.path == '/categories') {
-                body = [
-                  {'id': 1, 'name': ''},
-                  {'id': 3, 'name': 'agenda:categories/teatre'},
-                  {'id': 4, 'name': 'agenda:ambits/concerts'},
-                ];
-              } else {
-                requestedIds.add(request.url.queryParameters['filterCategory']);
-                body = [];
-              }
-              return http.Response.bytes(
-                utf8.encode(jsonEncode(body)),
-                200,
-                headers: {'content-type': 'application/json'},
-              );
-            }),
-          ),
-        );
-        model.dispose();
-        model = ActivitiesViewModel(repository: repository);
-        await pumpScreen(tester);
-        await open(tester, 'categories');
-        expect(category('Concerts'), findsOneWidget);
-        expect(category('Teatre'), findsOneWidget);
-        expect(
-          find.text('No hem pogut carregar les categories.'),
-          findsNothing,
-        );
+  testWidgets(
+    'The map shows valid HTTP categories when the catalogue contains unnamed rows',
+    (tester) async {
+      final requestedIds = <String?>[];
+      final repository = HttpActivityRepository(
+        apiClient: ApiClient(
+          client: MockClient((request) async {
+            final Object body;
+            if (request.url.path == '/categories') {
+              body = [
+                {'id': 1, 'name': ''},
+                {'id': 3, 'name': 'agenda:categories/teatre'},
+                {'id': 4, 'name': 'agenda:ambits/concerts'},
+              ];
+            } else {
+              requestedIds.add(request.url.queryParameters['filterCategory']);
+              body = [];
+            }
+            return http.Response.bytes(
+              utf8.encode(jsonEncode(body)),
+              200,
+              headers: {'content-type': 'application/json'},
+            );
+          }),
+        ),
+      );
+      model.dispose();
+      model = ActivitiesViewModel(repository: repository);
+      await pumpScreen(tester);
+      await open(tester, 'categories');
+      expect(category('Concerts'), findsOneWidget);
+      expect(category('Teatre'), findsOneWidget);
+      expect(find.text('No hem pogut carregar les categories.'), findsNothing);
 
-        await tester.tap(category('Teatre'));
-        await apply(tester);
-        expect(model.filters.categories, {'Teatre'});
-        expect(requestedIds.last, '3');
-        expect(tester.takeException(), isNull);
-      },
-    );
-  }
+      await tester.tap(category('Teatre'));
+      await apply(tester);
+      expect(model.filters.categories, {'Teatre'});
+      expect(requestedIds.last, '3');
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   testWidgets(
     'HTTP map badges and secondary-category filters stay consistent with the list',

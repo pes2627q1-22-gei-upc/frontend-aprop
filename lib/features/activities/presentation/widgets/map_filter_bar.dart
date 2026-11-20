@@ -94,7 +94,7 @@ class _SearchField extends StatelessWidget {
       key: const ValueKey('map-search'),
       color: colors.surface,
       elevation: 3,
-      shadowColor: colors.shadow.withValues(alpha: .35),
+      shadowColor: colors.shadow.withValues(alpha: _shadowAlpha),
       shape: const StadiumBorder(),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
@@ -123,6 +123,9 @@ class _SearchField extends StatelessWidget {
     );
   }
 }
+
+/// Opacitat de l'ombra dels elements que suren sobre el mapa.
+const _shadowAlpha = .3;
 
 /// Xip arrodonit amb ombra perquè es vegi sobre el mapa.
 class _FilterChip extends StatelessWidget {
@@ -156,7 +159,7 @@ class _FilterChip extends StatelessWidget {
         child: Material(
           color: selected ? colors.primary : colors.surface,
           elevation: 2,
-          shadowColor: colors.shadow.withValues(alpha: .3),
+          shadowColor: colors.shadow.withValues(alpha: _shadowAlpha),
           shape: StadiumBorder(
             side: selected
                 ? BorderSide.none
@@ -166,23 +169,23 @@ class _FilterChip extends StatelessWidget {
           child: InkWell(
             onTap: onPressed,
             child: ConstrainedBox(
-              constraints: const BoxConstraints(minHeight: 40),
+              // 48 dp: superfície tàctil mínima (docs/activity-filters.md).
+              constraints: const BoxConstraints(minHeight: 48, minWidth: 48),
               child: Padding(
                 padding: EdgeInsets.symmetric(
                   horizontal: label == null ? 11 : 14,
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(icon, size: 18, color: foreground),
                     if (label case final label?) ...[
                       const SizedBox(width: 6),
                       Text(
                         label,
-                        style: TextStyle(
-                          color: foreground,
-                          fontWeight: FontWeight.w600,
-                        ),
+                        style: Theme.of(context).textTheme.labelLarge
+                            ?.copyWith(color: foreground),
                       ),
                     ],
                   ],

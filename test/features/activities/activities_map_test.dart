@@ -74,7 +74,6 @@ void main() {
   }
 
   /// Des de la #274 la pantalla ja obre amb el mapa: no cal canviar de vista.
-  Future<void> openMap(WidgetTester tester) => tester.pumpAndSettle();
 
   GoogleMap map(WidgetTester tester) =>
       tester.widget<GoogleMap>(find.byType(GoogleMap));
@@ -114,7 +113,6 @@ void main() {
     tester,
   ) async {
     await pumpInici(tester);
-    await openMap(tester);
 
     expect(map(tester).markers, hasLength(3));
     // A la web, el control de càmera no queda sota «Crear activitat».
@@ -141,7 +139,6 @@ void main() {
     tester,
   ) async {
     await pumpInici(tester);
-    await openMap(tester);
 
     marker(tester, 'demo-theatre').onTap!();
     await tester.pumpAndSettle();
@@ -200,7 +197,6 @@ void main() {
     tester,
   ) async {
     await pumpInici(tester);
-    await openMap(tester);
     bool locked() => !map(tester).scrollGesturesEnabled;
     expect(locked(), isFalse);
 
@@ -248,7 +244,6 @@ void main() {
     tester,
   ) async {
     await pumpInici(tester, enrolled: {'demo-theatre'});
-    await openMap(tester);
 
     marker(tester, 'demo-theatre').onTap!();
     await tester.pumpAndSettle();
@@ -274,7 +269,6 @@ void main() {
 
   testWidgets('Tocar el mapa tanca la targeta', (tester) async {
     await pumpInici(tester);
-    await openMap(tester);
 
     marker(tester, 'demo-jazz').onTap!();
     await tester.pumpAndSettle();
@@ -314,7 +308,6 @@ void main() {
             at('lluny', 'Lluny d’aquí', cataloniaCenter, 9),
           ],
         );
-        await openMap(tester);
 
         // Un sol marcador per a les dues de l'auditori, i el sol a part.
         expect(map(tester).markers.map((m) => m.markerId.value).toSet(), {
@@ -375,7 +368,6 @@ void main() {
           ),
         ],
       );
-      await openMap(tester);
       marker(tester, 'lluny').onTap!();
       await tester.pumpAndSettle();
       expect(find.byTooltip('Tancar'), findsOneWidget);
@@ -409,7 +401,6 @@ void main() {
           ),
         ],
       );
-      await openMap(tester);
       expect(map(tester).markers.map((m) => m.markerId.value), ['grup:a:2']);
 
       // Els grups es refan quan el mapa s'acaba de moure, no a cada pas.
@@ -457,7 +448,6 @@ void main() {
       source: ActivitySource.community,
     );
     await pumpInici(tester, activities: [withLocation, withoutLocation]);
-    await openMap(tester);
 
     expect(map(tester).markers.map((m) => m.markerId.value), ['demo-jazz']);
 
@@ -494,7 +484,6 @@ void main() {
       final mapViewModel = ActivitiesMapViewModel(repository: repository);
       addTearDown(mapViewModel.dispose);
       await pumpInici(tester, mapViewModel: mapViewModel);
-      await openMap(tester);
       return mapViewModel;
     }
 
@@ -560,7 +549,6 @@ void main() {
       final userLocation = UserLocationViewModel(repository: repository);
       addTearDown(userLocation.dispose);
       await pumpInici(tester, userLocation: userLocation);
-      await openMap(tester);
       return userLocation;
     }
 
@@ -571,7 +559,6 @@ void main() {
 
     testWidgets('Sense ubicació, el mapa no té el botó', (tester) async {
       await pumpInici(tester);
-      await openMap(tester);
 
       expect(find.byTooltip('La meva ubicació'), findsNothing);
     });

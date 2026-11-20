@@ -68,8 +68,7 @@ class ActivitiesScreen extends StatefulWidget {
 class _ActivitiesScreenState extends State<ActivitiesScreen> {
   // Només hi ha mapa (#274). Si Google Maps no es pot dibuixar, en el seu
   // lloc surt la llista, perquè l'app no quedi bloquejada (CA3 de la #21).
-  late final _listController = ScrollController(onAttach: _onListAttached);
-  bool _resetListOnAttach = false;
+  final _listController = ScrollController();
   Route<dynamic>? _activeFilterRoute;
 
   @override
@@ -125,26 +124,10 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
 
   void _applyFilters(ActivityFilters filters) {
     if (filters == viewModel.filters) return;
-    _resetListOnAttach = true;
     viewModel.applyFilters(filters);
-    if (_listController.hasClients) {
-      _listController.jumpTo(0);
-      _resetListOnAttach = false;
-    }
-  }
-
-  void _onListAttached(ScrollPosition position) {
-    if (!_resetListOnAttach) return;
-    // The list may have been unmounted while filters changed on the map.
-    // Wait for layout before replacing its stored scroll position.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted &&
-          _resetListOnAttach &&
-          _listController.positions.contains(position)) {
-        position.jumpTo(0);
-        _resetListOnAttach = false;
-      }
-    });
+    // La llista de reserva sempre està muntada (no hi ha selector de vista):
+    // un filtre nou la torna a dalt.
+    if (_listController.hasClients) _listController.jumpTo(0);
   }
 
   void _clearFilters() => _applyFilters(ActivityFilters());

@@ -5,6 +5,7 @@ import 'package:aprop/features/activities/data/demo_activity_repository.dart';
 import 'package:aprop/features/activities/data/demo_discovery_repository.dart';
 import 'package:aprop/features/activities/models/activity.dart';
 import 'package:aprop/features/activities/models/discovery_feed.dart';
+import 'package:aprop/features/activities/models/geo_point.dart';
 import 'package:aprop/features/auth/data/demo_auth_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -12,6 +13,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../features/activities/fake_activity_repository.dart';
 import '../features/activities/fake_discovery_repository.dart';
 import '../features/activities/fake_enrollment_repository.dart';
+import 'app_navigation.dart';
 
 void main() {
   late DemoAuthRepository auth;
@@ -29,6 +31,8 @@ void main() {
       title: 'Mirades de Catalunya',
       category: 'Exposicions',
       municipality: 'Girona',
+      // Perquè surti al mapa.
+      location: const GeoPoint(latitude: 41.9794, longitude: 2.8214),
       startsAt: DateTime.now(),
       imageAsset: 'assets/images/mirades_de_catalunya.jpg',
       source: ActivitySource.culturalAgenda,
@@ -109,7 +113,17 @@ void main() {
       tester.widget<TextField>(find.byType(TextField)).controller!.text,
       'girona',
     );
-    // L'Agenda comparteix l'estat de la inscripció.
+    // El Mapa i l'Agenda comparteixen l'estat de la inscripció.
+    await tester.tap(destination('Mapa'));
+    await tester.pumpAndSettle();
+    await tapMarker(tester, 'demo-exhibition');
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey('demo-exhibition')),
+        matching: find.text('Apuntat'),
+      ),
+      findsOneWidget,
+    );
     await tester.tap(destination('Agenda'));
     await tester.pumpAndSettle();
     expect(find.text('Mirades de Catalunya'), findsOneWidget);
