@@ -1367,6 +1367,37 @@ class AppLocalizationsCa extends AppLocalizations {
   }
 
   @override
+  String get mapMyLocation => 'La meva ubicació';
+
+  @override
+  String get mapYouAreHere => 'On ets tu';
+
+  @override
+  String get mapLocateError => 'No hem pogut trobar on ets. Torna-ho a provar.';
+
+  @override
+  String get mapLocateDenied =>
+      'Per veure on ets, cal que permetis que AProp! faci servir la teva ubicació.';
+
+  @override
+  String get mapLocateDeniedForever =>
+      'Has denegat l’accés a la ubicació. Pots activar-lo a la configuració.';
+
+  @override
+  String get mapLocateSettings => 'Configuració';
+
+  @override
+  String get mapLocateBrowserDenied =>
+      'El navegador no deixa veure on ets. Pots permetre-ho des de la icona del costat de l’adreça.';
+
+  @override
+  String get mapLocationDisabled =>
+      'La ubicació del dispositiu està desactivada.';
+
+  @override
+  String get mapLocationEnable => 'Activar';
+
+  @override
   String actInThisPlace(int count) {
     return '$count activitats en aquest lloc';
   }

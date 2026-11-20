@@ -861,6 +861,15 @@
       }
     }
   },
+  "mapMyLocation": "La meva ubicació",
+  "mapYouAreHere": "On ets tu",
+  "mapLocateError": "No hem pogut trobar on ets. Torna-ho a provar.",
+  "mapLocateDenied": "Per veure on ets, cal que permetis que AProp! faci servir la teva ubicació.",
+  "mapLocateDeniedForever": "Has denegat l’accés a la ubicació. Pots activar-lo a la configuració.",
+  "mapLocateSettings": "Configuració",
+  "mapLocateBrowserDenied": "El navegador no deixa veure on ets. Pots permetre-ho des de la icona del costat de l’adreça.",
+  "mapLocationDisabled": "La ubicació del dispositiu està desactivada.",
+  "mapLocationEnable": "Activar",
   "actInThisPlace": "{count} activitats en aquest lloc",
   "@actInThisPlace": {
     "placeholders": {

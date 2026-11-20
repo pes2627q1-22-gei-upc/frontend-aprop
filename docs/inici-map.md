@@ -21,6 +21,24 @@
   «Veure activitat» obre la fitxa (#75) dins d'Inici. La creu o tocar el mapa la tanquen.
 - «Llegenda» explica els marcadors i diu quantes activitats no tenen ubicació (només surten a la llista).
 
+## On ets (Taiga #266)
+
+- **Punt «ets aquí»**: un punt blau amb el cercle de precisió, com a Google Maps. El dibuixa l'app, perquè a la
+  web Google no ho fa, i així es veu igual a la web i al mòbil. La llegenda l'explica («On ets tu»).
+- **Botó «La meva ubicació»**, rodó, a baix a la dreta, per sobre d'«Assistent» (també puja amb la targeta).
+  En prémer-lo, el mapa va on és la persona amb zoom 14 com a mínim, i es carreguen les activitats d'aquella zona.
+- **Permís**: només es demana en prémer el botó, mai en obrir el mapa. Si ja s'havia donat, el punt surt sol.
+  Si no es pot, un avís diu per què:
+  - permís denegat: cal permetre-ho;
+  - denegat per sempre: botó «Configuració» al mòbil; a la web, s'explica que es fa des de la icona del costat de
+    l'adreça;
+  - ubicació del dispositiu desactivada: botó «Activar».
+- **Bateria**: la posició només s'escolta mentre el mapa és visible, i cada 10 m. En tornar a l'app (p. ex. de
+  donar el permís a la configuració), es torna a mirar.
+- Plataformes: `ACCESS_FINE_LOCATION` i `ACCESS_COARSE_LOCATION` a Android (la persona pot triar ubicació
+  aproximada) i `NSLocationWhenInUseUsageDescription` a iOS. La web necessita HTTPS o `localhost`.
+- Decisions provisionals a DP-057.
+
 ## Amb el backend
 
 Si l'app s'executa amb `API_BASE_URL`, el mapa carrega les activitats del backend per zona visible. La llista
@@ -48,6 +66,9 @@ features/activities/presentation/widgets/activities_map.dart     mapa, marcadors
 features/activities/presentation/screens/activities_screen.dart  selector Mapa / Llista; mapa per zona amb el backend
 features/activities/presentation/view_models/activities_map_view_model.dart  càrrega per zona visible
 features/activities/data/http_activity_map_repository.dart       GET /events/map i GET /events/{id}
+features/activities/presentation/view_models/user_location_view_model.dart  on és la persona i el botó
+features/activities/data/geolocator_user_location_repository.dart  permís i posició amb geolocator
+features/activities/presentation/widgets/user_location_marker.dart  punt «ets aquí» i el seu color
 features/activities/data/demo_activity_repository.dart          coordenades de les activitats de demostració
 assets/icons/marker_official.png · marker_community.png · marker_friend.png
 ```
@@ -63,7 +84,6 @@ Els marcadors són imatges generades amb els colors del tema (`forest`, `coral` 
 - **Color dels grups**: el número dels grups el dibuixa Google amb el seu estil per defecte, no amb el verd del
   mockup (DP-022).
 - Dates i Categories: implementats amb filtratge local a la tasca #87; vegeu [la guia](activity-filters.md). Zona/municipi i filtratge global amb servidor continuen pendents (DP-035).
-- El botó de la meva ubicació del mockup no hi és: necessitaria permisos de localització.
 
 ## Proves
 
@@ -73,4 +93,7 @@ apropar-s'hi si no), activitats sense ubicació i llegenda. Amb
 el backend: marcadors de la zona, fitxa des del mapa, error i reintent.
 `activities_map_view_model_test.dart`: càrrega amb marge, zona ja carregada, error amb reintent i respostes
 antigues. `http_activity_map_repository_test.dart`: petició per zona, conversió del JSON, errors i fitxa.
+On ets: `user_location_view_model_test.dart` (sense preguntar si ja hi ha permís, demanar-lo amb el botó, cada
+motiu de no poder, temps esgotat, error i deixar d'escoltar) i el grup «La meva ubicació» de
+`activities_map_test.dart` (punt i cercle, llegenda, permís i avisos amb «Configuració» o «Activar»).
 A les proves, `test/flutter_test_config.dart` substitueix el mapa per un espai buit.

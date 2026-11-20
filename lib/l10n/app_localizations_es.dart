@@ -1372,6 +1372,38 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String get mapMyLocation => 'Mi ubicación';
+
+  @override
+  String get mapYouAreHere => 'Dónde estás';
+
+  @override
+  String get mapLocateError =>
+      'No hemos podido encontrar dónde estás. Vuelve a intentarlo.';
+
+  @override
+  String get mapLocateDenied =>
+      'Para ver dónde estás, tienes que permitir que AProp! use tu ubicación.';
+
+  @override
+  String get mapLocateDeniedForever =>
+      'Has denegado el acceso a la ubicación. Puedes activarlo en los ajustes.';
+
+  @override
+  String get mapLocateSettings => 'Ajustes';
+
+  @override
+  String get mapLocateBrowserDenied =>
+      'El navegador no deja ver dónde estás. Puedes permitirlo desde el icono junto a la dirección.';
+
+  @override
+  String get mapLocationDisabled =>
+      'La ubicación del dispositivo está desactivada.';
+
+  @override
+  String get mapLocationEnable => 'Activar';
+
+  @override
   String actInThisPlace(int count) {
     return '$count actividades en este lugar';
   }

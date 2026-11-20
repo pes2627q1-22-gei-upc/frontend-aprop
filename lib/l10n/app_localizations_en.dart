@@ -1360,6 +1360,37 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get mapMyLocation => 'My location';
+
+  @override
+  String get mapYouAreHere => 'You are here';
+
+  @override
+  String get mapLocateError =>
+      'We couldn’t find where you are. Please try again.';
+
+  @override
+  String get mapLocateDenied =>
+      'To see where you are, allow AProp! to use your location.';
+
+  @override
+  String get mapLocateDeniedForever =>
+      'You denied access to your location. You can turn it on in settings.';
+
+  @override
+  String get mapLocateSettings => 'Settings';
+
+  @override
+  String get mapLocateBrowserDenied =>
+      'The browser doesn’t allow showing where you are. You can allow it from the icon next to the address.';
+
+  @override
+  String get mapLocationDisabled => 'Device location is turned off.';
+
+  @override
+  String get mapLocationEnable => 'Turn on';
+
+  @override
   String actInThisPlace(int count) {
     return '$count activities in this place';
   }

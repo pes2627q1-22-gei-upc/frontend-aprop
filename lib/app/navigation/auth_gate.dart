@@ -11,6 +11,7 @@ import '../../features/activities/repositories/activity_map_repository.dart';
 import '../../features/activities/repositories/activity_repository.dart';
 import '../../features/activities/repositories/discovery_repository.dart';
 import '../../features/activities/repositories/enrollment_repository.dart';
+import '../../features/activities/repositories/user_location_repository.dart';
 import '../../features/assistant/data/demo_assistant_repository.dart';
 import '../../features/assistant/repositories/assistant_repository.dart';
 import '../../features/auth/models/app_user.dart';
@@ -48,9 +49,13 @@ class AuthGate extends StatefulWidget {
     this.profileSettingsRepository,
     this.interestTestRepository,
     this.activityCategoryRepository,
+    this.userLocationRepository,
   });
 
   final AuthRepository authRepository;
+
+  /// On és la persona, per al mapa d'Inici. Sense, el mapa no la mostra.
+  final UserLocationRepository? userLocationRepository;
   final ActivityRepository? activityRepository;
   final EnrollmentRepository? enrollmentRepository;
   final AssistantRepository? assistantRepository;
@@ -191,6 +196,7 @@ class _AuthGateState extends State<AuthGate> {
           profileSettingsRepository: _profileSettingsRepository,
           interestTestRepository: _interestTestRepository,
           activityCategoryRepository: widget.activityCategoryRepository,
+          userLocationRepository: widget.userLocationRepository,
         );
       },
     );

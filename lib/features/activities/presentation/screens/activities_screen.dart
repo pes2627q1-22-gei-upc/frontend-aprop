@@ -6,6 +6,7 @@ import '../formatters/activity_filter_formatter.dart';
 import '../view_models/activities_map_view_model.dart';
 import '../view_models/activities_view_model.dart';
 import '../view_models/enrollment_view_model.dart';
+import '../view_models/user_location_view_model.dart';
 import '../widgets/activities_header.dart';
 import '../widgets/activities_map.dart';
 import '../widgets/activity_card.dart';
@@ -26,8 +27,12 @@ class ActivitiesScreen extends StatefulWidget {
     this.onMapOverlayChanged,
     this.mapViewModel,
     this.onMapActivitySelected,
+    this.userLocationViewModel,
     this.now = DateTime.now,
   });
+
+  /// On és la persona. Sense, el mapa no mostra ni el punt ni el botó.
+  final UserLocationViewModel? userLocationViewModel;
 
   final ActivitiesViewModel viewModel;
   final EnrollmentViewModel enrollmentViewModel;
@@ -291,6 +296,7 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
                     onOverlayHeightChanged: widget.onMapOverlayChanged,
                     interactive: _activeFilterRoute == null,
                     participationActionBuilder: _mapEnrollmentAction,
+                    userLocation: widget.userLocationViewModel,
                   ),
                 ),
                 if (viewModel.filters.isActive &&
@@ -419,6 +425,7 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
                   interactive: _activeFilterRoute == null,
                   onVisibleAreaChanged: mapViewModel.loadArea,
                   participationActionBuilder: _mapEnrollmentAction,
+                  userLocation: widget.userLocationViewModel,
                 ),
               ),
               if (mapViewModel.isLoading)

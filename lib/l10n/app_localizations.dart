@@ -2308,6 +2308,60 @@ abstract class AppLocalizations {
   /// **'{count, plural, one{1 activitat no té ubicació i només surt a la llista.} other{{count} activitats no tenen ubicació i només surten a la llista.}}'**
   String actWithoutLocation(int count);
 
+  /// No description provided for @mapMyLocation.
+  ///
+  /// In ca, this message translates to:
+  /// **'La meva ubicació'**
+  String get mapMyLocation;
+
+  /// No description provided for @mapYouAreHere.
+  ///
+  /// In ca, this message translates to:
+  /// **'On ets tu'**
+  String get mapYouAreHere;
+
+  /// No description provided for @mapLocateError.
+  ///
+  /// In ca, this message translates to:
+  /// **'No hem pogut trobar on ets. Torna-ho a provar.'**
+  String get mapLocateError;
+
+  /// No description provided for @mapLocateDenied.
+  ///
+  /// In ca, this message translates to:
+  /// **'Per veure on ets, cal que permetis que AProp! faci servir la teva ubicació.'**
+  String get mapLocateDenied;
+
+  /// No description provided for @mapLocateDeniedForever.
+  ///
+  /// In ca, this message translates to:
+  /// **'Has denegat l’accés a la ubicació. Pots activar-lo a la configuració.'**
+  String get mapLocateDeniedForever;
+
+  /// No description provided for @mapLocateSettings.
+  ///
+  /// In ca, this message translates to:
+  /// **'Configuració'**
+  String get mapLocateSettings;
+
+  /// No description provided for @mapLocateBrowserDenied.
+  ///
+  /// In ca, this message translates to:
+  /// **'El navegador no deixa veure on ets. Pots permetre-ho des de la icona del costat de l’adreça.'**
+  String get mapLocateBrowserDenied;
+
+  /// No description provided for @mapLocationDisabled.
+  ///
+  /// In ca, this message translates to:
+  /// **'La ubicació del dispositiu està desactivada.'**
+  String get mapLocationDisabled;
+
+  /// No description provided for @mapLocationEnable.
+  ///
+  /// In ca, this message translates to:
+  /// **'Activar'**
+  String get mapLocationEnable;
+
   /// No description provided for @actInThisPlace.
   ///
   /// In ca, this message translates to:
