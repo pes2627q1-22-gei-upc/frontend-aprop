@@ -17,7 +17,7 @@
   - Estats: carregant, buit («Encara no hi ha missatges…»), error amb «Tornar-ho a provar» i sense
     inscripció (el backend respon 403).
 - **Missatges nous**: el backend no avisa en temps real. Mentre el xat és obert, cada 5 s es tornen a demanar
-  els més recents i s'hi afegeixen els nous sense repetir-ne cap (DP-061).
+  els més recents i s'hi afegeixen els nous sense repetir-ne cap (DP-062).
 
 ## Backend
 

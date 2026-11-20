@@ -10,7 +10,7 @@ import '../../repositories/activity_chat_repository.dart';
 ///
 /// El backend no avisa dels missatges nous, així que mentre el xat és obert
 /// es tornen a demanar cada [pollInterval].
-// TODO(DP-061): sense temps real al backend.
+// TODO(DP-062): sense temps real al backend.
 class ActivityChatViewModel extends ChangeNotifier {
   ActivityChatViewModel({
     required this.activityId,
