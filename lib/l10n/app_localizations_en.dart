@@ -514,6 +514,40 @@ class AppLocalizationsEn extends AppLocalizations {
   String get authEmailInvalid => 'The email isn\'t valid.';
 
   @override
+  String get forgotTitle => 'Reset your password';
+
+  @override
+  String get forgotLink => 'Forgot your password?';
+
+  @override
+  String get forgotIntro =>
+      'Enter your account email and we’ll send you a link to choose a new one.';
+
+  @override
+  String get forgotEmailLabel => 'Email';
+
+  @override
+  String get forgotSend => 'Send the link';
+
+  @override
+  String forgotResendIn(int seconds) {
+    return 'Send the link again ($seconds s)';
+  }
+
+  @override
+  String get forgotResend => 'Send the link again';
+
+  @override
+  String get forgotRemember => 'Remember it?';
+
+  @override
+  String get forgotBackToLogin => 'Back to sign in';
+
+  @override
+  String get forgotSent =>
+      'If there is an account with this email, we’ve sent it a link to choose a new password. If you can’t find it, check your spam folder.';
+
+  @override
   String get authUsernameRequired => 'Enter a username.';
 
   @override
@@ -1818,4 +1852,94 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get apiNetwork => 'We couldn’t connect to the server.';
+
+  @override
+  String get createFieldCategories => 'Categories';
+
+  @override
+  String createCategoriesHint(int max) {
+    return 'Choose up to $max. The first one is shown on the cards.';
+  }
+
+  @override
+  String createCategoriesMax(int max) {
+    return 'You can choose up to $max categories.';
+  }
+
+  @override
+  String get createScheduleNoteLabel => 'More about the schedule (optional)';
+
+  @override
+  String get createScheduleNoteHint => 'For example: about 1 hour long';
+
+  @override
+  String get createScheduleNoteHelper =>
+      'The start and end times are added automatically.';
+
+  @override
+  String get createModality => 'Format';
+
+  @override
+  String get createModalityBoth => 'Both';
+
+  @override
+  String get createOnlineUrlLabel => 'Link to join (optional)';
+
+  @override
+  String get createOnlineUrlInvalid =>
+      'Enter a link that starts with https://.';
+
+  @override
+  String get createPermanentHint => 'For example, a permanent exhibition.';
+
+  @override
+  String get actPermanent => 'Permanent activity';
+
+  @override
+  String get modalityInPerson => 'In person';
+
+  @override
+  String get modalityOnline => 'Online';
+
+  @override
+  String get modalityMixed => 'In person and online';
+
+  @override
+  String actUntil(String date) {
+    return 'Until $date';
+  }
+
+  @override
+  String get actLinks => 'Links';
+
+  @override
+  String get actLinkJoin => 'Link to join';
+
+  @override
+  String get actLinkWebsite => 'Activity website';
+
+  @override
+  String get actLinkAccess => 'Access information';
+
+  @override
+  String actLinkCopy(String name) {
+    return 'Copy link: $name';
+  }
+
+  @override
+  String get actLinkCopied => 'Link copied.';
+
+  @override
+  String get actLinkOpenError => 'The link could not be opened.';
+
+  @override
+  String actMoreCategories(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count more categories',
+      one: '1 more category',
+    );
+    return '$_temp0';
+  }
 }

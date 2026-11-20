@@ -90,7 +90,7 @@ class AssistantActivityTile extends StatelessWidget {
                     ),
                     if ([
                           activity.municipality,
-                          formatActivitySchedule(activity.startsAt),
+                          formatActivityWhen(activity),
                         ].where((t) => t.isNotEmpty).join(' · ')
                         case final details when details.isNotEmpty)
                       Text(

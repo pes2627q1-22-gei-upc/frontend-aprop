@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../../../core/formatters/reliability_formatter.dart';
-
+import '../../../../core/l10n/date_labels.dart';
+import '../../../../core/links/open_external_link.dart';
 import '../../models/activity.dart';
 import '../../repositories/activity_details_repository.dart';
 import '../formatters/activity_date_formatter.dart';
+import '../formatters/activity_modality_formatter.dart';
 import '../formatters/activity_price_formatter.dart';
 import '../view_models/activity_details_view_model.dart';
 import '../view_models/enrollment_view_model.dart';
@@ -14,6 +17,7 @@ import '../widgets/activity_image.dart';
 import '../widgets/enrollment_action.dart';
 import '../widgets/enrollment_badge.dart';
 import '../../../../core/l10n/locale_controller.dart';
+import '../../../../l10n/app_localizations.dart';
 
 class ActivityDetailsScreen extends StatefulWidget {
   const ActivityDetailsScreen({
@@ -24,6 +28,7 @@ class ActivityDetailsScreen extends StatefulWidget {
     this.ratingBuilder,
     this.canEdit,
     this.onEdit,
+    this.openLink = openExternalLink,
   });
 
   final String activityId;
@@ -39,6 +44,9 @@ class ActivityDetailsScreen extends StatefulWidget {
   /// Obre el formulari d'edició; acaba amb `true` si s'han desat canvis, i
   /// llavors la fitxa es torna a carregar.
   final Future<bool> Function(Activity activity)? onEdit;
+
+  /// Obre un enllaç de l'activitat fora de l'app; `false` si no ha pogut.
+  final Future<bool> Function(Uri uri) openLink;
 
   @override
   State<ActivityDetailsScreen> createState() => _ActivityDetailsScreenState();
@@ -146,6 +154,7 @@ class _ActivityDetailsScreenState extends State<ActivityDetailsScreen> {
                     activity: activity,
                     enrollmentViewModel: widget.enrollmentViewModel,
                     ratingBuilder: widget.ratingBuilder,
+                    openLink: widget.openLink,
                   ),
                 ),
                 _ParticipationAction(
@@ -166,11 +175,13 @@ class _ActivityDetailsContent extends StatelessWidget {
     required this.activity,
     required this.enrollmentViewModel,
     this.ratingBuilder,
+    required this.openLink,
   });
 
   final Activity activity;
   final EnrollmentViewModel enrollmentViewModel;
   final Widget Function(Activity activity)? ratingBuilder;
+  final Future<bool> Function(Uri uri) openLink;
 
   @override
   Widget build(BuildContext context) {
@@ -198,7 +209,8 @@ class _ActivityDetailsContent extends StatelessWidget {
           runSpacing: 8,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
-            ActivityCategoryBadge(category: activity.category),
+            for (final category in activity.categories)
+              ActivityCategoryBadge(category: category),
             EnrollmentStatusBadge(
               viewModel: enrollmentViewModel,
               activityId: activity.id,
@@ -216,8 +228,22 @@ class _ActivityDetailsContent extends StatelessWidget {
         const SizedBox(height: 16),
         ActivityInformationRow(
           icon: Icons.calendar_month_outlined,
-          text: formatActivitySchedule(activity.startsAt, includeDate: true),
+          text: formatActivityWhen(activity, includeDate: true),
         ),
+        if (activity.endsAt case final endsAt?) ...[
+          const SizedBox(height: 10),
+          ActivityInformationRow(
+            icon: Icons.event_available_outlined,
+            text: context.l10n.actUntil(dateWithYear(endsAt)),
+          ),
+        ],
+        if (activity.isPermanent) ...[
+          const SizedBox(height: 10),
+          ActivityInformationRow(
+            icon: Icons.all_inclusive,
+            text: context.l10n.actPermanent,
+          ),
+        ],
         // El municipi és opcional a les activitats no oficials.
         if (activity.municipality.isNotEmpty) ...[
           const SizedBox(height: 10),
@@ -240,6 +266,32 @@ class _ActivityDetailsContent extends StatelessWidget {
             text: formatActivityPrice(price),
           ),
         ],
+        if (activity.modality case final modality?) ...[
+          const SizedBox(height: 10),
+          ActivityInformationRow(
+            icon: switch (modality) {
+              ActivityModality.inPerson => Icons.groups_outlined,
+              ActivityModality.online => Icons.videocam_outlined,
+              ActivityModality.mixed => Icons.devices_outlined,
+            },
+            text: activityModalityLabel(modality),
+          ),
+        ],
+        if (activity.tickets case final tickets?) ...[
+          const SizedBox(height: 10),
+          ActivityInformationRow(
+            icon: Icons.confirmation_number_outlined,
+            text: tickets,
+          ),
+        ],
+        if (activity.email case final email?) ...[
+          const SizedBox(height: 10),
+          ActivityInformationRow(icon: Icons.mail_outline, text: email),
+        ],
+        if (activity.phone case final phone?) ...[
+          const SizedBox(height: 10),
+          ActivityInformationRow(icon: Icons.phone_outlined, text: phone),
+        ],
         if (activity.source == ActivitySource.community && creator != null) ...[
           const SizedBox(height: 16),
           _CreatorSection(creator: creator),
@@ -258,25 +310,25 @@ class _ActivityDetailsContent extends StatelessWidget {
               : description,
           style: theme.textTheme.bodyLarge?.copyWith(height: 1.5),
         ),
-        if (activity.source == ActivitySource.culturalAgenda) ...[
+        if (_linksOf(activity, context.l10n) case final links
+            when links.isNotEmpty) ...[
           const SizedBox(height: 20),
           Text(
-            context.l10n.actPracticalInfo,
+            context.l10n.actLinks,
             style: theme.textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.w700,
             ),
           ),
-          const SizedBox(height: 8),
-          Text(context.l10n.agendaSourceOfficial),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Tooltip(
-              message: context.l10n.actOriginalLinkSoon,
-              child: TextButton.icon(
-                onPressed: null,
-                icon: const Icon(Icons.open_in_new, size: 20),
-                label: Text(context.l10n.actOriginalLink),
-              ),
+          const SizedBox(height: 4),
+          for (final link in links)
+            _ActivityLinkRow(link: link, openLink: openLink),
+        ],
+        if (activity.source == ActivitySource.culturalAgenda) ...[
+          const SizedBox(height: 20),
+          Text(
+            context.l10n.agendaSourceOfficial,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: colors.onSurfaceVariant,
             ),
           ),
         ],
@@ -295,6 +347,113 @@ class _ActivityDetailsContent extends StatelessWidget {
           style: theme.textTheme.bodyMedium?.copyWith(
             color: colors.onSurfaceVariant,
           ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Tots els enllaços de l'activitat, sense repetir cap adreça.
+List<ActivityLink> _linksOf(Activity activity, AppLocalizations l10n) {
+  final links = [
+    if (activity.onlineUrl case final url?)
+      ActivityLink(name: l10n.actLinkJoin, url: url),
+    if (activity.website case final url?)
+      ActivityLink(name: l10n.actLinkWebsite, url: url),
+    if (activity.ticketsUrl case final url?)
+      ActivityLink(name: l10n.actLinkAccess, url: url),
+    ...activity.links,
+  ];
+  final seen = <String>{};
+  return [
+    for (final link in links)
+      if (seen.add(link.url)) link,
+  ];
+}
+
+/// Un enllaç amb el nom i l'adreça. Tocar-lo l'obre fora de l'app (DP-058);
+/// el botó del costat el copia.
+class _ActivityLinkRow extends StatelessWidget {
+  const _ActivityLinkRow({required this.link, required this.openLink});
+
+  final ActivityLink link;
+  final Future<bool> Function(Uri uri) openLink;
+
+  Future<void> _open(BuildContext context) async {
+    // El mapper ja només deixa passar adreces http(s); per si de cas.
+    final uri = Uri.tryParse(link.url);
+    final valid =
+        uri != null &&
+        (uri.scheme == 'https' || uri.scheme == 'http') &&
+        uri.host.isNotEmpty;
+    final opened = valid && await openLink(uri);
+    if (opened || !context.mounted) return;
+    _showMessage(context, context.l10n.actLinkOpenError);
+  }
+
+  Future<void> _copy(BuildContext context) async {
+    await Clipboard.setData(ClipboardData(text: link.url));
+    if (!context.mounted) return;
+    _showMessage(context, context.l10n.actLinkCopied);
+  }
+
+  void _showMessage(BuildContext context, String message) {
+    ScaffoldMessenger.maybeOf(context)
+      ?..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
+    return Row(
+      children: [
+        Expanded(
+          child: Semantics(
+            link: true,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(8),
+              onTap: () => _open(context),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Row(
+                  children: [
+                    Icon(Icons.open_in_new, color: colors.primary),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            link.name,
+                            style: theme.textTheme.bodyLarge?.copyWith(
+                              color: colors.primary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          Text(
+                            link.url,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: colors.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+        IconButton(
+          tooltip: context.l10n.actLinkCopy(link.name),
+          icon: const Icon(Icons.copy_outlined),
+          onPressed: () => _copy(context),
         ),
       ],
     );

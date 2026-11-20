@@ -91,6 +91,41 @@ void main() {
     expect(sent.location, const GeoPoint(latitude: 41.9301, longitude: 2.2549));
     expect(tester.takeException(), isNull);
   });
+  testWidgets('Es poden triar diverses categories, la modalitat i l’horari', (
+    tester,
+  ) async {
+    await pumpForm(tester);
+
+    await fill(tester, 'Títol', 'Xerrada');
+    await fill(tester, 'Descripció', 'En directe');
+    await tapVisible(tester, find.bySemanticsLabel('Música'));
+    await tapVisible(tester, find.bySemanticsLabel('Teatre'));
+    await tapVisible(tester, find.text('Tria la data i l’hora'));
+    await tester.tap(find.text('Fet'));
+    await tester.pumpAndSettle();
+    await fill(tester, 'Més sobre l’horari (opcional)', 'Durada: 1 h');
+
+    expect(
+      find.widgetWithText(TextField, 'Enllaç per connectar-s’hi (opcional)'),
+      findsNothing,
+    );
+    await tapVisible(tester, find.text('En línia'));
+    await fill(
+      tester,
+      'Enllaç per connectar-s’hi (opcional)',
+      'https://meet.example.cat/xerrada',
+    );
+    await tapVisible(tester, find.text('Activitat permanent'));
+    await tapVisible(tester, find.text('Publica'));
+
+    final sent = repository.created.single;
+    expect(sent.categories, ['Música', 'Teatre']);
+    expect(sent.schedule, '19.00 h · Durada: 1 h');
+    expect(sent.modality, ActivityModality.online);
+    expect(sent.onlineUrl, 'https://meet.example.cat/xerrada');
+    expect(sent.isPermanent, isTrue);
+    expect(tester.takeException(), isNull);
+  });
 
   testWidgets('La data per defecte és demà també quan acaba l’horari d’estiu', (
     tester,

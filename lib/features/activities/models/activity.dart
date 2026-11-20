@@ -2,6 +2,17 @@ import 'geo_point.dart';
 
 enum ActivitySource { culturalAgenda, community }
 
+/// Si l'activitat es fa en un lloc, en línia o de les dues maneres.
+enum ActivityModality { inPerson, online, mixed }
+
+/// Enllaç amb més informació, amb el nom que es mostra.
+class ActivityLink {
+  const ActivityLink({required this.name, required this.url});
+
+  final String name;
+  final String url;
+}
+
 class ActivityCreator {
   const ActivityCreator({
     required this.name,
@@ -41,8 +52,19 @@ class Activity {
     this.location,
     this.price,
     this.imageUrl,
+    this.schedule,
+    this.modality,
+    this.isPermanent = false,
+    this.onlineUrl,
+    this.website,
+    Iterable<ActivityLink> links = const [],
+    this.tickets,
+    this.ticketsUrl,
+    this.email,
+    this.phone,
     Iterable<String> categories = const [],
-  }) : categories = List.unmodifiable(
+  }) : links = List.unmodifiable(links),
+       categories = List.unmodifiable(
          categories.isEmpty ? [category] : categories,
        );
 
@@ -73,4 +95,32 @@ class Activity {
 
   /// En euros. `0` vol dir gratuïta; nul vol dir que no se sap.
   final double? price;
+
+  /// L'«Horari» tal com es publica: «19 h», «A les 10 h. Durada: 1 h»... El
+  /// backend només desa el dia de l'inici (DP-029): l'hora és aquí.
+  final String? schedule;
+
+  /// Nul si no se sap.
+  final ActivityModality? modality;
+
+  /// Activitat sense data de fi, com una exposició fixa.
+  final bool isPermanent;
+
+  /// On es connecta qui la segueix en línia.
+  final String? onlineUrl;
+
+  /// Web de l'activitat.
+  final String? website;
+
+  /// Altres enllaços amb més informació.
+  final List<ActivityLink> links;
+
+  /// Informació d'entrades i inscripció, com «Places limitades».
+  final String? tickets;
+  final String? ticketsUrl;
+
+  /// Contacte de qui l'organitza. Només el porten les de l'Agenda Cultural:
+  /// a les no oficials no es demana (dades personals).
+  final String? email;
+  final String? phone;
 }

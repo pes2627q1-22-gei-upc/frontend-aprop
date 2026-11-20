@@ -519,6 +519,40 @@ class AppLocalizationsCa extends AppLocalizations {
   String get authEmailInvalid => 'El correu no és vàlid.';
 
   @override
+  String get forgotTitle => 'Recupera la contrasenya';
+
+  @override
+  String get forgotLink => 'Has oblidat la contrasenya?';
+
+  @override
+  String get forgotIntro =>
+      'Escriu el correu del teu compte i t’enviarem un enllaç per triar-ne una de nova.';
+
+  @override
+  String get forgotEmailLabel => 'Correu';
+
+  @override
+  String get forgotSend => 'Envia l’enllaç';
+
+  @override
+  String forgotResendIn(int seconds) {
+    return 'Torna a enviar l’enllaç ($seconds s)';
+  }
+
+  @override
+  String get forgotResend => 'Torna a enviar l’enllaç';
+
+  @override
+  String get forgotRemember => 'Ja la recordes?';
+
+  @override
+  String get forgotBackToLogin => 'Torna a l’inici de sessió';
+
+  @override
+  String get forgotSent =>
+      'Si hi ha un compte amb aquest correu, t’hi hem enviat un enllaç per triar una contrasenya nova. Si no el trobes, mira el correu brossa.';
+
+  @override
   String get authUsernameRequired => 'Introdueix un nom d\'usuari.';
 
   @override
@@ -1830,4 +1864,95 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get apiNetwork => 'No s’ha pogut connectar amb el servidor.';
+
+  @override
+  String get createFieldCategories => 'Categories';
+
+  @override
+  String createCategoriesHint(int max) {
+    return 'Tria’n fins a $max. La primera és la que es veu a les targetes.';
+  }
+
+  @override
+  String createCategoriesMax(int max) {
+    return 'Pots triar fins a $max categories.';
+  }
+
+  @override
+  String get createScheduleNoteLabel => 'Més sobre l’horari (opcional)';
+
+  @override
+  String get createScheduleNoteHint =>
+      'Per exemple: durada aproximada d’1 hora';
+
+  @override
+  String get createScheduleNoteHelper =>
+      'L’hora d’inici i de fi ja s’hi afegeix sola.';
+
+  @override
+  String get createModality => 'Modalitat';
+
+  @override
+  String get createModalityBoth => 'Les dues';
+
+  @override
+  String get createOnlineUrlLabel => 'Enllaç per connectar-s’hi (opcional)';
+
+  @override
+  String get createOnlineUrlInvalid =>
+      'Introdueix un enllaç que comenci per https://.';
+
+  @override
+  String get createPermanentHint => 'Per exemple, una exposició fixa.';
+
+  @override
+  String get actPermanent => 'Activitat permanent';
+
+  @override
+  String get modalityInPerson => 'Presencial';
+
+  @override
+  String get modalityOnline => 'En línia';
+
+  @override
+  String get modalityMixed => 'Presencial i en línia';
+
+  @override
+  String actUntil(String date) {
+    return 'Fins al $date';
+  }
+
+  @override
+  String get actLinks => 'Enllaços';
+
+  @override
+  String get actLinkJoin => 'Enllaç per connectar-s’hi';
+
+  @override
+  String get actLinkWebsite => 'Web de l’activitat';
+
+  @override
+  String get actLinkAccess => 'Informació d’accés';
+
+  @override
+  String actLinkCopy(String name) {
+    return 'Copia l’enllaç: $name';
+  }
+
+  @override
+  String get actLinkCopied => 'Enllaç copiat.';
+
+  @override
+  String get actLinkOpenError => 'No s’ha pogut obrir l’enllaç.';
+
+  @override
+  String actMoreCategories(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count categories més',
+      one: '1 categoria més',
+    );
+    return '$_temp0';
+  }
 }

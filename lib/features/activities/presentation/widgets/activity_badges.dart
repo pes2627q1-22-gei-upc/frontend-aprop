@@ -43,6 +43,38 @@ class ActivityCategoryBadge extends StatelessWidget {
   }
 }
 
+/// La primera categoria i, si n'hi ha més, quantes en falten («+2»). A la
+/// fitxa es mostren totes.
+class ActivityCategoriesSummary extends StatelessWidget {
+  const ActivityCategoriesSummary({super.key, required this.categories});
+
+  final List<String> categories;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    final more = categories.length - 1;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Flexible(child: ActivityCategoryBadge(category: categories.first)),
+        if (more > 0) ...[
+          const SizedBox(width: 4),
+          Semantics(
+            label: context.l10n.actMoreCategories(more),
+            excludeSemantics: true,
+            child: _ActivityBadge(
+              label: '+$more',
+              background: colors.surfaceContainerHighest,
+              foreground: colors.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
 class FriendshipBadge extends StatelessWidget {
   const FriendshipBadge({super.key});
 

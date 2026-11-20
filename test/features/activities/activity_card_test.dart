@@ -56,4 +56,36 @@ void main() {
 
     expect(taps, ['action']);
   });
+  testWidgets('Amb diverses categories, mostra la primera i quantes més', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.light,
+        home: Scaffold(
+          body: SingleChildScrollView(
+            child: ActivityCard(
+              activity: Activity(
+                id: '101',
+                title: 'Xerrada',
+                category: 'Música',
+                categories: const ['Música', 'Teatre', 'Conferències'],
+                municipality: 'Girona',
+                startsAt: DateTime(2026, 11, 14),
+                imageAsset: '',
+                source: ActivitySource.culturalAgenda,
+                schedule: '18.00 h',
+              ),
+              onTap: () {},
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Música'), findsOneWidget);
+    expect(find.text('+2'), findsOneWidget);
+    expect(find.text('Teatre'), findsNothing);
+    expect(find.textContaining('18.00 h'), findsOneWidget);
+  });
 }

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../../../activities/models/activity.dart';
+import '../../../activities/presentation/formatters/activity_categories_formatter.dart';
+import '../../../activities/presentation/formatters/activity_date_formatter.dart';
 import '../../../activities/presentation/widgets/enrollment_badge.dart';
-import '../formatters/agenda_date_formatter.dart';
 import '../../../../core/l10n/locale_controller.dart';
 
 /// Compact plan of the selected day. The image and the title open the event.
@@ -84,8 +85,10 @@ class AgendaPlanCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '${formatAgendaTime(activity.startsAt)} · '
-                      '${activity.category}',
+                      [
+                        ?activityTimeLabel(activity, short: true),
+                        activityCategoriesLabel(activity),
+                      ].join(' · '),
                       style: secondaryStyle,
                     ),
                     InkWell(

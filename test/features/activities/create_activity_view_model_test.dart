@@ -333,7 +333,7 @@ void main() {
       NewActivity(
         title: 'Concert a la plaça',
         description: 'Una nit de música',
-        category: 'Música',
+        categories: ['Música'],
         startsAt: DateTime(2026, 9, 26, 12),
         municipality: 'Vic',
         imageAsset: jazzImage,
@@ -514,6 +514,320 @@ void main() {
 
       expect(saved, isNull);
       expect(viewModel.errorMessage, updateActivityErrorMessage);
+    });
+  });
+  group('Diverses categories', () {
+    test('Se n’hi poden triar fins a tres, en l’ordre triat', () async {
+      viewModel
+        ..toggleCategory('Teatre')
+        ..toggleCategory('Música')
+        ..toggleCategory('Exposicions')
+        ..toggleCategory('Cinema');
+
+      expect(viewModel.selectedCategories, ['Teatre', 'Música', 'Exposicions']);
+      expect(
+        viewModel.fieldError(CreateActivityField.category),
+        'Pots triar fins a 3 categories.',
+      );
+
+      viewModel.toggleCategory('Teatre');
+      expect(viewModel.selectedCategories, ['Música', 'Exposicions']);
+      expect(viewModel.fieldError(CreateActivityField.category), isNull);
+
+      viewModel
+        ..setStartsAt(DateTime(2026, 11, 1, 19))
+        ..setImageAsset(jazzImage);
+      await viewModel.publish(
+        price: '',
+        title: 'Concert',
+        description: 'Música',
+      );
+      expect(repository.created.single.categories, ['Música', 'Exposicions']);
+      expect(repository.created.single.category, 'Música');
+    });
+
+    test('Sense cap categoria no es publica', () async {
+      viewModel
+        ..toggleCategory('Música')
+        ..toggleCategory('Música')
+        ..setStartsAt(DateTime(2026, 11, 1, 19));
+
+      expect(
+        await viewModel.publish(
+          price: '',
+          title: 'Concert',
+          description: 'Música',
+        ),
+        isNull,
+      );
+      expect(
+        viewModel.fieldError(CreateActivityField.category),
+        'Tria una categoria.',
+      );
+    });
+  });
+
+  group('Horari', () {
+    test('Es genera amb l’hora d’inici', () async {
+      await publishValid();
+
+      expect(repository.created.single.schedule, '19.00 h');
+    });
+
+    test('Hi afegeix l’hora de fi i la nota opcional', () async {
+      viewModel
+        ..setCategory('Música')
+        ..setStartsAt(DateTime(2026, 11, 1, 19, 30))
+        ..setEndsAt(DateTime(2026, 11, 1, 21))
+        ..setImageAsset(jazzImage);
+
+      await viewModel.publish(
+        price: '',
+        title: 'Concert',
+        description: 'Música',
+        scheduleNote: '  Porta oberta mitja hora abans ',
+      );
+
+      expect(
+        repository.created.single.schedule,
+        '19.30 h – 21.00 h · Porta oberta mitja hora abans',
+      );
+    });
+
+    test('Si acaba un altre dia, només hi posa l’inici', () {
+      expect(
+        activityScheduleTime(
+          DateTime(2026, 11, 1, 9, 5),
+          DateTime(2026, 11, 3, 18),
+        ),
+        '09.05 h',
+      );
+    });
+  });
+
+  group('Modalitat i permanència', () {
+    test('Per defecte és presencial i no permanent', () async {
+      await publishValid();
+
+      final sent = repository.created.single;
+      expect(sent.modality, ActivityModality.inPerson);
+      expect(sent.isPermanent, isFalse);
+      expect(sent.onlineUrl, isNull);
+    });
+
+    test('En línia desa l’enllaç i si és permanent', () async {
+      viewModel
+        ..setModality(ActivityModality.online)
+        ..setPermanent(true)
+        ..setCategory('Música')
+        ..setStartsAt(DateTime(2026, 11, 1, 19))
+        ..setImageAsset(jazzImage);
+
+      await viewModel.publish(
+        price: '',
+        title: 'Xerrada',
+        description: 'En directe',
+        onlineUrl: ' https://meet.example.cat/xerrada ',
+      );
+
+      final sent = repository.created.single;
+      expect(sent.modality, ActivityModality.online);
+      expect(sent.isPermanent, isTrue);
+      expect(sent.onlineUrl, 'https://meet.example.cat/xerrada');
+    });
+
+    test('Rebutja un enllaç que no és una adreça web', () async {
+      viewModel
+        ..setModality(ActivityModality.mixed)
+        ..setCategory('Música')
+        ..setStartsAt(DateTime(2026, 11, 1, 19))
+        ..setImageAsset(jazzImage);
+
+      final activity = await viewModel.publish(
+        price: '',
+        title: 'Xerrada',
+        description: 'En directe',
+        onlineUrl: 'meet a la plaça',
+      );
+
+      expect(activity, isNull);
+      expect(repository.created, isEmpty);
+      expect(
+        viewModel.fieldError(CreateActivityField.onlineUrl),
+        'Introdueix un enllaç que comenci per https://.',
+      );
+    });
+
+    test('Si torna a ser presencial, l’enllaç no s’envia', () async {
+      viewModel
+        ..setModality(ActivityModality.online)
+        ..setModality(ActivityModality.inPerson)
+        ..setCategory('Música')
+        ..setStartsAt(DateTime(2026, 11, 1, 19))
+        ..setImageAsset(jazzImage);
+
+      await viewModel.publish(
+        price: '',
+        title: 'Concert',
+        description: 'Música',
+        onlineUrl: 'no és un enllaç',
+      );
+
+      expect(repository.created.single.onlineUrl, isNull);
+    });
+  });
+
+  group('Editar la informació extra', () {
+    final existing = Activity(
+      id: 'demo-created-2',
+      title: 'Xerrada',
+      category: 'Música',
+      categories: const ['Música', 'Teatre'],
+      municipality: 'Vic',
+      startsAt: DateTime(2026, 11, 1, 19),
+      endsAt: DateTime(2026, 11, 1, 21),
+      imageAsset: jazzImage,
+      source: ActivitySource.community,
+      creator: creator,
+      schedule: '19.00 – 21.00 h · Porta cadira',
+      modality: ActivityModality.mixed,
+      isPermanent: true,
+      onlineUrl: 'https://meet.example.cat/xerrada',
+    );
+
+    CreateActivityViewModel editing(Activity activity) {
+      final viewModel = CreateActivityViewModel(
+        repository: repository,
+        locationRepository: const DemoLocationRepository(),
+        creator: creator,
+        now: () => now,
+        editing: activity,
+      );
+      addTearDown(viewModel.dispose);
+      return viewModel;
+    }
+
+    test('Comença amb les categories, la modalitat i la nota', () {
+      final viewModel = editing(existing);
+
+      expect(viewModel.selectedCategories, ['Música', 'Teatre']);
+      expect(viewModel.modality, ActivityModality.mixed);
+      expect(viewModel.isPermanent, isTrue);
+      expect(viewModel.initialScheduleNote, 'Porta cadira');
+    });
+
+    test('Un horari escrit d’una altra manera es conserva com a nota', () {
+      final viewModel = editing(
+        Activity(
+          id: '506',
+          title: 'Exposició',
+          category: 'Exposicions',
+          municipality: '',
+          startsAt: DateTime(2026, 11, 1),
+          imageAsset: '',
+          source: ActivitySource.community,
+          schedule: 'De dimarts a diumenge, de 10 a 14 h',
+        ),
+      );
+
+      expect(
+        viewModel.initialScheduleNote,
+        'De dimarts a diumenge, de 10 a 14 h',
+      );
+    });
+
+    test('Si l’horari és només l’hora generada, no hi ha nota', () {
+      final viewModel = editing(
+        Activity(
+          id: '507',
+          title: 'Concert',
+          category: 'Música',
+          municipality: '',
+          startsAt: DateTime(2026, 11, 1, 19),
+          imageAsset: '',
+          source: ActivitySource.community,
+          schedule: '19.00 h',
+        ),
+      );
+
+      expect(viewModel.initialScheduleNote, isEmpty);
+    });
+  });
+  group('Editar una activitat del backend (sense hora a la data)', () {
+    // El backend només desa el dia: la data arriba a les 00.00 (DP-029).
+    Activity fromBackend(String? schedule, {DateTime? endsAt}) => Activity(
+      id: '506',
+      title: 'Concert',
+      category: 'Música',
+      municipality: 'Vic',
+      startsAt: DateTime(2026, 11, 1),
+      endsAt: endsAt,
+      imageAsset: jazzImage,
+      source: ActivitySource.community,
+      creator: creator,
+      schedule: schedule,
+    );
+
+    CreateActivityViewModel editing(Activity activity) {
+      final viewModel = CreateActivityViewModel(
+        repository: repository,
+        locationRepository: const DemoLocationRepository(),
+        creator: creator,
+        now: () => now,
+        editing: activity,
+      );
+      addTearDown(viewModel.dispose);
+      return viewModel;
+    }
+
+    test('Recupera l’hora de l’horari i no la repeteix en desar', () async {
+      final viewModel = editing(fromBackend('19.00 h · Durada: 1 h'));
+
+      expect(viewModel.startsAt, DateTime(2026, 11, 1, 19));
+      expect(viewModel.initialScheduleNote, 'Durada: 1 h');
+
+      await viewModel.publish(
+        title: 'Concert',
+        description: 'Música',
+        price: '',
+        scheduleNote: viewModel.initialScheduleNote,
+      );
+
+      final (_, sent) = repository.updated.single;
+      expect(sent.startsAt, DateTime(2026, 11, 1, 19));
+      expect(sent.schedule, '19.00 h · Durada: 1 h');
+    });
+
+    test('També en recupera l’hora de fi', () {
+      final viewModel = editing(
+        fromBackend('18.00 h – 20.30 h', endsAt: DateTime(2026, 11, 1)),
+      );
+
+      expect(viewModel.startsAt, DateTime(2026, 11, 1, 18));
+      expect(viewModel.endsAt, DateTime(2026, 11, 1, 20, 30));
+      expect(viewModel.initialScheduleNote, isEmpty);
+    });
+
+    test('Llegeix l’hora en el format de qualsevol idioma', () {
+      expect(parseActivityScheduleTime('19:00 h')?.start, (
+        hour: 19,
+        minute: 0,
+      ));
+      expect(parseActivityScheduleTime('7:05 – 9:00 · Nota'), (
+        start: (hour: 7, minute: 5),
+        end: (hour: 9, minute: 0),
+        note: 'Nota',
+      ));
+      // Un horari escrit a mà no és una hora generada.
+      expect(parseActivityScheduleTime('10.00 h a 14.00 h'), isNull);
+      expect(parseActivityScheduleTime('De dimarts a diumenge'), isNull);
+    });
+
+    test('Sense hora a l’horari, la data es queda com estava', () {
+      final viewModel = editing(fromBackend('De dimarts a diumenge'));
+
+      expect(viewModel.startsAt, DateTime(2026, 11, 1));
+      expect(viewModel.initialScheduleNote, 'De dimarts a diumenge');
     });
   });
 }

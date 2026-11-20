@@ -73,6 +73,13 @@ caducat o ja s'ha fet servir».
 - L'URL d'acció no es pot personalitzar amb el pla Spark (`EMAIL_TEMPLATE_UPDATE_NOT_ALLOWED`), ni tan sols
   amb SMTP propi.
 
+## Recuperar la contrasenya
+
+«Has oblidat la contrasenya?» del login obre `ForgotPasswordScreen`, que crida `sendPasswordResetEmail`
+(Firebase envia el correu en català). L'enllaç obre la mateixa pàgina de Firebase que la verificació, on es
+tria la contrasenya nova, i després es pot entrar a l'app amb ella. La pantalla no diu mai si el correu té
+compte: el missatge és el mateix en tots dos casos (DP-056). Entre enviaments cal esperar 60 s.
+
 ## Backend: nom d'usuari (`POST /auth/sync`)
 
 Després d'entrar a Firebase, l'app demana al backend l'usuari de la base de dades (`HttpUserSyncRepository`). El

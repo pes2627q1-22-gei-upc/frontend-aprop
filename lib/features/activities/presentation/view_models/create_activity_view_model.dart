@@ -8,6 +8,7 @@ import '../../models/new_activity.dart';
 import '../../repositories/activity_category_repository.dart';
 import '../../repositories/activity_repository.dart';
 import '../../repositories/location_repository.dart';
+import '../../../../core/l10n/date_labels.dart';
 import '../../../../core/l10n/locale_controller.dart';
 
 enum CreateActivityField {
@@ -17,11 +18,14 @@ enum CreateActivityField {
   startsAt,
   endsAt,
   price,
+  onlineUrl,
 }
 
 const maxActivityTitleLength = 80;
 const maxActivityDescriptionLength = 1000;
 const maxActivityDirectionsLength = 200;
+const maxActivityCategories = 3;
+const maxActivityScheduleNoteLength = 120;
 String get createActivityErrorMessage => currentL10n.createPublishError;
 String get updateActivityErrorMessage => currentL10n.createUpdateError;
 
@@ -44,11 +48,22 @@ class CreateActivityViewModel extends ChangeNotifier {
            : const [] {
     final activity = editing;
     if (activity == null) return;
-    // Fins que no arriben les categories, es guarda el nom que es veu.
-    _category = activity.category;
-    _matchEditedCategory();
-    _startsAt = activity.startsAt;
-    _endsAt = activity.endsAt;
+    // Fins que no arriben les categories, es guarden els noms que es veuen.
+    _selectedCategories = List.of(activity.categories);
+    _matchEditedCategories();
+    _modality = activity.modality ?? ActivityModality.inPerson;
+    _isPermanent = activity.isPermanent;
+    // El backend només desa el dia (DP-029): l'hora es recupera de l'«Horari»
+    // que es va generar en crear-la.
+    final time = parseActivityScheduleTime(activity.schedule ?? '');
+    _startsAt = _atScheduleTime(activity.startsAt, time?.start);
+    final end = _atScheduleTime(
+      activity.endsAt ?? activity.startsAt,
+      time?.end,
+    );
+    _endsAt = time?.end != null && end.isAfter(_startsAt!)
+        ? end
+        : activity.endsAt;
     if (activityImageTemplates.contains(activity.imageAsset)) {
       _imageAsset = activity.imageAsset;
     }
@@ -75,7 +90,12 @@ class CreateActivityViewModel extends ChangeNotifier {
   final DateTime Function() _now;
 
   final Map<CreateActivityField, String> _fieldErrors = {};
-  String? _category;
+
+  /// Valors de les categories triades, en l'ordre en què s'han triat: la
+  /// primera fa de distintiu.
+  List<String> _selectedCategories = [];
+  ActivityModality _modality = ActivityModality.inPerson;
+  bool _isPermanent = false;
   DateTime? _startsAt;
   DateTime? _endsAt;
 
@@ -96,8 +116,22 @@ class CreateActivityViewModel extends ChangeNotifier {
   bool _isLoadingCategories = false;
   String? _categoriesError;
 
-  /// Valor de la categoria triada (`ActivityCategory.value`).
-  String? get category => _category;
+  /// Valors (`ActivityCategory.value`) de les categories triades.
+  List<String> get selectedCategories => List.unmodifiable(_selectedCategories);
+
+  /// La primera categoria triada, la que fa de distintiu.
+  String? get category => _selectedCategories.firstOrNull;
+  ActivityModality get modality => _modality;
+  bool get isPermanent => _isPermanent;
+
+  /// En editar, el text que s'havia afegit a l'horari generat («Durada: 1
+  /// h»), perquè el formulari el torni a mostrar.
+  String get initialScheduleNote {
+    final schedule = editing?.schedule?.trim() ?? '';
+    // Un horari escrit d'una altra manera es conserva sencer com a nota.
+    return parseActivityScheduleTime(schedule)?.note ?? schedule;
+  }
+
   List<ActivityCategory> get categories => _categories;
   bool get isLoadingCategories => _isLoadingCategories;
   String? get categoriesError => _categoriesError;
@@ -133,7 +167,7 @@ class CreateActivityViewModel extends ChangeNotifier {
       final categories = await repository.getCreationCategories();
       if (_isDisposed) return;
       _categories = List.unmodifiable(categories);
-      _matchEditedCategory();
+      _matchEditedCategories();
     } catch (_) {
       if (_isDisposed) return;
       _categoriesError = currentL10n.actLoadCategoriesError;
@@ -145,23 +179,61 @@ class CreateActivityViewModel extends ChangeNotifier {
     }
   }
 
-  /// L'activitat editada només en sap el nom que es veu («Teatre»); el
-  /// formulari desa el valor («agenda:categories/teatre»). Si cap categoria
-  /// no hi correspon, no se'n tria cap: enviar el nom en crearia una de nova.
-  void _matchEditedCategory() {
-    final name = editing?.category;
-    if (name == null || _categories.isEmpty) return;
-    if (_categories.any((c) => c.value == _category)) return;
-    _category = _categories
-        .where((c) => c.label.toLowerCase() == name.toLowerCase())
-        .firstOrNull
-        ?.value;
+  /// L'activitat editada només en sap els noms que es veuen («Teatre»); el
+  /// formulari desa els valors («agenda:categories/teatre»). Les que no hi
+  /// corresponen es treuen: enviar el nom en crearia una categoria nova.
+  void _matchEditedCategories() {
+    if (editing == null || _categories.isEmpty) return;
+    _selectedCategories = {
+      for (final name in _selectedCategories)
+        ?_categories
+            .where(
+              (c) =>
+                  c.value == name ||
+                  c.label.toLowerCase() == name.toLowerCase(),
+            )
+            .firstOrNull
+            ?.value,
+    }.take(maxActivityCategories).toList();
   }
 
+  /// Tria només [category] (o cap, si és nul).
   void setCategory(String? category) {
-    _category = category;
+    _selectedCategories = [?category];
     _fieldErrors.remove(CreateActivityField.category);
     _errorMessage = null;
+    notifyListeners();
+  }
+
+  /// Afegeix o treu [category]. N'hi pot haver fins a [maxActivityCategories].
+  void toggleCategory(String category) {
+    _errorMessage = null;
+    if (_selectedCategories.contains(category)) {
+      _selectedCategories = [
+        for (final selected in _selectedCategories)
+          if (selected != category) selected,
+      ];
+      _fieldErrors.remove(CreateActivityField.category);
+    } else if (_selectedCategories.length >= maxActivityCategories) {
+      _fieldErrors[CreateActivityField.category] = currentL10n
+          .createCategoriesMax(maxActivityCategories);
+    } else {
+      _selectedCategories = [..._selectedCategories, category];
+      _fieldErrors.remove(CreateActivityField.category);
+    }
+    notifyListeners();
+  }
+
+  void setModality(ActivityModality modality) {
+    _modality = modality;
+    if (modality == ActivityModality.inPerson) {
+      _fieldErrors.remove(CreateActivityField.onlineUrl);
+    }
+    notifyListeners();
+  }
+
+  void setPermanent(bool isPermanent) {
+    _isPermanent = isPermanent;
     notifyListeners();
   }
 
@@ -234,6 +306,8 @@ class CreateActivityViewModel extends ChangeNotifier {
     required String price,
     String municipality = '',
     String directions = '',
+    String scheduleNote = '',
+    String onlineUrl = '',
   }) async {
     if (_isPublishing || _isDisposed) return null;
 
@@ -241,7 +315,9 @@ class CreateActivityViewModel extends ChangeNotifier {
     // Si el camp es deixa buit, no es converteix en gratuïta.
     final keepsUnknownPrice = hasUnknownPrice && price.trim().isEmpty;
     final parsedPrice = keepsUnknownPrice ? null : parseActivityPrice(price);
-    final category = _category;
+    final categories = _selectedCategories;
+    final isOnline = _modality != ActivityModality.inPerson;
+    final link = onlineUrl.trim();
     final startsAt = _startsAt;
     final endsAt = _endsAt;
     _errorMessage = null;
@@ -251,8 +327,11 @@ class CreateActivityViewModel extends ChangeNotifier {
       ..addAll({
         CreateActivityField.title: ?_validateTitle(title),
         CreateActivityField.description: ?_validateDescription(description),
-        CreateActivityField.category: ?(category == null
+        CreateActivityField.category: ?(categories.isEmpty
             ? currentL10n.createCategoryRequired
+            : null),
+        CreateActivityField.onlineUrl: ?(isOnline && link.isNotEmpty
+            ? _validateOnlineUrl(link)
             : null),
         CreateActivityField.startsAt: ?_validateStartsAt(startsAt),
         CreateActivityField.endsAt: ?_validateEndsAt(startsAt, endsAt),
@@ -273,7 +352,7 @@ class CreateActivityViewModel extends ChangeNotifier {
       final activity = NewActivity(
         title: title.trim(),
         description: description.trim(),
-        category: category!,
+        categories: categories,
         startsAt: startsAt!,
         endsAt: endsAt,
         municipality: municipality.trim(),
@@ -283,6 +362,10 @@ class CreateActivityViewModel extends ChangeNotifier {
         location: _location,
         creator: _creator,
         price: parsedPrice,
+        schedule: _scheduleFor(startsAt, endsAt, scheduleNote),
+        modality: _modality,
+        isPermanent: _isPermanent,
+        onlineUrl: isOnline && link.isNotEmpty ? link : null,
       );
       return await switch (editing) {
         final edited? => _repository.updateActivity(edited.id, activity),
@@ -335,11 +418,79 @@ class CreateActivityViewModel extends ChangeNotifier {
     return currentL10n.endSheetError;
   }
 
+  String? _validateOnlineUrl(String link) {
+    final uri = Uri.tryParse(link);
+    final valid =
+        uri != null &&
+        (uri.scheme == 'https' || uri.scheme == 'http') &&
+        uri.host.isNotEmpty;
+    return valid ? null : currentL10n.createOnlineUrlInvalid;
+  }
+
+  /// L'«Horari» que es desa: l'hora de les rodes i, si n'hi ha, la nota.
+  /// El backend no desa l'hora de l'inici (DP-029).
+  // TODO(DP-059): l'hora es guarda dins de l'«Horari» en text.
+  static String _scheduleFor(DateTime start, DateTime? end, String note) {
+    final time = activityScheduleTime(start, end);
+    final extra = note.trim();
+    return extra.isEmpty ? time : '$time$_scheduleSeparator$extra';
+  }
+
   @override
   void dispose() {
     _isDisposed = true;
     super.dispose();
   }
+}
+
+const _scheduleSeparator = ' · ';
+
+/// «19.00 h», o «19.00 h – 21.00 h» si acaba el mateix dia, en el format
+/// d'hora de l'idioma actiu.
+String activityScheduleTime(DateTime start, DateTime? end) {
+  final sameDay =
+      end != null &&
+      end.year == start.year &&
+      end.month == start.month &&
+      end.day == start.day;
+  return sameDay ? '${timeOfDay(start)} – ${timeOfDay(end)}' : timeOfDay(start);
+}
+
+/// L'hora d'inici (i, si n'hi ha, de fi) amb què comença un «Horari» generat
+/// per [activityScheduleTime], en qualsevol dels formats d'hora de l'app
+/// («19.00 h», «19:00 h», «19:00»), i el text que la segueix. Nul si l'horari
+/// no comença amb una hora seguida del final o del separador.
+({({int hour, int minute}) start, ({int hour, int minute})? end, String note})?
+parseActivityScheduleTime(String schedule) {
+  final match = _scheduleTimePattern.firstMatch(schedule.trim());
+  if (match == null) return null;
+  ({int hour, int minute})? clock(String? hour, String? minute) {
+    if (hour == null || minute == null) return null;
+    final h = int.parse(hour);
+    final m = int.parse(minute);
+    return h < 24 && m < 60 ? (hour: h, minute: m) : null;
+  }
+
+  final start = clock(match.group(1), match.group(2));
+  if (start == null) return null;
+  return (
+    start: start,
+    end: clock(match.group(3), match.group(4)),
+    note: schedule.trim().substring(match.end).trim(),
+  );
+}
+
+final _scheduleTimePattern = RegExp(
+  r'^(\d{1,2})[.:](\d{2})(?:\s*h)?'
+  r'(?:\s*[–-]\s*(\d{1,2})[.:](\d{2})(?:\s*h)?)?'
+  r'(?:\s*·\s*|$)',
+);
+
+/// [date] a l'hora [time] si no en tenia (mitjanit, DP-029).
+DateTime _atScheduleTime(DateTime date, ({int hour, int minute})? time) {
+  final isMidnight = date.hour == 0 && date.minute == 0;
+  if (time == null || !isMidnight) return date;
+  return DateTime(date.year, date.month, date.day, time.hour, time.minute);
 }
 
 final _pricePattern = RegExp(r'^\d+([.,]\d{1,2})?$');

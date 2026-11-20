@@ -88,7 +88,7 @@ void main() {
         NewActivity(
           title: 'Trobada acústica',
           description: 'Jam session oberta.',
-          category: 'Música',
+          categories: ['Música'],
           startsAt: DateTime(2026, 11, 20, 18),
           municipality: 'Barcelona',
           imageAsset: 'assets/images/jazz_al_parc.jpg',
@@ -132,7 +132,7 @@ void main() {
       }) => NewActivity(
         title: 'Taller de ceràmica',
         description: 'Per a tots els nivells.',
-        category: 'agenda:categories/exposicions',
+        categories: ['agenda:categories/exposicions'],
         startsAt: DateTime(2026, 11, 7, 0, 30),
         endsAt: endsAt,
         municipality: 'Sant Cugat del Vallès',
@@ -207,7 +207,7 @@ void main() {
         NewActivity(
           title: 'Taller nou',
           description: 'Ara a la tarda.',
-          category: 'agenda:categories/exposicions',
+          categories: ['agenda:categories/exposicions'],
           startsAt: DateTime(2026, 12, 7, 18),
           endsAt: DateTime(2026, 12, 7, 20),
           imageAsset: 'assets/images/jazz_al_parc.jpg',
@@ -238,6 +238,127 @@ void main() {
       final activity = await repository.getActivityById('101');
 
       expect(activity!.endsAt, isNull);
+    });
+    group('Informació extra', () {
+      Future<Activity> read(Map<String, Object?> extra) async {
+        final repository = HttpActivityRepository(
+          apiClient: ApiClient(
+            client: MockClient(
+              (request) async => jsonResponse({...sampleEventJson(), ...extra}),
+            ),
+          ),
+        );
+        return (await repository.getActivityById('101'))!;
+      }
+
+      test('Llegeix totes les categories, l’horari i la modalitat', () async {
+        final activity = await read({
+          'categories': [
+            'agenda:categories/teatre',
+            'agenda:categories/exposicions',
+          ],
+          'schedule': ' 19.30 h ',
+          'modality': 'Online and Face-to-Face',
+          'permanent': true,
+          'tickets': '10 €',
+          'email': 'info@example.cat',
+          'phone': '972 00 00 00',
+        });
+
+        expect(activity.categories, ['Teatre', 'Exposicions']);
+        expect(activity.category, 'Teatre');
+        expect(activity.schedule, '19.30 h');
+        expect(activity.modality, ActivityModality.mixed);
+        expect(activity.isPermanent, isTrue);
+        expect(activity.tickets, '10 €');
+        expect(activity.email, 'info@example.cat');
+        expect(activity.phone, '972 00 00 00');
+      });
+
+      test('Sense aquests camps, no s’inventa res', () async {
+        final activity = await read({});
+
+        expect(activity.schedule, isNull);
+        expect(activity.modality, isNull);
+        expect(activity.isPermanent, isFalse);
+        expect(activity.links, isEmpty);
+        expect(activity.website, isNull);
+      });
+
+      test('Separa els enllaços relacionats i en llegeix els noms', () async {
+        final activity = await read({
+          'url': 'https://auditori.cat/concert',
+          'related-urls':
+              'https://example.cat/a?x=1,2, https://www.programa.cat/b',
+          'url-names': 'Programa de mà, Web del festival',
+          'activity-url': 'no és un enllaç',
+        });
+
+        expect(activity.website, 'https://auditori.cat/concert');
+        expect(activity.onlineUrl, isNull);
+        expect(activity.links.map((link) => (link.name, link.url)), [
+          ('Programa de mà', 'https://example.cat/a?x=1,2'),
+          ('Web del festival', 'https://www.programa.cat/b'),
+        ]);
+      });
+
+      test('Si els noms no hi quadren, fa servir el domini', () async {
+        final activity = await read({
+          'related-urls': 'https://www.programa.cat/b, https://example.cat/a',
+          'url-names': 'Programa, de mà, i més',
+        });
+
+        expect(activity.links.map((link) => link.name), [
+          'programa.cat',
+          'example.cat',
+        ]);
+      });
+
+      test('Envia les categories, l’horari, la modalitat i l’enllaç', () async {
+        late Map<String, Object?> sent;
+        final repository = HttpActivityRepository(
+          apiClient: ApiClient(
+            client: MockClient((request) async {
+              sent = jsonDecode(request.body) as Map<String, Object?>;
+              return jsonResponse(
+                sampleEventJson(id: 506, isOfficial: false),
+                201,
+              );
+            }),
+          ),
+        );
+
+        final created = await repository.createActivity(
+          NewActivity(
+            title: 'Xerrada',
+            description: 'En directe.',
+            categories: [
+              'agenda:categories/conferencies',
+              'agenda:categories/teatre',
+            ],
+            startsAt: DateTime(2026, 11, 7, 18),
+            imageAsset: 'assets/images/jazz_al_parc.jpg',
+            creator: const ActivityCreator(name: 'Pol Vidal', isFriend: false),
+            schedule: '18.00 h · Durada: 1 h',
+            modality: ActivityModality.online,
+            isPermanent: true,
+            onlineUrl: 'https://meet.example.cat/xerrada',
+          ),
+        );
+
+        expect(sent['categories'], [
+          'agenda:categories/conferencies',
+          'agenda:categories/teatre',
+        ]);
+        expect(sent['schedule'], '18.00 h · Durada: 1 h');
+        expect(sent['modality'], 'Online');
+        expect(sent['permanent'], isTrue);
+        expect(sent['activity-url'], 'https://meet.example.cat/xerrada');
+        // Si la resposta no ho torna, es manté el que s'ha enviat.
+        expect(created.schedule, '18.00 h · Durada: 1 h');
+        expect(created.modality, ActivityModality.online);
+        expect(created.onlineUrl, 'https://meet.example.cat/xerrada');
+      });
     });
 
     test(
