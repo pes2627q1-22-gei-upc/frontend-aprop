@@ -15,11 +15,15 @@ class ProfileScreen extends StatefulWidget {
     required this.onSettingsPressed,
     required this.onActivitySelected,
     this.onSharePressed,
+    this.onFriendsPressed,
   });
   final ProfileViewModel viewModel;
   final VoidCallback onSettingsPressed;
   final VoidCallback? onSharePressed;
   final ValueChanged<String> onActivitySelected;
+
+  /// Opens your friends list (#54).
+  final VoidCallback? onFriendsPressed;
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -130,6 +134,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ? null
                               : _edit,
                           onShare: widget.onSharePressed,
+                          onFriendsPressed: widget.onFriendsPressed,
                           showAvatarAction: model.canChangeAvatar,
                           onChangeAvatar: model.isLoading || model.isSaving
                               ? null

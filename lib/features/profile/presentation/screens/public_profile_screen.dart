@@ -16,6 +16,7 @@ class PublicProfileScreen extends StatefulWidget {
     required this.repository,
     required this.onActivitySelected,
     this.onSharePressed,
+    this.onFriendsPressed,
   });
 
   final String userId;
@@ -24,6 +25,9 @@ class PublicProfileScreen extends StatefulWidget {
 
   /// Receives the person's username.
   final ValueChanged<String>? onSharePressed;
+
+  /// Opens the person's friends list (#54) with their ID and name.
+  final void Function(String userId, String name)? onFriendsPressed;
 
   @override
   State<PublicProfileScreen> createState() => _PublicProfileScreenState();
@@ -115,6 +119,13 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
                       profile: person.profile,
                       showEdit: false,
                       onEdit: null,
+                      onFriendsPressed: switch (widget.onFriendsPressed) {
+                        final open? => () => open(
+                          widget.userId,
+                          person.profile.displayName,
+                        ),
+                        null => null,
+                      },
                       primaryAction: switch (model.friendship) {
                         null || FriendshipAction.unavailable => null,
                         final action => _FriendButton(

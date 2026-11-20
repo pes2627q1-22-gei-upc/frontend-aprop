@@ -97,6 +97,26 @@ class AppLocalizationsEs extends AppLocalizations {
       'No puedes enviar una solicitud de amistad a esta persona.';
 
   @override
+  String get friendsTitle => 'Amigos';
+
+  @override
+  String get friendsLoading => 'Cargando los amigos';
+
+  @override
+  String get friendsLoadError => 'No hemos podido cargar los amigos.';
+
+  @override
+  String get friendsEmptyOwn => 'Todavía no tienes amigos.';
+
+  @override
+  String friendsEmptyOther(String name) {
+    return '$name todavía no tiene amigos.';
+  }
+
+  @override
+  String get friendsOpenList => 'Ver los amigos';
+
+  @override
   String get publicProfilePlansLoadError =>
       'No hemos podido cargar los planes.';
 

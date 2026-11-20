@@ -26,10 +26,12 @@ import '../../features/notifications/repositories/notification_repository.dart';
 import '../../features/profile/data/demo_profile_repository.dart';
 import '../../features/profile/data/demo_profile_settings_repository.dart';
 import '../../features/profile/data/demo_public_profile_repository.dart';
+import '../../features/profile/data/demo_friends_repository.dart';
 import '../../features/profile/data/demo_user_search_repository.dart';
 import '../../features/profile/repositories/profile_repository.dart';
 import '../../features/profile/repositories/profile_settings_repository.dart';
 import '../../features/profile/repositories/public_profile_repository.dart';
+import '../../features/profile/repositories/friends_repository.dart';
 import '../../features/profile/repositories/user_search_repository.dart';
 import '../../features/ratings/data/demo_rating_repository.dart';
 import '../../features/ratings/repositories/rating_repository.dart';
@@ -53,6 +55,7 @@ class AuthGate extends StatefulWidget {
     this.profileSettingsRepository,
     this.publicProfileRepository,
     this.userSearchRepository,
+    this.friendsRepository,
     this.interestTestRepository,
     this.activityCategoryRepository,
     this.userLocationRepository,
@@ -72,6 +75,7 @@ class AuthGate extends StatefulWidget {
   final ProfileSettingsRepository? profileSettingsRepository;
   final PublicProfileRepository? publicProfileRepository;
   final UserSearchRepository? userSearchRepository;
+  final FriendsRepository? friendsRepository;
   final InterestTestRepository? interestTestRepository;
   final ActivityCategoryRepository? activityCategoryRepository;
 
@@ -95,6 +99,7 @@ class _AuthGateState extends State<AuthGate> {
   late final ProfileSettingsRepository _profileSettingsRepository;
   late final PublicProfileRepository _publicProfileRepository;
   late final UserSearchRepository _userSearchRepository;
+  late final FriendsRepository _friendsRepository;
   late final InterestTestRepository _interestTestRepository;
   DemoEnrollmentRepository? _ownedEnrollmentRepository;
 
@@ -147,6 +152,7 @@ class _AuthGateState extends State<AuthGate> {
         DemoPublicProfileRepository(activityRepository: _activityRepository);
     _userSearchRepository =
         widget.userSearchRepository ?? const DemoUserSearchRepository();
+    _friendsRepository = widget.friendsRepository ?? DemoFriendsRepository();
     _interestTestRepository =
         widget.interestTestRepository ??
         DemoInterestTestRepository(activityRepository: _activityRepository);
@@ -211,6 +217,7 @@ class _AuthGateState extends State<AuthGate> {
           profileSettingsRepository: _profileSettingsRepository,
           publicProfileRepository: _publicProfileRepository,
           userSearchRepository: _userSearchRepository,
+          friendsRepository: _friendsRepository,
           interestTestRepository: _interestTestRepository,
           activityCategoryRepository: widget.activityCategoryRepository,
           userLocationRepository: widget.userLocationRepository,

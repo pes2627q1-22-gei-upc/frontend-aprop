@@ -256,6 +256,42 @@ abstract class AppLocalizations {
   /// **'No pots enviar una sol·licitud d’amistat a aquesta persona.'**
   String get friendRequestBlocked;
 
+  /// No description provided for @friendsTitle.
+  ///
+  /// In ca, this message translates to:
+  /// **'Amics'**
+  String get friendsTitle;
+
+  /// No description provided for @friendsLoading.
+  ///
+  /// In ca, this message translates to:
+  /// **'Carregant els amics'**
+  String get friendsLoading;
+
+  /// No description provided for @friendsLoadError.
+  ///
+  /// In ca, this message translates to:
+  /// **'No hem pogut carregar els amics.'**
+  String get friendsLoadError;
+
+  /// No description provided for @friendsEmptyOwn.
+  ///
+  /// In ca, this message translates to:
+  /// **'Encara no tens amics.'**
+  String get friendsEmptyOwn;
+
+  /// No description provided for @friendsEmptyOther.
+  ///
+  /// In ca, this message translates to:
+  /// **'{name} encara no té amics.'**
+  String friendsEmptyOther(String name);
+
+  /// No description provided for @friendsOpenList.
+  ///
+  /// In ca, this message translates to:
+  /// **'Veure els amics'**
+  String get friendsOpenList;
+
   /// No description provided for @publicProfilePlansLoadError.
   ///
   /// In ca, this message translates to:
