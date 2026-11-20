@@ -29,6 +29,19 @@
   "friendStatusError": "No hem pogut consultar les sol·licituds. Torna-ho a provar.",
   "friendRequestError": "No hem pogut enviar la sol·licitud. Torna-ho a provar.",
   "friendRequestBlocked": "No pots enviar una sol·licitud d’amistat a aquesta persona.",
+  "friendsTitle": "Amics",
+  "friendsLoading": "Carregant els amics",
+  "friendsLoadError": "No hem pogut carregar els amics.",
+  "friendsEmptyOwn": "Encara no tens amics.",
+  "friendsEmptyOther": "{name} encara no té amics.",
+  "@friendsEmptyOther": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "friendsOpenList": "Veure els amics",
   "publicProfilePlansLoadError": "No hem pogut carregar els plans.",
   "publicProfilePlansFriendsOnly": "Els plans de {name} només els poden veure els seus amics.",
   "@publicProfilePlansFriendsOnly": {
@@ -823,9 +836,19 @@
   "actPracticalInfo": "Informació pràctica",
   "actOriginalLinkSoon": "Enllaç original disponible properament",
   "actOriginalLink": "Consultar informació original",
-  "actChatSoon": "Xat disponible properament",
+  "actChatNeedsEnrollment": "Apunta’t a l’activitat per poder parlar al xat.",
   "actChat": "Xat de l’activitat",
   "actChatHint": "Parla amb les persones que també s’hi han apuntat.",
+  "chatEmpty": "Encara no hi ha missatges. Saluda les persones que hi aniran!",
+  "chatLoadError": "No hem pogut carregar els missatges. Torna-ho a provar.",
+  "chatNotEnrolled": "Només les persones apuntades a l’activitat poden fer servir el xat.",
+  "chatOlder": "Veure missatges anteriors",
+  "chatInputHint": "Escriu un missatge",
+  "chatSend": "Enviar",
+  "chatSendError": "No s’ha pogut enviar el missatge. Torna-ho a provar.",
+  "chatMessageTooLong": "El missatge és massa llarg. Fes-lo més curt.",
+  "chatBackToActivity": "Tornar a la fitxa",
+  "chatYou": "Tu",
   "actPublishedBy": "Publicat per",
   "actReliabilityNone": "Fiabilitat de l’organitzador: sense valoracions",
   "actReliabilityOutOfFive": "Fiabilitat de l’organitzador: {value} sobre 5",

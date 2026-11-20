@@ -9,6 +9,7 @@ import 'core/l10n/locale_controller.dart';
 import 'core/network/api_client.dart';
 import 'features/activities/data/geolocator_user_location_repository.dart';
 import 'features/activities/data/http_activity_map_repository.dart';
+import 'features/activity_chat/data/http_activity_chat_repository.dart';
 import 'features/activities/data/http_activity_repository.dart';
 import 'features/activities/data/http_discovery_repository.dart';
 import 'features/activities/data/http_enrollment_repository.dart';
@@ -23,6 +24,7 @@ import 'features/interest_test/data/http_interest_test_repository.dart';
 import 'features/notifications/data/http_notification_repository.dart';
 import 'features/profile/data/http_profile_repository.dart';
 import 'features/profile/data/http_friendship_repository.dart';
+import 'features/profile/data/http_friends_repository.dart';
 import 'features/profile/data/http_user_search_repository.dart';
 import 'features/profile/data/http_profile_settings_repository.dart';
 import 'features/profile/data/http_public_profile_repository.dart';
@@ -78,12 +80,14 @@ Future<APropApp> createConfiguredApp() async {
     profileRepository: HttpProfileRepository(apiClient: apiClient),
     publicProfileRepository: HttpPublicProfileRepository(apiClient: apiClient),
     userSearchRepository: HttpUserSearchRepository(apiClient: apiClient),
+    friendsRepository: HttpFriendsRepository(apiClient: apiClient),
     profileSettingsRepository: HttpProfileSettingsRepository(
       apiClient: apiClient,
     ),
     interestTestRepository: HttpInterestTestRepository(apiClient: apiClient),
     userLocationRepository: userLocationRepository,
     ratingRepository: HttpRatingRepository(apiClient: apiClient),
+    activityChatRepository: HttpActivityChatRepository(apiClient: apiClient),
   );
 }
 

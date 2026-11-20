@@ -105,6 +105,26 @@ class AppLocalizationsEn extends AppLocalizations {
       'You can’t send a friend request to this person.';
 
   @override
+  String get friendsTitle => 'Friends';
+
+  @override
+  String get friendsLoading => 'Loading friends';
+
+  @override
+  String get friendsLoadError => 'We couldn’t load the friends.';
+
+  @override
+  String get friendsEmptyOwn => 'You don’t have any friends yet.';
+
+  @override
+  String friendsEmptyOther(String name) {
+    return '$name doesn’t have any friends yet.';
+  }
+
+  @override
+  String get friendsOpenList => 'See friends';
+
+  @override
   String get publicProfilePlansLoadError => 'We couldn’t load the plans.';
 
   @override
@@ -1295,13 +1315,46 @@ class AppLocalizationsEn extends AppLocalizations {
   String get actOriginalLink => 'View original information';
 
   @override
-  String get actChatSoon => 'Chat coming soon';
+  String get actChatNeedsEnrollment =>
+      'Sign up for the activity to use its chat.';
 
   @override
   String get actChat => 'Activity chat';
 
   @override
   String get actChatHint => 'Talk to the people who have also signed up.';
+
+  @override
+  String get chatEmpty =>
+      'No messages yet. Say hello to the people who are going!';
+
+  @override
+  String get chatLoadError => 'We couldn’t load the messages. Try again.';
+
+  @override
+  String get chatNotEnrolled =>
+      'Only people signed up for the activity can use the chat.';
+
+  @override
+  String get chatOlder => 'See earlier messages';
+
+  @override
+  String get chatInputHint => 'Write a message';
+
+  @override
+  String get chatSend => 'Send';
+
+  @override
+  String get chatSendError => 'The message couldn’t be sent. Try again.';
+
+  @override
+  String get chatMessageTooLong => 'The message is too long. Make it shorter.';
+
+  @override
+  String get chatBackToActivity => 'Back to the activity';
+
+  @override
+  String get chatYou => 'You';
 
   @override
   String get actPublishedBy => 'Published by';

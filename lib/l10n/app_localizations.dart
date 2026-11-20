@@ -274,6 +274,42 @@ abstract class AppLocalizations {
   /// **'No pots enviar una sol·licitud d’amistat a aquesta persona.'**
   String get friendRequestBlocked;
 
+  /// No description provided for @friendsTitle.
+  ///
+  /// In ca, this message translates to:
+  /// **'Amics'**
+  String get friendsTitle;
+
+  /// No description provided for @friendsLoading.
+  ///
+  /// In ca, this message translates to:
+  /// **'Carregant els amics'**
+  String get friendsLoading;
+
+  /// No description provided for @friendsLoadError.
+  ///
+  /// In ca, this message translates to:
+  /// **'No hem pogut carregar els amics.'**
+  String get friendsLoadError;
+
+  /// No description provided for @friendsEmptyOwn.
+  ///
+  /// In ca, this message translates to:
+  /// **'Encara no tens amics.'**
+  String get friendsEmptyOwn;
+
+  /// No description provided for @friendsEmptyOther.
+  ///
+  /// In ca, this message translates to:
+  /// **'{name} encara no té amics.'**
+  String friendsEmptyOther(String name);
+
+  /// No description provided for @friendsOpenList.
+  ///
+  /// In ca, this message translates to:
+  /// **'Veure els amics'**
+  String get friendsOpenList;
+
   /// No description provided for @publicProfilePlansLoadError.
   ///
   /// In ca, this message translates to:
@@ -2206,11 +2242,11 @@ abstract class AppLocalizations {
   /// **'Consultar informació original'**
   String get actOriginalLink;
 
-  /// No description provided for @actChatSoon.
+  /// No description provided for @actChatNeedsEnrollment.
   ///
   /// In ca, this message translates to:
-  /// **'Xat disponible properament'**
-  String get actChatSoon;
+  /// **'Apunta’t a l’activitat per poder parlar al xat.'**
+  String get actChatNeedsEnrollment;
 
   /// No description provided for @actChat.
   ///
@@ -2223,6 +2259,66 @@ abstract class AppLocalizations {
   /// In ca, this message translates to:
   /// **'Parla amb les persones que també s’hi han apuntat.'**
   String get actChatHint;
+
+  /// No description provided for @chatEmpty.
+  ///
+  /// In ca, this message translates to:
+  /// **'Encara no hi ha missatges. Saluda les persones que hi aniran!'**
+  String get chatEmpty;
+
+  /// No description provided for @chatLoadError.
+  ///
+  /// In ca, this message translates to:
+  /// **'No hem pogut carregar els missatges. Torna-ho a provar.'**
+  String get chatLoadError;
+
+  /// No description provided for @chatNotEnrolled.
+  ///
+  /// In ca, this message translates to:
+  /// **'Només les persones apuntades a l’activitat poden fer servir el xat.'**
+  String get chatNotEnrolled;
+
+  /// No description provided for @chatOlder.
+  ///
+  /// In ca, this message translates to:
+  /// **'Veure missatges anteriors'**
+  String get chatOlder;
+
+  /// No description provided for @chatInputHint.
+  ///
+  /// In ca, this message translates to:
+  /// **'Escriu un missatge'**
+  String get chatInputHint;
+
+  /// No description provided for @chatSend.
+  ///
+  /// In ca, this message translates to:
+  /// **'Enviar'**
+  String get chatSend;
+
+  /// No description provided for @chatSendError.
+  ///
+  /// In ca, this message translates to:
+  /// **'No s’ha pogut enviar el missatge. Torna-ho a provar.'**
+  String get chatSendError;
+
+  /// No description provided for @chatMessageTooLong.
+  ///
+  /// In ca, this message translates to:
+  /// **'El missatge és massa llarg. Fes-lo més curt.'**
+  String get chatMessageTooLong;
+
+  /// No description provided for @chatBackToActivity.
+  ///
+  /// In ca, this message translates to:
+  /// **'Tornar a la fitxa'**
+  String get chatBackToActivity;
+
+  /// No description provided for @chatYou.
+  ///
+  /// In ca, this message translates to:
+  /// **'Tu'**
+  String get chatYou;
 
   /// No description provided for @actPublishedBy.
   ///

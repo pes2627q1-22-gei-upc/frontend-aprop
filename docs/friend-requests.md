@@ -38,7 +38,7 @@ la resposta. El backend fa l’acceptació i l’amistat recíproca en una trans
 5. A Avisos, la lectura és independent. Després de respondre s’intenta marcar l’avís real com a llegit.
    Si això falla, la targeta continua acceptada i mostra l’error de lectura; es pot tornar a obrir.
 
-## Límit del servidor i DP-065
+## Límit del servidor i DP-066
 
 Actualment enviar una sol·licitud **no crea una notificació**. Per això, la bústia incorpora les
 sol·licituds rebudes autoritatives com a targetes socials. Si ja hi ha un avís Social amb el mateix
@@ -67,3 +67,11 @@ respostes falses/tardanes, error/reintent, compte diferent, dispose, privacitat,
 Abans de fusionar: CI, revisió humana i prova amb dos comptes reals. Enviar des d’un compte, acceptar
 amb l’altre, comprovar comptadors, distintiu, retorn a Avisos i privacitat. Les proves automatitzades
 fan servir HTTP simulat i dades Demo; no s’han fet escriptures reals a Render.
+
+## Compatibilitat amb la llista d’amics #197
+
+En integrar `develop@8b4b5dd` es conserven el comptador que obre la llista i la navegació al perfil.
+La font HTTP consulta la llista real en obrir-la/refrescar-la. La llista Demo de #197 conserva els seus
+exemples fixos (DP-065): no és una representació completa del graf després d’acceptar una petició.
+L’estat i els comptadors Demo de #164 sí comparteixen la confirmació. Aquest límit no afecta la
+consulta HTTP de les amistats. La decisió de #164 s’ha renumerat a DP-066 per evitar la col·lisió.

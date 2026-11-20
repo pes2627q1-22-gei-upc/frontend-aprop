@@ -548,6 +548,7 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Provisionalment:** mantenir-la amagada fins a sortir de `/assistant`. Això conserva la seqüència xat → fitxa → xat → Inici; les fitxes obertes des de les seccions habituals continuen amb barra. `TODO(DP-048)` a `MainShell._openAssistant`. La conversa i les inscripcions mantenen els ViewModels compartits.
 - **Verificació:** recorregut d’inscripció des del xat, fitxa i retorn; restauració de barra amb fletxa, retorn del sistema i dreceres a Agenda/Configuració.
 - **Qui decideix:** equip/PO a la revisió visual de #261. Ocultar la barra al xat ja és el requisit explícit; només queda oberta la fitxa que s’hi obre a sobre.
+
 ### DP-059 · Horari i informació extra de les activitats no oficials
 - **Estat:** oberta · 2026-11-17 · Claude Code (Opus 5.5) amb confirmació de l’usuari · Taiga #189
 - **Identificador:** es va obrir com a DP-051; renumerada a DP-055 i després a DP-059 en integrar develop (la DP-054 i la DP-055 són de #28, idiomes).
@@ -626,7 +627,6 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Qui decideix:** equip
 - **Resolució:** C, a Google Cloud (2026-11-07, l'usuari). S'ha restaurat la clau antiga, la que Firebase posa als enllaços, i s'ha restringit a llocs web (`aprop-919ec.firebaseapp.com`, `aprop-919ec.web.app`, `frontend-aprop.onrender.com`) i a les API Identity Toolkit i Token Service. Ara la pàgina de Firebase verifica el correu en fer clic a l'enllaç. També s'ha configurat un SMTP propi amb un Gmail de l'equip, però no desbloqueja l'URL d'acció (`EMAIL_TEMPLATE_UPDATE_NOT_ALLOWED`, pla Spark): E no és possible. El 2026-11-09 (Taiga #73) s'esborren l'opció d'enganxar l'enllaç (D) i la pàgina pròpia (E): `EmailActionScreen`, `EmailAction`, `AuthRepository.verifyEmailWithLink`, `confirmEmailVerification`, `verificationCodeFromLink` i `AuthFailure.invalidVerificationLink`. **No esborreu la clau restaurada:** sense ella, els enllaços tornarien a fallar.
 
-
 ### DP-036 · Format UUID de `X-User-ID` i sincronització d'UID de Firebase a Render
 - **Estat:** resolta 2026-10-26
 - **Obert per:** 2026-10-25 · Antigravity · Taiga #231
@@ -651,6 +651,20 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Dubte:** la targeta estàndard (~330 px) deixa veure només una activitat per pantalla al xat.
 - **Provisionalment:** fila compacta (miniatura 72 px, títol, municipi · data i la mateixa acció d'apuntar-se). Mateix estat d'inscripcions, mateix detall en tocar. Sense avatar del creador ni «Font». `TODO(DP-044)`: confirmar amb l'equip/mockup.
 - **Qui decideix:** equip frontend (UX)
+
+### DP-065 · Llista d’amics (#54): una petició per amic i sense privacitat
+- **Estat:** oberta · 2026-11-20 · Claude Code (Opus 5.5) amb confirmació de l’usuari · Taiga #197 (història #54)
+- **Context:** `FriendsListScreen`, `FriendsListViewModel`, `HttpFriendsRepository`, `DemoFriendsRepository`, `ProfileHeader` (comptador «Amics»). Backend consultat a `api-aprop@develop` sense modificar-lo: `GET /users/{id}/friends` (i `me`).
+- **Decisions de l’usuari:**
+  - L’API només retorna els identificadors dels amics. L’app demana el perfil de cada amic (`GET /users/{id}`, de 4 en 4, com els Avisos): 1 + N peticions. Si el backend retornés nom, `username` i foto, només canviaria `HttpFriendsRepository`.
+  - El comptador «Amics» obre la llista al perfil propi i també al d’altres persones. Qualsevol la pot veure: el backend no té cap opció de privacitat per als amics.
+- **Deduït (sense confirmar):**
+  - Un amic que ja no existeix (404) no surt a la llista; qualsevol altre error fa fallar la càrrega, amb reintent.
+  - A la pròpia llista no hi surts tu; a la d’una altra persona sí, si en sou amics, i en tocar-te s’obre la pestanya Perfil.
+  - Demo: els amics del compte són els exemples marcats com a amics (Laia i Júlia), i Laia i Júlia són amigues entre elles. El comptador de Laia (14) no coincideix amb la llista.
+- **Codi:** `TODO(DP-065)` a `http_friends_repository.dart` i `demo_public_profile_repository.dart`.
+- **Qui decideix:** backend (dades dels amics a `/users/{id}/friends`) + equip (privacitat de la llista)
+- **Resolució:**
 
 ### DP-064 · Botó d’amistat al perfil d’una altra persona (#160)
 - **Estat:** oberta · 2026-11-20 · Claude Code (Opus 5.5) amb confirmació de l’usuari · Taiga #160 (història #33)
@@ -680,6 +694,30 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Risc del backend:** `GET /users/{userId}/events` no comprova la privacitat; qualsevol que cridi l’API veu els plans d’una altra persona. L’app respecta `plans-visible`, però la protecció ha de ser al servidor.
 - **Codi:** `TODO(DP-063)` a `http_public_profile_repository.dart`, `demo_public_profile_repository.dart` i `public_profile_screen.dart`.
 - **Qui decideix:** equip (què és un «pla fet») + backend (privacitat de `/users/{id}/events`)
+- **Resolució:**
+
+### DP-062 · Xat de l’activitat (#26): sense temps real i disseny sense mockup
+- **Estat:** oberta
+- **Obert per:** 2026-11-20 · Claude Code (Opus 5.5) a petició de l'usuari · Taiga #26 / #148
+- **Identificador:** la DP-060 (#273) i la DP-061 (#274) són a branques sense fusionar; es fa servir DP-062 per no col·lidir-hi.
+- **Context:** `lib/features/activity_chat/` (`ActivityChatScreen`, `ActivityChatViewModel`, `HttpActivityChatRepository`), botó «Xat de l’activitat» d’`ActivityDetailsScreen`, `MainShell._openActivityChat`.
+- **Dubte:**
+  - El backend (`GET`/`POST /events/{id}/messages`, #147) no avisa dels missatges nous: no hi ha websockets ni cap altre mecanisme de temps real.
+  - Els missatges no tenen identificador.
+  - El mockup (fig. 9) només mostra el botó; no hi ha disseny de la pantalla del xat.
+- **Opcions:** A) demanar els missatges nous cada pocs segons mentre el xat és obert (fet) · B) temps real al backend (websockets o SSE), fora de l’abast actual.
+- **Provisionalment:** A.
+  - Cada 5 s es torna a demanar la pàgina més recent i s’hi afegeixen els missatges nous; quan es tanca el xat, s’atura. Si falla, es torna a provar sense avisar. Mai no hi ha dues peticions de refresc alhora, i mentre l’app és en segon pla no se’n fa cap; en tornar, es refresca de seguida (revisió de la PR #59).
+  - Un missatge s’identifica per autor i data d’enviament: el backend no deixa enviar-ne dos al mateix instant (409).
+  - Pàgines de 50, de la més recent a la més antiga, amb «Veure missatges anteriors». Les pàgines van per posició: la que es demana es calcula amb els missatges que ja es tenen, perquè els nous no la desplacin. Si n’arriben més de 50 entre dos refrescos (per exemple, després d’un tall llarg), pot quedar un forat a l’historial sense cap avís; ho resoldria una paginació per data al backend (`before=<date-sent>`), que no existeix.
+  - Si arriben missatges mentre es llegeix l’historial, la llista es desplaça (els nous entren a baix). Es podria mostrar «Missatges nous ↓» en lloc de moure-la; queda per a la revisió visual.
+  - Pantalla completa per sobre de la barra inferior, com el xat de l’Assistent (#261). Missatges propis a la dreta (color principal) i dels altres a l’esquerra amb el nom. Hora al peu: només l’hora si és d’avui, «Ahir · …» o la data si és més antic. No es mostra la foto de perfil.
+  - Màxim 1.000 runes (punts de codi), com compta el backend: un emoji compost en pot ocupar més d’una. El camp talla el text sense partir cap caràcter i el comptador només surt a prop del límit. Si el backend rebutja el text (400), es diu que és massa llarg, no que es torni a provar.
+  - Sense inscripció, el botó de la fitxa queda desactivat i el backend respon 403, que es mostra com a avís amb «Tornar a la fitxa» en lloc de reintentar.
+  - Un missatge sense data vàlida es descarta i no amaga la resta de la pàgina.
+  - Sense backend, un xat de demostració en memòria.
+  - Textos i disseny sense mockup. `TODO(DP-062)` al ViewModel.
+- **Qui decideix:** equip + disseny (temps real: backend)
 - **Resolució:**
 
 ### DP-053 · Valoració d'activitats (#185): requisit d'assistència i contracte de #184
@@ -724,14 +762,15 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Provisionalment:** (1) Els ViewModels, validadors i formatadors fan servir `currentL10n` (`LocaleController.active`, global) i els widgets `context.l10n`. Els missatges d'error que un ViewModel ja ha desat (p. ex. «No hem pogut carregar…») no es tornen a traduir fins al pròxim intent; els widgets sí que es redibuixen. El missatge de benvinguda de l'assistent es resol en cada renderitzat i els xips de suggeriments es tornen a demanar en canviar d'idioma. Els errors d'avatar (`AvatarSelectionException`) són un enum que el ViewModel tradueix. (2) Es queden en català: les dades de demostració (`demo_*_repository`: respostes de l'assistent, activitats, avisos), els missatges `ApiException`/`StateError` dels repositoris HTTP que no es mostren tal qual i els errors `{"error": "…"}` del backend. `updateLanguage` fa un `GET users/me` addicional abans del `PATCH` (acceptat, pendent de simplificar quan el backend ho permeti). (3) Els noms de categories i el contingut dels esdeveniments (títol, descripció) no van als ARB; la traducció d'esdeveniments és del backend (`?lang=`). (4) Mockup fig. 19 només mostrava ca/es: s'afegeix l'anglès per decisió de l'usuari.
 - **Qui decideix:** equip
 
-### DP-065 · Acceptació d’amistat i targetes rebudes sense avís automàtic (#164)
+### DP-066 · Acceptació d’amistat i targetes rebudes sense avís automàtic (#164)
 - **Estat:** oberta · 2026-11-20 · Taiga #164, història #35 · només frontend.
+- **Identificador:** renumerada de DP-065 a DP-066 en integrar `origin/develop@8b4b5dd`, per conservar la DP-065 de la llista d’amics #197.
 - **Context:** backend contrastat a `454e22b`. Hi ha consulta de rebudes i resposta amb data exacta; acceptar confirma l’amistat recíproca en transacció. Enviar no crea avís; la bústia només exposa Social genèric i l’historial de sol·licituds resoltes no és consultable.
 - **Decisió provisional:** afegir targetes socials des de les sol·licituds rebudes, no des de text lliure. Correlació amb avisos existents per remitent i `request-date` exactes; quan manca l’avís, ID de presentació separat, sense punt de no llegit ni escriptura de lectura fictícia. Cache de confirmacions per compte durant l’execució, sense inventar històric en reiniciar. Comptadors recarregats del perfil, privacitat de plans controlada pel servidor.
 - **Data:** el camp `request-date` de PostgreSQL pot ometre zona; es compara com a UTC amb `date-sent`. Les mutacions retenen el `date-sent` autoritatiu amb microsegons i UTC `Z`. Aquesta regla és només per identificar sol·licituds, no canvia l’horari general d’Avisos.
 - **Textos:** distintiu inclusiu «Amiga/Amic» (guia i18n); la informació de gènere no forma part del contracte. Mateixos estats/accions amb traduccions ca/es/en.
 - **Pendent backend/equip:** generar el primer avís Social amb remitent/data i definir la política de zona horària. Historial resolt i lectura de sol·licituds, si es requereixen després de reiniciar, necessiten contracte. Es conserva el risc d’autorització de lectura d’avisos de DP-039.
-- **Codi:** `TODO(DP-065)` a `notification_json_mapper.dart` i `http_notification_repository.dart`. Guia: `docs/friend-requests.md`.
+- **Codi:** `TODO(DP-066)` a `notification_json_mapper.dart` i `http_notification_repository.dart`. Guia: `docs/friend-requests.md`.
 - **Resolució:**
 
 **Actualització #164 de DP-023/DP-039/DP-064 (2026-11-20):** l’abast fora de l’Sprint 1 es manté com a històric. A l’Sprint 2 ja hi ha acceptació/rebuig amb HTTP i estat compartit. Les sol·licituds **rebudes** es consulten i permeten «Acceptar» al perfil; les sortints i els bloquejos continuen sense estat explícit al DTO del perfil (DP-064). No es crea ni es modifica cap endpoint.

@@ -108,6 +108,26 @@ class AppLocalizationsEs extends AppLocalizations {
       'No puedes enviar una solicitud de amistad a esta persona.';
 
   @override
+  String get friendsTitle => 'Amigos';
+
+  @override
+  String get friendsLoading => 'Cargando los amigos';
+
+  @override
+  String get friendsLoadError => 'No hemos podido cargar los amigos.';
+
+  @override
+  String get friendsEmptyOwn => 'Todavía no tienes amigos.';
+
+  @override
+  String friendsEmptyOther(String name) {
+    return '$name todavía no tiene amigos.';
+  }
+
+  @override
+  String get friendsOpenList => 'Ver los amigos';
+
+  @override
   String get publicProfilePlansLoadError =>
       'No hemos podido cargar los planes.';
 
@@ -1305,7 +1325,8 @@ class AppLocalizationsEs extends AppLocalizations {
   String get actOriginalLink => 'Consultar información original';
 
   @override
-  String get actChatSoon => 'Chat disponible próximamente';
+  String get actChatNeedsEnrollment =>
+      'Apúntate a la actividad para poder hablar en el chat.';
 
   @override
   String get actChat => 'Chat de la actividad';
@@ -1313,6 +1334,41 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get actChatHint =>
       'Habla con las personas que también se han apuntado.';
+
+  @override
+  String get chatEmpty =>
+      'Todavía no hay mensajes. ¡Saluda a las personas que irán!';
+
+  @override
+  String get chatLoadError =>
+      'No hemos podido cargar los mensajes. Vuelve a intentarlo.';
+
+  @override
+  String get chatNotEnrolled =>
+      'Solo las personas apuntadas a la actividad pueden usar el chat.';
+
+  @override
+  String get chatOlder => 'Ver mensajes anteriores';
+
+  @override
+  String get chatInputHint => 'Escribe un mensaje';
+
+  @override
+  String get chatSend => 'Enviar';
+
+  @override
+  String get chatSendError =>
+      'No se ha podido enviar el mensaje. Vuelve a intentarlo.';
+
+  @override
+  String get chatMessageTooLong =>
+      'El mensaje es demasiado largo. Hazlo más corto.';
+
+  @override
+  String get chatBackToActivity => 'Volver a la ficha';
+
+  @override
+  String get chatYou => 'Tú';
 
   @override
   String get actPublishedBy => 'Publicado por';

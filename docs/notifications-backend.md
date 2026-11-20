@@ -2,7 +2,7 @@
 
 > **Sprint 2 · #164:** l’acceptació des d’Avisos i Perfil ja està integrada amb HTTP.
 > Les notes anteriors sobre amistat només Demo corresponen a l’Sprint 1.
-> Contracte, sincronització i límits actuals: [Acceptar una sol·licitud](friend-requests.md), DP-065.
+> Contracte, sincronització i límits actuals: [Acceptar una sol·licitud](friend-requests.md), DP-066.
 
 ## Abast i estat
 
@@ -93,7 +93,7 @@ Tocar targeta → comprovar destinatari → POST/read → confirmar estat
   Des de #164, les rebudes es consulten al seu endpoint i es correlacionen amb `friend-id` i
   `request-date` exactes; aquestes sí mostren Acceptar/Rebutjar amb resposta HTTP confirmada.
   Les rebudes sense avís automàtic també apareixen com a targetes, sense inventar lectura persistent
-  (DP-065). Vegeu `friend-requests.md` per al contracte actual i la reconciliació amb el perfil.
+  (DP-066). Vegeu `friend-requests.md` per al contracte actual i la reconciliació amb el perfil.
 - Recordatoris/recomanacions no reben un actor encara que un registre contingui `friend-id`, ni
   depenen d’altres avisos socials que comparteixin la mateixa persona.
 - Dates de l’activitat desconegudes es presenten «Data no informada». La recepció necessita una data
@@ -107,7 +107,7 @@ El [missatge de traspàs](notifications-backend-handoff.md) separa:
 - Per comprovar l’Sprint 1: disponibilitat/URL, autorització per destinatari, zona horària i dades de
   prova; confirmar si entra la generació automàtica de recordatoris/recomanacions. Només s’ha trobat
   creació via `POST /notifications`; cap servei la invoca automàticament al `develop` revisat.
-- A l’Sprint 2: #164 ja integra identificador/estat i acceptar/rebutjar per l’API de sol·licituds. Queden l’avís automàtic en enviar, subtipus socials addicionals i l’historial resolt consultable (DP-065).
+- A l’Sprint 2: #164 ja integra identificador/estat i acceptar/rebutjar per l’API de sol·licituds. Queden l’avís automàtic en enviar, subtipus socials addicionals i l’historial resolt consultable (DP-066).
 
 La comprovació de disponibilitat sense credencials a `/notificationtypes` ha esgotat **15 segons sense
 resposta HTTP**. No s’ha validat una sessió real ni persistència contra producció. Tampoc s’ha enviat

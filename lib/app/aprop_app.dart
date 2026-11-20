@@ -9,6 +9,7 @@ import '../features/activities/repositories/activity_repository.dart';
 import '../features/activities/repositories/discovery_repository.dart';
 import '../features/activities/repositories/enrollment_repository.dart';
 import '../features/activities/repositories/user_location_repository.dart';
+import '../features/activity_chat/repositories/activity_chat_repository.dart';
 import '../features/ratings/repositories/rating_repository.dart';
 import '../features/assistant/repositories/assistant_repository.dart';
 import '../features/auth/repositories/auth_repository.dart';
@@ -18,6 +19,7 @@ import '../features/profile/repositories/profile_repository.dart';
 import '../features/profile/repositories/profile_settings_repository.dart';
 import '../features/profile/repositories/public_profile_repository.dart';
 import '../features/profile/repositories/friendship_repository.dart';
+import '../features/profile/repositories/friends_repository.dart';
 import '../features/profile/repositories/user_search_repository.dart';
 import 'navigation/auth_gate.dart';
 import 'theme/app_theme.dart';
@@ -38,9 +40,11 @@ class APropApp extends StatelessWidget {
     this.publicProfileRepository,
     this.friendshipRepository,
     this.userSearchRepository,
+    this.friendsRepository,
     this.interestTestRepository,
     this.activityCategoryRepository,
     this.userLocationRepository,
+    this.activityChatRepository,
     this.localeController,
   });
 
@@ -51,6 +55,9 @@ class APropApp extends StatelessWidget {
 
   /// On és la persona, per al mapa d'Inici. Sense, el mapa no la mostra.
   final UserLocationRepository? userLocationRepository;
+
+  /// Xat de les activitats. Sense, se'n fa servir un de demostració.
+  final ActivityChatRepository? activityChatRepository;
   final ActivityRepository? activityRepository;
   final ActivityMapRepository? activityMapRepository;
   final EnrollmentRepository? enrollmentRepository;
@@ -63,6 +70,7 @@ class APropApp extends StatelessWidget {
   final PublicProfileRepository? publicProfileRepository;
   final FriendshipRepository? friendshipRepository;
   final UserSearchRepository? userSearchRepository;
+  final FriendsRepository? friendsRepository;
   final InterestTestRepository? interestTestRepository;
 
   /// Categories per crear activitats. Si no hi és, el formulari fa servir la
@@ -86,9 +94,11 @@ class APropApp extends StatelessWidget {
         publicProfileRepository,
         friendshipRepository,
         userSearchRepository,
+        friendsRepository,
         interestTestRepository,
         activityCategoryRepository,
         userLocationRepository,
+        activityChatRepository,
       )),
       authRepository: authRepository,
       activityRepository: activityRepository,
@@ -103,9 +113,11 @@ class APropApp extends StatelessWidget {
       publicProfileRepository: publicProfileRepository,
       friendshipRepository: friendshipRepository,
       userSearchRepository: userSearchRepository,
+      friendsRepository: friendsRepository,
       interestTestRepository: interestTestRepository,
       activityCategoryRepository: activityCategoryRepository,
       userLocationRepository: userLocationRepository,
+      activityChatRepository: activityChatRepository,
     );
 
     final controller = localeController;

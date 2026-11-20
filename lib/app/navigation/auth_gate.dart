@@ -12,6 +12,7 @@ import '../../features/activities/repositories/activity_repository.dart';
 import '../../features/activities/repositories/discovery_repository.dart';
 import '../../features/activities/repositories/enrollment_repository.dart';
 import '../../features/activities/repositories/user_location_repository.dart';
+import '../../features/activity_chat/repositories/activity_chat_repository.dart';
 import '../../features/assistant/data/demo_assistant_repository.dart';
 import '../../features/assistant/repositories/assistant_repository.dart';
 import '../../features/auth/models/app_user.dart';
@@ -27,11 +28,13 @@ import '../../features/profile/data/demo_profile_repository.dart';
 import '../../features/profile/data/demo_friendship_repository.dart';
 import '../../features/profile/data/demo_profile_settings_repository.dart';
 import '../../features/profile/data/demo_public_profile_repository.dart';
+import '../../features/profile/data/demo_friends_repository.dart';
 import '../../features/profile/data/demo_user_search_repository.dart';
 import '../../features/profile/repositories/profile_repository.dart';
 import '../../features/profile/repositories/profile_settings_repository.dart';
 import '../../features/profile/repositories/public_profile_repository.dart';
 import '../../features/profile/repositories/friendship_repository.dart';
+import '../../features/profile/repositories/friends_repository.dart';
 import '../../features/profile/repositories/user_search_repository.dart';
 import '../../features/ratings/data/demo_rating_repository.dart';
 import '../../features/ratings/repositories/rating_repository.dart';
@@ -56,15 +59,20 @@ class AuthGate extends StatefulWidget {
     this.publicProfileRepository,
     this.friendshipRepository,
     this.userSearchRepository,
+    this.friendsRepository,
     this.interestTestRepository,
     this.activityCategoryRepository,
     this.userLocationRepository,
+    this.activityChatRepository,
   });
 
   final AuthRepository authRepository;
 
   /// On és la persona, per al mapa d'Inici. Sense, el mapa no la mostra.
   final UserLocationRepository? userLocationRepository;
+
+  /// Xat de les activitats. Sense, MainShell en fa servir un de demostració.
+  final ActivityChatRepository? activityChatRepository;
   final ActivityRepository? activityRepository;
   final EnrollmentRepository? enrollmentRepository;
   final AssistantRepository? assistantRepository;
@@ -76,6 +84,7 @@ class AuthGate extends StatefulWidget {
   final PublicProfileRepository? publicProfileRepository;
   final FriendshipRepository? friendshipRepository;
   final UserSearchRepository? userSearchRepository;
+  final FriendsRepository? friendsRepository;
   final InterestTestRepository? interestTestRepository;
   final ActivityCategoryRepository? activityCategoryRepository;
 
@@ -99,6 +108,7 @@ class _AuthGateState extends State<AuthGate> {
   late final ProfileSettingsRepository _profileSettingsRepository;
   late final PublicProfileRepository _publicProfileRepository;
   late final UserSearchRepository _userSearchRepository;
+  late final FriendsRepository _friendsRepository;
   late final InterestTestRepository _interestTestRepository;
   DemoEnrollmentRepository? _ownedEnrollmentRepository;
   DemoFriendshipRepository? _ownedFriendshipRepository;
@@ -165,6 +175,7 @@ class _AuthGateState extends State<AuthGate> {
         );
     _userSearchRepository =
         widget.userSearchRepository ?? const DemoUserSearchRepository();
+    _friendsRepository = widget.friendsRepository ?? DemoFriendsRepository();
     _interestTestRepository =
         widget.interestTestRepository ??
         DemoInterestTestRepository(activityRepository: _activityRepository);
@@ -232,9 +243,11 @@ class _AuthGateState extends State<AuthGate> {
           publicProfileRepository: _publicProfileRepository,
           friendshipRepository: _friendshipRepository,
           userSearchRepository: _userSearchRepository,
+          friendsRepository: _friendsRepository,
           interestTestRepository: _interestTestRepository,
           activityCategoryRepository: widget.activityCategoryRepository,
           userLocationRepository: widget.userLocationRepository,
+          activityChatRepository: widget.activityChatRepository,
         );
       },
     );

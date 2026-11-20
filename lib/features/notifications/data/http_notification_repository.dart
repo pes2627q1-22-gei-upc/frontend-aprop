@@ -177,7 +177,7 @@ class HttpNotificationRepository implements NotificationRepository {
         );
       }
     }
-    // TODO(DP-065): sending a request currently creates no DB notification.
+    // TODO(DP-066): sending a request currently creates no DB notification.
     // These cards come from the received-requests API. They have no persisted
     // unread receipt and must never call /notifications/{id}/read.
     for (final request in known.values.where((r) => !matched.contains(r.id))) {

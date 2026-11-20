@@ -66,6 +66,27 @@ class DemoPublicProfileRepository implements PublicProfileRepository {
   /// Laia's example history, the same one her own profile shows.
   static const _laiaPlans = ['demo-jazz', 'demo-theatre', 'demo-exhibition'];
 
+  /// The demo friendships (#54). The signed-in person's friends (null) are the
+  /// examples marked as friends; Laia and Júlia are also friends of each other.
+  /// The list may include the signed-in person: the screen leaves them out.
+  // TODO(DP-065): fixed examples, not a friendship graph.
+  static List<UserSummary> friendsOf(String? userId) {
+    final id = userId == null ? null : (_aliases[userId] ?? userId);
+    final ids = switch (id) {
+      null => [
+        for (final entry in _people.entries)
+          if (entry.value.isFriend) entry.key,
+      ],
+      'demo-laiasoler' => ['demo-person-julia'],
+      'demo-person-julia' => ['demo-laiasoler'],
+      _ => const <String>[],
+    };
+    return List.unmodifiable([
+      for (final person in searchablePeople)
+        if (ids.contains(person.id)) person,
+    ]);
+  }
+
   static List<UserSummary> get searchablePeople => List.unmodifiable([
     for (final entry in _people.entries)
       UserSummary(

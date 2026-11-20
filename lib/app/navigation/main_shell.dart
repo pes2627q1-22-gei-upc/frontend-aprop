@@ -22,6 +22,9 @@ import '../../features/activities/presentation/view_models/user_location_view_mo
 import '../../features/activities/repositories/activity_repository.dart';
 import '../../features/activities/repositories/discovery_repository.dart';
 import '../../features/activities/repositories/enrollment_repository.dart';
+import '../../features/activity_chat/data/demo_activity_chat_repository.dart';
+import '../../features/activity_chat/presentation/screens/activity_chat_screen.dart';
+import '../../features/activity_chat/repositories/activity_chat_repository.dart';
 import '../../features/agenda/presentation/screens/agenda_screen.dart';
 import '../../features/assistant/models/assistant_message.dart';
 import '../../features/assistant/presentation/screens/assistant_screen.dart';
@@ -40,6 +43,8 @@ import '../../features/profile/presentation/screens/public_profile_screen.dart';
 import '../../features/profile/repositories/profile_repository.dart';
 import '../../features/profile/repositories/public_profile_repository.dart';
 import '../../features/profile/repositories/friendship_repository.dart';
+import '../../features/profile/presentation/screens/friends_list_screen.dart';
+import '../../features/profile/repositories/friends_repository.dart';
 import '../../features/profile/repositories/user_search_repository.dart';
 import '../../features/profile/repositories/profile_settings_repository.dart';
 import '../../features/ratings/presentation/view_models/rating_view_model.dart';
@@ -64,13 +69,18 @@ class MainShell extends StatefulWidget {
     this.publicProfileRepository,
     this.friendshipRepository,
     this.userSearchRepository,
+    this.friendsRepository,
     this.interestTestRepository,
     this.activityCategoryRepository,
     this.userLocationRepository,
+    this.activityChatRepository,
     this.now,
   });
 
   final AppUser user;
+
+  /// Xat de les activitats. Si no hi és, se'n fa servir un de demostració.
+  final ActivityChatRepository? activityChatRepository;
 
   /// On és la persona, per al mapa. Sense, el mapa no la mostra.
   final UserLocationRepository? userLocationRepository;
@@ -88,6 +98,10 @@ class MainShell extends StatefulWidget {
   final PublicProfileRepository? publicProfileRepository;
   final FriendshipRepository? friendshipRepository;
   final UserSearchRepository? userSearchRepository;
+
+  /// Llistes d'amics (#54). Si no hi és, el comptador «Amics» és només un
+  /// número.
+  final FriendsRepository? friendsRepository;
 
   /// Si no hi és, «Tornar a fer el test d’interessos» queda pendent.
   final InterestTestRepository? interestTestRepository;
@@ -261,6 +275,7 @@ class _MainShellState extends State<MainShell> {
         ratingBuilder: _buildRating,
         canEdit: _canEdit,
         onEdit: _editActivity,
+        onOpenChat: _openActivityChat,
         onCreatorSelected: _creatorProfileOpener,
       ),
     );
@@ -293,6 +308,33 @@ class _MainShellState extends State<MainShell> {
               : null,
         );
       },
+    );
+  }
+
+  late final ActivityChatRepository _activityChatRepository =
+      widget.activityChatRepository ??
+      DemoActivityChatRepository(
+        authorId: _enrollmentUserId,
+        authorName: '${widget.user.firstName} ${widget.user.lastName}'.trim(),
+      );
+
+  /// Xat de l'activitat (#26), a pantalla completa per sobre de la barra
+  /// inferior, com el de l'Assistent (#261). «Enrere» torna a la fitxa.
+  void _openActivityChat(Activity activity) {
+    Navigator.of(context, rootNavigator: true).push<void>(
+      MaterialPageRoute<void>(
+        settings: RouteSettings(
+          name: '/activities/${Uri.encodeComponent(activity.id)}/chat',
+        ),
+        builder: (context) => ActivityChatScreen(
+          activityId: activity.id,
+          activityTitle: activity.title,
+          // Els missatges del backend porten l'UUID de l'usuari, com les
+          // inscripcions.
+          userId: _enrollmentUserId,
+          repository: _activityChatRepository,
+        ),
+      ),
     );
   }
 
@@ -382,6 +424,7 @@ class _MainShellState extends State<MainShell> {
                   ratingBuilder: _buildRating,
                   canEdit: _canEdit,
                   onEdit: _editActivity,
+                  onOpenChat: _openActivityChat,
                   onCreatorSelected: _creatorProfileOpener,
                 ),
               );
@@ -435,6 +478,7 @@ class _MainShellState extends State<MainShell> {
                 ratingBuilder: _buildRating,
                 canEdit: _canEdit,
                 onEdit: _editActivity,
+                onOpenChat: _openActivityChat,
                 onCreatorSelected: _creatorProfileOpener,
               ),
             );
@@ -565,6 +609,9 @@ class _MainShellState extends State<MainShell> {
           friendshipRepository: widget.friendshipRepository,
           currentUserId: widget.user.id,
           onSharePressed: _shareProfile,
+          onFriendsPressed: widget.friendsRepository == null
+              ? null
+              : (id, name) => _openFriendsList(userId: id, ownerName: name),
           onActivitySelected: (activityId) {
             if (!(ModalRoute.of(context)?.isCurrent ?? false)) return;
             Navigator.of(context).push<void>(
@@ -575,10 +622,38 @@ class _MainShellState extends State<MainShell> {
                 ratingBuilder: _buildRating,
                 canEdit: _canEdit,
                 onEdit: _editActivity,
+                onOpenChat: _openActivityChat,
                 onCreatorSelected: _creatorProfileOpener,
               ),
             );
           },
+        ),
+      ),
+    );
+  }
+
+  /// Obre la llista d'amics (#54) al navegador de la secció activa: la
+  /// pròpia si [userId] és nul. Cada fila obre el perfil d'aquella persona.
+  void _openFriendsList({String? userId, String? ownerName}) {
+    final repository = widget.friendsRepository;
+    if (repository == null) return;
+    _sectionNavigatorKeys[_selectedIndex].currentState!.push<void>(
+      MaterialPageRoute<void>(
+        settings: RouteSettings(
+          name: userId == null
+              ? '/profile/friends'
+              : '/users/${Uri.encodeComponent(userId)}/friends',
+        ),
+        builder: (context) => FriendsListScreen(
+          repository: repository,
+          userId: userId,
+          ownerName: ownerName,
+          // A la pròpia llista no hi surt qui mira; a la d'una altra persona
+          // sí, si en sou amics (i obre la pestanya Perfil).
+          hiddenIds: userId == null
+              ? {widget.user.id, ?widget.user.serverId}
+              : const {},
+          onUserSelected: _openUserProfile,
         ),
       ),
     );
@@ -668,6 +743,7 @@ class _MainShellState extends State<MainShell> {
         ratingBuilder: _buildRating,
         canEdit: _canEdit,
         onEdit: _editActivity,
+        onOpenChat: _openActivityChat,
         onCreatorSelected: _creatorProfileOpener,
       ),
     );
@@ -838,6 +914,16 @@ class _MainShellState extends State<MainShell> {
                     ? _shareOwnProfile
                     : null,
                 onActivitySelected: _openActivityDetails,
+                onFriendsPressed: widget.friendsRepository == null
+                    ? null
+                    : () {
+                        // Only from the root of Perfil, once per tap.
+                        final navigator =
+                            _sectionNavigatorKeys[4].currentState!;
+                        if (_selectedIndex == 4 && !navigator.canPop()) {
+                          _openFriendsList();
+                        }
+                      },
               ),
             ),
           ],

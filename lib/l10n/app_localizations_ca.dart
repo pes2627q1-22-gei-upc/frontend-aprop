@@ -108,6 +108,26 @@ class AppLocalizationsCa extends AppLocalizations {
       'No pots enviar una sol·licitud d’amistat a aquesta persona.';
 
   @override
+  String get friendsTitle => 'Amics';
+
+  @override
+  String get friendsLoading => 'Carregant els amics';
+
+  @override
+  String get friendsLoadError => 'No hem pogut carregar els amics.';
+
+  @override
+  String get friendsEmptyOwn => 'Encara no tens amics.';
+
+  @override
+  String friendsEmptyOther(String name) {
+    return '$name encara no té amics.';
+  }
+
+  @override
+  String get friendsOpenList => 'Veure els amics';
+
+  @override
   String get publicProfilePlansLoadError => 'No hem pogut carregar els plans.';
 
   @override
@@ -1299,7 +1319,8 @@ class AppLocalizationsCa extends AppLocalizations {
   String get actOriginalLink => 'Consultar informació original';
 
   @override
-  String get actChatSoon => 'Xat disponible properament';
+  String get actChatNeedsEnrollment =>
+      'Apunta’t a l’activitat per poder parlar al xat.';
 
   @override
   String get actChat => 'Xat de l’activitat';
@@ -1307,6 +1328,41 @@ class AppLocalizationsCa extends AppLocalizations {
   @override
   String get actChatHint =>
       'Parla amb les persones que també s’hi han apuntat.';
+
+  @override
+  String get chatEmpty =>
+      'Encara no hi ha missatges. Saluda les persones que hi aniran!';
+
+  @override
+  String get chatLoadError =>
+      'No hem pogut carregar els missatges. Torna-ho a provar.';
+
+  @override
+  String get chatNotEnrolled =>
+      'Només les persones apuntades a l’activitat poden fer servir el xat.';
+
+  @override
+  String get chatOlder => 'Veure missatges anteriors';
+
+  @override
+  String get chatInputHint => 'Escriu un missatge';
+
+  @override
+  String get chatSend => 'Enviar';
+
+  @override
+  String get chatSendError =>
+      'No s’ha pogut enviar el missatge. Torna-ho a provar.';
+
+  @override
+  String get chatMessageTooLong =>
+      'El missatge és massa llarg. Fes-lo més curt.';
+
+  @override
+  String get chatBackToActivity => 'Tornar a la fitxa';
+
+  @override
+  String get chatYou => 'Tu';
 
   @override
   String get actPublishedBy => 'Publicat per';
