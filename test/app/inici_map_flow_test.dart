@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
+import 'app_navigation.dart';
+
 void main() {
   testWidgets('El botó flotant puja per sobre de la targeta del mapa', (
     tester,
@@ -16,9 +18,8 @@ void main() {
     await auth.signIn(usernameOrEmail: 'laiasoler', password: 'Aprop2026!');
     await tester.pumpWidget(APropApp(authRepository: auth));
     await tester.pumpAndSettle();
+    await openMapTab(tester);
 
-    await tester.tap(find.text('Mapa'));
-    await tester.pumpAndSettle();
     final button = find.byType(FloatingActionButton);
     final restingTop = tester.getTopLeft(button).dy;
 

@@ -270,6 +270,7 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Provisionalment:** la llista és la vista inicial (si Google Maps falla o no hi ha clau, Inici funciona igual); es mostren totes les activitats carregades; grups amb l'estil de Google (`TODO(DP-022)`).
 - **Targeta del marcador (2026-11-15, Claude Code (Opus 5.5) a petició de l'usuari):** tocar qualsevol lloc de la targeta obre la fitxa (com ja passa a les targetes de llista, l'assistent i l'Agenda), i el botó «Veure activitat» del mockup (fig. 7) es canvia pel d'apuntar-se («M’hi apunto» / «✓ Apuntat · Desapunta’m»). Desviació del mockup per confirmar amb l'equip.
 - **Grups propis (2026-11-16, Claude Code (Opus 5.5) a petició de l'usuari, Taiga #254):** els grups ja no els fa Google (`ClusterManager`), sinó l'app (`activity_map_groups.dart`): els marcadors que amb el zoom actual queden a menys de 64 px s'ajunten, i després s'ajunten també els grups que es tocarien segons la mida real del cercle, perquè mai no quedin l'un sobre l'altre. És igual a la web i al mòbil. El cercle és propi, amb el color principal de l'app, vora clara i el número total exacte (el cercle creix amb les xifres), en lloc dels cercles blaus i vermells de Google. Els grups es refan quan el mapa s'acaba de moure. Les activitats d'un mateix lloc sempre van en grup. El radi de 64 px i el disseny del cercle no surten del mockup (`TODO(DP-022)`).
+- **Només mapa (2026-11-20, decisió de l’usuari, Taiga #274):** la pestanya Mapa ja no té selector Mapa / Llista: s’obre sempre amb el mapa (com la fig. 7 del mockup; la fig. 8 tenia el selector). La llista només surt, en lloc del mapa, si Google Maps no es pot dibuixar (vegeu DP-061), perquè es continuï complint el CA3 de la #21.
 - **Qui decideix:** frontend + backend
 - **Resolució:**
 
@@ -296,6 +297,8 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Resolució:**
 
 - **Actualització 2026-10-27:** integració HTTP de recomanacions/populars/cerca amb el contracte real de `api-aprop@be6c25e`. Total i pàgines des de 0, disponibilitat/error per secció i preferències absents. Els límits nous s’especifiquen a DP-041; Demo conserva la seva semàntica local.
+
+- **Actualització 2026-11-20 (#162):** cerca de persones amb el contracte implementat de #161 (`GET /users?q=&pageNum=&pageSize=`) i perfil públic de #277. S’habilita el selector amb dades i destinació disponibles, consulta per nom/username, total/pàgines del servidor i retorn amb estat conservat. Es respecten els límits actuals del backend (100 punts de codi Unicode, 20 files per petició, màxim 50 configurable). L’adaptador només consumeix el resum públic; bloquejos i comptes visibles els filtra el servidor. No s’implementen amistats noves. La resta de límits de la cerca d’activitats es manté a DP-041. Guia `docs/user-search.md`; pendent prova autenticada del desplegament.
 
 ### DP-025 · Primer accés amb Google: nom d'usuari i contracte amb el backend
 - **Estat:** oberta
@@ -583,6 +586,38 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Qui decideix:** frontend + backend (valors de `modality`)
 - **Resolució:**
 
+### DP-060 · Pestanyes Inici i Mapa (#273): desviació del mockup
+- **Estat:** oberta · 2026-11-20 · Claude Code (Opus 5.5) amb confirmació de l’usuari · Taiga #273
+- **Context:** `MainShell` (barra inferior, capçaleres i botons flotants), `DiscoverScreen`, `ActivitiesHeader`.
+- **Dubte:** al mockup, Inici és el mapa/llista i Descobreix és una pestanya a part. La tasca #273 els intercanvia.
+- **Decisions de l’usuari:**
+  - Pestanyes: «Inici» (icona de casa) mostra les recomanacions de Descobreix; «Mapa» (icona de mapa), al lloc on era Descobreix, mostra el mapa i la llista. Clau nova `navMap`.
+  - Capçalera d’Inici: «AProp!» (el logotip) al centre, el «+» per crear una activitat a l’esquerra i la lupa de la cerca a la dreta. El camp de cerca que hi havia a dalt de les recomanacions desapareix, perquè ja hi és la lupa.
+  - El botó «Assistent» surt a Inici i al Mapa; l’assistent s’obre a la pestanya on es prem. El «+» ja no surt al Mapa.
+- **Deduït (sense confirmar):**
+  - Els enllaços de l’assistent `home` i `discover` porten tots dos a Inici, perquè ara Inici mostra Descobreix. Cap enllaç no porta al Mapa.
+  - La pestanya «Mapa» continua obrint-se amb la llista (DP-022: si Google Maps falla, l’app no queda bloquejada). La #274 la deixa només amb el mapa i la llista com a reserva.
+  - El logotip de la capçalera d’Inici fa 40 px d’alçada (cap en una barra de 56 px); DP-047 fixava 80 px quan era a la pantalla. Validació de marca pendent.
+  - En crear o editar una activitat, les recomanacions d’Inici es tornen a carregar; en tornar del formulari es veu Inici, no la llista.
+  - El feed d’Inici deixa 96 px al final perquè el botó «Assistent» no tapi l’última targeta.
+- **Qui decideix:** equip (disseny)
+- **Resolució:**
+
+### DP-061 · Mapa a pantalla completa (#274): sense llista ni capçalera
+- **Estat:** oberta · 2026-11-20 · Claude Code (Opus 5.5) amb confirmació de l’usuari · Taiga #274
+- **Context:** `ActivitiesScreen`, `MapFilterBar` (nou; substitueix `ActivitiesHeader`), `google_maps_availability*.dart`, `MainShell`.
+- **Decisions de l’usuari:**
+  - La pestanya Mapa és només el mapa, a tota la pantalla i sense capçalera. A sobre hi suren el camp «Cerca activitats» (obre la cerca, a la mateixa pestanya) i una sola fila de xips que es desplaça: Dates, Categories i, si hi ha filtres, un xip només amb la icona per treure’ls.
+  - Ja no hi ha llista ni selector Mapa / Llista. Per complir el CA3 de la #21 (si Google Maps falla, l’app no queda bloquejada), la llista surt en lloc del mapa quan Google Maps no es pot dibuixar.
+- **Deduït (sense confirmar):**
+  - «No es pot dibuixar» vol dir que a la web no s’ha carregat el script de Google Maps (`google.maps`, p. ex. sense clau). Al mòbil el mapa és del sistema i es considera sempre disponible: sense clau surt gris i no se’n pot detectar l’error.
+  - Els xips mostren la selecció en lloc del nom del filtre («Avui», «Música»), com a Google Maps.
+  - Desapareix el xip desactivat «Catalunya» (filtre d’ubicació encara no fet); el botó «La meva ubicació» ja és al mapa.
+  - L’avís d’activitats sense categoria ja no ofereix «Veure llista».
+  - `ActivitiesViewModel` continua carregant el catàleg per als filtres i per al mapa sense backend, encara que no hi hagi llista.
+- **Qui decideix:** equip (disseny)
+- **Resolució:**
+
 ## Resoltes
 
 ### DP-058 · Enllaços de la fitxa: obrir-los amb `url_launcher`
@@ -637,6 +672,50 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Dubte:** la targeta estàndard (~330 px) deixa veure només una activitat per pantalla al xat.
 - **Provisionalment:** fila compacta (miniatura 72 px, títol, municipi · data i la mateixa acció d'apuntar-se). Mateix estat d'inscripcions, mateix detall en tocar. Sense avatar del creador ni «Font». `TODO(DP-044)`: confirmar amb l'equip/mockup.
 - **Qui decideix:** equip frontend (UX)
+
+### DP-065 · Llista d’amics (#54): una petició per amic i sense privacitat
+- **Estat:** oberta · 2026-11-20 · Claude Code (Opus 5.5) amb confirmació de l’usuari · Taiga #197 (història #54)
+- **Context:** `FriendsListScreen`, `FriendsListViewModel`, `HttpFriendsRepository`, `DemoFriendsRepository`, `ProfileHeader` (comptador «Amics»). Backend consultat a `api-aprop@develop` sense modificar-lo: `GET /users/{id}/friends` (i `me`).
+- **Decisions de l’usuari:**
+  - L’API només retorna els identificadors dels amics. L’app demana el perfil de cada amic (`GET /users/{id}`, de 4 en 4, com els Avisos): 1 + N peticions. Si el backend retornés nom, `username` i foto, només canviaria `HttpFriendsRepository`.
+  - El comptador «Amics» obre la llista al perfil propi i també al d’altres persones. Qualsevol la pot veure: el backend no té cap opció de privacitat per als amics.
+- **Deduït (sense confirmar):**
+  - Un amic que ja no existeix (404) no surt a la llista; qualsevol altre error fa fallar la càrrega, amb reintent.
+  - A la pròpia llista no hi surts tu; a la d’una altra persona sí, si en sou amics, i en tocar-te s’obre la pestanya Perfil.
+  - Demo: els amics del compte són els exemples marcats com a amics (Laia i Júlia), i Laia i Júlia són amigues entre elles. El comptador de Laia (14) no coincideix amb la llista.
+- **Codi:** `TODO(DP-065)` a `http_friends_repository.dart` i `demo_public_profile_repository.dart`.
+- **Qui decideix:** backend (dades dels amics a `/users/{id}/friends`) + equip (privacitat de la llista)
+- **Resolució:**
+
+### DP-064 · Botó d’amistat al perfil d’una altra persona (#160)
+- **Estat:** oberta · 2026-11-20 · Claude Code (Opus 5.5) amb confirmació de l’usuari · Taiga #160 (història #33)
+- **Context:** `PublicProfileScreen`, `PublicProfileViewModel`, `HttpPublicProfileRepository.sendFriendRequest`. Backend consultat a `api-aprop@develop` sense modificar-lo: `POST /users/{id}/friend-requests`.
+- **Decisions de l’usuari:** botó amb tres estats: «Afegeix com a amic» → (enviant) → «Sol·licitud enviada» (desactivat); «Amics» (desactivat) si ja ho sou. No surt al perfil propi ni amb un bloqueig. Si el servidor diu que ja hi ha una sol·licitud, passa a «Sol·licitud enviada».
+- **Dubtes (contracte del backend):**
+  - Tots els rebuigs (sol·licitud pendent, ja amics, bloqueig, a un mateix) són un 400; l’app els distingeix pel text de l’error. Si el backend canvia el text, el rebuig es mostra com un error que es pot tornar a provar. Caldria un codi d’estat (p. ex. 409) o un camp `code`.
+  - `GET /users/{id}` no diu si hi ha una sol·licitud pendent ni si hi ha un bloqueig. En obrir el perfil surt «Afegeix com a amic» i l’app ho descobreix quan el servidor la rebutja. La pantalla recorda la sol·licitud mentre és oberta.
+  - «Ja hi ha una sol·licitud» pot ser una que t’ha enviat l’altra persona; també es mostra «Sol·licitud enviada». Es podria indicar que la responguis a Avisos amb `GET /users/me/friend-requests`.
+  - Amb bloqueig no hi ha botó i un text diu que no hi pots enviar una sol·licitud.
+- **Deduït:** en Demo, les sol·licituds enviades es recorden durant l’execució; Laia i Júlia ja són amigues.
+- **Codi:** `TODO(DP-064)` a `http_public_profile_repository.dart` i `public_profile_view_model.dart`.
+- **Qui decideix:** backend (codis d’error i estat de la sol·licitud a `GET /users/{id}`)
+- **Resolució:**
+
+### DP-063 · Perfil d’una altra persona (#277): plans fets, privacitat i dades Demo
+- **Estat:** oberta · 2026-11-20 · Claude Code (Opus 5.5) amb confirmació de l’usuari · Taiga #277 (història #36, CA3)
+- **Context:** `PublicProfileScreen`, `HttpPublicProfileRepository` i `DemoPublicProfileRepository`. Backend consultat a `api-aprop@develop` sense modificar-lo: `GET /users/{id}` (amb `is-friend` i `plans-visible`), `GET /users/{id}/created-events` i `GET /users/{userId}/events`. No hi ha mockup del perfil d’una altra persona.
+- **Decisions de l’usuari:** es fa com la fig. 18, sense «Editar perfil» ni engranatge; «Compartir perfil» copia el `username`. S’obre des de «Veure perfil» de la fitxa i des dels avisos d’una persona. La cerca de persones continua desactivada (DP-024) i el botó d’amistat és la #160.
+- **Deduït (sense confirmar):**
+  - «Plans fets» són les inscripcions de `GET /users/{id}/events` que ja han començat, de més nova a més antiga: l’API no confirma l’assistència (com a DP-053).
+  - Els plans només es demanen si el servidor diu `plans-visible: true`; si el camp falta, es tracten com a privats. Si són privats, el text diu «no comparteix els seus plans» quan `is-friend` és cert i «només els poden veure els seus amics» si no.
+  - Sense plans visibles, el perfil s’obre a «Creats»; amb plans, a «Plans fets».
+  - No es mostren la barra d’XP ni les insígnies d’una altra persona; l’API només dona `level` com a identificador (DP-040).
+  - Si l’ID és el de la mateixa persona, «Veure perfil» porta a la pestanya Perfil.
+  - Demo: Laia (amiga, plans visibles), Marc (no amic) i Júlia (amiga, plans ocults) són exemples fixos, sense graf d’amistats.
+- **Risc del backend:** `GET /users/{userId}/events` no comprova la privacitat; qualsevol que cridi l’API veu els plans d’una altra persona. L’app respecta `plans-visible`, però la protecció ha de ser al servidor.
+- **Codi:** `TODO(DP-063)` a `http_public_profile_repository.dart`, `demo_public_profile_repository.dart` i `public_profile_screen.dart`.
+- **Qui decideix:** equip (què és un «pla fet») + backend (privacitat de `/users/{id}/events`)
+- **Resolució:**
 
 ### DP-053 · Valoració d'activitats (#185): requisit d'assistència i contracte de #184
 - **Estat:** oberta 2026-11-17

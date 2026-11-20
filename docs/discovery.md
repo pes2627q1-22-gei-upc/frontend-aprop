@@ -6,9 +6,9 @@
 
 Implementació del recorregut Descobreix → Cerca d'activitats → Fitxa, amb les figures 14–16 i els prompts aprovats d'`output/mockup/aprop-descobreix-*` de PES. L'usuari confirma #96 i autoritza implementar Descobreix i la cerca d'activitats. Els criteris detallats de Taiga encara s'han de contrastar en la revisió humana.
 
-La pantalla inicial té la capçalera «Descobreix», l'accés «Cerca activitats», «Per a tu» i «Destacats». No afegeix el logotip, l'assistent ni els filtres d'Inici. Comparteix les targetes, la fitxa i les inscripcions existents. La barra inferior continua sent única, propietat de `MainShell`.
+Des de la #273 (DP-060), Descobreix és la pestanya «Inici»: la capçalera de l'app porta el logotip «AProp!», el «+» per crear una activitat i la lupa de la cerca, i hi ha el botó «Assistent». La pantalla mostra «Per a tu» i «Destacats», sense els filtres del mapa. Comparteix les targetes, la fitxa i les inscripcions existents. La barra inferior continua sent única, propietat de `MainShell`.
 
-DP-024 registra el contracte pendent i les adaptacions: les seleccions demo són l'exposició i el teatre del catàleg compartit, amb les seves dates històriques. No representen interessos persistits ni un rànquing real. El subtítol és «Una selecció per començar»; només un feed amb `isPersonalized: true` mostra «Segons els teus interessos». «Persones» és una opció desactivada amb una explicació; la cerca de persones, els perfils i les amistats no s'implementen en aquesta tasca.
+DP-024 registra el contracte pendent i les adaptacions: les seleccions demo són l'exposició i el teatre del catàleg compartit, amb les seves dates històriques. No representen interessos persistits ni un rànquing real. El subtítol és «Una selecció per començar»; només un feed amb `isPersonalized: true` mostra «Segons els teus interessos». La #96 deixava «Persones» desactivada; la #162 l’habilita amb `UserSearchViewModel`, repositoris HTTP/Demo i retorn del perfil públic de #277. Vegeu [la cerca de persones](user-search.md). Les accions d’amistat continuen sent una altra funcionalitat.
 
 ## Fitxers i responsabilitats
 
@@ -32,7 +32,7 @@ Tots els fitxers nous de producció, excepte la composició, són dins de `lib/f
 1. `APropApp` rep opcionalment un `DiscoveryRepository`. `AuthGate` fa servir el rebut o crea `DemoDiscoveryRepository(activityRepository: ...)`. Aquest objecte és una implementació concreta de la interfície, no un objecte instanciable de la interfície.
 2. Després de verificar la sessió, `MainShell` injecta el repositori a `DiscoverScreen` i li passa el mateix `EnrollmentViewModel` que tenen Inici i les fitxes. L'`IndexedStack` construeix totes les arrels; el feed pot carregar-se abans de tocar la lupa.
 3. `DiscoverScreen.initState()` crea `DiscoverViewModel` i crida `load()`. El ViewModel consulta `repository.getFeed(userId: ...)`. Quan té dades o error, crida `notifyListeners()`, i Flutter executa de nou el `builder` del `ListenableBuilder`.
-4. Prémer «Cerca activitats» executa el callback de composició `_openDiscoverySearch()`. `MainShell` afegeix `/discover/search` al navegador de la secció 2. La pantalla de cerca crea el seu propi ViewModel; el menú inferior continua fora de les rutes.
+4. Prémer «Cerca activitats» executa el callback de composició `_openDiscoverySearch()`. `MainShell` afegeix `/discover/search` al navegador de la secció 0 (Inici). La pantalla de cerca crea el seu propi ViewModel; el menú inferior continua fora de les rutes.
 5. El `TextField` envia cada canvi a `updateQuery()`. El ViewModel invalida la resposta anterior, neteja resultats antics i programa la cerca al cap de 350 ms. Tornar a escriure cancel·la aquest temporitzador. L'acció de cerca del teclat crida `searchNow()` immediatament i tanca el teclat.
 6. `searchNow()` consulta `repository.searchActivities(query)`. L'adaptador demo torna a llegir el catàleg compartit; per això també troba activitats acabades de crear. Una resposta només s'aplica si pertany a la revisió vigent de la consulta i el ViewModel no està alliberat.
 7. La pantalla mostra el recompte i els mateixos `ActivityCard` d'Inici. Prémer la foto o el títol emet un ID; `MainShell` obre `activityDetailsRoute`. Obrir el detall no apunta l'usuari.
@@ -63,7 +63,7 @@ flutter test
 flutter build apk --debug
 ```
 
-Prova manual: entrar amb el compte demo del README, obrir Descobreix, consultar l'exposició i tornar; cercar «teatre», consultar-ne la fitxa, tornar i comprovar la consulta. Apuntar-s'hi des de Cerca i comprovar el mateix «Apuntat» a la fitxa i a Inici. Provar «musica barcelona», una cerca sense coincidències i esborrar la consulta. Les dates dels exemples són de setembre de 2026: a Agenda cal consultar aquell mes per veure'ls.
+Prova manual: entrar amb el compte demo del README (s'obre Inici, amb Descobreix), consultar l'exposició i tornar; cercar «teatre», consultar-ne la fitxa, tornar i comprovar la consulta. Apuntar-s'hi des de Cerca i comprovar el mateix «Apuntat» a la fitxa i a Inici. Provar «musica barcelona», una cerca sense coincidències i esborrar la consulta. Les dates dels exemples són de setembre de 2026: a Agenda cal consultar aquell mes per veure'ls.
 
 Integració pendent: API de cerca, recomanacions de producció/interessos, paginació segons el contracte real, cerca de persones i perfils. Aquesta implementació frontend no prova que aquestes funcionalitats backend estiguin acabades. Cap paquet ni endpoint nou.
 

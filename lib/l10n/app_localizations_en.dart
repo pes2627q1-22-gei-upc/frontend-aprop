@@ -65,6 +65,79 @@ class AppLocalizationsEn extends AppLocalizations {
       'We couldn’t load the activities you created.';
 
   @override
+  String get publicProfileLoadError => 'We couldn’t load the profile.';
+
+  @override
+  String get publicProfileNotFound =>
+      'This profile doesn’t exist or is no longer available.';
+
+  @override
+  String get publicProfileTabCreated => 'Created';
+
+  @override
+  String get friendAdd => 'Add friend';
+
+  @override
+  String get friendSending => 'Sending…';
+
+  @override
+  String get friendRequestSent => 'Request sent';
+
+  @override
+  String get friendAlready => 'Friends';
+
+  @override
+  String get friendRequestError =>
+      'We couldn’t send the request. Please try again.';
+
+  @override
+  String get friendRequestBlocked =>
+      'You can’t send a friend request to this person.';
+
+  @override
+  String get friendsTitle => 'Friends';
+
+  @override
+  String get friendsLoading => 'Loading friends';
+
+  @override
+  String get friendsLoadError => 'We couldn’t load the friends.';
+
+  @override
+  String get friendsEmptyOwn => 'You don’t have any friends yet.';
+
+  @override
+  String friendsEmptyOther(String name) {
+    return '$name doesn’t have any friends yet.';
+  }
+
+  @override
+  String get friendsOpenList => 'See friends';
+
+  @override
+  String get publicProfilePlansLoadError => 'We couldn’t load the plans.';
+
+  @override
+  String publicProfilePlansFriendsOnly(String name) {
+    return 'Only $name’s friends can see their plans.';
+  }
+
+  @override
+  String publicProfilePlansHidden(String name) {
+    return '$name doesn’t share their plans.';
+  }
+
+  @override
+  String publicProfileNoPlans(String name) {
+    return '$name has no past plans yet.';
+  }
+
+  @override
+  String publicProfileNoCreated(String name) {
+    return '$name hasn’t created any activity yet.';
+  }
+
+  @override
   String get profileBiographyTooLong =>
       'Your bio is too long. Try making it shorter.';
 
@@ -1196,9 +1269,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get actLoadingZone => 'Loading activities in this area';
 
   @override
-  String get actFilterLocation => 'Catalonia';
-
-  @override
   String get actFilterDates => 'Dates';
 
   @override
@@ -1208,31 +1278,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get actClearAllFilters => 'Clear all filters';
 
   @override
-  String get actViewMap => 'Map';
-
-  @override
-  String get actViewList => 'List';
-
-  @override
   String get actCreate => 'Create activity';
-
-  @override
-  String get actCreateSoon => 'Creating activities coming soon';
-
-  @override
-  String actViewSelected(String label) {
-    return '$label view selected';
-  }
-
-  @override
-  String actViewSoon(String label) {
-    return '$label view coming soon';
-  }
-
-  @override
-  String actViewShow(String label) {
-    return 'Show $label';
-  }
 
   @override
   String get actDetailsTitle => 'Activity';
@@ -1507,12 +1553,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get actSeeListHint => 'Check the list to see results by category.';
-
-  @override
-  String get actSeeList => 'See list';
-
-  @override
   String get actClear => 'Clear';
 
   @override
@@ -1659,7 +1699,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'We couldn’t search the activities. Please try again.';
 
   @override
-  String get discoverSearchField => 'Search activities';
+  String get discoverSearchField => 'Search activities or people';
 
   @override
   String get discoverLoading => 'Loading suggestions';
@@ -1847,6 +1887,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navDiscover => 'Discover';
 
   @override
+  String get navMap => 'Map';
+
+  @override
   String get navNotifications => 'Alerts';
 
   @override
@@ -1968,5 +2011,62 @@ class AppLocalizationsEn extends AppLocalizations {
       one: '1 more category',
     );
     return '$_temp0';
+  }
+
+  @override
+  String get userSearchHint => 'Name or username';
+
+  @override
+  String get userSearchLabel => 'Search people';
+
+  @override
+  String get userSearchPromptTitle => 'Who are you looking for?';
+
+  @override
+  String get userSearchPromptBody => 'Enter a name or username.';
+
+  @override
+  String get userSearchSearching => 'Searching people';
+
+  @override
+  String get userSearchError => 'We couldn’t search for people. Try again.';
+
+  @override
+  String get userSearchNoResultsTitle => 'No people found';
+
+  @override
+  String get userSearchNoResultsBody => 'Try another name or username.';
+
+  @override
+  String userSearchCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count people found',
+      one: '1 person found',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String userSearchLoaded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count people loaded',
+      one: '1 person loaded',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get userSearchLoadMore => 'Load more people';
+
+  @override
+  String get userSearchMoreError => 'We couldn’t load more people. Try again.';
+
+  @override
+  String userSearchTooLong(int limit) {
+    return 'Search can contain up to $limit characters.';
   }
 }

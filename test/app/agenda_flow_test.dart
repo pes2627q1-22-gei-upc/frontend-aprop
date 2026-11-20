@@ -3,6 +3,8 @@ import 'package:aprop/features/auth/data/demo_auth_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'app_navigation.dart';
+
 void main() {
   testWidgets('Plans joined in Inici appear in Agenda and open details', (
     tester,
@@ -15,6 +17,8 @@ void main() {
     await auth.signIn(usernameOrEmail: 'laiasoler', password: 'Aprop2026!');
     await tester.pumpWidget(APropApp(authRepository: auth));
     await tester.pumpAndSettle();
+    await openMapTab(tester);
+    await tapMarker(tester, 'demo-jazz');
 
     final jazzCard = find.byKey(const ValueKey('demo-jazz'));
     await tester.tap(
@@ -67,6 +71,8 @@ void main() {
     await auth.signIn(usernameOrEmail: 'laiasoler', password: 'Aprop2026!');
     await tester.pumpWidget(APropApp(authRepository: auth));
     await tester.pumpAndSettle();
+    await openMapTab(tester);
+    await tapMarker(tester, 'demo-jazz');
 
     final jazzCard = find.byKey(const ValueKey('demo-jazz'));
     await tester.tap(
@@ -115,6 +121,8 @@ void main() {
     await auth.signIn(usernameOrEmail: 'laiasoler', password: 'Aprop2026!');
     await tester.pumpWidget(APropApp(authRepository: auth));
     await tester.pumpAndSettle();
+    await openMapTab(tester);
+    await tapMarker(tester, 'demo-jazz');
 
     final jazzCard = find.byKey(const ValueKey('demo-jazz'));
     await tester.tap(

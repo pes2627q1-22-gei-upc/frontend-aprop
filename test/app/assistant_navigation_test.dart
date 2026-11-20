@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../features/assistant/fake_assistant_repository.dart';
+import 'app_navigation.dart';
 
 Future<DemoAuthRepository> _pumpApp(
   WidgetTester tester, {
@@ -22,6 +23,7 @@ Future<DemoAuthRepository> _pumpApp(
     APropApp(authRepository: auth, assistantRepository: assistant),
   );
   await tester.pumpAndSettle();
+  await openMapTab(tester);
   return auth;
 }
 
@@ -45,22 +47,12 @@ Future<void> _sendQuery(WidgetTester tester) async {
 void main() {
   for (final systemBack in [false, true]) {
     testWidgets(
-      'Chat hides navigation and restores the list with ${systemBack ? 'system' : 'toolbar'} back',
+      'Chat hides navigation and restores the map with ${systemBack ? 'system' : 'toolbar'} back',
       (tester) async {
         await _pumpApp(tester);
-        final list = find.byKey(
-          const PageStorageKey<String>('activities-list'),
-        );
-        await tester.drag(list, const Offset(0, -400));
-        await tester.pumpAndSettle();
-        final scrollable = find.descendant(
-          of: list,
-          matching: find.byType(Scrollable),
-        );
-        final offset = tester
-            .state<ScrollableState>(scrollable)
-            .position
-            .pixels;
+        // Una targeta oberta al mapa ha de continuar oberta en tornar.
+        await tapMarker(tester, 'demo-jazz');
+        expect(find.byTooltip('Tancar'), findsOneWidget);
         expect(find.byType(NavigationBar), findsOneWidget);
 
         await _openAssistant(tester);
@@ -98,12 +90,10 @@ void main() {
           tester
               .widget<NavigationBar>(find.byType(NavigationBar))
               .selectedIndex,
-          0,
+          2, // Mapa
         );
-        expect(
-          tester.state<ScrollableState>(scrollable).position.pixels,
-          offset,
-        );
+        expect(find.byTooltip('Tancar'), findsOneWidget);
+        expect(find.text('Jazz al parc'), findsOneWidget);
         await _openAssistant(tester);
         expect(tester.takeException(), isNull);
       },

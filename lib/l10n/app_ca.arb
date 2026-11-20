@@ -17,6 +17,61 @@
   "profileCreateHint": "Pots crear-ne una des d’Inici.",
   "profileLoadError": "No hem pogut carregar el perfil. Torna-ho a provar.",
   "profileCreatedLoadError": "No hem pogut carregar les activitats creades.",
+  "publicProfileLoadError": "No hem pogut carregar el perfil.",
+  "publicProfileNotFound": "Aquest perfil no existeix o ja no està disponible.",
+  "publicProfileTabCreated": "Creats",
+  "friendAdd": "Afegeix com a amic",
+  "friendSending": "Enviant…",
+  "friendRequestSent": "Sol·licitud enviada",
+  "friendAlready": "Amics",
+  "friendRequestError": "No hem pogut enviar la sol·licitud. Torna-ho a provar.",
+  "friendRequestBlocked": "No pots enviar una sol·licitud d’amistat a aquesta persona.",
+  "friendsTitle": "Amics",
+  "friendsLoading": "Carregant els amics",
+  "friendsLoadError": "No hem pogut carregar els amics.",
+  "friendsEmptyOwn": "Encara no tens amics.",
+  "friendsEmptyOther": "{name} encara no té amics.",
+  "@friendsEmptyOther": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "friendsOpenList": "Veure els amics",
+  "publicProfilePlansLoadError": "No hem pogut carregar els plans.",
+  "publicProfilePlansFriendsOnly": "Els plans de {name} només els poden veure els seus amics.",
+  "@publicProfilePlansFriendsOnly": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "publicProfilePlansHidden": "{name} no comparteix els seus plans.",
+  "@publicProfilePlansHidden": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "publicProfileNoPlans": "{name} encara no té plans fets.",
+  "@publicProfileNoPlans": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "publicProfileNoCreated": "{name} encara no ha creat cap activitat.",
+  "@publicProfileNoCreated": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "profileBiographyTooLong": "La biografia és massa llarga. Prova de fer-la més curta.",
   "profileMunicipalityTooLong": "Escriu com a màxim 80 caràcters.",
   "profileNameRequired": "Escriu el teu nom.",
@@ -766,38 +821,10 @@
   "actUpdating": "Actualitzant les activitats",
   "actNoneAvailable": "No hi ha activitats disponibles.",
   "actLoadingZone": "Carregant les activitats de la zona",
-  "actFilterLocation": "Catalunya",
   "actFilterDates": "Dates",
   "actFilterCategories": "Categories",
   "actClearAllFilters": "Netejar tots els filtres",
-  "actViewMap": "Mapa",
-  "actViewList": "Llista",
   "actCreate": "Crear activitat",
-  "actCreateSoon": "Crear activitat disponible properament",
-  "actViewSelected": "Vista {label} seleccionada",
-  "@actViewSelected": {
-    "placeholders": {
-      "label": {
-        "type": "String"
-      }
-    }
-  },
-  "actViewSoon": "Vista {label} disponible properament",
-  "@actViewSoon": {
-    "placeholders": {
-      "label": {
-        "type": "String"
-      }
-    }
-  },
-  "actViewShow": "Mostrar {label}",
-  "@actViewShow": {
-    "placeholders": {
-      "label": {
-        "type": "String"
-      }
-    }
-  },
   "actDetailsTitle": "Activitat",
   "actEdit": "Edita l’activitat",
   "actNotFound": "No hem trobat aquesta activitat.",
@@ -928,8 +955,6 @@
       }
     }
   },
-  "actSeeListHint": "Consulta la llista per veure els resultats per categoria.",
-  "actSeeList": "Veure llista",
   "actClear": "Netejar",
   "actApply": "Aplicar",
   "actLoadedCount": "{count, plural, one{1 activitat carregada} other{{count} activitats carregades}}",
@@ -1000,7 +1025,7 @@
   "actLoadZoneError": "No hem pogut carregar les activitats d’aquesta zona. Torna-ho a provar.",
   "actLoadDetailError": "No hem pogut carregar l’activitat. Torna-ho a provar.",
   "actSearchError": "No hem pogut cercar les activitats. Torna-ho a provar.",
-  "discoverSearchField": "Cerca activitats",
+  "discoverSearchField": "Cerca activitats o persones",
   "discoverLoading": "Carregant propostes",
   "discoverEmptyTitle": "Encara no hi ha propostes",
   "discoverEmptyBody": "Pots cercar activitats o tornar-ho a provar més tard.",
@@ -1071,6 +1096,7 @@
   "navHome": "Inici",
   "navAgenda": "Agenda",
   "navDiscover": "Descobreix",
+  "navMap": "Mapa",
   "navNotifications": "Avisos",
   "navProfile": "Perfil",
   "shareDialogBody": "Comparteix el teu nom d’usuari d’AProp!",
@@ -1137,6 +1163,40 @@
   "@actMoreCategories": {
     "placeholders": {
       "count": {
+        "type": "int"
+      }
+    }
+  },
+  "userSearchHint": "Nom o nom d’usuari",
+  "userSearchLabel": "Cerca persones",
+  "userSearchPromptTitle": "A qui vols trobar?",
+  "userSearchPromptBody": "Escriu un nom o un nom d’usuari.",
+  "userSearchSearching": "Cercant persones",
+  "userSearchError": "No hem pogut cercar persones. Torna-ho a provar.",
+  "userSearchNoResultsTitle": "No hem trobat cap persona",
+  "userSearchNoResultsBody": "Prova un altre nom o nom d’usuari.",
+  "userSearchCount": "{count, plural, =1{1 persona trobada} other{{count} persones trobades}}",
+  "@userSearchCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "userSearchLoaded": "{count, plural, =1{1 persona carregada} other{{count} persones carregades}}",
+  "@userSearchLoaded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "userSearchLoadMore": "Carregar més persones",
+  "userSearchMoreError": "No hem pogut carregar més persones. Torna-ho a provar.",
+  "userSearchTooLong": "La cerca pot tenir com a màxim {limit} caràcters.",
+  "@userSearchTooLong": {
+    "placeholders": {
+      "limit": {
         "type": "int"
       }
     }

@@ -202,6 +202,126 @@ abstract class AppLocalizations {
   /// **'No hem pogut carregar les activitats creades.'**
   String get profileCreatedLoadError;
 
+  /// No description provided for @publicProfileLoadError.
+  ///
+  /// In ca, this message translates to:
+  /// **'No hem pogut carregar el perfil.'**
+  String get publicProfileLoadError;
+
+  /// No description provided for @publicProfileNotFound.
+  ///
+  /// In ca, this message translates to:
+  /// **'Aquest perfil no existeix o ja no està disponible.'**
+  String get publicProfileNotFound;
+
+  /// No description provided for @publicProfileTabCreated.
+  ///
+  /// In ca, this message translates to:
+  /// **'Creats'**
+  String get publicProfileTabCreated;
+
+  /// No description provided for @friendAdd.
+  ///
+  /// In ca, this message translates to:
+  /// **'Afegeix com a amic'**
+  String get friendAdd;
+
+  /// No description provided for @friendSending.
+  ///
+  /// In ca, this message translates to:
+  /// **'Enviant…'**
+  String get friendSending;
+
+  /// No description provided for @friendRequestSent.
+  ///
+  /// In ca, this message translates to:
+  /// **'Sol·licitud enviada'**
+  String get friendRequestSent;
+
+  /// No description provided for @friendAlready.
+  ///
+  /// In ca, this message translates to:
+  /// **'Amics'**
+  String get friendAlready;
+
+  /// No description provided for @friendRequestError.
+  ///
+  /// In ca, this message translates to:
+  /// **'No hem pogut enviar la sol·licitud. Torna-ho a provar.'**
+  String get friendRequestError;
+
+  /// No description provided for @friendRequestBlocked.
+  ///
+  /// In ca, this message translates to:
+  /// **'No pots enviar una sol·licitud d’amistat a aquesta persona.'**
+  String get friendRequestBlocked;
+
+  /// No description provided for @friendsTitle.
+  ///
+  /// In ca, this message translates to:
+  /// **'Amics'**
+  String get friendsTitle;
+
+  /// No description provided for @friendsLoading.
+  ///
+  /// In ca, this message translates to:
+  /// **'Carregant els amics'**
+  String get friendsLoading;
+
+  /// No description provided for @friendsLoadError.
+  ///
+  /// In ca, this message translates to:
+  /// **'No hem pogut carregar els amics.'**
+  String get friendsLoadError;
+
+  /// No description provided for @friendsEmptyOwn.
+  ///
+  /// In ca, this message translates to:
+  /// **'Encara no tens amics.'**
+  String get friendsEmptyOwn;
+
+  /// No description provided for @friendsEmptyOther.
+  ///
+  /// In ca, this message translates to:
+  /// **'{name} encara no té amics.'**
+  String friendsEmptyOther(String name);
+
+  /// No description provided for @friendsOpenList.
+  ///
+  /// In ca, this message translates to:
+  /// **'Veure els amics'**
+  String get friendsOpenList;
+
+  /// No description provided for @publicProfilePlansLoadError.
+  ///
+  /// In ca, this message translates to:
+  /// **'No hem pogut carregar els plans.'**
+  String get publicProfilePlansLoadError;
+
+  /// No description provided for @publicProfilePlansFriendsOnly.
+  ///
+  /// In ca, this message translates to:
+  /// **'Els plans de {name} només els poden veure els seus amics.'**
+  String publicProfilePlansFriendsOnly(String name);
+
+  /// No description provided for @publicProfilePlansHidden.
+  ///
+  /// In ca, this message translates to:
+  /// **'{name} no comparteix els seus plans.'**
+  String publicProfilePlansHidden(String name);
+
+  /// No description provided for @publicProfileNoPlans.
+  ///
+  /// In ca, this message translates to:
+  /// **'{name} encara no té plans fets.'**
+  String publicProfileNoPlans(String name);
+
+  /// No description provided for @publicProfileNoCreated.
+  ///
+  /// In ca, this message translates to:
+  /// **'{name} encara no ha creat cap activitat.'**
+  String publicProfileNoCreated(String name);
+
   /// No description provided for @profileBiographyTooLong.
   ///
   /// In ca, this message translates to:
@@ -2032,12 +2152,6 @@ abstract class AppLocalizations {
   /// **'Carregant les activitats de la zona'**
   String get actLoadingZone;
 
-  /// No description provided for @actFilterLocation.
-  ///
-  /// In ca, this message translates to:
-  /// **'Catalunya'**
-  String get actFilterLocation;
-
   /// No description provided for @actFilterDates.
   ///
   /// In ca, this message translates to:
@@ -2056,47 +2170,11 @@ abstract class AppLocalizations {
   /// **'Netejar tots els filtres'**
   String get actClearAllFilters;
 
-  /// No description provided for @actViewMap.
-  ///
-  /// In ca, this message translates to:
-  /// **'Mapa'**
-  String get actViewMap;
-
-  /// No description provided for @actViewList.
-  ///
-  /// In ca, this message translates to:
-  /// **'Llista'**
-  String get actViewList;
-
   /// No description provided for @actCreate.
   ///
   /// In ca, this message translates to:
   /// **'Crear activitat'**
   String get actCreate;
-
-  /// No description provided for @actCreateSoon.
-  ///
-  /// In ca, this message translates to:
-  /// **'Crear activitat disponible properament'**
-  String get actCreateSoon;
-
-  /// No description provided for @actViewSelected.
-  ///
-  /// In ca, this message translates to:
-  /// **'Vista {label} seleccionada'**
-  String actViewSelected(String label);
-
-  /// No description provided for @actViewSoon.
-  ///
-  /// In ca, this message translates to:
-  /// **'Vista {label} disponible properament'**
-  String actViewSoon(String label);
-
-  /// No description provided for @actViewShow.
-  ///
-  /// In ca, this message translates to:
-  /// **'Mostrar {label}'**
-  String actViewShow(String label);
 
   /// No description provided for @actDetailsTitle.
   ///
@@ -2542,18 +2620,6 @@ abstract class AppLocalizations {
   /// **'{count, plural, one{1 activitat sense categoria informada no s’inclou en aquest filtre.} other{{count} activitats sense categoria informada no s’inclouen en aquest filtre.}}'**
   String actUncategorised(int count);
 
-  /// No description provided for @actSeeListHint.
-  ///
-  /// In ca, this message translates to:
-  /// **'Consulta la llista per veure els resultats per categoria.'**
-  String get actSeeListHint;
-
-  /// No description provided for @actSeeList.
-  ///
-  /// In ca, this message translates to:
-  /// **'Veure llista'**
-  String get actSeeList;
-
   /// No description provided for @actClear.
   ///
   /// In ca, this message translates to:
@@ -2809,7 +2875,7 @@ abstract class AppLocalizations {
   /// No description provided for @discoverSearchField.
   ///
   /// In ca, this message translates to:
-  /// **'Cerca activitats'**
+  /// **'Cerca activitats o persones'**
   String get discoverSearchField;
 
   /// No description provided for @discoverLoading.
@@ -3148,6 +3214,12 @@ abstract class AppLocalizations {
   /// **'Descobreix'**
   String get navDiscover;
 
+  /// No description provided for @navMap.
+  ///
+  /// In ca, this message translates to:
+  /// **'Mapa'**
+  String get navMap;
+
   /// No description provided for @navNotifications.
   ///
   /// In ca, this message translates to:
@@ -3357,6 +3429,84 @@ abstract class AppLocalizations {
   /// In ca, this message translates to:
   /// **'{count, plural, one{1 categoria més} other{{count} categories més}}'**
   String actMoreCategories(int count);
+
+  /// No description provided for @userSearchHint.
+  ///
+  /// In ca, this message translates to:
+  /// **'Nom o nom d’usuari'**
+  String get userSearchHint;
+
+  /// No description provided for @userSearchLabel.
+  ///
+  /// In ca, this message translates to:
+  /// **'Cerca persones'**
+  String get userSearchLabel;
+
+  /// No description provided for @userSearchPromptTitle.
+  ///
+  /// In ca, this message translates to:
+  /// **'A qui vols trobar?'**
+  String get userSearchPromptTitle;
+
+  /// No description provided for @userSearchPromptBody.
+  ///
+  /// In ca, this message translates to:
+  /// **'Escriu un nom o un nom d’usuari.'**
+  String get userSearchPromptBody;
+
+  /// No description provided for @userSearchSearching.
+  ///
+  /// In ca, this message translates to:
+  /// **'Cercant persones'**
+  String get userSearchSearching;
+
+  /// No description provided for @userSearchError.
+  ///
+  /// In ca, this message translates to:
+  /// **'No hem pogut cercar persones. Torna-ho a provar.'**
+  String get userSearchError;
+
+  /// No description provided for @userSearchNoResultsTitle.
+  ///
+  /// In ca, this message translates to:
+  /// **'No hem trobat cap persona'**
+  String get userSearchNoResultsTitle;
+
+  /// No description provided for @userSearchNoResultsBody.
+  ///
+  /// In ca, this message translates to:
+  /// **'Prova un altre nom o nom d’usuari.'**
+  String get userSearchNoResultsBody;
+
+  /// No description provided for @userSearchCount.
+  ///
+  /// In ca, this message translates to:
+  /// **'{count, plural, =1{1 persona trobada} other{{count} persones trobades}}'**
+  String userSearchCount(int count);
+
+  /// No description provided for @userSearchLoaded.
+  ///
+  /// In ca, this message translates to:
+  /// **'{count, plural, =1{1 persona carregada} other{{count} persones carregades}}'**
+  String userSearchLoaded(int count);
+
+  /// No description provided for @userSearchLoadMore.
+  ///
+  /// In ca, this message translates to:
+  /// **'Carregar més persones'**
+  String get userSearchLoadMore;
+
+  /// No description provided for @userSearchMoreError.
+  ///
+  /// In ca, this message translates to:
+  /// **'No hem pogut carregar més persones. Torna-ho a provar.'**
+  String get userSearchMoreError;
+
+  /// No description provided for @userSearchTooLong.
+  ///
+  /// In ca, this message translates to:
+  /// **'La cerca pot tenir com a màxim {limit} caràcters.'**
+  String userSearchTooLong(int limit);
 }
 
 class _AppLocalizationsDelegate

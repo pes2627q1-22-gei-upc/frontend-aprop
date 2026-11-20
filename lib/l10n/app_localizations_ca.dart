@@ -67,6 +67,79 @@ class AppLocalizationsCa extends AppLocalizations {
       'No hem pogut carregar les activitats creades.';
 
   @override
+  String get publicProfileLoadError => 'No hem pogut carregar el perfil.';
+
+  @override
+  String get publicProfileNotFound =>
+      'Aquest perfil no existeix o ja no està disponible.';
+
+  @override
+  String get publicProfileTabCreated => 'Creats';
+
+  @override
+  String get friendAdd => 'Afegeix com a amic';
+
+  @override
+  String get friendSending => 'Enviant…';
+
+  @override
+  String get friendRequestSent => 'Sol·licitud enviada';
+
+  @override
+  String get friendAlready => 'Amics';
+
+  @override
+  String get friendRequestError =>
+      'No hem pogut enviar la sol·licitud. Torna-ho a provar.';
+
+  @override
+  String get friendRequestBlocked =>
+      'No pots enviar una sol·licitud d’amistat a aquesta persona.';
+
+  @override
+  String get friendsTitle => 'Amics';
+
+  @override
+  String get friendsLoading => 'Carregant els amics';
+
+  @override
+  String get friendsLoadError => 'No hem pogut carregar els amics.';
+
+  @override
+  String get friendsEmptyOwn => 'Encara no tens amics.';
+
+  @override
+  String friendsEmptyOther(String name) {
+    return '$name encara no té amics.';
+  }
+
+  @override
+  String get friendsOpenList => 'Veure els amics';
+
+  @override
+  String get publicProfilePlansLoadError => 'No hem pogut carregar els plans.';
+
+  @override
+  String publicProfilePlansFriendsOnly(String name) {
+    return 'Els plans de $name només els poden veure els seus amics.';
+  }
+
+  @override
+  String publicProfilePlansHidden(String name) {
+    return '$name no comparteix els seus plans.';
+  }
+
+  @override
+  String publicProfileNoPlans(String name) {
+    return '$name encara no té plans fets.';
+  }
+
+  @override
+  String publicProfileNoCreated(String name) {
+    return '$name encara no ha creat cap activitat.';
+  }
+
+  @override
   String get profileBiographyTooLong =>
       'La biografia és massa llarga. Prova de fer-la més curta.';
 
@@ -1199,9 +1272,6 @@ class AppLocalizationsCa extends AppLocalizations {
   String get actLoadingZone => 'Carregant les activitats de la zona';
 
   @override
-  String get actFilterLocation => 'Catalunya';
-
-  @override
   String get actFilterDates => 'Dates';
 
   @override
@@ -1211,31 +1281,7 @@ class AppLocalizationsCa extends AppLocalizations {
   String get actClearAllFilters => 'Netejar tots els filtres';
 
   @override
-  String get actViewMap => 'Mapa';
-
-  @override
-  String get actViewList => 'Llista';
-
-  @override
   String get actCreate => 'Crear activitat';
-
-  @override
-  String get actCreateSoon => 'Crear activitat disponible properament';
-
-  @override
-  String actViewSelected(String label) {
-    return 'Vista $label seleccionada';
-  }
-
-  @override
-  String actViewSoon(String label) {
-    return 'Vista $label disponible properament';
-  }
-
-  @override
-  String actViewShow(String label) {
-    return 'Mostrar $label';
-  }
 
   @override
   String get actDetailsTitle => 'Activitat';
@@ -1518,13 +1564,6 @@ class AppLocalizationsCa extends AppLocalizations {
   }
 
   @override
-  String get actSeeListHint =>
-      'Consulta la llista per veure els resultats per categoria.';
-
-  @override
-  String get actSeeList => 'Veure llista';
-
-  @override
   String get actClear => 'Netejar';
 
   @override
@@ -1673,7 +1712,7 @@ class AppLocalizationsCa extends AppLocalizations {
       'No hem pogut cercar les activitats. Torna-ho a provar.';
 
   @override
-  String get discoverSearchField => 'Cerca activitats';
+  String get discoverSearchField => 'Cerca activitats o persones';
 
   @override
   String get discoverLoading => 'Carregant propostes';
@@ -1861,6 +1900,9 @@ class AppLocalizationsCa extends AppLocalizations {
   String get navDiscover => 'Descobreix';
 
   @override
+  String get navMap => 'Mapa';
+
+  @override
   String get navNotifications => 'Avisos';
 
   @override
@@ -1983,5 +2025,64 @@ class AppLocalizationsCa extends AppLocalizations {
       one: '1 categoria més',
     );
     return '$_temp0';
+  }
+
+  @override
+  String get userSearchHint => 'Nom o nom d’usuari';
+
+  @override
+  String get userSearchLabel => 'Cerca persones';
+
+  @override
+  String get userSearchPromptTitle => 'A qui vols trobar?';
+
+  @override
+  String get userSearchPromptBody => 'Escriu un nom o un nom d’usuari.';
+
+  @override
+  String get userSearchSearching => 'Cercant persones';
+
+  @override
+  String get userSearchError =>
+      'No hem pogut cercar persones. Torna-ho a provar.';
+
+  @override
+  String get userSearchNoResultsTitle => 'No hem trobat cap persona';
+
+  @override
+  String get userSearchNoResultsBody => 'Prova un altre nom o nom d’usuari.';
+
+  @override
+  String userSearchCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count persones trobades',
+      one: '1 persona trobada',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String userSearchLoaded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count persones carregades',
+      one: '1 persona carregada',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get userSearchLoadMore => 'Carregar més persones';
+
+  @override
+  String get userSearchMoreError =>
+      'No hem pogut carregar més persones. Torna-ho a provar.';
+
+  @override
+  String userSearchTooLong(int limit) {
+    return 'La cerca pot tenir com a màxim $limit caràcters.';
   }
 }

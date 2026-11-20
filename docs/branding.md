@@ -22,7 +22,7 @@ validació visual de marca pendent de l’equip.
 `BoxFit.contain`, alineació i etiqueta accessible «AProp!». No té estat de negoci, peticions HTTP
 ni dependències de `app/` o `features/`.
 
-- `ActivitiesHeader`: alineació esquerra i alçada de 80 píxels lògics.
+- Capçalera d'Inici (`MainShell`): alçada de 40 píxels lògics (DP-060).
 - `LoginScreen`: alineació centrada i alçada de 96 píxels lògics.
 - L’asset respecta les proporcions i ja queda inclòs per `assets/branding/` al pubspec.
 - Sense paquets nous, filtres de color que alterin els marcadors ni canvis de navegació/autenticació.

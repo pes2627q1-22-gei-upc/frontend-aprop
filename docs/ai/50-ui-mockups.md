@@ -16,7 +16,8 @@
 
 ## Navegació
 
-Barra inferior fixa amb 5 seccions: **Inici · Agenda · Descobreix · Avisos · Perfil**. Cada secció conserva
+Barra inferior fixa amb 5 seccions: **Inici · Agenda · Mapa · Avisos · Perfil**. Des de la #273 (DP-060),
+Inici mostra el contingut de Descobreix i el mapa té la seva pestanya; al mockup, Inici era el mapa. Cada secció conserva
 el seu historial; tornar d'una fitxa o perfil conserva els filtres, la cerca i la posició del desplaçament.
 Accés amb Google; en el primer accés es completa el perfil i es fa el test d'interessos.
 
@@ -38,8 +39,8 @@ mantenen el flux sense barra, pendent de validar aquest detall de disseny a DP-0
 
 | Secció | Pantalla | Comportament clau |
 |---|---|---|
-| Inici | Mapa (fig. 7) | Marcadors diferents per a oficials i d'usuaris, distintiu d'amistat, agrupació numerada. En tocar-ne un surt una targeta («Veure activitat»). Botó «Crear activitat». Filtres de zona, dates i categories amb «Aplicar» (si tanques el panell sense aplicar, es conserva la selecció anterior). Accés a «Assistent». |
-| Inici | Llista (fig. 8) | Selector «Mapa / Llista» sobre el mateix conjunt de resultats, amb els mateixos filtres. |
+| Mapa | Mapa (fig. 7) | Marcadors diferents per a oficials i d'usuaris, distintiu d'amistat, agrupació numerada. En tocar-ne un surt una targeta («Veure activitat»). Botó «Crear activitat». Filtres de zona, dates i categories amb «Aplicar» (si tanques el panell sense aplicar, es conserva la selecció anterior). Accés a «Assistent». |
+| Mapa | Llista (fig. 8) | Selector «Mapa / Llista» sobre el mateix conjunt de resultats, amb els mateixos filtres. Des de la #274 (DP-061) no hi ha selector: només mapa, i la llista només si Google Maps no es pot dibuixar. |
 | Inici | Fitxa (fig. 9) | Contingut desplaçable amb la franja de participació fixa. Bloc del creador («Veure perfil») o de la font oficial (enllaç a l'original). Després d'apuntar-se: «Apuntat» + «Xat de l'activitat». |
 | Inici | Assistent (fig. 10) | Bombolles diferenciades. Interpreta tipus, municipi i interval de dates i les mostra a la resposta. Resultats amb la targeta estàndard. Enviar desactivat si el camp és buit. Es conserva la conversa en tornar de la fitxa. |
 | Agenda | Calendari (fig. 11) | Mes amb un punt als dies que tenen plans propis, contorn al dia actual i fons verd al seleccionat. La llista del dia s'actualitza a l'instant. Fila «Recordatori» independent («No activat»). Missatge específic si el dia no té plans. |
@@ -53,11 +54,11 @@ mantenen el flux sense barra, pendent de validar aquest detall de disseny a DP-0
 
 ## Estat actual vs mockups
 
-Taiga #87 implementa els panells Dates/Categories aprovats: calendari inclusiu, dreceres, caselles, esborrany, Aplicar/Netejar i cancel·lació sense guardar. Les vuit caselles del mockup són l’exemple Demo; en HTTP les opcions venen de `/categories`, amb càrrega/error/reintent. La capçalera mostra selecció i resum; Mapa/Llista comparteixen els filtres. La llista consulta el servidor abans de paginar. #253 conserva les opcions vàlides si hi ha noms buits i permet reintentar un catàleg buit. Amb el contracte de mapa del backend `6f4979e`, es mostren les categories rebudes i es filtra localment per qualsevol categoria de l’activitat. Si genuïnament falta categoria es manté «Veure llista», sense confondre-ho amb absència d’esdeveniments. Font compartida i filtratge global pendents (DP-035/DP-038/DP-046). Zona/municipi continua pendent. Vegeu `docs/inici-server-filters.md`.
+Taiga #87 implementa els panells Dates/Categories aprovats: calendari inclusiu, dreceres, caselles, esborrany, Aplicar/Netejar i cancel·lació sense guardar. Les vuit caselles del mockup són l’exemple Demo; en HTTP les opcions venen de `/categories`, amb càrrega/error/reintent. Des de la #274, els filtres són xips sobre el mapa que mostren la selecció. La llista consulta el servidor abans de paginar. #253 conserva les opcions vàlides si hi ha noms buits i permet reintentar un catàleg buit. Amb el contracte de mapa del backend `6f4979e`, es mostren les categories rebudes i es filtra localment per qualsevol categoria de l’activitat. Si genuïnament falta categoria es manté «Veure llista», sense confondre-ho amb absència d’esdeveniments. Font compartida i filtratge global pendents (DP-035/DP-038/DP-046). Zona/municipi continua pendent. Vegeu `docs/inici-server-filters.md`.
 
 Perfil propi i Configuració segueixen `perfil_1_principal.png` i `perfil_2_configuracio.png`. En HTTP, la identitat, comptadors i XP venen de `/users/me`; s’editen nom/username/biografia, es puja la foto i es desa `show-plans`. «Creats per mi» és la pestanya inicial i carrega a part amb error/reintent; «Plans fets» indica historial pendent perquè plans passats no confirmen assistència. Sense metadades de nivells no es dibuixen insígnies/llindars inventats. Municipi i preferències d’avisos queden pendents; Demo conserva els exemples i canvis en memòria. Compartir copia el username confirmat. Colors centralitzats i disposició adaptable. Taiga #230; DP-032/DP-033/DP-040 i `docs/profile-backend.md`.
 
-Taiga #96 conserva els mockups de Descobreix/cerca i els connecta amb recomanacions, populars i cerca paginada. «Per a tu» només mostra «Segons els teus interessos» amb dades personalitzades; sense gustos explica el test pendent. Errors de secció mantenen la resta visible i permeten reintentar. El total de cerca ve del servidor i «Carregar més activitats» continua des de la pàgina següent. Detall, inscripcions, retorn i scroll compartits. «Persones» continua pendent; Demo conserva les seleccions sense personalització real. Contracte i adaptacions a DP-041/DP-024 i `docs/discovery-backend.md`.
+Taiga #96 conserva els mockups de Descobreix/cerca i els connecta amb recomanacions, populars i cerca paginada. «Per a tu» només mostra «Segons els teus interessos» amb dades personalitzades; sense gustos explica el test pendent. Errors de secció mantenen la resta visible i permeten reintentar. El total de cerca ve del servidor i «Carregar més activitats» continua des de la pàgina següent. Detall, inscripcions, retorn i scroll compartits. #162 habilita «Persones» (fig. 16) al mateix cercador: avatar o inicials, nom, nom d’usuari i fila que obre el perfil públic de #277; resum del total i continuació. En tornar es conserven consulta, mode, resultats i scroll. Inici i Mapa ofereixen el mateix accés segons #273/#274. No s’inventen distintius d’amistat ni accions socials a les files. Demo conserva les seleccions sense personalització real. Vegeu `docs/user-search.md` i, per activitats, DP-041/DP-024 i `docs/discovery-backend.md`.
 
 Ampliació HTTP de #86: les accions socials del mockup són del projecte final i queden fora de l’Sprint 1
 (confirmat per l’usuari). El servidor actual només informa una categoria Social; es mostra un missatge

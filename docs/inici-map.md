@@ -1,10 +1,13 @@
-# Mapa d'Inici — Taiga #21 «Veure un mapa amb els esdeveniments»
+# Mapa — Taiga #21 «Veure un mapa amb els esdeveniments»
+
+> Des de la #273 (DP-060) el mapa té la seva pestanya, «Mapa», i Inici mostra Descobreix. On aquest
+> document diu «Inici», s'ha d'entendre la pestanya Mapa.
 
 ## Comportament
 
-- A Inici, el selector «Mapa / Llista» canvia entre les dues vistes del **mateix conjunt d'activitats**. La
-  llista és la vista inicial (DP-022). El selector sempre funciona: si Google Maps falla, la llista continua
-  disponible (CA3).
+- Des de la #274 (DP-061), la pestanya Mapa només té el mapa, a pantalla completa, amb la cerca i els filtres
+  en xips a sobre (`MapFilterBar`). No hi ha selector Mapa / Llista: si Google Maps no es pot dibuixar (a la
+  web, sense el script), la llista surt en lloc del mapa (CA3).
 - Cada activitat amb ubicació (`Activity.location`) té un marcador (CA1):
   - verd fosc amb un punt: activitat de l'Agenda Cultural;
   - coral amb una persona: publicada per un usuari;
@@ -63,7 +66,7 @@ flutter run -d emulator-5554 --dart-define=API_BASE_URL=http://10.0.2.2:8080
 
 ```text
 features/activities/presentation/widgets/activities_map.dart     mapa, marcadors, targeta i llegenda
-features/activities/presentation/screens/activities_screen.dart  selector Mapa / Llista; mapa per zona amb el backend
+features/activities/presentation/screens/activities_screen.dart  mapa a pantalla completa amb `MapFilterBar` (llista si no hi ha Google Maps); mapa per zona amb el backend
 features/activities/presentation/view_models/activities_map_view_model.dart  càrrega per zona visible
 features/activities/data/http_activity_map_repository.dart       GET /events/map i GET /events/{id}
 features/activities/presentation/view_models/user_location_view_model.dart  on és la persona i el botó
@@ -87,7 +90,7 @@ Els marcadors són imatges generades amb els colors del tema (`forest`, `coral` 
 
 ## Proves
 
-`test/features/activities/activities_map_test.dart`: selector Mapa / Llista, un marcador per activitat amb el
+`test/features/activities/activities_map_test.dart`: un marcador per activitat amb el
 tipus i el grup correctes, targeta i «Veure activitat», tancar-la, tocar un grup (llista si són al mateix lloc,
 apropar-s'hi si no), activitats sense ubicació i llegenda. Amb
 el backend: marcadors de la zona, fitxa des del mapa, error i reintent.

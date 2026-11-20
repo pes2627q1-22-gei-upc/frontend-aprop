@@ -5,6 +5,7 @@ import 'package:aprop/features/activities/data/demo_activity_repository.dart';
 import 'package:aprop/features/activities/data/demo_discovery_repository.dart';
 import 'package:aprop/features/activities/models/activity.dart';
 import 'package:aprop/features/activities/models/discovery_feed.dart';
+import 'package:aprop/features/activities/models/geo_point.dart';
 import 'package:aprop/features/auth/data/demo_auth_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -12,6 +13,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../features/activities/fake_activity_repository.dart';
 import '../features/activities/fake_discovery_repository.dart';
 import '../features/activities/fake_enrollment_repository.dart';
+import 'app_navigation.dart';
 
 void main() {
   late DemoAuthRepository auth;
@@ -29,6 +31,8 @@ void main() {
       title: 'Mirades de Catalunya',
       category: 'Exposicions',
       municipality: 'Girona',
+      // Perquè surti al mapa.
+      location: const GeoPoint(latitude: 41.9794, longitude: 2.8214),
       startsAt: DateTime.now(),
       imageAsset: 'assets/images/mirades_de_catalunya.jpg',
       source: ActivitySource.culturalAgenda,
@@ -68,7 +72,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    await tester.tap(destination('Descobreix'));
+    await tester.tap(destination('Inici'));
     await tester.pumpAndSettle();
   }
 
@@ -84,8 +88,9 @@ void main() {
     tester,
   ) async {
     await pumpApp(tester);
-    expect(find.widgetWithText(AppBar, 'Descobreix'), findsOneWidget);
-    expect(find.text('Assistent'), findsNothing);
+    expect(find.byKey(const ValueKey('discover-search')), findsOneWidget);
+    // Des de la #273 l'assistent també és a Inici.
+    expect(find.text('Assistent'), findsOneWidget);
     await search(tester, 'girona');
     expect(find.text('1 activitat trobada'), findsOneWidget);
     await tester.ensureVisible(find.text('M’hi apunto'));
@@ -100,7 +105,7 @@ void main() {
     expect(find.text('Apuntat'), findsOneWidget);
     expect(
       tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex,
-      2,
+      0, // Inici (Descobreix)
     );
     await tester.tap(find.byTooltip('Tornar enrere'));
     await tester.pumpAndSettle();
@@ -108,9 +113,17 @@ void main() {
       tester.widget<TextField>(find.byType(TextField)).controller!.text,
       'girona',
     );
-    await tester.tap(destination('Inici'));
+    // El Mapa i l'Agenda comparteixen l'estat de la inscripció.
+    await tester.tap(destination('Mapa'));
     await tester.pumpAndSettle();
-    expect(find.text('Apuntat'), findsOneWidget);
+    await tapMarker(tester, 'demo-exhibition');
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey('demo-exhibition')),
+        matching: find.text('Apuntat'),
+      ),
+      findsOneWidget,
+    );
     await tester.tap(destination('Agenda'));
     await tester.pumpAndSettle();
     expect(find.text('Mirades de Catalunya'), findsOneWidget);
@@ -127,9 +140,9 @@ void main() {
       expect(enrollments.enrolledRequests, isEmpty);
       await tester.tap(find.byTooltip('Tornar enrere'));
       await tester.pumpAndSettle();
-      await tester.tap(destination('Inici'));
+      await tester.tap(destination('Mapa'));
       await tester.pumpAndSettle();
-      await tester.tap(destination('Descobreix'));
+      await tester.tap(destination('Inici'));
       await tester.pumpAndSettle();
       expect(find.widgetWithText(AppBar, 'Cerca'), findsOneWidget);
       expect(
@@ -140,7 +153,7 @@ void main() {
       expect(discovery.queries, ['girona']);
       await tester.tap(find.byTooltip('Tornar enrere'));
       await tester.pumpAndSettle();
-      expect(find.widgetWithText(AppBar, 'Descobreix'), findsOneWidget);
+      expect(find.byKey(const ValueKey('discover-search')), findsOneWidget);
       expect(find.text('Per a tu'), findsOneWidget);
     },
   );
@@ -183,9 +196,9 @@ void main() {
     await tester.tap(find.byTooltip('Tornar enrere'));
     await tester.pumpAndSettle();
     expect(tester.getTopLeft(card).dy, closeTo(before, 1));
-    await tester.tap(destination('Inici'));
+    await tester.tap(destination('Mapa'));
     await tester.pumpAndSettle();
-    await tester.tap(destination('Descobreix'));
+    await tester.tap(destination('Inici'));
     await tester.pumpAndSettle();
     expect(tester.getTopLeft(card).dy, closeTo(before, 1));
   });
@@ -227,9 +240,9 @@ void main() {
     await tester.tap(find.byTooltip('Tornar enrere'));
     await tester.pumpAndSettle();
     expect(tester.getTopLeft(card).dy, closeTo(before, 1));
-    await tester.tap(destination('Inici'));
+    await tester.tap(destination('Mapa'));
     await tester.pumpAndSettle();
-    await tester.tap(destination('Descobreix'));
+    await tester.tap(destination('Inici'));
     await tester.pumpAndSettle();
     expect(tester.getTopLeft(card).dy, closeTo(before, 1));
     expect(
@@ -264,7 +277,7 @@ void main() {
     );
     await auth.checkEmailVerified();
     await tester.pumpAndSettle();
-    await tester.tap(destination('Descobreix'));
+    await tester.tap(destination('Inici'));
     await tester.pumpAndSettle();
     pending.complete([exhibition]);
     await tester.pumpAndSettle();
@@ -286,7 +299,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    await tester.tap(destination('Descobreix'));
+    await tester.tap(destination('Inici'));
     await tester.pumpAndSettle();
     expect(find.text('Mirades de Catalunya'), findsOneWidget);
     await search(tester, 'teatre');

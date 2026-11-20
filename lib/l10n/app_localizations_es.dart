@@ -67,6 +67,80 @@ class AppLocalizationsEs extends AppLocalizations {
       'No hemos podido cargar las actividades creadas.';
 
   @override
+  String get publicProfileLoadError => 'No hemos podido cargar el perfil.';
+
+  @override
+  String get publicProfileNotFound =>
+      'Este perfil no existe o ya no está disponible.';
+
+  @override
+  String get publicProfileTabCreated => 'Creados';
+
+  @override
+  String get friendAdd => 'Añadir como amigo';
+
+  @override
+  String get friendSending => 'Enviando…';
+
+  @override
+  String get friendRequestSent => 'Solicitud enviada';
+
+  @override
+  String get friendAlready => 'Amigos';
+
+  @override
+  String get friendRequestError =>
+      'No hemos podido enviar la solicitud. Vuelve a intentarlo.';
+
+  @override
+  String get friendRequestBlocked =>
+      'No puedes enviar una solicitud de amistad a esta persona.';
+
+  @override
+  String get friendsTitle => 'Amigos';
+
+  @override
+  String get friendsLoading => 'Cargando los amigos';
+
+  @override
+  String get friendsLoadError => 'No hemos podido cargar los amigos.';
+
+  @override
+  String get friendsEmptyOwn => 'Todavía no tienes amigos.';
+
+  @override
+  String friendsEmptyOther(String name) {
+    return '$name todavía no tiene amigos.';
+  }
+
+  @override
+  String get friendsOpenList => 'Ver los amigos';
+
+  @override
+  String get publicProfilePlansLoadError =>
+      'No hemos podido cargar los planes.';
+
+  @override
+  String publicProfilePlansFriendsOnly(String name) {
+    return 'Los planes de $name solo los pueden ver sus amigos.';
+  }
+
+  @override
+  String publicProfilePlansHidden(String name) {
+    return '$name no comparte sus planes.';
+  }
+
+  @override
+  String publicProfileNoPlans(String name) {
+    return '$name todavía no tiene planes hechos.';
+  }
+
+  @override
+  String publicProfileNoCreated(String name) {
+    return '$name todavía no ha creado ninguna actividad.';
+  }
+
+  @override
   String get profileBiographyTooLong =>
       'La biografía es demasiado larga. Prueba a acortarla.';
 
@@ -1204,9 +1278,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get actLoadingZone => 'Cargando las actividades de la zona';
 
   @override
-  String get actFilterLocation => 'Cataluña';
-
-  @override
   String get actFilterDates => 'Fechas';
 
   @override
@@ -1216,31 +1287,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get actClearAllFilters => 'Limpiar todos los filtros';
 
   @override
-  String get actViewMap => 'Mapa';
-
-  @override
-  String get actViewList => 'Lista';
-
-  @override
   String get actCreate => 'Crear actividad';
-
-  @override
-  String get actCreateSoon => 'Crear actividad disponible próximamente';
-
-  @override
-  String actViewSelected(String label) {
-    return 'Vista $label seleccionada';
-  }
-
-  @override
-  String actViewSoon(String label) {
-    return 'Vista $label disponible próximamente';
-  }
-
-  @override
-  String actViewShow(String label) {
-    return 'Mostrar $label';
-  }
 
   @override
   String get actDetailsTitle => 'Actividad';
@@ -1523,13 +1570,6 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get actSeeListHint =>
-      'Consulta la lista para ver los resultados por categoría.';
-
-  @override
-  String get actSeeList => 'Ver lista';
-
-  @override
   String get actClear => 'Limpiar';
 
   @override
@@ -1678,7 +1718,7 @@ class AppLocalizationsEs extends AppLocalizations {
       'No hemos podido buscar las actividades. Vuelve a intentarlo.';
 
   @override
-  String get discoverSearchField => 'Busca actividades';
+  String get discoverSearchField => 'Busca actividades o personas';
 
   @override
   String get discoverLoading => 'Cargando propuestas';
@@ -1867,6 +1907,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get navDiscover => 'Descubre';
 
   @override
+  String get navMap => 'Mapa';
+
+  @override
   String get navNotifications => 'Avisos';
 
   @override
@@ -1989,5 +2032,66 @@ class AppLocalizationsEs extends AppLocalizations {
       one: '1 categoría más',
     );
     return '$_temp0';
+  }
+
+  @override
+  String get userSearchHint => 'Nombre o nombre de usuario';
+
+  @override
+  String get userSearchLabel => 'Buscar personas';
+
+  @override
+  String get userSearchPromptTitle => '¿A quién quieres encontrar?';
+
+  @override
+  String get userSearchPromptBody =>
+      'Escribe un nombre o un nombre de usuario.';
+
+  @override
+  String get userSearchSearching => 'Buscando personas';
+
+  @override
+  String get userSearchError =>
+      'No hemos podido buscar personas. Vuelve a intentarlo.';
+
+  @override
+  String get userSearchNoResultsTitle => 'No hemos encontrado a nadie';
+
+  @override
+  String get userSearchNoResultsBody =>
+      'Prueba otro nombre o nombre de usuario.';
+
+  @override
+  String userSearchCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count personas encontradas',
+      one: '1 persona encontrada',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String userSearchLoaded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count personas cargadas',
+      one: '1 persona cargada',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get userSearchLoadMore => 'Cargar más personas';
+
+  @override
+  String get userSearchMoreError =>
+      'No hemos podido cargar más personas. Vuelve a intentarlo.';
+
+  @override
+  String userSearchTooLong(int limit) {
+    return 'La búsqueda puede tener como máximo $limit caracteres.';
   }
 }

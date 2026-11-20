@@ -150,7 +150,7 @@ void main() {
         of: find.byType(NavigationBar),
         matching: find.text(text),
       );
-      await tester.tap(destination('Descobreix'));
+      await tester.tap(destination('Inici'));
       await tester.pumpAndSettle();
       expect(find.text('Segons els teus interessos'), findsOneWidget);
       final recommended = find.byKey(const ValueKey('discover-recommended-7'));
@@ -219,11 +219,14 @@ void main() {
       await tester.tap(find.byTooltip('Tornar enrere'));
       await tester.pumpAndSettle();
       expect(tester.getTopLeft(find.text('Jazz 9')).dy, closeTo(before, 1));
-      await tester.tap(destination('Inici'));
+      await tester.tap(find.byTooltip('Tornar enrere'));
       await tester.pumpAndSettle();
       // Inici and search use the same enrollment state, even on distinct routes.
       expect(enrolled, {7});
-      expect(find.text('Apuntat'), findsOneWidget);
+      expect(
+        find.descendant(of: recommended, matching: find.text('Apuntat')),
+        findsOneWidget,
+      );
       expect(writes, 1);
       expect(tester.takeException(), isNull);
     },

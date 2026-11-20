@@ -66,6 +66,8 @@ void main() {
             viewModel: model,
             enrollmentViewModel: enrollment,
             onActivitySelected: opened.add,
+            // La llista només surt si Google Maps no es pot dibuixar (#274).
+            googleMapsAvailable: false,
           ),
         ),
       ),

@@ -6,7 +6,7 @@
 
 L'usuari aporta `perfil_1_principal.png` i `perfil_2_configuracio.png` i autoritza implementar-ne el frontend. Les còpies originals de referència són a `PES/output/mockup/aprop-perfil-principal-v2.png` i `aprop-perfil-configuracio-v2.png`. El contingut coincideix amb les figures 18–19 de la Incepció 2. L'usuari confirma la tasca **#230 Frontend perfil**; els criteris detallats de Taiga continuen pendents de contrastar.
 
-S'implementen el perfil propi, les dues pestanyes, l'accés a fitxes, el panell d'edició de biografia/municipi, copiar el nom d'usuari, Configuració, preferències en memòria i tancament de sessió. DP-032 i DP-033 registren els contractes i les adaptacions provisionals. Els perfils públics d'altres persones i el sistema social complet continuen pendents.
+S'implementen el perfil propi, les dues pestanyes, l'accés a fitxes, el panell d'edició de biografia/municipi, copiar el nom d'usuari, Configuració, preferències en memòria i tancament de sessió. DP-032 i DP-033 registren els contractes i les adaptacions provisionals. El perfil d’altres persones és la #277 (secció final); el sistema social complet continua pendent.
 
 ## Identitat, dades demo i fidelitat
 
@@ -82,3 +82,24 @@ Es conserven Firebase, la tria del nom d'usuari, la verificació enganxant l'enl
 Aquesta còpia no té `lib/firebase_options.dart` ni `android/app/google-services.json`. Són configuracions locals ignorades que necessita la nova entrada de Firebase; no s'inventen ni es versionen. La generació i l'accés al projecte s'expliquen a `docs/firebase-auth.md`. Per això l'anàlisi completa i l'APK anteriors (2026-10-22) no es poden atribuir a aquesta integració fins que es generi aquella configuració.
 
 Verificació després de la integració: `flutter pub get --enforce-lockfile` correcte sense canviar el lockfile de `develop`; format de 162 fitxers sense canvis; **318 proves superades** amb `flutter test --no-pub`; `dart analyze lib/app lib/core lib/features test` sense incidències. `flutter analyze --no-pub` només informa dels dos errors de `main.dart` causats per la configuració local de Firebase absent. No es reintenta l'APK mentre faltin els dos fitxers de configuració. La revisió de la resolució no detecta bloquejos; sense marcadors de conflicte ni entrades sense fusionar. No s'ha creat cap commit ni s'ha pujat aquesta resolució.
+
+## Perfil d’una altra persona (#277, DP-063)
+
+`PublicProfileScreen` mostra el perfil d’una altra persona amb la mateixa capçalera que el propi (`ProfileHeader` amb `showEdit: false`): nom, `username`, foto, biografia i comptadors de plans, amics i valoració. Només hi ha «Compartir perfil», que copia el `username` amb el mateix diàleg.
+
+- **Dades:** `PublicProfileRepository` (`getPublicProfile`, `getCreatedActivities`, `getPastPlans`). En HTTP fa servir `GET /users/{id}`, `/users/{id}/created-events` i `/users/{id}/events`, sempre amb el token de la sessió. Un 404 és «aquest perfil no existeix» (sense reintent).
+- **Privacitat (CA3):** els plans només es demanen i es mostren si el servidor diu `plans-visible: true` (sou amics i la persona té «Mostrar els meus plans» activat). Si no, la pestanya «Plans fets» explica que són privats.
+- **Estat:** `PublicProfileViewModel`, creat i alliberat per la pantalla. La capçalera i les dues llistes carreguen per separat, amb error i reintent propis.
+- **Navegació:** `MainShell._openUserProfile` l’obre al navegador de la secció activa des de «Veure perfil» de la fitxa i des dels avisos d’una persona. Si és la mateixa persona, obre la pestanya Perfil. Des del perfil, una activitat obre la seva fitxa.
+- **Demo:** Laia (amiga, plans visibles), Marc (no amic) i Júlia (amiga, plans ocults).
+- **Botó d’amistat (#160, DP-064):** al lloc d’«Editar perfil». «Afegeix com a amic» envia `POST /users/{id}/friend-requests` i, quan el servidor ho confirma, passa a «Sol·licitud enviada» (desactivat). Si ja sou amics, «Amics» (desactivat). Si el servidor diu que ja hi ha una sol·licitud o que sou amics, el botó hi passa; amb un bloqueig desapareix i surt un avís. Un error deixa tornar-ho a provar.
+
+## Llista d’amics (#54, DP-065)
+
+El comptador «Amics» de la capçalera és un botó (48 dp) que obre `FriendsListScreen`, al perfil propi i al d’altres persones. Cada fila (`UserRow`, la mateixa de la cerca de persones) mostra foto o inicials, nom i `@username`, i obre el perfil d’aquella persona; si ets tu, obre la pestanya Perfil.
+
+- **Dades:** `FriendsRepository.getFriends({userId})` (nul = la persona que ha iniciat sessió). En HTTP, `GET /users/{id|me}/friends` retorna només identificadors i l’adaptador demana el perfil de cada amic, de 4 en 4. Un amic eliminat (404) no surt.
+- **Estat:** `FriendsListViewModel`, creat i alliberat per la pantalla: càrrega, buit («Encara no tens amics» o «{nom} encara no té amics») i error amb reintent.
+- **Navegació:** `MainShell._openFriendsList` l’obre al navegador de la secció activa.
+
+Prova manual: amb un compte nou, a la pestanya Mapa obrir «Teatre sota les estrelles» → «Veure perfil» (Laia, amb plans); a Avisos → Social, tocar la sol·licitud de Marc (plans privats) i prémer «Afegeix com a amic»; al Perfil, tocar «Amics» i després Júlia.

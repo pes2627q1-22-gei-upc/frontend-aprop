@@ -9,13 +9,11 @@ class MapFilterFeedback extends StatelessWidget {
     required this.isEmpty,
     required this.missingCategories,
     required this.onClear,
-    this.onShowList,
   });
 
   final bool isEmpty;
   final int missingCategories;
   final VoidCallback onClear;
-  final VoidCallback? onShowList;
 
   @override
   Widget build(BuildContext context) => Align(
@@ -30,10 +28,7 @@ class MapFilterFeedback extends StatelessWidget {
             if (isEmpty && missingCategories == 0)
               MapFilterNotice(onClear: onClear),
             if (missingCategories > 0)
-              MissingCategoryNotice(
-                count: missingCategories,
-                onShowList: onShowList,
-              ),
+              MissingCategoryNotice(count: missingCategories),
             if (isEmpty && missingCategories > 0)
               TextButton(
                 onPressed: onClear,
@@ -117,13 +112,8 @@ class MapFilterNotice extends StatelessWidget {
 }
 
 class MissingCategoryNotice extends StatelessWidget {
-  const MissingCategoryNotice({
-    super.key,
-    required this.count,
-    this.onShowList,
-  });
+  const MissingCategoryNotice({super.key, required this.count});
   final int count;
-  final VoidCallback? onShowList;
 
   @override
   Widget build(BuildContext context) => Card(
@@ -131,17 +121,7 @@ class MissingCategoryNotice extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(context.l10n.actUncategorised(count)),
-          if (onShowList != null) ...[
-            const SizedBox(height: 8),
-            Text(context.l10n.actSeeListHint),
-            TextButton(
-              onPressed: onShowList,
-              child: Text(context.l10n.actSeeList),
-            ),
-          ],
-        ],
+        children: [Text(context.l10n.actUncategorised(count))],
       ),
     ),
   );

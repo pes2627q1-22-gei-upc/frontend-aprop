@@ -14,6 +14,7 @@ Route<void> activityDetailsRoute({
   bool Function(Activity activity)? canEdit,
   Future<bool> Function(Activity activity)? onEdit,
   void Function(Activity activity)? onOpenChat,
+  ValueChanged<String>? onCreatorSelected,
 }) {
   return MaterialPageRoute<void>(
     settings: RouteSettings(
@@ -27,6 +28,7 @@ Route<void> activityDetailsRoute({
       canEdit: canEdit,
       onEdit: onEdit,
       onOpenChat: onOpenChat,
+      onCreatorSelected: onCreatorSelected,
     ),
   );
 }
