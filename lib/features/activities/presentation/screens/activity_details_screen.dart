@@ -28,6 +28,7 @@ class ActivityDetailsScreen extends StatefulWidget {
     this.ratingBuilder,
     this.canEdit,
     this.onEdit,
+    this.onCreatorSelected,
     this.openLink = openExternalLink,
   });
 
@@ -44,6 +45,10 @@ class ActivityDetailsScreen extends StatefulWidget {
   /// Obre el formulari d'edició; acaba amb `true` si s'han desat canvis, i
   /// llavors la fitxa es torna a carregar.
   final Future<bool> Function(Activity activity)? onEdit;
+
+  /// Obre el perfil de qui ha creat l'activitat (rep el seu ID). Sense,
+  /// «Veure perfil» queda desactivat.
+  final ValueChanged<String>? onCreatorSelected;
 
   /// Obre un enllaç de l'activitat fora de l'app; `false` si no ha pogut.
   final Future<bool> Function(Uri uri) openLink;
@@ -155,6 +160,7 @@ class _ActivityDetailsScreenState extends State<ActivityDetailsScreen> {
                     enrollmentViewModel: widget.enrollmentViewModel,
                     ratingBuilder: widget.ratingBuilder,
                     openLink: widget.openLink,
+                    onCreatorSelected: widget.onCreatorSelected,
                   ),
                 ),
                 _ParticipationAction(
@@ -176,12 +182,14 @@ class _ActivityDetailsContent extends StatelessWidget {
     required this.enrollmentViewModel,
     this.ratingBuilder,
     required this.openLink,
+    this.onCreatorSelected,
   });
 
   final Activity activity;
   final EnrollmentViewModel enrollmentViewModel;
   final Widget Function(Activity activity)? ratingBuilder;
   final Future<bool> Function(Uri uri) openLink;
+  final ValueChanged<String>? onCreatorSelected;
 
   @override
   Widget build(BuildContext context) {
@@ -294,7 +302,13 @@ class _ActivityDetailsContent extends StatelessWidget {
         ],
         if (activity.source == ActivitySource.community && creator != null) ...[
           const SizedBox(height: 16),
-          _CreatorSection(creator: creator),
+          _CreatorSection(
+            creator: creator,
+            onViewProfile: switch ((creator.userId, onCreatorSelected)) {
+              (final id?, final open?) => () => open(id),
+              _ => null,
+            },
+          ),
         ],
         const SizedBox(height: 20),
         Text(
@@ -461,9 +475,10 @@ class _ActivityLinkRow extends StatelessWidget {
 }
 
 class _CreatorSection extends StatelessWidget {
-  const _CreatorSection({required this.creator});
+  const _CreatorSection({required this.creator, this.onViewProfile});
 
   final ActivityCreator creator;
+  final VoidCallback? onViewProfile;
 
   @override
   Widget build(BuildContext context) {
@@ -542,14 +557,22 @@ class _CreatorSection extends StatelessWidget {
                     style: theme.textTheme.labelLarge,
                   ),
                 ),
-                Tooltip(
-                  message: context.l10n.notifProfileSoon,
-                  child: TextButton.icon(
-                    onPressed: null,
+                if (onViewProfile == null)
+                  Tooltip(
+                    message: context.l10n.notifProfileSoon,
+                    child: TextButton.icon(
+                      onPressed: null,
+                      label: Text(context.l10n.actViewProfile),
+                      icon: const Icon(Icons.chevron_right, size: 20),
+                    ),
+                  )
+                else
+                  TextButton.icon(
+                    key: const ValueKey('activity-creator-profile'),
+                    onPressed: onViewProfile,
                     label: Text(context.l10n.actViewProfile),
                     icon: const Icon(Icons.chevron_right, size: 20),
                   ),
-                ),
               ],
             ),
           ],
