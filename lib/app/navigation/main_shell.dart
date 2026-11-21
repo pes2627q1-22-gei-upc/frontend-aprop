@@ -42,6 +42,7 @@ import '../../features/profile/data/gallery_profile_image_picker.dart';
 import '../../features/profile/presentation/screens/public_profile_screen.dart';
 import '../../features/profile/repositories/profile_repository.dart';
 import '../../features/profile/repositories/public_profile_repository.dart';
+import '../../features/profile/repositories/friendship_repository.dart';
 import '../../features/profile/presentation/screens/friends_list_screen.dart';
 import '../../features/profile/repositories/friends_repository.dart';
 import '../../features/profile/repositories/user_search_repository.dart';
@@ -66,6 +67,7 @@ class MainShell extends StatefulWidget {
     required this.profileRepository,
     required this.profileSettingsRepository,
     this.publicProfileRepository,
+    this.friendshipRepository,
     this.userSearchRepository,
     this.friendsRepository,
     this.interestTestRepository,
@@ -94,6 +96,7 @@ class MainShell extends StatefulWidget {
 
   /// Perfils d'altres persones. Si no hi és, «Veure perfil» queda desactivat.
   final PublicProfileRepository? publicProfileRepository;
+  final FriendshipRepository? friendshipRepository;
   final UserSearchRepository? userSearchRepository;
 
   /// Llistes d'amics (#54). Si no hi és, el comptador «Amics» és només un
@@ -191,6 +194,7 @@ class _MainShellState extends State<MainShell> {
     _profileViewModel = ProfileViewModel(
       user: widget.user,
       repository: widget.profileRepository,
+      friendshipRepository: widget.friendshipRepository,
       imagePicker: widget.profileRepository.capabilities.uploadAvatar
           ? GalleryProfileImagePicker()
           : null,
@@ -602,6 +606,8 @@ class _MainShellState extends State<MainShell> {
         builder: (context) => PublicProfileScreen(
           userId: userId,
           repository: repository,
+          friendshipRepository: widget.friendshipRepository,
+          currentUserId: widget.user.id,
           onSharePressed: _shareProfile,
           onFriendsPressed: widget.friendsRepository == null
               ? null
@@ -886,6 +892,7 @@ class _MainShellState extends State<MainShell> {
                 NotificationsScreen(
                   userId: widget.user.id,
                   repository: widget.notificationRepository,
+                  friendshipRepository: widget.friendshipRepository,
                   onActivitySelected: (id) {
                     // A late read confirmation must not open another tab's route.
                     if (_selectedIndex == 3) _openActivityDetails(id);

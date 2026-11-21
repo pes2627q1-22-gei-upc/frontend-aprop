@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../models/app_notification.dart';
 import '../../repositories/notification_repository.dart';
+import '../../../profile/repositories/friendship_repository.dart';
 import '../formatters/notification_formatter.dart';
 import '../view_models/notifications_view_model.dart';
 import '../widgets/notification_card.dart';
@@ -15,11 +16,13 @@ class NotificationsScreen extends StatefulWidget {
     required this.repository,
     required this.onActivitySelected,
     this.onPersonSelected,
+    this.friendshipRepository,
     this.now,
   });
 
   final String userId;
   final NotificationRepository repository;
+  final FriendshipRepository? friendshipRepository;
   final ValueChanged<String> onActivitySelected;
   // TODO(DP-023): App composition supplies this when real profiles exist.
   final ValueChanged<String>? onPersonSelected;
@@ -43,6 +46,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     _viewModel = NotificationsViewModel(
       userId: widget.userId,
       repository: widget.repository,
+      friendshipRepository: widget.friendshipRepository,
       now: widget.now,
     );
     _viewModel.load();
@@ -53,6 +57,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.userId != widget.userId ||
         oldWidget.repository != widget.repository ||
+        oldWidget.friendshipRepository != widget.friendshipRepository ||
         oldWidget.now != widget.now) {
       _viewModel.dispose();
       _opening.clear();

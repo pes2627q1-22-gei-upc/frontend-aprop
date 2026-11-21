@@ -1,5 +1,9 @@
 # Avisos — Taiga #86
 
+> **Sprint 2 · #164:** l’acceptació des d’Avisos i Perfil ja està integrada amb HTTP.
+> Les notes anteriors sobre amistat només Demo corresponen a l’Sprint 1.
+> Contracte, sincronització i límits actuals: [Acceptar una sol·licitud](friend-requests.md), DP-066.
+
 ## Estat actual de la integració (26 d’octubre de 2026)
 
 La bústia i la lectura utilitzen el contracte real del servidor. Vegeu [la guia HTTP](notifications-backend.md)

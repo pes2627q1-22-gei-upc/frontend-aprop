@@ -27,7 +27,7 @@ Les tasques #75 i #82 afegeixen el detall i les inscripcions compartides entre l
 | `features/assistant/` | Conversa amb l'assistent cultural («Assistent»), interpretació de consultes i recomanació d'activitats. |
 | `features/profile/` | Perfil propi, edició de detalls i preferències de Configuració, amb les mateixes capes i repositoris per compte. |
 | `features/activity_chat/` | Xat de cada activitat entre les persones apuntades (#148): missatges, enviament i refresc periòdic. Vegeu [Xat de l’activitat](activity-chat.md). |
-| `features/notifications/` | Bústia d'Avisos, filtres, lectura i resposta a sol·licituds de demostració, separats de l'enviament de notificacions. |
+| `features/notifications/` | Bústia d’Avisos, filtres, lectura i respostes d’amistat confirmades mitjançant el contracte compartit de Perfil, separats de l’enviament de notificacions. |
 | `assets/images/` | Fotografies i imatges de contingut. |
 | `assets/branding/` | Logotip i recursos d’identitat d’AProp!. |
 | `assets/icons/` | Icones de tercers que no ofereix Material, com el logotip de Google. |
@@ -249,3 +249,27 @@ Afegim paquets només quan hi ha codi que els necessita i revisem també el lock
 Les futures funcionalitats tindran carpetes pròpies sota `features/` quan comencem a implementar-les, com ja fan `agenda/` i `profile/`. Seguim el mateix patró i compartim només el que té sentit. Si apareix lògica de negoci complexa o repetida entre ViewModels, podem afegir casos d’ús després de revisar la necessitat.
 
 La interfície de l’aplicació és en català. Revisem els mockups, la llegibilitat, els estats de càrrega/buit/error i les interaccions abans de marcar una tasca com a completada. Les proves comproven comportaments; una PR amb dades de demostració ha d’indicar explícitament la integració pendent.
+
+### Acceptació d’amistat — Taiga #164
+
+`ReceivedFriendRequest` i `FriendRequestResolution` són models immutables en Dart pur de Perfil.
+`FriendshipRepository` és la font compartida de sol·licituds rebudes i confirmacions, separada dels
+snapshots de perfil i de les notificacions. `CachedFriendshipRepository` agrupa les lectures i respostes
+per compte/sol·licitud, conserva només resultats confirmats i publica un stream per compte; un GET antic
+no pot reintroduir una sol·licitud resolta. Els adaptadors HTTP/Demo defineixen l’accés a les dades.
+
+`main.dart` injecta una mateixa instància HTTP a `APropApp` i `HttpNotificationRepository`. La composició
+la passa per `AuthGate` i `MainShell` als ViewModels de Perfil i Avisos. Al mode Demo, `AuthGate` crea i
+allibera una instància compartida; els perfils projecten el recompte des de la base i les acceptacions,
+sense increments acumulatius. Els ViewModels s’alliberen de les subscripcions al `dispose`.
+
+La pantalla de perfil només invoca `performFriendAction`; el seu ViewModel distingeix enviament,
+sol·licitud rebuda, acceptació, amistat confirmada i error/reintent. Les confirmacions actualitzen el
+botó i les targetes de la bústia; els dos perfils recarreguen els comptadors del servidor. Si una càrrega
+o edició ja està en curs, el refresc queda pendent; no s’incrementen comptadors als widgets o ViewModels.
+La visibilitat dels plans continua depenent exclusivament de `plans-visible`.
+
+Avisos comparteix només models i el contracte de Perfil, mai el seu ViewModel. La lectura i l’acceptació
+són escriptures independents: un error de lectura no desfà una amistat confirmada. La reconciliació
+entre avisos i sol·licituds usa participants i data exacta; el text lliure no dona permisos d’acció.
+Vegeu [contracte, estat i límits](friend-requests.md), DP-064 i DP-066.

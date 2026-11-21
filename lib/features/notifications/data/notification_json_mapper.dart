@@ -1,4 +1,5 @@
 import '../models/app_notification.dart';
+import '../../../core/network/utc_timestamp.dart';
 
 /// The kebab-case payload, before context lookup. Bad required fields are
 /// errors, not an empty inbox or a received notice with an invented date.
@@ -17,6 +18,7 @@ class NotificationRecord {
        activityId = json['event'] == null
            ? null
            : positiveNotificationId(json['event']),
+       requestDate = _requestDate(json['request-date']),
        personId = json['friend-id'] == null
            ? null
            : notificationUserId(json['friend-id']) {
@@ -31,6 +33,7 @@ class NotificationRecord {
   final bool isRead;
   final String? activityId;
   final String? personId;
+  final DateTime? requestDate;
 }
 
 String positiveNotificationId(Object? value) {
@@ -86,4 +89,16 @@ Map<String, NotificationType> notificationTypesFromJson(Object? decoded) {
     };
   }
   return Map.unmodifiable(types);
+}
+
+// An absent/invalid optional reference never makes a generic notice actionable.
+DateTime? _requestDate(Object? value) {
+  if (value == null) return null;
+  try {
+    // TODO(DP-066): request-date is a zone-less SQL timestamp representing the
+    // same UTC instant as date-sent. Never interpret it in the device timezone.
+    return utcTimestamp(value, allowMissingZone: true);
+  } on FormatException {
+    return null;
+  }
 }

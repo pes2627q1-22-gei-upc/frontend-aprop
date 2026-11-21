@@ -18,6 +18,7 @@ import '../features/notifications/repositories/notification_repository.dart';
 import '../features/profile/repositories/profile_repository.dart';
 import '../features/profile/repositories/profile_settings_repository.dart';
 import '../features/profile/repositories/public_profile_repository.dart';
+import '../features/profile/repositories/friendship_repository.dart';
 import '../features/profile/repositories/friends_repository.dart';
 import '../features/profile/repositories/user_search_repository.dart';
 import 'navigation/auth_gate.dart';
@@ -37,6 +38,7 @@ class APropApp extends StatelessWidget {
     this.profileRepository,
     this.profileSettingsRepository,
     this.publicProfileRepository,
+    this.friendshipRepository,
     this.userSearchRepository,
     this.friendsRepository,
     this.interestTestRepository,
@@ -66,6 +68,7 @@ class APropApp extends StatelessWidget {
   final ProfileRepository? profileRepository;
   final ProfileSettingsRepository? profileSettingsRepository;
   final PublicProfileRepository? publicProfileRepository;
+  final FriendshipRepository? friendshipRepository;
   final UserSearchRepository? userSearchRepository;
   final FriendsRepository? friendsRepository;
   final InterestTestRepository? interestTestRepository;
@@ -89,6 +92,7 @@ class APropApp extends StatelessWidget {
         profileRepository,
         profileSettingsRepository,
         publicProfileRepository,
+        friendshipRepository,
         userSearchRepository,
         friendsRepository,
         interestTestRepository,
@@ -107,6 +111,7 @@ class APropApp extends StatelessWidget {
       profileRepository: profileRepository,
       profileSettingsRepository: profileSettingsRepository,
       publicProfileRepository: publicProfileRepository,
+      friendshipRepository: friendshipRepository,
       userSearchRepository: userSearchRepository,
       friendsRepository: friendsRepository,
       interestTestRepository: interestTestRepository,

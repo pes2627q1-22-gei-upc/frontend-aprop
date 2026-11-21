@@ -4,16 +4,17 @@
 
 ## Sprint
 
-- Sprint 2 · només frontend. Tasca activa #162: cerca de persones i navegació al perfil amb estat conservat.
+- Sprint 2 · només frontend. Tasca activa #164: acceptar amistats des d’Avisos i Perfil amb estat reactiu compartit.
 
 ## En curs
 
 | Taiga | Tasca | Branca | Estat |
 |---|---|---|---|
-| #148 | [FE] Xat de l'activitat | `feature/xat-activitat` | PR #59; correccions de la revisió (límit en runes, refresc sense encavalcar-se i pausat en segon pla, proves d'estats, documentació); DP-062 oberta |
-| #197 | [FE] `FriendsListScreen` + `FriendsListViewModel` connectada des de `ProfileScreen` + tests (història #54) | `feature/llista-amics` | Implementada (HTTP i Demo); DP-065 oberta; pendent revisió humana |
-| #160 | [FE] Botó d'acció d'amistat al perfil aliè + integració al ViewModel + tests | `feature/boto-amistat` | Implementada (HTTP i Demo); DP-064 oberta; pendent revisió humana |
-| #162 | [FE] Vista y `UserSearchViewModel` integrada en el buscador de Descobreix (fig. 16) + navegación al perfil conservando estado + tests | `feature/user-search-162` | Implementada amb HTTP/Demo; 725 proves, anàlisi i revisió tècnica correctes; sense commit/push |
+| #164 | [FE] Acceptar en avís social i perfil + comptadors/distintiu reactius + tests | `feature/accept-friend-request-164` | Implementada amb HTTP/Demo; 807 proves després del merge; revisió tècnica correcta; APK debug correcte; DP-066 oberta; resolució del merge pendent de commit/push |
+| #160 | [FE] Botó d'acció d'amistat al perfil aliè + integració al ViewModel + tests | `feature/boto-amistat` | Integrada a develop amb PR #63; DP-064 oberta |
+| #162 | [FE] Vista y `UserSearchViewModel` integrada en el buscador de Descobreix (fig. 16) + navegación al perfil conservando estado + tests | `feature/user-search-162` | Integrada a develop amb PR #64 |
+| #148 | [FE] Xat de l'activitat | `feature/xat-activitat` | Integrada a develop amb PR #59; correccions de la revisió (límit en runes, refresc sense encavalcar-se i pausat en segon pla, proves d'estats, documentació); DP-062 oberta |
+| #197 | [FE] `FriendsListScreen` + `FriendsListViewModel` connectada des de `ProfileScreen` + tests (història #54) | `feature/llista-amics` | Integrada a develop amb PR #65; DP-065 oberta |
 | #274 | [FE] Mapa a pantalla completa estil Google Maps | `feature/mapa-pantalla-completa` | PR #58; correccions de la revisió (proves, xips de 48 px, documentació, codi sense ús); només mapa per decisió de l’usuari (DP-061) |
 | #273 | [FE] Intercanviar Inici i Descobreix | `feature/intercanviar-inici-descobreix` | PR #57; correccions de la revisió (marge de l'assistent, documentació, proves); DP-060 oberta |
 | #28 | [FE] Canviar idioma (ca/es/en) | `feature/change-language-28` | Implementada (ARB + gen-l10n, selector a Configuració, `language` al backend, `?lang=`); DP-001 resolta; DP-054 i DP-055 obertes; pendent revisió humana i contracte backend |
@@ -25,25 +26,40 @@
 
 ## Base i abast
 
-- Branca independent des de `origin/develop@9245291`; backend contrastat a `454e22b`, sense modificar-lo.
-- `GET /users` de #161 i perfil públic de #277 disponibles. Autenticació Bearer, paginació des de zero, 20 files i límit de 100 punts de codi segons el contracte actual.
-- Models/contracte/adaptadors de dades d’usuaris a Perfil; `UserSearchViewModel` i files a la presentació del cercador existent. Sense dependències entre ViewModels de diferents features.
-- `main.dart` injecta HTTP; AuthGate disposa d’un adaptador Demo sobre les mateixes identitats que els perfils ficticis.
-- Mateix cercador des d’Inici i Mapa, respectant #273/#274. Consulta compartida entre modes i resultats independents.
-- Navegació al perfil al navegador de la secció; text, mode, pàgines i scroll conservats. El resultat propi obre Perfil sense destruir la cerca.
-- Textos ca/es/en als ARB i fitxers generats amb `flutter gen-l10n`; sense paquets nous ni canvis al backend.
-- Guia: `docs/user-search.md`; DP-024 actualitzada amb l’ampliació #162.
+- Branca `feature/accept-friend-request-164`, base `44b7bf1`, amb `origin/develop@8b4b5dd` incorporat sense commit (#197 i #148).
+- Backend contrastat a `454e22b`, intacte. Només frontend; cap commit, push o PR automàtics.
+- Contracte `FriendshipRepository`, models de sol·licitud/resolució i adaptadors HTTP/Demo a Perfil.
+- Mateixa instància per a Avisos, perfil propi i perfils públics. Cap dependència entre ViewModels.
+- Consulta autoritativa de rebudes amb `/users/me/friend-requests`; acceptació/rebuig per remitent i data UTC exacta.
+- Sol·licituds rebudes com a targetes quan manca l’avís automàtic; la lectura real continua separada. DP-066.
+- Botó «Acceptar»/«Acceptant…»/«Amiga/Amic», error/reintent i textos ca/es/en.
+- Comptadors recarregats del servidor; refresc pendent durant càrregues/edicions i descart de respostes antigues.
+- La privacitat dels plans continua depenent de `plans-visible`.
+- Guia de flux/contracte/límits: `docs/friend-requests.md`.
 
-## Verificació (2026-11-20)
+## Verificació #164 (2026-11-20)
 
-- 48 proves focalitzades superades: repositoris, ViewModel, pantalla i recorreguts de cerca/perfil; també es mantenen les de cerca d’activitats.
-- Comprovats debounce, Unicode, respostes tardanes, neteja, continuació, error/reintent, dispose, mode, scroll, perfil propi/aliè, accés des de Mapa, ca/es/en i 320 px amb text ×2.
-- Suite completa: 725 proves superades. `flutter analyze` sense incidències; format de 310 fitxers sense canvis; `git diff --check` correcte.
-- Revisió tècnica independent sense bloquejos. Captures Flutter amb fonts Roboto i dades Demo a `PES/output/frontend/task-162-{persones,perfil,retorn}.png`, renderitzat i retorn comprovats visualment. El script temporal reutilitza el mapa substituït de les proves del projecte.
-- No s’han executat peticions autenticades a Render ni el backend. Cap commit/push; l’usuari executa personalment aquests passos.
+- 26 proves noves: contracte HTTP, participants, microsegons, single-flight, resposta falsa, error/reintent,
+  canvi de compte, dispose, refrescos antics, comptadors, errors de lectura separats i pantalla estreta.
+- Recorregut d’app actualitzat: Avisos → perfil → acceptar → tornar a Avisos → Perfil propi, amb recompte reactiu.
+- Suite completa: **760 proves superades**. `flutter analyze` sense incidències. Format de 323 fitxers sense canvis.
+- Revisió tècnica independent: dues carreres corregides i cobertes amb regressions; segona revisió sense bloquejos.
+- Captures Flutter amb fonts Roboto i Demo a `PES/output/frontend/task-164-{avisos-pendent,perfil-pendent,perfil-acceptat,avisos-acceptat,comptador-propi}.png`.
+- Contrast del distintiu confirmat ajustat amb colors del tema; proves de pantalla i render tornats a passar.
+- Compilació `flutter build apk --debug` correcta (`build/app/outputs/flutter-apk/app-debug.apk`). No s’han executat el backend, migracions ni escriptures autenticades a Render.
 
 ## Pendents / següents passos
 
-1. Revisió humana, commit de #162, PR a develop i CI. Sense publicació automàtica.
-2. Comprovar la cerca/perfil amb una sessió real al desplegament i en Android.
-3. La resta de funcionalitats i contractes pendents es conserven a les seves guies/DP.
+1. Canvis preparats per revisar; `git diff --check` correcte.
+2. Revisar la resolució, fer el commit del merge i push a la mateixa branca per actualitzar la PR existent; l’usuari fa aquests passos personalment. Esperar CI i aprovació d’un company.
+3. Comprovar el recorregut amb dos comptes reals al desplegament i en Android.
+4. Backend/equip: avís automàtic en enviar sol·licitud i política de zona de `request-date` (DP-066).
+   Si cal historial resolt o lectura de sol·licituds després de reiniciar, falten aquests contractes.
+
+## Resolució de conflictes amb develop (2026-11-20)
+
+- `origin/develop@8b4b5dd` incorpora la llista d’amics #197 (PR #65) i el xat d’activitat #148 (PR #59).
+- Es conserven tots els repositoris/callbacks d’ambdues branques; no es substitueix cap funcionalitat.
+- DP-065 queda reservada a la llista d’amics. L’acceptació de #164 passa a DP-066 amb les seves referències.
+- Traduccions ca/es/en regenerades després de combinar els ARB. Conjunt verificat: 807 proves superades, anàlisi sense incidències, format de 343 fitxers i APK debug correctes. Revisió tècnica independent sense bloquejos.
+- El commit funcional `1bd9dc7` ja està publicat; la resolució del merge encara no té commit ni push; l’usuari actualitza la mateixa PR després de revisar-la.

@@ -73,7 +73,7 @@ void main() {
     // Already friends (#160): the button cannot send a request.
     final friend = find.byKey(const ValueKey('public-profile-friend'));
     expect(
-      find.descendant(of: friend, matching: find.text('Amics')),
+      find.descendant(of: friend, matching: find.text('Amiga/Amic')),
       findsOneWidget,
     );
     expect(tester.widget<ButtonStyleButton>(friend).onPressed, isNull);
@@ -128,14 +128,14 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.widgetWithText(AppBar, 'marcvidal'), findsOneWidget);
-      // Not friends (#160): send a request; it cannot be sent twice.
+      // An incoming request (#164): accept it rather than sending another one.
       final friend = find.byKey(const ValueKey('public-profile-friend'));
       await tester.tap(
-        find.descendant(of: friend, matching: find.text('Afegeix com a amic')),
+        find.descendant(of: friend, matching: find.text('Acceptar')),
       );
       await tester.pumpAndSettle();
       expect(
-        find.descendant(of: friend, matching: find.text('Sol·licitud enviada')),
+        find.descendant(of: friend, matching: find.text('Amiga/Amic')),
         findsOneWidget,
       );
       expect(tester.widget<ButtonStyleButton>(friend).onPressed, isNull);
@@ -147,11 +147,24 @@ void main() {
       await tester.tap(find.text('Plans fets'));
       await tester.pumpAndSettle();
       expect(
-        find.text(
-          'Els plans de Marc Vidal només els poden veure els seus amics.',
-        ),
+        find.text('Marc Vidal no comparteix els seus plans.'),
         findsOneWidget,
       );
+      await tester.tap(find.byTooltip('Tornar enrere'));
+      await tester.pumpAndSettle();
+      expect(find.text('Sol·licitud acceptada'), findsOneWidget);
+      expect(find.text('Acceptar'), findsNothing);
+      await tester.tap(
+        find.descendant(
+          of: find.byType(NavigationBar),
+          matching: find.text('Perfil'),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        find.text('15'),
+        findsOneWidget,
+      ); // 14 example friends + Marc, confirmed by the shared demo repository.
       expect(tester.takeException(), isNull);
     },
   );

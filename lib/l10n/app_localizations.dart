@@ -241,8 +241,26 @@ abstract class AppLocalizations {
   /// No description provided for @friendAlready.
   ///
   /// In ca, this message translates to:
-  /// **'Amics'**
+  /// **'Amiga/Amic'**
   String get friendAlready;
+
+  /// No description provided for @friendAccepting.
+  ///
+  /// In ca, this message translates to:
+  /// **'Acceptant…'**
+  String get friendAccepting;
+
+  /// No description provided for @friendAcceptError.
+  ///
+  /// In ca, this message translates to:
+  /// **'No hem pogut acceptar la sol·licitud. Torna-ho a provar.'**
+  String get friendAcceptError;
+
+  /// No description provided for @friendStatusError.
+  ///
+  /// In ca, this message translates to:
+  /// **'No hem pogut consultar les sol·licituds. Torna-ho a provar.'**
+  String get friendStatusError;
 
   /// No description provided for @friendRequestError.
   ///

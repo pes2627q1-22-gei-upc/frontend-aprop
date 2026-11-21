@@ -1,7 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 
 import '../../models/app_notification.dart';
 import '../../repositories/notification_repository.dart';
+import '../../../profile/models/received_friend_request.dart';
+import '../../../profile/repositories/friendship_repository.dart';
 import '../../../../core/l10n/locale_controller.dart';
 
 /// Inbox state for a single signed-in account. Contains no navigation/widgets.
@@ -10,7 +14,36 @@ class NotificationsViewModel extends ChangeNotifier {
     required this.userId,
     required this._repository,
     DateTime Function()? now,
-  }) : _now = now ?? DateTime.now;
+    this.friendshipRepository,
+  }) : _now = now ?? DateTime.now {
+    _friendChanges = friendshipRepository?.watchChanges(userId).listen((
+      change,
+    ) {
+      if (_isDisposed) return;
+      for (final notice in _notifications.where(
+        (n) => n.requestId == change.request.id,
+      )) {
+        _responseErrors.remove(notice.id);
+      }
+      _replaceWhere(
+        (n) => n.requestId == change.request.id,
+        (n) => n.resolveRequest(change.status, markRead: false),
+      );
+      notifyListeners();
+    });
+  }
+  final FriendshipRepository? friendshipRepository;
+  StreamSubscription<FriendRequestResolution>? _friendChanges;
+
+  AppNotification _reconcile(AppNotification notice) {
+    final resolution = friendshipRepository
+        ?.resolutions(userId)
+        .where((r) => r.request.id == notice.requestId)
+        .firstOrNull;
+    return resolution == null
+        ? notice
+        : notice.resolveRequest(resolution.status, markRead: false);
+  }
 
   final String userId;
   final NotificationRepository _repository;
@@ -20,6 +53,7 @@ class NotificationsViewModel extends ChangeNotifier {
   final Set<String> _reading = {};
   final Set<String> _responding = {};
   final Map<String, String> _errors = {};
+  final Map<String, String> _responseErrors = {};
   bool _isLoading = false;
   bool _hasLoaded = false;
   bool _isDisposed = false;
@@ -40,7 +74,7 @@ class NotificationsViewModel extends ChangeNotifier {
 
   bool isReading(String id) => _reading.contains(id);
   bool isResponding(String requestId) => _responding.contains(requestId);
-  String? errorFor(String id) => _errors[id];
+  String? errorFor(String id) => _responseErrors[id] ?? _errors[id];
 
   void selectFilter(NotificationCategory? category) {
     if (_isDisposed || category == _filter) return;
@@ -63,14 +97,19 @@ class NotificationsViewModel extends ChangeNotifier {
       final result = await _repository.getNotifications(userId);
       if (_isDisposed) return;
       final now = _now();
-      final received = result.where((n) => !n.receivedAt.isAfter(now)).toList()
-        ..sort((a, b) {
-          final time = b.receivedAt.compareTo(a.receivedAt);
-          return time == 0 ? a.id.compareTo(b.id) : time;
-        });
+      final received =
+          result
+              .map(_reconcile)
+              .where((n) => !n.receivedAt.isAfter(now))
+              .toList()
+            ..sort((a, b) {
+              final time = b.receivedAt.compareTo(a.receivedAt);
+              return time == 0 ? a.id.compareTo(b.id) : time;
+            });
       _notifications = List.unmodifiable(received);
       _hasLoaded = true;
       _errors.clear();
+      _responseErrors.clear();
     } catch (_) {
       if (!_isDisposed) {
         _errorMessage = currentL10n.notifLoadError;
@@ -129,7 +168,7 @@ class NotificationsViewModel extends ChangeNotifier {
     }
     final requestId = notice.requestId!;
     _responding.add(requestId);
-    _errors.remove(id);
+    _responseErrors.remove(id);
     notifyListeners();
     try {
       final status = await _repository.respondToFriendRequest(
@@ -143,17 +182,24 @@ class NotificationsViewModel extends ChangeNotifier {
       }
       _replaceWhere(
         (n) => n.requestId == requestId,
-        (n) => n.resolveRequest(status),
+        (n) => n.resolveRequest(status, markRead: friendshipRepository == null),
       );
     } catch (_) {
       if (!_isDisposed) {
-        _errors[id] = currentL10n.notifRespondError;
+        _responseErrors[id] = currentL10n.notifRespondError;
       }
     } finally {
       if (!_isDisposed) {
         _responding.remove(requestId);
         notifyListeners();
       }
+    }
+    // Acceptance and reading are separate server writes. A read failure must
+    // never make a confirmed friendship appear to have failed.
+    if (!_isDisposed &&
+        _find(id)?.requestStatus != FriendRequestStatus.pending &&
+        _find(id)?.isRead == false) {
+      await markAsRead(id);
     }
   }
 
@@ -169,6 +215,7 @@ class NotificationsViewModel extends ChangeNotifier {
   @override
   void dispose() {
     _isDisposed = true;
+    unawaited(_friendChanges?.cancel());
     super.dispose();
   }
 }

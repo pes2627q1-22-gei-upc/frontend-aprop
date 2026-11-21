@@ -1,5 +1,6 @@
 import '../../activities/repositories/activity_repository.dart';
 import '../models/app_notification.dart';
+import '../../profile/repositories/friendship_repository.dart';
 import '../repositories/notification_repository.dart';
 
 /// Historical mockup fixtures, isolated per demo account and lost on restart.
@@ -7,10 +8,12 @@ import '../repositories/notification_repository.dart';
 class DemoNotificationRepository implements NotificationRepository {
   DemoNotificationRepository({
     required this.activityRepository,
+    this.friendshipRepository,
     DateTime Function()? now,
   }) : _now = now ?? DateTime.now;
 
   final ActivityRepository activityRepository;
+  final FriendshipRepository? friendshipRepository;
   final DateTime Function() _now;
   final Map<String, List<AppNotification>> _inboxes = {};
   final Map<String, Future<List<AppNotification>>> _loading = {};
@@ -19,7 +22,7 @@ class DemoNotificationRepository implements NotificationRepository {
     if (userId.isEmpty) throw ArgumentError.value(userId, 'userId');
     final existing = _inboxes[userId];
     if (existing != null) return existing;
-    final pending = _loading.putIfAbsent(userId, _createFixtures);
+    final pending = _loading.putIfAbsent(userId, () => _createFixtures(userId));
     try {
       final notices = await pending;
       return _inboxes.putIfAbsent(userId, () => notices);
@@ -32,7 +35,17 @@ class DemoNotificationRepository implements NotificationRepository {
   Future<List<AppNotification>> getNotifications(String userId) async {
     final inbox = await _inbox(userId);
     final now = _now();
-    return List.unmodifiable(inbox.where((n) => !n.receivedAt.isAfter(now)));
+    final resolutions = friendshipRepository?.resolutions(userId) ?? const [];
+    return List.unmodifiable(
+      inbox.where((n) => !n.receivedAt.isAfter(now)).map((n) {
+        final resolved = resolutions
+            .where((r) => r.request.id == n.requestId)
+            .firstOrNull;
+        return resolved == null
+            ? n
+            : n.resolveRequest(resolved.status, markRead: false);
+      }),
+    );
   }
 
   @override
@@ -63,7 +76,14 @@ class DemoNotificationRepository implements NotificationRepository {
     if (notice.person!.id == userId) {
       throw StateError('R2: a user cannot respond to their own request.');
     }
-    final status = notice.requestStatus == FriendRequestStatus.pending
+    final friends = friendshipRepository;
+    final status = friends != null
+        ? (await friends.respond(
+            userId: userId,
+            requestId: requestId,
+            accept: accept,
+          )).status
+        : notice.requestStatus == FriendRequestStatus.pending
         ? (accept ? FriendRequestStatus.accepted : FriendRequestStatus.rejected)
         : notice.requestStatus!;
     for (var i = 0; i < inbox.length; i++) {
@@ -74,7 +94,7 @@ class DemoNotificationRepository implements NotificationRepository {
     return status;
   }
 
-  Future<List<AppNotification>> _createFixtures() async {
+  Future<List<AppNotification>> _createFixtures(String userId) async {
     final activities = {
       for (final activity in await activityRepository.getActivities())
         activity.id: activity,
@@ -89,13 +109,24 @@ class DemoNotificationRepository implements NotificationRepository {
       id: 'demo-person-julia',
       name: 'Júlia Riera',
     );
+    final friendships = friendshipRepository;
+    final pendingRequests =
+        await friendships?.getReceivedRequests(userId) ?? const [];
+    final marcRequest =
+        pendingRequests.where((r) => r.senderId == marc.id).firstOrNull ??
+        friendships
+            ?.resolutions(userId)
+            .where((r) => r.request.senderId == marc.id)
+            .firstOrNull
+            ?.request;
     final notices = <AppNotification>[
-      AppNotification.friendRequest(
-        id: 'demo-request-notice',
-        receivedAt: DateTime(2026, 9, 26, 16, 30),
-        person: marc,
-        requestId: 'demo-request-marc',
-      ),
+      if (friendships == null || marcRequest != null)
+        AppNotification.friendRequest(
+          id: 'demo-request-notice',
+          receivedAt: DateTime(2026, 9, 26, 16, 30),
+          person: marc,
+          requestId: marcRequest?.id ?? 'demo-request-marc',
+        ),
       AppNotification.friendRequestAccepted(
         id: 'demo-friend-accepted',
         receivedAt: DateTime(2026, 9, 26, 15, 20),

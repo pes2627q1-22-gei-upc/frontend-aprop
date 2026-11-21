@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../activities/models/activity.dart';
 import '../../../../core/l10n/locale_controller.dart';
 import '../../repositories/public_profile_repository.dart';
+import '../../repositories/friendship_repository.dart';
 import '../view_models/public_profile_view_model.dart';
 import '../widgets/profile_activity_tile.dart';
 import '../widgets/profile_header.dart';
@@ -16,11 +17,15 @@ class PublicProfileScreen extends StatefulWidget {
     required this.repository,
     required this.onActivitySelected,
     this.onSharePressed,
+    this.friendshipRepository,
+    this.currentUserId,
     this.onFriendsPressed,
   });
 
   final String userId;
   final PublicProfileRepository repository;
+  final FriendshipRepository? friendshipRepository;
+  final String? currentUserId;
   final ValueChanged<String> onActivitySelected;
 
   /// Receives the person's username.
@@ -43,6 +48,8 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
     _viewModel = PublicProfileViewModel(
       userId: widget.userId,
       repository: widget.repository,
+      friendshipRepository: widget.friendshipRepository,
+      currentUserId: widget.currentUserId,
     )..load();
   }
 
@@ -130,7 +137,7 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
                         null || FriendshipAction.unavailable => null,
                         final action => _FriendButton(
                           action: action,
-                          onPressed: model.sendFriendRequest,
+                          onPressed: model.performFriendAction,
                         ),
                       },
                       onShare: switch ((username, widget.onSharePressed)) {
@@ -265,6 +272,13 @@ class _FriendButton extends StatelessWidget {
         context.l10n.friendAdd,
       ),
       FriendshipAction.sending => (null, context.l10n.friendSending),
+      FriendshipAction.checking => (null, context.l10n.profileLoading),
+      FriendshipAction.accepting => (null, context.l10n.friendAccepting),
+      FriendshipAction.incoming => (
+        Icons.person_add_alt_1_outlined,
+        context.l10n.notifAccept,
+      ),
+      FriendshipAction.retry => (Icons.refresh, context.l10n.retry),
       FriendshipAction.requestSent => (
         Icons.schedule_send_outlined,
         context.l10n.friendRequestSent,
@@ -276,8 +290,23 @@ class _FriendButton extends StatelessWidget {
     };
     return FilledButton.icon(
       key: const ValueKey('public-profile-friend'),
-      onPressed: action == FriendshipAction.add ? onPressed : null,
+      onPressed:
+          {
+            FriendshipAction.add,
+            FriendshipAction.incoming,
+            FriendshipAction.retry,
+          }.contains(action)
+          ? onPressed
+          : null,
       style: FilledButton.styleFrom(
+        // Friendship is a confirmed status, so keep it legible even though
+        // the button no longer offers an action.
+        disabledBackgroundColor: action == FriendshipAction.friends
+            ? Theme.of(context).colorScheme.primaryContainer
+            : null,
+        disabledForegroundColor: action == FriendshipAction.friends
+            ? Theme.of(context).colorScheme.onPrimaryContainer
+            : null,
         minimumSize: const Size(0, 48),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       ),
