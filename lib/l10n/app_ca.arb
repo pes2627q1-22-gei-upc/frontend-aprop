@@ -1302,5 +1302,34 @@
         "type": "int"
       }
     }
-  }
+  },
+  "friendRemove": "Eliminar amistat",
+  "friendRemoveTitle": "Eliminar aquesta amistat?",
+  "friendRemoveMessage": "Vols eliminar l’amistat amb {name}?",
+  "@friendRemoveMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "friendRemoveSuccess": "Has eliminat l’amistat amb {name}.",
+  "@friendRemoveSuccess": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "friendRemoveError": "No hem pogut eliminar l’amistat. Torna-ho a provar.",
+  "friendRemoving": "Eliminant l’amistat",
+  "friendRemoveFrom": "Eliminar l’amistat amb {name}",
+  "@friendRemoveFrom": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "friendOptions": "Opcions d’amistat"
 }

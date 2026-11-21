@@ -2252,4 +2252,35 @@ class AppLocalizationsCa extends AppLocalizations {
   String userSearchTooLong(int limit) {
     return 'La cerca pot tenir com a màxim $limit caràcters.';
   }
+
+  @override
+  String get friendRemove => 'Eliminar amistat';
+
+  @override
+  String get friendRemoveTitle => 'Eliminar aquesta amistat?';
+
+  @override
+  String friendRemoveMessage(String name) {
+    return 'Vols eliminar l’amistat amb $name?';
+  }
+
+  @override
+  String friendRemoveSuccess(String name) {
+    return 'Has eliminat l’amistat amb $name.';
+  }
+
+  @override
+  String get friendRemoveError =>
+      'No hem pogut eliminar l’amistat. Torna-ho a provar.';
+
+  @override
+  String get friendRemoving => 'Eliminant l’amistat';
+
+  @override
+  String friendRemoveFrom(String name) {
+    return 'Eliminar l’amistat amb $name';
+  }
+
+  @override
+  String get friendOptions => 'Opcions d’amistat';
 }

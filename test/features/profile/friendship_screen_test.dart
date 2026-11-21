@@ -36,6 +36,8 @@ void main() {
             currentUserId: 'viewer',
             repository: DemoPublicProfileRepository(
               activityRepository: DemoActivityRepository(),
+              friendshipRepository: friendships,
+              currentUserId: () => 'viewer',
             ),
             friendshipRepository: friendships,
             onActivitySelected: (_) {},

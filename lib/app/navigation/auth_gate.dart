@@ -187,7 +187,12 @@ class _AuthGateState extends State<AuthGate> {
         );
     _userSearchRepository =
         widget.userSearchRepository ?? const DemoUserSearchRepository();
-    _friendsRepository = widget.friendsRepository ?? DemoFriendsRepository();
+    _friendsRepository =
+        widget.friendsRepository ??
+        DemoFriendsRepository(
+          friendshipRepository: _ownedFriendshipRepository,
+          currentUserId: () => _activeUserId,
+        );
     // One for the whole run, so answers survive signing out and in again.
     _attendanceRepository =
         widget.attendanceRepository ?? DemoAttendanceRepository();

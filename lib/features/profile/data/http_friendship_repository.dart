@@ -9,6 +9,23 @@ class HttpFriendshipRepository extends CachedFriendshipRepository {
   final ApiClient apiClient;
 
   @override
+  String peerId(String value) => value.toLowerCase();
+
+  @override
+  Future<void> sendRemoval(String userId, String friendId) async {
+    final target = _uuid(friendId);
+    final session = await ProfileApi(apiClient).own(userId);
+    if (target == (session.profile['id']! as String).toLowerCase()) {
+      throw ArgumentError('Cannot remove yourself');
+    }
+    // The 200 response confirms the write; its free-form message is not state.
+    await apiClient.postJson(
+      'users/${Uri.encodeComponent(target)}/unfriend',
+      headers: session.headers,
+    );
+  }
+
+  @override
   Future<List<ReceivedFriendRequest>> fetchReceived(String userId) async {
     final session = await ProfileApi(apiClient).own(userId);
     final owner = (session.profile['id']! as String).toLowerCase();

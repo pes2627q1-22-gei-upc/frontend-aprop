@@ -724,6 +724,8 @@ class _MainShellState extends State<MainShell> {
         ),
         builder: (context) => FriendsListScreen(
           repository: repository,
+          friendshipRepository: widget.friendshipRepository,
+          currentUserId: widget.user.id,
           userId: userId,
           ownerName: ownerName,
           // A la pròpia llista no hi surt qui mira; a la d'una altra persona

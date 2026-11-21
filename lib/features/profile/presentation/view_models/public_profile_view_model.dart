@@ -8,6 +8,7 @@ import '../../models/public_profile.dart';
 import '../../repositories/public_profile_repository.dart';
 import '../../repositories/friendship_repository.dart';
 import '../../models/received_friend_request.dart';
+import '../../models/friendship_removal.dart';
 
 /// Another person's profile. Its two lists load separately, so one failing
 /// does not hide the other or the header.
@@ -34,17 +35,60 @@ class PublicProfileViewModel extends ChangeNotifier {
             notifyListeners();
             _flushRefresh();
           });
+      _friendRemovals = friendshipRepository!
+          .watchRemovals(currentUserId!)
+          .listen((change) {
+            if (_isDisposed ||
+                (change.friendId != userId &&
+                    change.friendId != _profile?.profile.userId)) {
+              return;
+            }
+            _friendship = _outgoingState = FriendshipAction.add;
+            _incoming = null;
+            _friendRequestError = null;
+            final previous = _profile;
+            if (previous != null) {
+              _profile = PublicProfile(
+                profile: previous.profile,
+                plansVisible: false,
+                isFriend: false,
+              );
+            }
+            _plans.items = null;
+            _plans.error = null;
+            _revision++;
+            _reloadPending = true;
+            notifyListeners();
+            _flushRefresh();
+          });
     }
   }
   final FriendshipRepository? friendshipRepository;
   final String? currentUserId;
   StreamSubscription<FriendRequestResolution>? _friendChanges;
+  StreamSubscription<FriendshipRemoval>? _friendRemovals;
+  bool _removingFriend = false;
+  bool get isRemovingFriend => _removingFriend;
+  bool get canRemoveFriend =>
+      !_isDisposed &&
+      !_isLoading &&
+      !_removingFriend &&
+      _friendship == FriendshipAction.friends &&
+      friendshipRepository != null &&
+      currentUserId != null;
   ReceivedFriendRequest? _incoming;
   int _revision = 0;
   bool _reloadPending = false;
 
   void _flushRefresh() {
-    if (_isDisposed || !_reloadPending || _isLoading) return;
+    if (_isDisposed ||
+        !_reloadPending ||
+        _isLoading ||
+        _removingFriend ||
+        _plans.isLoading ||
+        _created.isLoading) {
+      return;
+    }
     _reloadPending = false;
     unawaited(load());
   }
@@ -105,6 +149,7 @@ class PublicProfileViewModel extends ChangeNotifier {
   Future<void> load() async {
     if (_isDisposed ||
         _isLoading ||
+        _removingFriend ||
         _friendship == FriendshipAction.accepting ||
         _friendship == FriendshipAction.rejecting) {
       return;
@@ -118,6 +163,11 @@ class PublicProfileViewModel extends ChangeNotifier {
       result = await repository.getPublicProfile(userId);
       if (_isDisposed) return;
       if (revision != _revision) return;
+      if (result.isFriend == true && currentUserId != null) {
+        friendshipRepository?.reconcileFriends(currentUserId!, [
+          result.profile.userId,
+        ]);
+      }
       _profile = result;
       _notFound = false;
       await _loadFriendship(result);
@@ -135,28 +185,23 @@ class PublicProfileViewModel extends ChangeNotifier {
         _flushRefresh();
       }
     }
-    if (result == null || _isDisposed) return;
+    if (result == null || _isDisposed || revision != _revision) return;
     // Never keep plans from before the person made them private.
-    if (!result.plansVisible) _plans.items = null;
+    if (!(_profile?.plansVisible ?? false)) _plans.items = null;
     await Future.wait([
       loadCreatedActivities(),
-      if (result.plansVisible) loadPastPlans(),
+      if (_profile?.plansVisible ?? false) loadPastPlans(),
     ]);
   }
 
   Future<void> _loadFriendship(PublicProfile profile) async {
     final friends = friendshipRepository;
     final account = currentUserId;
+    final confirmed = account == null
+        ? null
+        : friends?.confirmedFriendship(account, userId);
     if (profile.isFriend == true ||
-        (account != null &&
-            friends
-                    ?.resolutions(account)
-                    .any(
-                      (r) =>
-                          r.request.senderId == userId &&
-                          r.status == FriendRequestStatus.accepted,
-                    ) ==
-                true)) {
+        (profile.isFriend == null && confirmed == true)) {
       _friendship = FriendshipAction.friends;
       _incoming = null;
       return;
@@ -188,6 +233,32 @@ class PublicProfileViewModel extends ChangeNotifier {
   }
 
   FriendshipAction _outgoingState = FriendshipAction.add;
+
+  Future<bool> removeFriend() async {
+    if (!canRemoveFriend) return false;
+    final revision = _revision;
+    _removingFriend = true;
+    _friendRequestError = null;
+    notifyListeners();
+    try {
+      await friendshipRepository!.removeFriend(
+        userId: currentUserId!,
+        friendId: _profile?.profile.userId ?? userId,
+      );
+      return !_isDisposed;
+    } catch (_) {
+      if (!_isDisposed && revision == _revision) {
+        _friendRequestError = currentL10n.friendRemoveError;
+      }
+      return false;
+    } finally {
+      if (!_isDisposed) {
+        _removingFriend = false;
+        notifyListeners();
+        _flushRefresh();
+      }
+    }
+  }
 
   /// One entry point for the button; the widget never decides business actions.
   Future<void> performFriendAction() async {
@@ -290,21 +361,26 @@ class PublicProfileViewModel extends ChangeNotifier {
     String Function() errorText,
   ) async {
     if (_isDisposed || _profile == null || state.isLoading) return;
+    final revision = _revision;
     state
       ..isLoading = true
       ..error = null;
     notifyListeners();
     try {
       final items = await fetch();
-      if (_isDisposed) return;
+      if (_isDisposed || revision != _revision) return;
+      if (identical(state, _plans) && !(_profile?.plansVisible ?? false)) {
+        return;
+      }
       state.items = items;
     } catch (_) {
-      if (_isDisposed) return;
+      if (_isDisposed || revision != _revision) return;
       state.error = errorText();
     } finally {
       if (!_isDisposed) {
         state.isLoading = false;
         notifyListeners();
+        _flushRefresh();
       }
     }
   }
@@ -313,6 +389,7 @@ class PublicProfileViewModel extends ChangeNotifier {
   void dispose() {
     _isDisposed = true;
     unawaited(_friendChanges?.cancel());
+    unawaited(_friendRemovals?.cancel());
     super.dispose();
   }
 }

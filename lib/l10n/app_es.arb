@@ -634,5 +634,34 @@
   "userSearchLoaded": "{count, plural, =1{1 persona cargada} other{{count} personas cargadas}}",
   "userSearchLoadMore": "Cargar más personas",
   "userSearchMoreError": "No hemos podido cargar más personas. Vuelve a intentarlo.",
-  "userSearchTooLong": "La búsqueda puede tener como máximo {limit} caracteres."
+  "userSearchTooLong": "La búsqueda puede tener como máximo {limit} caracteres.",
+  "friendRemove": "Eliminar amistad",
+  "friendRemoveTitle": "¿Eliminar esta amistad?",
+  "friendRemoveMessage": "¿Quieres eliminar la amistad con {name}?",
+  "@friendRemoveMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "friendRemoveSuccess": "Has eliminado la amistad con {name}.",
+  "@friendRemoveSuccess": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "friendRemoveError": "No hemos podido eliminar la amistad. Vuelve a intentarlo.",
+  "friendRemoving": "Eliminando la amistad",
+  "friendRemoveFrom": "Eliminar la amistad con {name}",
+  "@friendRemoveFrom": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "friendOptions": "Opciones de amistad"
 }

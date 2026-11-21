@@ -880,3 +880,13 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Codi:** `TODO(DP-074)` a `activities_map.dart`.
 - **Qui decideix:** equip/PO (radi inicial i moment de demanar el permís)
 - **Resolució:**
+
+### DP-076 · Ubicació de l’acció d’eliminar amistat (#195)
+- **Estat:** oberta · 2026-11-21 · Taiga #195, història #53 · només frontend.
+- **Context:** la tasca diu `FriendsListScreen` i `ProfileScreen`; `ProfileScreen` és el perfil propi i no representa una relació amb una altra persona. Els mockups no concreten el diàleg ni la ubicació d’eliminar.
+- **Deduït:** acció visible a cada fila de la llista pròpia i al menú superior de `PublicProfileScreen` quan consta amistat. El perfil propi dona accés a la seva llista amb el comptador Amics; no hi ha autoeliminació ni gestió de relacions alienes. Mateix diàleg per a totes dues entrades, amb nom, Cancel·lar i Eliminar amistat; tornar/cancel·lar no escriu res.
+- **Comportament:** només una confirmació correcta de `POST /users/{id}/unfriend` retira la relació i provoca la recàrrega de comptadors. No es bloqueja la persona, no s’esborren activitats ni es tanquen perfils. Un error conserva l’amistat i permet reintentar. El frontend no interpreta el text dels errors 400 ni promet la possibilitat de tornar a enviar una petició (això depèn del contracte de sol·licituds del servidor).
+- **Demo:** conserva els recomptes i persones sembrats dels mockups, amb acceptacions/eliminacions confirmades per compte durant l’execució. No s’inventa un graf complet per justificar els recomptes d’exemple. HTTP recarrega els recomptes reals i el servidor determina la privacitat dels plans; una eliminació confirmada amaga qualsevol còpia local anterior.
+- **Codi:** `TODO(DP-076)` a `public_profile_screen.dart`. Guia `docs/remove-friend.md`.
+- **Qui decideix:** equip frontend/PO (presentació i interpretació del nom de pantalla de la tasca).
+- **Resolució:**

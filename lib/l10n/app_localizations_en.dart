@@ -2233,4 +2233,34 @@ class AppLocalizationsEn extends AppLocalizations {
   String userSearchTooLong(int limit) {
     return 'Search can contain up to $limit characters.';
   }
+
+  @override
+  String get friendRemove => 'Remove friend';
+
+  @override
+  String get friendRemoveTitle => 'Remove this friend?';
+
+  @override
+  String friendRemoveMessage(String name) {
+    return 'Do you want to remove $name from your friends?';
+  }
+
+  @override
+  String friendRemoveSuccess(String name) {
+    return 'You removed $name from your friends.';
+  }
+
+  @override
+  String get friendRemoveError => 'We couldn’t remove this friend. Try again.';
+
+  @override
+  String get friendRemoving => 'Removing friend';
+
+  @override
+  String friendRemoveFrom(String name) {
+    return 'Remove $name from your friends';
+  }
+
+  @override
+  String get friendOptions => 'Friendship options';
 }
