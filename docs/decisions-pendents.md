@@ -814,3 +814,15 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Codi:** `TODO(DP-069)` a `enrollment_view_model.dart`.
 - **Qui decideix:** backend (`state` a l’activitat i bloqueig d’inscripcions)
 - **Resolució:**
+
+### DP-071 · Avís de cancel·lació (#47): filtre i estat de l’activitat
+- **Estat:** oberta · 2026-11-21 · Claude Code (Opus 5.5) a petició de l’usuari · Taiga #183 (història #47)
+- **Identificador:** la DP-070 és de la #170 (Adam, PR oberta); es fa servir la DP-071 per no col·lidir-hi.
+- **Context:** `NotificationType.activityCancelled`, `notificationTypesFromJson`, `notificationMessage`, `NotificationsScreen.onActivitiesCancelled`, `MainShell`. Backend consultat a `api-aprop@develop` sense modificar-lo: en cancel·lar una activitat (#46) es crea un avís de tipus «Cancelacio» (amb l’activitat) per a cada persona apuntada, excepte qui l’ha creada.
+- **Deduït (sense confirmar):**
+  - El mockup (fig. 17) només té els filtres Tots / Social / Recordatoris / Recomanacions. La cancel·lació va a «Recordatoris» perquè parla dels plans de la persona; el distintiu de la targeta diu «Recordatori» i el text diu «S’ha cancel·lat «…»».
+  - Com que l’API no diu si una activitat està cancel·lada (DP-069), l’avís és l’única manera que en té qui s’hi havia apuntat: en carregar els avisos, l’app marca l’activitat «Cancel·lada» a tota l’app i ja no s’hi pot apuntar.
+  - Demo: no hi ha cap avís de cancel·lació d’exemple, perquè marcaria com a cancel·lada una activitat del catàleg de demostració.
+- **Codi:** `TODO(DP-071)` a `app_notification.dart`; `TODO(DP-069)` a `notifications_screen.dart`.
+- **Qui decideix:** equip/PO (filtre i distintiu de les cancel·lacions)
+- **Resolució:**

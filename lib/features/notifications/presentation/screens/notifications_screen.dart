@@ -17,6 +17,7 @@ class NotificationsScreen extends StatefulWidget {
     required this.onActivitySelected,
     this.onPersonSelected,
     this.friendshipRepository,
+    this.onActivitiesCancelled,
     this.now,
   });
 
@@ -26,6 +27,10 @@ class NotificationsScreen extends StatefulWidget {
   final ValueChanged<String> onActivitySelected;
   // App composition supplies the profile destination; responding is independent.
   final ValueChanged<String>? onPersonSelected;
+
+  /// Activities that the received notices say were cancelled (#47): the app
+  /// shows them as cancelled everywhere.
+  final ValueChanged<Set<String>>? onActivitiesCancelled;
   final DateTime Function()? now;
 
   @override
@@ -48,8 +53,21 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       repository: widget.repository,
       friendshipRepository: widget.friendshipRepository,
       now: widget.now,
-    );
+    )..addListener(_reportCancelled);
     _viewModel.load();
+  }
+
+  // TODO(DP-069): the notices are the only way the people who joined learn
+  // that an activity was cancelled; the activities do not say it.
+  void _reportCancelled() {
+    final report = widget.onActivitiesCancelled;
+    if (report == null) return;
+    final ids = {
+      for (final notice in _viewModel.notifications)
+        if (notice.type == NotificationType.activityCancelled)
+          ?notice.activityId,
+    };
+    if (ids.isNotEmpty) report(ids);
   }
 
   @override

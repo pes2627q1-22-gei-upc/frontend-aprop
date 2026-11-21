@@ -1696,6 +1696,18 @@ abstract class AppLocalizations {
   /// **'Tens un nou avís.'**
   String get notifMessageOther;
 
+  /// No description provided for @notifMessageCancelledFor.
+  ///
+  /// In ca, this message translates to:
+  /// **'S’ha cancel·lat «{title}».'**
+  String notifMessageCancelledFor(String title);
+
+  /// No description provided for @notifMessageCancelled.
+  ///
+  /// In ca, this message translates to:
+  /// **'S’ha cancel·lat una activitat on t’havies apuntat.'**
+  String get notifMessageCancelled;
+
   /// No description provided for @notifMessagePublished.
   ///
   /// In ca, this message translates to:

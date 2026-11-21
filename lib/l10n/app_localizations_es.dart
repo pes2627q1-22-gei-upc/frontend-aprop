@@ -1003,6 +1003,15 @@ class AppLocalizationsEs extends AppLocalizations {
   String get notifMessageOther => 'Tienes un nuevo aviso.';
 
   @override
+  String notifMessageCancelledFor(String title) {
+    return 'Se ha cancelado «$title».';
+  }
+
+  @override
+  String get notifMessageCancelled =>
+      'Se ha cancelado una actividad a la que te habías apuntado.';
+
+  @override
   String notifMessagePublished(String name, String title) {
     return '$name ha publicado “$title”.';
   }

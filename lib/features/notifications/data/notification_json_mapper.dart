@@ -85,6 +85,9 @@ Map<String, NotificationType> notificationTypesFromJson(Object? decoded) {
       'social' => NotificationType.socialUpdate,
       'recomanacio' => NotificationType.recommendation,
       'recordatori' => NotificationType.reminder,
+      // Created by the backend for each person signed up when the creator
+      // cancels an activity (#46, #47).
+      'cancelacio' => NotificationType.activityCancelled,
       _ => NotificationType.other,
     };
   }

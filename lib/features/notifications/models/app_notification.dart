@@ -14,10 +14,15 @@ enum NotificationType {
   reminder,
   recommendation,
   socialUpdate,
+
+  /// An activity the person joined was cancelled by its creator (#47).
+  activityCancelled,
   other;
 
   NotificationCategory? get category => switch (this) {
-    reminder => NotificationCategory.reminders,
+    // TODO(DP-071): no filter of the mockup is for cancellations; they are
+    // about the person's plans, like the reminders.
+    reminder || activityCancelled => NotificationCategory.reminders,
     recommendation => NotificationCategory.recommendations,
     other => null,
     _ => NotificationCategory.social,
@@ -127,6 +132,7 @@ class AppNotification {
       NotificationType.reminder,
       NotificationType.recommendation,
       NotificationType.socialUpdate,
+      NotificationType.activityCancelled,
       NotificationType.other,
     }.contains(type)) {
       throw ArgumentError(
@@ -139,7 +145,8 @@ class AppNotification {
       );
     }
     if ((type == NotificationType.reminder ||
-            type == NotificationType.recommendation) &&
+            type == NotificationType.recommendation ||
+            type == NotificationType.activityCancelled) &&
         person != null) {
       throw ArgumentError(
         'Reminders and recommendations do not have an actor.',

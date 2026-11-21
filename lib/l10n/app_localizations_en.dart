@@ -991,6 +991,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notifMessageOther => 'You have a new alert.';
 
   @override
+  String notifMessageCancelledFor(String title) {
+    return '«$title» has been cancelled.';
+  }
+
+  @override
+  String get notifMessageCancelled =>
+      'An activity you signed up for has been cancelled.';
+
+  @override
   String notifMessagePublished(String name, String title) {
     return '$name published “$title”.';
   }

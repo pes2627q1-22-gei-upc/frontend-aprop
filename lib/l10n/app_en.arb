@@ -266,6 +266,8 @@
   "notifMessageSocialPerson": "You have a social alert related to {name}.",
   "notifMessageSocial": "You have a new social alert.",
   "notifMessageOther": "You have a new alert.",
+  "notifMessageCancelledFor": "«{title}» has been cancelled.",
+  "notifMessageCancelled": "An activity you signed up for has been cancelled.",
   "notifMessagePublished": "{name} published “{title}”.",
   "notifMessageEnrolled": "{name} signed up for “{title}”.",
   "notifMessageFriendRequest": "{name} sent you a friend request.",
