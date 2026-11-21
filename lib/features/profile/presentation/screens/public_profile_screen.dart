@@ -137,8 +137,23 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
                         null || FriendshipAction.unavailable => null,
                         final action => _FriendButton(
                           action: action,
+                          enabled: !model.isLoading,
                           onPressed: model.performFriendAction,
                         ),
+                      },
+                      // TODO(DP-067): received actions share a row; sharing moves below.
+                      secondaryAction: switch (model.friendship) {
+                        FriendshipAction.incoming ||
+                        FriendshipAction.accepting ||
+                        FriendshipAction.rejecting => _RejectFriendButton(
+                          isRejecting:
+                              model.friendship == FriendshipAction.rejecting,
+                          enabled:
+                              model.friendship == FriendshipAction.incoming &&
+                              !model.isLoading,
+                          onPressed: model.rejectFriendRequest,
+                        ),
+                        _ => null,
                       },
                       onShare: switch ((username, widget.onSharePressed)) {
                         (final name?, final share?) when name.isNotEmpty =>
@@ -148,6 +163,13 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
                     ),
                   ),
                 ),
+                if (model.friendRequestFeedback case final message?)
+                  SliverPadding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                    sliver: SliverToBoxAdapter(
+                      child: Semantics(liveRegion: true, child: Text(message)),
+                    ),
+                  ),
                 if (model.friendRequestError ??
                         (model.friendship == FriendshipAction.unavailable
                             ? context.l10n.friendRequestBlocked
@@ -259,9 +281,14 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
 
 /// «Afegeix com a amic» and the states that follow it (#160).
 class _FriendButton extends StatelessWidget {
-  const _FriendButton({required this.action, required this.onPressed});
+  const _FriendButton({
+    required this.action,
+    required this.onPressed,
+    this.enabled = true,
+  });
 
   final FriendshipAction action;
+  final bool enabled;
   final VoidCallback onPressed;
 
   @override
@@ -274,7 +301,7 @@ class _FriendButton extends StatelessWidget {
       FriendshipAction.sending => (null, context.l10n.friendSending),
       FriendshipAction.checking => (null, context.l10n.profileLoading),
       FriendshipAction.accepting => (null, context.l10n.friendAccepting),
-      FriendshipAction.incoming => (
+      FriendshipAction.rejecting || FriendshipAction.incoming => (
         Icons.person_add_alt_1_outlined,
         context.l10n.notifAccept,
       ),
@@ -292,10 +319,11 @@ class _FriendButton extends StatelessWidget {
       key: const ValueKey('public-profile-friend'),
       onPressed:
           {
-            FriendshipAction.add,
-            FriendshipAction.incoming,
-            FriendshipAction.retry,
-          }.contains(action)
+                FriendshipAction.add,
+                FriendshipAction.incoming,
+                FriendshipAction.retry,
+              }.contains(action) &&
+              enabled
           ? onPressed
           : null,
       style: FilledButton.styleFrom(
@@ -320,6 +348,39 @@ class _FriendButton extends StatelessWidget {
       label: Text(label, textAlign: TextAlign.center),
     );
   }
+}
+
+/// Secondary action on the same received request as the Acceptar button.
+class _RejectFriendButton extends StatelessWidget {
+  const _RejectFriendButton({
+    required this.isRejecting,
+    required this.enabled,
+    required this.onPressed,
+  });
+  final bool isRejecting;
+  final bool enabled;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) => OutlinedButton.icon(
+    key: const ValueKey('public-profile-reject-friend'),
+    onPressed: enabled ? onPressed : null,
+    style: OutlinedButton.styleFrom(
+      minimumSize: const Size(0, 48),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+    ),
+    icon: isRejecting
+        ? const SizedBox(
+            width: 18,
+            height: 18,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          )
+        : const Icon(Icons.person_remove_outlined),
+    label: Text(
+      isRejecting ? context.l10n.friendRejecting : context.l10n.notifDecline,
+      textAlign: TextAlign.center,
+    ),
+  );
 }
 
 class _ActivityGrid extends StatelessWidget {

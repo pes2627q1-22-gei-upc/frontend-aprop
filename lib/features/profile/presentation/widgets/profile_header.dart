@@ -19,6 +19,7 @@ class ProfileHeader extends StatelessWidget {
     this.showAvatarAction = false,
     this.showEdit = true,
     this.primaryAction,
+    this.secondaryAction,
     this.onFriendsPressed,
   });
 
@@ -29,12 +30,16 @@ class ProfileHeader extends StatelessWidget {
   final bool isChangingAvatar;
   final bool showAvatarAction;
 
-  /// False on another person's profile: only «Compartir perfil» is shown.
+  /// False on another person's profile: hides the owner-only edit action.
   final bool showEdit;
 
   /// Takes the place of «Editar perfil» when [showEdit] is false (for
   /// example, the friend button on another person's profile).
   final Widget? primaryAction;
+
+  /// Optional companion to the public profile's primary action. Sharing moves
+  /// to its own row so both request actions keep comfortable touch targets.
+  final Widget? secondaryAction;
 
   /// Opens the friends list (#54); null leaves the counter as a number.
   final VoidCallback? onFriendsPressed;
@@ -186,31 +191,37 @@ class ProfileHeader extends StatelessWidget {
               Expanded(child: action),
               const SizedBox(width: 8),
             ],
-            Expanded(
-              child: Tooltip(
-                message: onShare == null
-                    ? context.l10n.shareNeedsUsername
-                    : context.l10n.shareUsername,
-                child: OutlinedButton(
-                  onPressed: onShare,
-                  style: OutlinedButton.styleFrom(
-                    minimumSize: const Size(0, 48),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                  ),
-                  child: Text(
-                    context.l10n.shareProfile,
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              ),
-            ),
+            if (secondaryAction case final action?)
+              Expanded(child: action)
+            else
+              _shareButton(context),
           ],
         ),
+        if (secondaryAction != null) ...[
+          const SizedBox(height: 8),
+          Row(children: [_shareButton(context)]),
+        ],
       ],
     );
   }
+
+  Widget _shareButton(BuildContext context) => Expanded(
+    child: Tooltip(
+      message: onShare == null
+          ? context.l10n.shareNeedsUsername
+          : context.l10n.shareUsername,
+      child: OutlinedButton(
+        onPressed: onShare,
+        style: OutlinedButton.styleFrom(
+          minimumSize: const Size(0, 48),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
+        ),
+        child: Text(context.l10n.shareProfile, textAlign: TextAlign.center),
+      ),
+    ),
+  );
 }
 
 class _Statistic extends StatelessWidget {
