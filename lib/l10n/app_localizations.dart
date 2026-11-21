@@ -3783,6 +3783,114 @@ abstract class AppLocalizations {
   /// In ca, this message translates to:
   /// **'Opcions d’amistat'**
   String get friendOptions;
+
+  /// No description provided for @blockedLoading.
+  ///
+  /// In ca, this message translates to:
+  /// **'Carregant usuaris bloquejats'**
+  String get blockedLoading;
+
+  /// No description provided for @blockedLoadError.
+  ///
+  /// In ca, this message translates to:
+  /// **'No hem pogut carregar els usuaris bloquejats. Torna-ho a provar.'**
+  String get blockedLoadError;
+
+  /// No description provided for @blockedEmptyTitle.
+  ///
+  /// In ca, this message translates to:
+  /// **'No tens usuaris bloquejats'**
+  String get blockedEmptyTitle;
+
+  /// No description provided for @blockedEmptyMessage.
+  ///
+  /// In ca, this message translates to:
+  /// **'Els usuaris que bloquegis apareixeran aquí.'**
+  String get blockedEmptyMessage;
+
+  /// No description provided for @userBlock.
+  ///
+  /// In ca, this message translates to:
+  /// **'Bloquejar'**
+  String get userBlock;
+
+  /// No description provided for @userUnblock.
+  ///
+  /// In ca, this message translates to:
+  /// **'Desbloquejar'**
+  String get userUnblock;
+
+  /// No description provided for @userBlocking.
+  ///
+  /// In ca, this message translates to:
+  /// **'Bloquejant l’usuari'**
+  String get userBlocking;
+
+  /// No description provided for @userUnblocking.
+  ///
+  /// In ca, this message translates to:
+  /// **'Desbloquejant l’usuari'**
+  String get userUnblocking;
+
+  /// No description provided for @userBlockTitle.
+  ///
+  /// In ca, this message translates to:
+  /// **'Bloquejar {name}?'**
+  String userBlockTitle(String name);
+
+  /// No description provided for @userUnblockTitle.
+  ///
+  /// In ca, this message translates to:
+  /// **'Desbloquejar {name}?'**
+  String userUnblockTitle(String name);
+
+  /// No description provided for @userBlockMessage.
+  ///
+  /// In ca, this message translates to:
+  /// **'No us podreu enviar sol·licituds d’amistat. Si ja sou amics, l’amistat s’eliminarà.'**
+  String get userBlockMessage;
+
+  /// No description provided for @userUnblockMessage.
+  ///
+  /// In ca, this message translates to:
+  /// **'Desbloquejar no recupera l’amistat anterior.'**
+  String get userUnblockMessage;
+
+  /// No description provided for @userBlockError.
+  ///
+  /// In ca, this message translates to:
+  /// **'No hem pogut bloquejar l’usuari. Torna-ho a provar.'**
+  String get userBlockError;
+
+  /// No description provided for @userUnblockError.
+  ///
+  /// In ca, this message translates to:
+  /// **'No hem pogut desbloquejar l’usuari. Torna-ho a provar.'**
+  String get userUnblockError;
+
+  /// No description provided for @userBlockSuccess.
+  ///
+  /// In ca, this message translates to:
+  /// **'Has bloquejat {name}.'**
+  String userBlockSuccess(String name);
+
+  /// No description provided for @userUnblockSuccess.
+  ///
+  /// In ca, this message translates to:
+  /// **'Has desbloquejat {name}.'**
+  String userUnblockSuccess(String name);
+
+  /// No description provided for @userUnblockFrom.
+  ///
+  /// In ca, this message translates to:
+  /// **'Desbloquejar {name}'**
+  String userUnblockFrom(String name);
+
+  /// No description provided for @userBlockedState.
+  ///
+  /// In ca, this message translates to:
+  /// **'Has bloquejat aquest usuari.'**
+  String get userBlockedState;
 }
 
 class _AppLocalizationsDelegate

@@ -655,5 +655,58 @@
       }
     }
   },
-  "friendOptions": "Opciones de amistad"
+  "friendOptions": "Opciones de amistad",
+  "blockedLoading": "Cargando usuarios bloqueados",
+  "blockedLoadError": "No hemos podido cargar los usuarios bloqueados. Vuelve a intentarlo.",
+  "blockedEmptyTitle": "No tienes usuarios bloqueados",
+  "blockedEmptyMessage": "Los usuarios que bloquees aparecerán aquí.",
+  "userBlock": "Bloquear",
+  "userUnblock": "Desbloquear",
+  "userBlocking": "Bloqueando al usuario",
+  "userUnblocking": "Desbloqueando al usuario",
+  "userBlockTitle": "¿Bloquear a {name}?",
+  "@userBlockTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "userUnblockTitle": "¿Desbloquear a {name}?",
+  "@userUnblockTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "userBlockMessage": "No podréis enviaros solicitudes de amistad. Si ya sois amigos, se eliminará la amistad.",
+  "userUnblockMessage": "Desbloquear no recupera la amistad anterior.",
+  "userBlockError": "No hemos podido bloquear al usuario. Vuelve a intentarlo.",
+  "userUnblockError": "No hemos podido desbloquear al usuario. Vuelve a intentarlo.",
+  "userBlockSuccess": "Has bloqueado a {name}.",
+  "@userBlockSuccess": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "userUnblockSuccess": "Has desbloqueado a {name}.",
+  "@userUnblockSuccess": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "userUnblockFrom": "Desbloquear a {name}",
+  "@userUnblockFrom": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "userBlockedState": "Has bloqueado a este usuario."
 }

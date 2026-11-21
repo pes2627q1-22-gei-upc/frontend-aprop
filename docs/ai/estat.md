@@ -4,13 +4,14 @@
 
 ## Sprint
 
-- Sprint 2 · només frontend. Tasca activa #195: eliminar amistats des de la llista pròpia i el perfil aliè, amb confirmació i proves.
+- Sprint 2 · només frontend. Tasca activa #179: bloqueig al perfil i gestió d’usuaris bloquejats a Configuració.
 
 ## En curs
 
 | Taiga | Tasca | Branca | Estat |
 |---|---|---|---|
-| #195 | [FE] Eliminar amistat a la llista i perfil amb confirmació + tests (història #53) | `feature/remove-friend-195` | HTTP/Demo verificats: 933 proves, anàlisi, format i APK correctes; revisió tècnica aprovada; DP-076 de presentació; sense commit/push |
+| #179 | [FE] Bloqueig al perfil + BlockedUsersScreen a Configuració + tests (història #45) | `feature/block-users-179` | HTTP/Demo verificats: 970 proves, anàlisi, format i APK; revisió tècnica aprovada; branca sobre #195 (`fd95352`); DP-077; sense commit/push |
+| #195 | [FE] Eliminar amistat a la llista i perfil amb confirmació + tests (història #53) | `feature/remove-friend-195` | Publicada a `fd95352`; pendent d’integrar en començar #179. Verificada amb 933 proves, anàlisi i APK; DP-076 oberta |
 | #183 | [FE] Targeta d’avís de cancel·lació a `NotificationsScreen` + tests (història #47) | `feature/avis-cancel-lacio` | Integrada a develop amb PR #74; DP-071 oberta |
 | #170 | [FE] Targeta d’amistat acceptada a NotificationsScreen amb navegació al perfil + tests | `feature/accepted-friendship-notification-170` | Integrada a develop amb PR #72; classificació HTTP pendent (DP-070) |
 | #181 | [FE] Botó i diàleg de cancel·lació a la fitxa per a qui l’ha creada + reflex visual a l’Agenda i el catàleg + tests (història #46) | `feature/cancel-lar-activitat` | Integrada a develop amb PR #71 (`085a03a`); DP-069 oberta |
@@ -32,7 +33,31 @@
 | #277 | [FE] Perfil d'un altre usuari amb GET /users/{id} i privacitat dels plans (CA3) + tests | `feature/perfil-altre-usuari` | Implementada (HTTP i Demo); DP-063 oberta; pendent revisió humana |
 | #117 | [FE] Acció i diàleg de confirmació a Configuració + tancament de sessió + tests (història #10) | `feature/eliminar-compte` | Integrada a develop amb PR #73; DP-075 oberta |
 
-## Base i abast actual (#195)
+## Base i abast actual (#179)
+
+- Branca `feature/block-users-179` sobre `fd95352` de #195; cal integrar #195 abans de fusionar #179 cap a develop. Per revisar només #179 es compara amb `feature/remove-friend-195`.
+- Backend `4f98835` consultat sense canvis: GET bloquejats, POST block (201) i DELETE block (204).
+- Contracte `UserBlockingRepository` i font compartida d’amistat; snapshots per compte, agrupació d’operacions, confirmacions autenticades i protecció de lectures antigues.
+- Perfil, Configuració, llista de bloquejats i Avisos coordinats; bloquejar elimina amistat/peticions actives, desbloquejar no les recupera.
+- Interfície ca/es/en, confirmació i reintent; cap paquet o endpoint nou, cap política d’ocultació de contingut inventada.
+- Guia `docs/user-blocking.md`, presentació/abast i dependència a DP-077. Verificació local i revisió tècnica independent aprovades; sense commit/push.
+
+## Verificació #179 (2026-11-21)
+
+- 37 proves noves: contracte HTTP i autenticació, errors/reintent, consultes antigues, concurrència,
+  canvi de compte/dispose, peticions resoltes, comptadors i navegació de perfil/Configuració/llista.
+- 269 proves de regressió del conjunt de perfils, notificacions i recorreguts superades. Suite completa:
+  **970 proves superades**. Després de la neteja final, conjunt focal i render: 38 proves superades.
+- Revisió independent aprovada després de corregir dues regressions: llegir avisos d’una persona
+  bloquejada continua disponible, i un bloqueig conegut es conserva si falla una consulta posterior.
+- ca/es/en a 390 px i 320 px amb text ×2, controls natius i superfícies de 48 px comprovats.
+- `flutter analyze` sense incidències; format de 382 fitxers i `git diff --check` correctes.
+- `flutter build apk --debug` correcte. Captures Flutter amb fonts Roboto i Demo revisades a
+  `PES/output/frontend/task-179-{menu-perfil,confirmar-bloqueig,perfil-bloquejat,configuracio,usuaris-bloquejats,confirmar-desbloqueig,llista-buida}.png`.
+- Backend net a `4f98835`; cap migració ni escriptura a Render. Prova amb dos comptes reals en
+  Android, CI i revisió humana pendents. Sense commit/push.
+
+## Context anterior (#195)
 
 - Branca independent `feature/remove-friend-195` des de `origin/develop@112d2f8`; backend `4f98835` consultat, sense modificar.
 - HTTP real amb `POST /users/{id}/unfriend`, compte i bearer fixats amb `ProfileApi.own`, sense interpretar text lliure.
@@ -115,7 +140,7 @@
 
 ## Pendents / següents passos
 
-1. Revisió de l’usuari dels canvis #195, commit i PR cap a develop. CI, aprovació humana i prova amb dos comptes reals en Android pendents.
+1. Revisió de l’usuari, commit i PR de #179; integrar #195 abans de fusionar-la a develop. CI, revisió humana i prova amb dos comptes reals en Android pendents.
 2. Backend/equip: discriminador estructurat d’acceptació a la bústia (DP-070); després integrar el JSON real i comprovar el recorregut amb dos comptes al desplegament i Android.
 3. Backend/equip: avís automàtic en enviar sol·licitud i política de zona de `request-date` (DP-066).
    Si cal historial resolt o lectura de sol·licituds després de reiniciar, falten aquests contractes.

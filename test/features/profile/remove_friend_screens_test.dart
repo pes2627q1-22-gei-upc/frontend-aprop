@@ -218,8 +218,16 @@ void main() {
       await tester.pumpAndSettle();
       expect(
         find.byKey(const ValueKey('public-profile-friend-options')),
-        findsNothing,
+        findsOneWidget,
       );
+      await tester.tap(
+        find.byKey(const ValueKey('public-profile-friend-options')),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Eliminar amistat'), findsNothing);
+      expect(find.text('Bloquejar'), findsOneWidget);
+      await tester.tapAt(const Offset(10, 400));
+      await tester.pumpAndSettle();
       expect(find.text('Afegeix com a amic'), findsOneWidget);
       expect(find.text('Amiga/Amic'), findsNothing);
       expect(tester.takeException(), isNull);

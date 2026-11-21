@@ -17,6 +17,7 @@ class NotificationCard extends StatelessWidget {
     this.responding = false,
     this.error,
     this.enabled = true,
+    this.personBlocked = false,
   });
 
   final AppNotification notification;
@@ -27,6 +28,7 @@ class NotificationCard extends StatelessWidget {
   final bool responding;
   final String? error;
   final bool enabled;
+  final bool personBlocked;
 
   @override
   Widget build(BuildContext context) {
@@ -180,7 +182,12 @@ class NotificationCard extends StatelessWidget {
               ),
             ),
           ),
-          if (notice.type == NotificationType.friendRequest)
+          if (notice.type == NotificationType.friendRequest && personBlocked)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+              child: Text(context.l10n.userBlockedState),
+            )
+          else if (notice.type == NotificationType.friendRequest)
             FriendRequestNotificationActions(
               notificationId: notice.id,
               senderName: notice.person!.name,

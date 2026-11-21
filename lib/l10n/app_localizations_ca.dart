@@ -2255,4 +2255,74 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get friendOptions => 'Opcions d’amistat';
+
+  @override
+  String get blockedLoading => 'Carregant usuaris bloquejats';
+
+  @override
+  String get blockedLoadError =>
+      'No hem pogut carregar els usuaris bloquejats. Torna-ho a provar.';
+
+  @override
+  String get blockedEmptyTitle => 'No tens usuaris bloquejats';
+
+  @override
+  String get blockedEmptyMessage =>
+      'Els usuaris que bloquegis apareixeran aquí.';
+
+  @override
+  String get userBlock => 'Bloquejar';
+
+  @override
+  String get userUnblock => 'Desbloquejar';
+
+  @override
+  String get userBlocking => 'Bloquejant l’usuari';
+
+  @override
+  String get userUnblocking => 'Desbloquejant l’usuari';
+
+  @override
+  String userBlockTitle(String name) {
+    return 'Bloquejar $name?';
+  }
+
+  @override
+  String userUnblockTitle(String name) {
+    return 'Desbloquejar $name?';
+  }
+
+  @override
+  String get userBlockMessage =>
+      'No us podreu enviar sol·licituds d’amistat. Si ja sou amics, l’amistat s’eliminarà.';
+
+  @override
+  String get userUnblockMessage =>
+      'Desbloquejar no recupera l’amistat anterior.';
+
+  @override
+  String get userBlockError =>
+      'No hem pogut bloquejar l’usuari. Torna-ho a provar.';
+
+  @override
+  String get userUnblockError =>
+      'No hem pogut desbloquejar l’usuari. Torna-ho a provar.';
+
+  @override
+  String userBlockSuccess(String name) {
+    return 'Has bloquejat $name.';
+  }
+
+  @override
+  String userUnblockSuccess(String name) {
+    return 'Has desbloquejat $name.';
+  }
+
+  @override
+  String userUnblockFrom(String name) {
+    return 'Desbloquejar $name';
+  }
+
+  @override
+  String get userBlockedState => 'Has bloquejat aquest usuari.';
 }

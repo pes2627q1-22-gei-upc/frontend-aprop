@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../features/profile/presentation/screens/blocked_users_screen.dart';
+
 import '../../core/l10n/locale_controller.dart';
 import '../../core/widgets/aprop_logo.dart';
 import '../../features/activities/data/demo_location_repository.dart';
@@ -626,6 +628,28 @@ class _MainShellState extends State<MainShell> {
         builder: (context) => ProfileSettingsScreen(
           user: widget.user,
           repository: widget.profileSettingsRepository,
+          blockingRepository: widget.friendshipRepository,
+          onOpenBlockedUsers: widget.friendshipRepository == null
+              ? null
+              : () {
+                  if (!(ModalRoute.of(context)?.isCurrent ?? true)) return;
+                  Navigator.of(context).push<void>(
+                    MaterialPageRoute<void>(
+                      settings: const RouteSettings(
+                        name: '/profile/blocked-users',
+                      ),
+                      builder: (context) => BlockedUsersScreen(
+                        userId: widget.user.id,
+                        repository: widget.friendshipRepository!,
+                        onUserSelected: (id) {
+                          if (ModalRoute.of(context)?.isCurrent ?? true) {
+                            _openUserProfile(id);
+                          }
+                        },
+                      ),
+                    ),
+                  );
+                },
           onSignOut: widget.onSignOut,
           onDeleteAccount: widget.onDeleteAccount,
           onBack: () => Navigator.of(context).pop(),

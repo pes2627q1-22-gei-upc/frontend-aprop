@@ -31,9 +31,17 @@ class NotificationsViewModel extends ChangeNotifier {
       );
       notifyListeners();
     });
+    _blockChanges = friendshipRepository?.watchBlocks(userId).listen((_) {
+      if (_isDisposed) return;
+      _notifications = List.unmodifiable(_notifications.map(_reconcile));
+      notifyListeners();
+    });
   }
   final FriendshipRepository? friendshipRepository;
   StreamSubscription<FriendRequestResolution>? _friendChanges;
+  StreamSubscription<void>? _blockChanges;
+  bool isPersonBlocked(String? id) =>
+      id != null && friendshipRepository?.isBlocked(userId, id) == true;
 
   AppNotification _reconcile(AppNotification notice) {
     final resolution = friendshipRepository
@@ -161,6 +169,7 @@ class NotificationsViewModel extends ChangeNotifier {
     if (_isDisposed ||
         _isLoading ||
         notice == null ||
+        isPersonBlocked(notice.person?.id) ||
         _reading.contains(id) ||
         notice.requestStatus != FriendRequestStatus.pending ||
         _responding.contains(notice.requestId)) {
@@ -216,6 +225,7 @@ class NotificationsViewModel extends ChangeNotifier {
   void dispose() {
     _isDisposed = true;
     unawaited(_friendChanges?.cancel());
+    unawaited(_blockChanges?.cancel());
     super.dispose();
   }
 }

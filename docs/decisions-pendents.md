@@ -873,3 +873,14 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Codi:** `TODO(DP-076)` a `public_profile_screen.dart`. Guia `docs/remove-friend.md`.
 - **Qui decideix:** equip frontend/PO (presentació i interpretació del nom de pantalla de la tasca).
 - **Resolució:**
+
+### DP-077 · Bloqueig personal: confirmació, abast i dependència (#179)
+- **Estat:** oberta · 2026-11-21 · Taiga #179, història #45 · només frontend.
+- **Context:** backend `4f98835`: `GET /users/me/blocked`, `POST /users/{id}/block` (201 amb persona/data) i `DELETE /users/{id}/block` (204). Bloquejar elimina l’amistat i rebutja peticions Pending/Accepted en transacció; desbloquejar no recupera l’amistat. La cerca del servidor exclou bloquejos, però el backend no oculta activitats, xats ni avisos per aquest motiu (DP-042 backend).
+- **Deduït:** al menú del perfil aliè hi ha Bloquejar o Desbloquejar segons els bloquejos propis coneguts. Confirmació amb nom i efecte exacte, sense prometre amagar contingut. Configuració → Usuaris bloquejats mostra recompte carregat, llista, buit, càrrega, error/reintent i acció de desbloqueig amb confirmació. La navegació al perfil conserva Configuració i la llista.
+- **Estat compartit:** contracte `UserBlockingRepository` implementat per la mateixa font d’amistat, amb snapshots per compte. Una llista desconeguda no es presenta com a zero; 409/404 només es reconcilien consultant la llista pròpia autenticada. Les peticions antigues queden resoltes i no es recupera l’amistat en desbloquejar.
+- **Límits:** només es poden gestionar els bloquejos fets pel compte actual; no es dedueix que l’altra persona t’hagi bloquejat. No es creen controls de moderació ni un filtre general de contingut. Demo conserva els canvis en memòria durant l’execució.
+- **Dependència:** branca #179 sobre `fd95352` de #195, encara pendent de merge en començar. Per revisar només #179: comparar amb `feature/remove-friend-195`. Abans de fusionar #179 cap a develop, #195 ha d’estar integrada.
+- **Codi:** `TODO(DP-077)` a `public_profile_screen.dart` i `blocked_users_screen.dart`. Guia `docs/user-blocking.md`.
+- **Qui decideix:** equip/PO (presentació i abast del bloqueig).
+- **Resolució:**

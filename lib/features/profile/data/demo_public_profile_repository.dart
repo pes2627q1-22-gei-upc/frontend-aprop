@@ -20,6 +20,10 @@ class DemoPublicProfileRepository implements PublicProfileRepository {
 
   bool _accepted(String peer) {
     final viewer = currentUserId?.call();
+    if (viewer != null &&
+        friendshipRepository?.isBlocked(viewer, peer) == true) {
+      _sentRequests.remove('$viewer/$peer');
+    }
     return viewer != null &&
         friendshipRepository?.confirmedFriendship(viewer, peer) == true;
   }
@@ -149,6 +153,10 @@ class DemoPublicProfileRepository implements PublicProfileRepository {
     final person = _people[id];
     if (person == null) throw const PublicProfileNotFound();
     final viewer = currentUserId?.call();
+    if (viewer != null && friendshipRepository?.isBlocked(viewer, id) == true) {
+      _sentRequests.remove('$viewer/$id');
+      return FriendRequestResult.blocked;
+    }
     final removed =
         viewer != null &&
         friendshipRepository?.confirmedFriendship(viewer, id) == false;
