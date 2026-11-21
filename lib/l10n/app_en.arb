@@ -294,6 +294,22 @@
   "notifActivityGone": "The activity is no longer available.",
   "notifActivityLoadError": "We couldn’t load the activity’s details. You can try opening it.",
   "notifSendingResponse": "Sending your answer",
+  "notifAcceptRequestFrom": "Accept the friend request from {name}",
+  "@notifAcceptRequestFrom": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "notifDeclineRequestFrom": "Decline the friend request from {name}",
+  "@notifDeclineRequestFrom": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "notifAccept": "Accept",
   "notifDecline": "Decline",
   "notifRequestAccepted": "Request accepted",

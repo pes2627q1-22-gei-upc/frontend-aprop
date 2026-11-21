@@ -1864,6 +1864,18 @@ abstract class AppLocalizations {
   /// **'Enviant la resposta'**
   String get notifSendingResponse;
 
+  /// No description provided for @notifAcceptRequestFrom.
+  ///
+  /// In ca, this message translates to:
+  /// **'Acceptar la sol·licitud d’amistat de {name}'**
+  String notifAcceptRequestFrom(String name);
+
+  /// No description provided for @notifDeclineRequestFrom.
+  ///
+  /// In ca, this message translates to:
+  /// **'Rebutjar la sol·licitud d’amistat de {name}'**
+  String notifDeclineRequestFrom(String name);
+
   /// No description provided for @notifAccept.
   ///
   /// In ca, this message translates to:

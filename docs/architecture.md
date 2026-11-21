@@ -161,11 +161,11 @@ Calendar integration must use the same repository instance and user ID through i
 
 ## Avisos — Taiga #86
 
-`NotificationRepository` és el contracte en Dart pur per consultar els avisos rebuts, confirmar-ne la lectura i respondre una sol·licitud. `HttpNotificationRepository` rep `ApiClient` i el contracte `ActivityDetailsRepository`; obté el UUID real de `/users/me`, valida la identitat sol·licitada i consulta `/notificationtypes` i la bústia. El mapping JSON és a `data/notification_json_mapper.dart`; models i ViewModel no coneixen HTTP ni IDs de tipus. `DemoNotificationRepository` conserva exemples separats per compte, sense modificar inscripcions. Les accions socials de Demo no es simulen al repositori HTTP (fora de l’Sprint 1, confirmat per l’usuari).
+`NotificationRepository` és el contracte en Dart pur per consultar els avisos rebuts, confirmar-ne la lectura i respondre una sol·licitud. `HttpNotificationRepository` rep `ApiClient` i el contracte `ActivityDetailsRepository`; obté el UUID real de `/users/me`, valida la identitat sol·licitada i consulta `/notificationtypes` i la bústia. El mapping JSON és a `data/notification_json_mapper.dart`; models i ViewModel no coneixen HTTP ni IDs de tipus. `DemoNotificationRepository` conserva exemples separats per compte, sense modificar inscripcions. A l’Sprint 2, #164/#193 integren les respostes d’amistat amb HTTP i un contracte compartit amb Perfil; els límits del servidor es conserven a DP-066.
 
 `AuthGate` crea o rep el repositori compartit, i `MainShell` l'injecta a `NotificationsScreen`. La pantalla crea i allibera el seu `NotificationsViewModel`. Els widgets no fan peticions ni contenen avisos de demostració. El ViewModel ordena i filtra, controla les operacions pendents i només confirma lectura/resposta després de l'èxit del repositori. Un error de recàrrega conserva els avisos ja carregats.
 
-La navegació surt per `onActivitySelected` i `onPersonSelected`; la feature no importa cap pantalla ni ViewModel d'una altra feature. La fitxa s'obre amb la ruta i les inscripcions compartides. El callback de perfil queda absent fins que la funcionalitat existeixi, amb una indicació explícita a la UI. Cada filtre conserva el desplaçament i tornar d'una fitxa conserva l'estat. `TickerMode` atura les animacions de les seccions no visibles sense destruir-ne els navegadors.
+La navegació surt per `onActivitySelected` i `onPersonSelected`; la feature no importa cap pantalla ni ViewModel d'una altra feature. La fitxa s'obre amb la ruta i les inscripcions compartides. La composició aporta el callback de perfil quan la destinació està disponible; respondre una petició no depèn d’aquell callback. Cada filtre conserva el desplaçament i tornar d'una fitxa conserva l'estat. `TickerMode` atura les animacions de les seccions no visibles sense destruir-ne els navegadors.
 
 Els colors addicionals de les etiquetes s'injecten des d'`AppTheme` amb `NotificationBadgeTheme`. La fila de filtres es pot desplaçar en pantalles estretes o amb text ampliat. Vegeu `docs/notifications.md` per seguir els fitxers i les proves.
 
@@ -287,3 +287,16 @@ perfil a una fila pròpia. Només el perfil amb petició rebuda fa servir aquest
 accions s’inhabiliten en enviar i no es sobreescriuen amb un refresc. Després de confirmar Rejected,
 la targeta i el perfil es reconcilien; no es modifica amistat, comptadors ni permisos de plans.
 Disseny/retorn després de rebutjar a DP-067; contracte i límits a [sol·licituds d’amistat](friend-requests.md).
+
+### Targeta de sol·licitud rebuda — Taiga #168
+
+`NotificationCard` delega exclusivament la presentació de la petició rebuda a
+`FriendRequestNotificationActions`. La pantalla continua enviant els booleans de disponibilitat i
+operació del ViewModel i reenviant el callback; ni el nou widget ni la targeta importen repositoris.
+La lectura, els errors i les mutacions confirmades continuen sent estat del mateix ViewModel.
+
+El component renderitza opcions pendents, progrés visible i resultat amb icona/text, adapta la fila
+a una columna quan cal i afegeix etiquetes accessibles amb la persona remitent. La disponibilitat
+visual i semàntica és la mateixa: mentre s’envia no es pot repetir l’acció. Només `friendRequest`
+mostra els controls; els avisos socials genèrics no s’interpreten com a peticions. Guia i proves a
+[Targeta de sol·licitud rebuda](notification-request-card.md).

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../models/app_notification.dart';
 import '../formatters/notification_formatter.dart';
 import 'notification_badge_theme.dart';
+import 'friend_request_notification_actions.dart';
 import '../../../../core/l10n/locale_controller.dart';
 
 class NotificationCard extends StatelessWidget {
@@ -34,7 +35,6 @@ class NotificationCard extends StatelessWidget {
     final badgeTheme = theme.extension<NotificationBadgeTheme>();
     final notice = notification;
     final activity = notice.activity;
-    final pendingRequest = notice.requestStatus == FriendRequestStatus.pending;
     final unavailableProfile =
         notice.activityId == null && notice.person != null && !profileAvailable;
     final hasDestination =
@@ -180,56 +180,14 @@ class NotificationCard extends StatelessWidget {
               ),
             ),
           ),
-          if (pendingRequest)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  if (responding) ...[
-                    LinearProgressIndicator(
-                      semanticsLabel: context.l10n.notifSendingResponse,
-                    ),
-                    const SizedBox(height: 8),
-                  ],
-                  Wrap(
-                    spacing: 12,
-                    runSpacing: 8,
-                    children: [
-                      FilledButton(
-                        onPressed: busy ? null : () => onRespond(true),
-                        style: FilledButton.styleFrom(
-                          minimumSize: const Size(120, 48),
-                        ),
-                        child: Text(context.l10n.notifAccept),
-                      ),
-                      OutlinedButton(
-                        onPressed: busy ? null : () => onRespond(false),
-                        style: OutlinedButton.styleFrom(
-                          minimumSize: const Size(120, 48),
-                        ),
-                        child: Text(context.l10n.notifDecline),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            )
-          else if (notice.requestStatus != null)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-              child: Semantics(
-                liveRegion: true,
-                child: Text(
-                  notice.requestStatus == FriendRequestStatus.accepted
-                      ? context.l10n.notifRequestAccepted
-                      : context.l10n.notifRequestDeclined,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: colors.primary,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
+          if (notice.type == NotificationType.friendRequest)
+            FriendRequestNotificationActions(
+              notificationId: notice.id,
+              senderName: notice.person!.name,
+              status: notice.requestStatus!,
+              enabled: !busy,
+              responding: responding,
+              onRespond: onRespond,
             ),
           if (error != null)
             Padding(

@@ -1101,6 +1101,16 @@ class AppLocalizationsCa extends AppLocalizations {
   String get notifSendingResponse => 'Enviant la resposta';
 
   @override
+  String notifAcceptRequestFrom(String name) {
+    return 'Acceptar la sol·licitud d’amistat de $name';
+  }
+
+  @override
+  String notifDeclineRequestFrom(String name) {
+    return 'Rebutjar la sol·licitud d’amistat de $name';
+  }
+
+  @override
   String get notifAccept => 'Acceptar';
 
   @override

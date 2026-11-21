@@ -99,10 +99,9 @@ Decisió de presentació i retorn posterior: DP-067.
 
 ### Branca i revisió de #193
 
-`feature/reject-friend-request-193` parteix de `94793c2` a `feature/accept-friend-request-164`, perquè
-la PR de #164 encara no és a `develop`. Per revisar només #193, comparar amb aquesta branca pare.
-Abans de fusionar #193 a `develop`, cal haver-hi integrat #164 i comprovar la base de la PR. No es
-fusiona la PR pare automàticament ni es dupliquen els seus canvis.
+#164 s’ha integrat a `develop` amb PR #66 i #193 amb PR #68. La branca original de #193 partia de
+`94793c2`; #168 ja parteix directament de `origin/develop@550d9a9`. El component visual d’Avisos de
+#168 manté aquest flux compartit; vegeu [la targeta de sol·licitud](notification-request-card.md).
 
 ### Proves específiques de #193
 
