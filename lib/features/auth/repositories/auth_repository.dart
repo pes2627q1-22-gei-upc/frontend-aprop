@@ -49,6 +49,11 @@ abstract interface class AuthRepository {
 
   Future<void> signOut();
 
+  /// Esborra el compte de la sessió i les seves dades (#10, RGPD) i tanca la
+  /// sessió: `authStateChanges` emet `null`. És irreversible. Llança una
+  /// excepció si no s'ha pogut esborrar; aleshores la sessió continua oberta.
+  Future<void> deleteAccount();
+
   /// Token de la sessió per identificar l'usuari davant del backend
   /// (`Authorization: Bearer`). És nul si no hi ha sessió o si les dades són
   /// de demostració.

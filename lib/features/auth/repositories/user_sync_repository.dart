@@ -17,4 +17,9 @@ abstract interface class UserSyncRepository {
   /// Desa el nom i cognoms de l'usuari de la sessió i retorna el perfil
   /// actualitzat. L'usuari ja ha d'existir (després de [sync]).
   Future<UserProfile> updateName(String name);
+
+  /// Esborra l'usuari de la sessió i les seves dades. Retorna cert si també
+  /// s'ha esborrat el compte d'autenticació (el backend ho fa amb Firebase);
+  /// si no, ho ha de fer l'app.
+  Future<bool> deleteAccount();
 }

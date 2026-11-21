@@ -60,6 +60,7 @@ class MainShell extends StatefulWidget {
     super.key,
     required this.user,
     required this.onSignOut,
+    this.onDeleteAccount,
     required this.activityRepository,
     required this.enrollmentRepository,
     required this.assistantRepository,
@@ -89,6 +90,9 @@ class MainShell extends StatefulWidget {
   /// On és la persona, per al mapa. Sense, el mapa no la mostra.
   final UserLocationRepository? userLocationRepository;
   final Future<void> Function() onSignOut;
+
+  /// Esborra el compte i tanca la sessió (#10).
+  final Future<void> Function()? onDeleteAccount;
   final ActivityRepository activityRepository;
   final EnrollmentRepository enrollmentRepository;
   final AssistantRepository assistantRepository;
@@ -623,6 +627,7 @@ class _MainShellState extends State<MainShell> {
           user: widget.user,
           repository: widget.profileSettingsRepository,
           onSignOut: widget.onSignOut,
+          onDeleteAccount: widget.onDeleteAccount,
           onBack: () => Navigator.of(context).pop(),
           onOpenInterestTest: switch (widget.interestTestRepository) {
             final repository? => () {

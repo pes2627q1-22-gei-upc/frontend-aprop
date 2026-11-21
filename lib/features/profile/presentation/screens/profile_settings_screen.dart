@@ -15,6 +15,7 @@ class ProfileSettingsScreen extends StatefulWidget {
     required this.onSignOut,
     required this.onBack,
     this.onOpenInterestTest,
+    this.onDeleteAccount,
     this.localeController,
   });
   final AppUser user;
@@ -22,6 +23,9 @@ class ProfileSettingsScreen extends StatefulWidget {
   final Future<void> Function() onSignOut;
   final VoidCallback onBack;
   final VoidCallback? onOpenInterestTest;
+
+  /// Esborra el compte (#10). Sense, «Eliminar compte» queda pendent.
+  final Future<void> Function()? onDeleteAccount;
 
   /// Defaults to the app's [LocaleScope] controller.
   final LocaleController? localeController;
@@ -38,6 +42,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
       userId: widget.user.id,
       repository: widget.repository,
       onSignOut: widget.onSignOut,
+      onDeleteAccount: widget.onDeleteAccount,
       localeController: widget.localeController ?? LocaleScope.maybeOf(context),
     )..load();
   }
@@ -246,11 +251,31 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                     enabled: !model.isBusy,
                     onTap: model.isBusy ? null : model.signOut,
                   ),
-                  PendingSettingsTile(
-                    title: context.l10n.settingsDeleteAccount,
-                    icon: Icons.delete_outline,
-                    danger: true,
-                  ),
+                  if (model.canDeleteAccount)
+                    ListTile(
+                      key: const ValueKey('profile-delete-account'),
+                      leading: const SettingsIcon(
+                        icon: Icons.delete_outline,
+                        danger: true,
+                      ),
+                      title: Text(
+                        model.isDeletingAccount
+                            ? context.l10n.settingsDeletingAccount
+                            : context.l10n.settingsDeleteAccount,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.error,
+                        ),
+                      ),
+                      minVerticalPadding: 12,
+                      enabled: !model.isBusy,
+                      onTap: model.isBusy ? null : _confirmDeleteAccount,
+                    )
+                  else
+                    PendingSettingsTile(
+                      title: context.l10n.settingsDeleteAccount,
+                      icon: Icons.delete_outline,
+                      danger: true,
+                    ),
                 ],
               ),
             ],
@@ -259,6 +284,24 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
       },
     ),
   );
+
+  /// CA1: un diàleg explica què s'esborra i que no es pot desfer; el botó
+  /// només s'activa en escriure «ELIMINAR».
+  Future<void> _confirmDeleteAccount() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => const _DeleteAccountDialog(),
+    );
+    if (confirmed != true || !mounted) return;
+    await _viewModel.deleteAccount();
+    // L'error de dalt de tot queda fora de la pantalla des d'aquí baix.
+    if (!mounted) return;
+    if (_viewModel.actionError case final error?) {
+      ScaffoldMessenger.maybeOf(context)
+        ?..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text(error)));
+    }
+  }
 
   Widget _preference(
     ProfilePreference preference,
@@ -362,6 +405,71 @@ class _ChoiceRow extends StatelessWidget {
           );
         },
       ),
+    );
+  }
+}
+
+/// Confirmació d'«Eliminar compte» (#10): cal escriure la paraula per evitar
+/// esborrar el compte d'un toc.
+class _DeleteAccountDialog extends StatefulWidget {
+  const _DeleteAccountDialog();
+
+  @override
+  State<_DeleteAccountDialog> createState() => _DeleteAccountDialogState();
+}
+
+class _DeleteAccountDialogState extends State<_DeleteAccountDialog> {
+  final _text = TextEditingController();
+
+  @override
+  void dispose() {
+    _text.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    final word = context.l10n.settingsDeleteAccountWord;
+    return AlertDialog(
+      title: Text(context.l10n.settingsDeleteAccountTitle),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(context.l10n.settingsDeleteAccountBody),
+            const SizedBox(height: 16),
+            Text(context.l10n.settingsDeleteAccountTypeWord(word)),
+            const SizedBox(height: 8),
+            TextField(
+              key: const ValueKey('profile-delete-account-word'),
+              controller: _text,
+              autofocus: true,
+              textCapitalization: TextCapitalization.characters,
+              decoration: InputDecoration(hintText: word),
+              onChanged: (_) => setState(() {}),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          child: Text(context.l10n.cancel),
+        ),
+        FilledButton(
+          key: const ValueKey('profile-delete-account-confirm'),
+          style: FilledButton.styleFrom(
+            backgroundColor: colors.error,
+            foregroundColor: colors.onError,
+          ),
+          onPressed: _text.text.trim().toUpperCase() == word.toUpperCase()
+              ? () => Navigator.of(context).pop(true)
+              : null,
+          child: Text(context.l10n.settingsDeleteAccountConfirm),
+        ),
+      ],
     );
   }
 }

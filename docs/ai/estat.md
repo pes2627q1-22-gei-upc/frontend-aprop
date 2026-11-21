@@ -28,6 +28,7 @@
 | #203 | [FE] Valorar l'organitzador (esdeveniments comunitaris) i actualitzar-ne la fiabilitat | `feature/valorar-organitzador-203` | PR oberta #50 (Demo DP-049); apilada sobre #45; pendent CI i revisió humana |
 | #262 | [FE] Ajustar contrast i color del logotip respecte al fons | `feature/fix-262-logo-contrast` | Implementada; preparació de PR autoritzada; pendent CI i revisió humana |
 | #277 | [FE] Perfil d'un altre usuari amb GET /users/{id} i privacitat dels plans (CA3) + tests | `feature/perfil-altre-usuari` | Implementada (HTTP i Demo); DP-063 oberta; pendent revisió humana |
+| #117 | [FE] Acció i diàleg de confirmació a Configuració + tancament de sessió + tests (història #10) | `feature/eliminar-compte` | Implementada (HTTP i Demo); DP-075 oberta; pendent revisió humana |
 
 ## Base i abast actual (#170)
 

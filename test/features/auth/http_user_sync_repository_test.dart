@@ -186,4 +186,40 @@ void main() {
 
     expect((await repository.sync())?.name, 'Laia Puigdomènech');
   });
+
+  group('Eliminar compte (#10)', () {
+    test(
+      'Envia DELETE /users/me amb el token i el backend esborra Firebase',
+      () async {
+        final repository = repositoryAnswering(204);
+
+        expect(await repository.deleteAccount(), isTrue);
+
+        expect(lastRequest.method, 'DELETE');
+        expect(lastRequest.url.path, '/users/me');
+        expect(lastRequest.headers['Authorization'], 'Bearer firebase-token');
+      },
+    );
+
+    test('Si ja no existia (404), el resultat és el mateix', () async {
+      expect(await repositoryAnswering(404).deleteAccount(), isTrue);
+    });
+
+    test('Si el backend falla, no es dona per esborrat', () async {
+      expect(
+        repositoryAnswering(502).deleteAccount(),
+        throwsA(isA<StateError>()),
+      );
+    });
+
+    test('Sense connexió, és un error de xarxa', () async {
+      final repository = HttpUserSyncRepository(
+        baseUrl: Uri.parse('http://10.0.2.2:8080'),
+        idToken: () async => 'firebase-token',
+        client: MockClient((_) => throw http.ClientException('offline')),
+      );
+
+      expect(repository.deleteAccount(), throwsA(AuthFailure.network));
+    });
+  });
 }
