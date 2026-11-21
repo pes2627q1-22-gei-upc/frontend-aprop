@@ -800,3 +800,13 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Codi:** `TODO(DP-068)` a `http_attendance_repository.dart` i `main.dart`.
 - **Qui decideix:** backend (tornar el valor de l’assistència)
 - **Resolució:**
+
+### DP-069 · Avís d’amistat acceptada sense subtipus al backend (#170)
+- **Estat:** oberta · 2026-11-21 · Taiga #170, història #38 · només frontend.
+- **Context:** backend `fb266a7`: acceptar crea un avís amb tipus Social, `friend-id`, `request-date` i text lliure. El DTO de notificacions no conté un subtipus/estat d’acceptació. `/users/me/friend-requests` només retorna rebudes Pending; no és historial d’acceptacions sortints. L’usuari confirma que no hi ha una altra branca.
+- **Presentació:** reutilitzar `AppNotification.friendRequestAccepted`, el missatge i la navegació ja existents; afegir l’accés explícit «Veure perfil» amb nom accessible. Cap Acceptar/Rebutjar. Mateix flux de lectura confirmada, errors i protecció de respostes tardanes de la bústia.
+- **Límit:** es completa la interfície amb el model tipat/Demo i proves. La classificació HTTP d’acceptacions queda pendent: un Social genèric continua genèric, encara que el text digui «ha acceptat». Ni el text ni ser amics ara demostren l’esdeveniment concret. No es crea cap historial ni avís fictici.
+- **Pendent backend/equip:** acordar un discriminador estructurat d’acceptació i publicar-ne l’esquema, amb destinatari, persona que accepta, data i referència de sol·licitud. Els noms del nou camp/subtipus s’han d’acordar; no es pressuposa un endpoint o camp nou. Després, adaptar `notification_json_mapper.dart`/`HttpNotificationRepository` i afegir una prova del JSON real.
+- **Codi:** `TODO(DP-069)` a `http_notification_repository.dart`. Flux i missatge de traspàs a `docs/accepted-friendship-notification.md`. Backend intacte; segueixen obertes DP-039/DP-066.
+- **Qui decideix:** equip frontend/backend (contracte de l’avís).
+- **Resolució:**

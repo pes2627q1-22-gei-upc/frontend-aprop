@@ -16,6 +16,18 @@ final notificationActivity = Activity(
   source: ActivitySource.culturalAgenda,
 );
 
+AppNotification acceptedFriendNotice({
+  String id = 'accepted',
+  DateTime? receivedAt,
+  NotificationPerson person = notificationPerson,
+  bool isRead = false,
+}) => AppNotification.friendRequestAccepted(
+  id: id,
+  receivedAt: receivedAt ?? DateTime(2026, 9, 27, 18),
+  person: person,
+  isRead: isRead,
+);
+
 AppNotification requestNotice({String id = 'request', bool isRead = false}) =>
     AppNotification.friendRequest(
       id: id,

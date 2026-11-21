@@ -1105,6 +1105,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String notifViewFriendProfile(String name) {
+    return 'View the profile of $name';
+  }
+
+  @override
   String get notifAccept => 'Accept';
 
   @override
