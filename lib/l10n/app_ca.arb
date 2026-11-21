@@ -1331,5 +1331,58 @@
       }
     }
   },
-  "friendOptions": "Opcions d’amistat"
+  "friendOptions": "Opcions d’amistat",
+  "blockedLoading": "Carregant usuaris bloquejats",
+  "blockedLoadError": "No hem pogut carregar els usuaris bloquejats. Torna-ho a provar.",
+  "blockedEmptyTitle": "No tens usuaris bloquejats",
+  "blockedEmptyMessage": "Els usuaris que bloquegis apareixeran aquí.",
+  "userBlock": "Bloquejar",
+  "userUnblock": "Desbloquejar",
+  "userBlocking": "Bloquejant l’usuari",
+  "userUnblocking": "Desbloquejant l’usuari",
+  "userBlockTitle": "Bloquejar {name}?",
+  "@userBlockTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "userUnblockTitle": "Desbloquejar {name}?",
+  "@userUnblockTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "userBlockMessage": "No us podreu enviar sol·licituds d’amistat. Si ja sou amics, l’amistat s’eliminarà.",
+  "userUnblockMessage": "Desbloquejar no recupera l’amistat anterior.",
+  "userBlockError": "No hem pogut bloquejar l’usuari. Torna-ho a provar.",
+  "userUnblockError": "No hem pogut desbloquejar l’usuari. Torna-ho a provar.",
+  "userBlockSuccess": "Has bloquejat {name}.",
+  "@userBlockSuccess": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "userUnblockSuccess": "Has desbloquejat {name}.",
+  "@userUnblockSuccess": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "userUnblockFrom": "Desbloquejar {name}",
+  "@userUnblockFrom": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "userBlockedState": "Has bloquejat aquest usuari."
 }

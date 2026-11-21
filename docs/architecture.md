@@ -342,3 +342,22 @@ El diàleg i els botons són presentació reutilitzable (`friend_removal_action.
 comprova compte/instància/ruta després de confirmar; el ViewModel torna a validar la disponibilitat.
 `MainShell` injecta la mateixa instància a llista i perfils, sense imports de navegació a la feature.
 Ubicació de l’acció i abast de `ProfileScreen` a DP-076; guia a [Eliminar una amistat](remove-friend.md).
+
+### Bloqueig personal — Taiga #179
+
+`UserBlockingRepository` és el contracte de lectura i gestió dels bloquejos propis. La mateixa font
+`FriendshipRepository` l’implementa per coordinar la transacció de bloqueig amb l’amistat i les peticions.
+No es fa un segon POST per eliminar l’amistat: el backend ja ho garanteix en bloquejar.
+
+`CachedFriendshipRepository` separa llista desconeguda, snapshots carregats i mutacions confirmades,
+amb cache per compte, single-flight i serialització per persona. Les revisions reconcilien lectures
+antigues de bloquejos i peticions. Desbloquejar només canvia el bloqueig; conserva l’absència d’amistat.
+`HttpFriendshipRepository` valida el compte i la resposta; Demo reutilitza la mateixa política en memòria.
+
+`BlockedUsersViewModel` observa snapshots i gestiona els desbloqueigs; `PublicProfileViewModel` consulta
+l’estat propi i gestiona el menú. `ProfileSettingsViewModel` observa el recompte de la font compartida.
+`MainShell` connecta Configuració, la llista i el perfil conservant-ne la navegació. Els widgets no fan HTTP.
+Les targetes d’Avisos conserven el contingut, sense oferir Acceptar/Rebutjar sobre una persona bloquejada.
+
+El bloqueig no implica ocultar contingut que el servidor encara no restringeix. Guia i límits a
+[Bloquejar usuaris](user-blocking.md), decisions de presentació a DP-077.

@@ -9,6 +9,7 @@ import '../../repositories/public_profile_repository.dart';
 import '../../repositories/friendship_repository.dart';
 import '../../models/received_friend_request.dart';
 import '../../models/friendship_removal.dart';
+import '../../models/user_summary.dart';
 
 /// Another person's profile. Its two lists load separately, so one failing
 /// does not hide the other or the header.
@@ -20,6 +21,7 @@ class PublicProfileViewModel extends ChangeNotifier {
     this.currentUserId,
   }) {
     if (friendshipRepository != null && currentUserId != null) {
+      _blocked = friendshipRepository!.isBlocked(currentUserId!, userId);
       _friendChanges = friendshipRepository!
           .watchChanges(currentUserId!)
           .listen((change) {
@@ -61,18 +63,112 @@ class PublicProfileViewModel extends ChangeNotifier {
             notifyListeners();
             _flushRefresh();
           });
+      _blockChanges = friendshipRepository!
+          .watchBlocks(currentUserId!)
+          .listen((_) => _onBlockChanged());
     }
   }
   final FriendshipRepository? friendshipRepository;
   final String? currentUserId;
   StreamSubscription<FriendRequestResolution>? _friendChanges;
   StreamSubscription<FriendshipRemoval>? _friendRemovals;
+  StreamSubscription<void>? _blockChanges;
+  bool? _blocked;
+  bool _blockBusy = false;
+  bool _blockIntent = true;
+  String? _blockError;
+  bool get isUserBlocked => _blocked == true;
+  bool get isManagingBlock => _blockBusy;
+  bool get isBlocking => _blockIntent;
+  String? get blockError => _blockError;
+  bool get canManageBlocks =>
+      !_isDisposed &&
+      !_isLoading &&
+      !_removingFriend &&
+      !_blockBusy &&
+      friendshipRepository != null &&
+      currentUserId != null &&
+      _profile != null &&
+      _blocked != null;
+
+  void _onBlockChanged() {
+    if (_isDisposed) return;
+    final next = friendshipRepository!.isBlocked(currentUserId!, userId);
+    final previous = _blocked;
+    if (previous == next) return;
+    _blocked = next;
+    if (next == true || previous == true) {
+      _incoming = null;
+      _outgoingState = FriendshipAction.add;
+      _friendship = next == true
+          ? FriendshipAction.unavailable
+          : FriendshipAction.checking;
+      _friendRequestError = null;
+      _plans.items = null;
+      final person = _profile;
+      if (person != null) {
+        _profile = PublicProfile(
+          profile: person.profile,
+          plansVisible: false,
+          isFriend: false,
+        );
+      }
+      _revision++;
+      _reloadPending = true;
+    }
+    notifyListeners();
+    _flushRefresh();
+  }
+
+  Future<bool> setBlocked(bool blocked) async {
+    if (!canManageBlocks || blocked == isUserBlocked) return false;
+    final person = _profile!.profile;
+    _blockBusy = true;
+    _blockIntent = blocked;
+    _blockError = null;
+    notifyListeners();
+    try {
+      if (blocked) {
+        await friendshipRepository!.blockUser(
+          userId: currentUserId!,
+          target: UserSummary(
+            id: person.userId,
+            username: person.username ?? person.displayName,
+            displayName: person.displayName,
+            avatarUrl: person.avatarUrl,
+            avatarAsset: person.avatarAsset,
+          ),
+        );
+      } else {
+        await friendshipRepository!.unblockUser(
+          userId: currentUserId!,
+          targetId: person.userId,
+        );
+      }
+      return !_isDisposed;
+    } catch (_) {
+      if (!_isDisposed) {
+        _blockError = blocked
+            ? currentL10n.userBlockError
+            : currentL10n.userUnblockError;
+      }
+      return false;
+    } finally {
+      if (!_isDisposed) {
+        _blockBusy = false;
+        notifyListeners();
+        _flushRefresh();
+      }
+    }
+  }
+
   bool _removingFriend = false;
   bool get isRemovingFriend => _removingFriend;
   bool get canRemoveFriend =>
       !_isDisposed &&
       !_isLoading &&
       !_removingFriend &&
+      !_blockBusy &&
       _friendship == FriendshipAction.friends &&
       friendshipRepository != null &&
       currentUserId != null;
@@ -85,6 +181,7 @@ class PublicProfileViewModel extends ChangeNotifier {
         !_reloadPending ||
         _isLoading ||
         _removingFriend ||
+        _blockBusy ||
         _plans.isLoading ||
         _created.isLoading) {
       return;
@@ -149,6 +246,7 @@ class PublicProfileViewModel extends ChangeNotifier {
   Future<void> load() async {
     if (_isDisposed ||
         _isLoading ||
+        _blockBusy ||
         _removingFriend ||
         _friendship == FriendshipAction.accepting ||
         _friendship == FriendshipAction.rejecting) {
@@ -160,6 +258,16 @@ class PublicProfileViewModel extends ChangeNotifier {
     notifyListeners();
     PublicProfile? result;
     try {
+      if (friendshipRepository != null && currentUserId != null) {
+        try {
+          await friendshipRepository!.getBlockedUsers(currentUserId!);
+          _blocked = friendshipRepository!.isBlocked(currentUserId!, userId);
+          _blockError = null;
+        } catch (_) {
+          if (!_isDisposed) _blockError = currentL10n.blockedLoadError;
+        }
+      }
+      if (_isDisposed || revision != _revision) return;
       result = await repository.getPublicProfile(userId);
       if (_isDisposed) return;
       if (revision != _revision) return;
@@ -168,7 +276,13 @@ class PublicProfileViewModel extends ChangeNotifier {
           result.profile.userId,
         ]);
       }
-      _profile = result;
+      _profile = isUserBlocked
+          ? PublicProfile(
+              profile: result.profile,
+              plansVisible: false,
+              isFriend: false,
+            )
+          : result;
       _notFound = false;
       await _loadFriendship(result);
     } on PublicProfileNotFound {
@@ -197,6 +311,11 @@ class PublicProfileViewModel extends ChangeNotifier {
   Future<void> _loadFriendship(PublicProfile profile) async {
     final friends = friendshipRepository;
     final account = currentUserId;
+    if (isUserBlocked) {
+      _friendship = FriendshipAction.unavailable;
+      _incoming = null;
+      return;
+    }
     final confirmed = account == null
         ? null
         : friends?.confirmedFriendship(account, userId);
@@ -284,6 +403,7 @@ class PublicProfileViewModel extends ChangeNotifier {
     final account = currentUserId;
     if (_isDisposed ||
         _isLoading ||
+        _blockBusy ||
         _friendship != FriendshipAction.incoming ||
         request == null ||
         friends == null ||
@@ -332,7 +452,12 @@ class PublicProfileViewModel extends ChangeNotifier {
   // TODO(DP-064): the profile cannot say that a request is pending or that
   // someone is blocked; the button learns it when the server refuses.
   Future<void> sendFriendRequest() async {
-    if (_isDisposed || _friendship != FriendshipAction.add) return;
+    if (_isDisposed ||
+        _blockBusy ||
+        isUserBlocked ||
+        _friendship != FriendshipAction.add) {
+      return;
+    }
     final revision = _revision;
     _friendship = FriendshipAction.sending;
     _friendRequestError = null;
@@ -390,6 +515,7 @@ class PublicProfileViewModel extends ChangeNotifier {
     _isDisposed = true;
     unawaited(_friendChanges?.cancel());
     unawaited(_friendRemovals?.cancel());
+    unawaited(_blockChanges?.cancel());
     super.dispose();
   }
 }

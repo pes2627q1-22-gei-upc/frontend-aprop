@@ -663,5 +663,58 @@
       }
     }
   },
-  "friendOptions": "Friendship options"
+  "friendOptions": "Friendship options",
+  "blockedLoading": "Loading blocked users",
+  "blockedLoadError": "We couldn’t load blocked users. Try again.",
+  "blockedEmptyTitle": "You have no blocked users",
+  "blockedEmptyMessage": "People you block will appear here.",
+  "userBlock": "Block",
+  "userUnblock": "Unblock",
+  "userBlocking": "Blocking user",
+  "userUnblocking": "Unblocking user",
+  "userBlockTitle": "Block {name}?",
+  "@userBlockTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "userUnblockTitle": "Unblock {name}?",
+  "@userUnblockTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "userBlockMessage": "You won’t be able to send each other friend requests. If you are friends, the friendship will be removed.",
+  "userUnblockMessage": "Unblocking does not restore the previous friendship.",
+  "userBlockError": "We couldn’t block this user. Try again.",
+  "userUnblockError": "We couldn’t unblock this user. Try again.",
+  "userBlockSuccess": "You blocked {name}.",
+  "@userBlockSuccess": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "userUnblockSuccess": "You unblocked {name}.",
+  "@userUnblockSuccess": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "userUnblockFrom": "Unblock {name}",
+  "@userUnblockFrom": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "userBlockedState": "You have blocked this user."
 }

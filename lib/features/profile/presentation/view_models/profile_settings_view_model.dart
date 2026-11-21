@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/widgets.dart';
 
 import '../../../../core/l10n/locale_controller.dart';
 import '../../models/profile_settings.dart';
 import '../../repositories/profile_settings_repository.dart';
+import '../../repositories/user_blocking_repository.dart';
 
 class ProfileSettingsViewModel extends ChangeNotifier {
   ProfileSettingsViewModel({
@@ -11,7 +14,36 @@ class ProfileSettingsViewModel extends ChangeNotifier {
     required this.onSignOut,
     this.onDeleteAccount,
     this.localeController,
-  });
+    this.blockingRepository,
+  }) {
+    _blockChanges = blockingRepository?.watchBlocks(userId).listen((_) {
+      if (!_isDisposed) notifyListeners();
+    });
+  }
+
+  final UserBlockingRepository? blockingRepository;
+  StreamSubscription<void>? _blockChanges;
+  bool _loadingBlocks = false;
+  String? _blocksError;
+  int? get blockedUserCount =>
+      blockingRepository?.cachedBlockedUsers(userId)?.length;
+  String? get blocksError => _blocksError;
+
+  Future<void> _loadBlocks() async {
+    if (_isDisposed || _loadingBlocks || blockingRepository == null) return;
+    _loadingBlocks = true;
+    _blocksError = null;
+    try {
+      await blockingRepository!.getBlockedUsers(userId);
+    } catch (_) {
+      if (!_isDisposed) _blocksError = currentL10n.blockedLoadError;
+    } finally {
+      if (!_isDisposed) {
+        _loadingBlocks = false;
+        notifyListeners();
+      }
+    }
+  }
 
   final LocaleController? localeController;
   final String userId;
@@ -49,6 +81,7 @@ class ProfileSettingsViewModel extends ChangeNotifier {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
+    unawaited(_loadBlocks());
     try {
       final result = await repository.getSettings(userId);
       if (!_isDisposed) _settings = result;
@@ -168,6 +201,7 @@ class ProfileSettingsViewModel extends ChangeNotifier {
   @override
   void dispose() {
     _isDisposed = true;
+    unawaited(_blockChanges?.cancel());
     super.dispose();
   }
 }

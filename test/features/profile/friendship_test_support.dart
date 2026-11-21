@@ -1,5 +1,7 @@
 import 'package:aprop/features/profile/data/cached_friendship_repository.dart';
 import 'package:aprop/features/profile/models/received_friend_request.dart';
+import 'package:aprop/features/profile/models/blocked_user.dart';
+import 'package:aprop/features/profile/models/user_summary.dart';
 
 class ControlledFriendshipRepository extends CachedFriendshipRepository {
   ControlledFriendshipRepository(this.request);
@@ -10,6 +12,33 @@ class ControlledFriendshipRepository extends CachedFriendshipRepository {
   int writes = 0;
   final removals = <(String, String)>[];
   Future<void> Function()? onRemove;
+  Future<List<BlockedUser>> Function()? onFetchBlocked;
+  Future<BlockedUser> Function(UserSummary)? onBlock;
+  Future<void> Function(String)? onUnblock;
+  final blocks = <UserSummary>[];
+  final unblocks = <String>[];
+  final blockedUsers = <String, BlockedUser>{};
+
+  @override
+  Future<List<BlockedUser>> fetchBlocked(String userId) async =>
+      onFetchBlocked == null ? List.of(blockedUsers.values) : onFetchBlocked!();
+
+  @override
+  Future<BlockedUser> sendBlock(String userId, UserSummary target) async {
+    blocks.add(target);
+    final row =
+        await onBlock?.call(target) ??
+        BlockedUser(user: target, blockedAt: DateTime.utc(2026, 11, 21));
+    blockedUsers[target.id] = row;
+    return row;
+  }
+
+  @override
+  Future<void> sendUnblock(String userId, String targetId) async {
+    unblocks.add(targetId);
+    await onUnblock?.call(targetId);
+    blockedUsers.remove(targetId);
+  }
 
   @override
   Future<void> sendRemoval(String userId, String friendId) async {
