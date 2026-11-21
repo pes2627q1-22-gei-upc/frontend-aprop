@@ -359,6 +359,11 @@ class _MainShellState extends State<MainShell> {
     }
   }
 
+  void _onInterestTestCompleted() {
+    if (!mounted) return;
+    setState(() => _discoverGeneration++);
+  }
+
   void _openInterestTest() {
     final repository = widget.interestTestRepository;
     final navigator = _sectionNavigatorKeys[4].currentState;
@@ -369,6 +374,7 @@ class _MainShellState extends State<MainShell> {
         builder: (context) => InterestTestScreen(
           repository: repository,
           onBack: () => Navigator.of(context).pop(),
+          onCompleted: _onInterestTestCompleted,
         ),
       ),
     );
@@ -559,15 +565,19 @@ class _MainShellState extends State<MainShell> {
           onSignOut: widget.onSignOut,
           onBack: () => Navigator.of(context).pop(),
           onOpenInterestTest: switch (widget.interestTestRepository) {
-            final repository? => () => Navigator.of(context).push<void>(
-              MaterialPageRoute<void>(
-                settings: const RouteSettings(name: '/profile/interest-test'),
-                builder: (context) => InterestTestScreen(
-                  repository: repository,
-                  onBack: () => Navigator.of(context).pop(),
+            final repository? => () {
+              if (!(ModalRoute.of(context)?.isCurrent ?? true)) return;
+              Navigator.of(context).push<void>(
+                MaterialPageRoute<void>(
+                  settings: const RouteSettings(name: '/profile/interest-test'),
+                  builder: (context) => InterestTestScreen(
+                    repository: repository,
+                    onBack: () => Navigator.of(context).pop(),
+                    onCompleted: _onInterestTestCompleted,
+                  ),
                 ),
-              ),
-            ),
+              );
+            },
             null => null,
           },
         ),

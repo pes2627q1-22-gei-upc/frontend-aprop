@@ -1149,6 +1149,12 @@ class AppLocalizationsEs extends AppLocalizations {
       'No hemos podido guardar las respuestas. Vuelve a intentarlo.';
 
   @override
+  String get interestTestSkip => 'Ahora no';
+
+  @override
+  String get interestTestContinue => 'Continuar';
+
+  @override
   String get ratingDeleteTitle => '¿Eliminar la valoración?';
 
   @override

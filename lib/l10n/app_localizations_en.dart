@@ -1140,6 +1140,12 @@ class AppLocalizationsEn extends AppLocalizations {
       'We couldn’t save your answers. Please try again.';
 
   @override
+  String get interestTestSkip => 'Not now';
+
+  @override
+  String get interestTestContinue => 'Continue';
+
+  @override
   String get ratingDeleteTitle => 'Delete your rating?';
 
   @override

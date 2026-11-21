@@ -4,9 +4,20 @@ import '../repositories/interest_test_repository.dart';
 
 /// Questions from the demo catalogue; answers are kept only during this app run.
 class DemoInterestTestRepository implements InterestTestRepository {
-  DemoInterestTestRepository({required this.activityRepository});
+  DemoInterestTestRepository({
+    required this.activityRepository,
+    // TODO(DP-066): Demo accounts default to completed so demo runs and
+    // existing app flow tests enter MainShell directly; pass false to
+    // exercise onboarding in Demo mode.
+    this.completed = true,
+  });
+
   final ActivityRepository activityRepository;
   List<InterestAnswer> lastAnswers = const [];
+  bool completed;
+
+  @override
+  Future<bool> hasCompletedTest() async => completed;
 
   @override
   Future<List<InterestQuestion>> getQuestions() async {
@@ -25,6 +36,8 @@ class DemoInterestTestRepository implements InterestTestRepository {
   }
 
   @override
-  Future<void> submitAnswers(List<InterestAnswer> answers) async =>
-      lastAnswers = List.unmodifiable(answers);
+  Future<void> submitAnswers(List<InterestAnswer> answers) async {
+    lastAnswers = List.unmodifiable(answers);
+    completed = true;
+  }
 }

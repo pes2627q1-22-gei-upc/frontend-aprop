@@ -21,6 +21,7 @@ import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/verify_email_screen.dart';
 import '../../features/auth/repositories/auth_repository.dart';
 import '../../features/interest_test/data/demo_interest_test_repository.dart';
+import '../../features/interest_test/presentation/screens/interest_test_screen.dart';
 import '../../features/interest_test/repositories/interest_test_repository.dart';
 import '../../features/notifications/data/demo_notification_repository.dart';
 import '../../features/notifications/repositories/notification_repository.dart';
@@ -107,6 +108,12 @@ class _AuthGateState extends State<AuthGate> {
   late final FriendsRepository _friendsRepository;
   late final InterestTestRepository _interestTestRepository;
   DemoEnrollmentRepository? _ownedEnrollmentRepository;
+
+  // Users whose onboarding interest test was already completed, skipped or
+  // bypassed during this app run.
+  // TODO(DP-066): Keep the skip decision in memory only for this run; decide
+  // whether skipping should persist across restarts.
+  final Set<String> _onboardingHandledUsers = {};
 
   @override
   void initState() {
@@ -205,6 +212,16 @@ class _AuthGateState extends State<AuthGate> {
           );
         }
 
+        if (!_onboardingHandledUsers.contains(user.id)) {
+          return _InterestTestOnboardingGate(
+            key: ValueKey(user.id),
+            repository: _interestTestRepository,
+            onDone: () => setState(() {
+              _onboardingHandledUsers.add(user.id);
+            }),
+          );
+        }
+
         return MainShell(
           // Si l'identificador del backend arriba més tard (sense connexió en
           // obrir l'app), les inscripcions s'han de tornar a carregar amb ell.
@@ -229,6 +246,76 @@ class _AuthGateState extends State<AuthGate> {
           activityChatRepository: widget.activityChatRepository,
         );
       },
+    );
+  }
+}
+
+/// Checks once whether the signed-in user has completed the interest test.
+/// Shows [InterestTestScreen] (skippable via «Ara no») if not completed; on
+/// completion, skip, or any status error it calls [onDone] so the app is never
+/// blocked.
+class _InterestTestOnboardingGate extends StatefulWidget {
+  const _InterestTestOnboardingGate({
+    super.key,
+    required this.repository,
+    required this.onDone,
+  });
+
+  final InterestTestRepository repository;
+  final VoidCallback onDone;
+
+  @override
+  State<_InterestTestOnboardingGate> createState() =>
+      _InterestTestOnboardingGateState();
+}
+
+class _InterestTestOnboardingGateState
+    extends State<_InterestTestOnboardingGate> {
+  bool _showTest = false;
+  int _checkGeneration = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkStatus();
+  }
+
+  @override
+  void didUpdateWidget(covariant _InterestTestOnboardingGate oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.repository != widget.repository && !_showTest) {
+      _checkStatus();
+    }
+  }
+
+  Future<void> _checkStatus() async {
+    final generation = ++_checkGeneration;
+    try {
+      final completed = await widget.repository.hasCompletedTest().timeout(
+        const Duration(seconds: 3),
+      );
+      if (!mounted || generation != _checkGeneration) return;
+      if (completed) {
+        widget.onDone();
+      } else {
+        setState(() => _showTest = true);
+      }
+    } catch (_) {
+      // Never block entry into the app when the status check fails.
+      if (!mounted || generation != _checkGeneration) return;
+      widget.onDone();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_showTest) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+    return InterestTestScreen(
+      repository: widget.repository,
+      onSkip: widget.onDone,
+      onDone: widget.onDone,
     );
   }
 }
