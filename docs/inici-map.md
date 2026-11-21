@@ -100,3 +100,7 @@ On ets: `user_location_view_model_test.dart` (sense preguntar si ja hi ha permí
 motiu de no poder, temps esgotat, error i deixar d'escoltar) i el grup «La meva ubicació» de
 `activities_map_test.dart` (punt i cercle, llegenda, permís i avisos amb «Configuració» o «Activar»).
 A les proves, `test/flutter_test_config.dart` substitueix el mapa per un espai buit.
+
+## Zoom en obrir el mapa (DP-074)
+
+En obrir la pestanya Mapa per primer cop, `ActivitiesMap` demana el permís d'ubicació (si cal) i, si es dona, mostra uns 5 km al voltant de la persona (`boundsAround`). El zoom mínim (`minimumZoomFor`) fa que el món ompli el mapa: es pot veure sencer, però no es repeteix ni queden franges grises. Proves a `activities_map_test.dart` (zoom mínim i requadre) i `test/app/map_open_location_test.dart` (permís en obrir la pestanya, una sola vegada).

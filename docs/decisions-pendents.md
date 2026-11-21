@@ -814,3 +814,18 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Codi:** `TODO(DP-069)` a `enrollment_view_model.dart`.
 - **Qui decideix:** backend (`state` a l’activitat i bloqueig d’inscripcions)
 - **Resolució:**
+
+### DP-074 · Mapa: zoom a la persona en obrir-lo i límit d’allunyament
+- **Estat:** oberta · 2026-11-21 · Claude Code (Opus 5.5) a petició de l’usuari · Taiga pendent (millora de la geolocalització, #266)
+- **Identificador:** la DP-070 és de la #170, la DP-071 de la #47, la DP-072 de la #265 (sense fusionar) i la DP-073 es va proposar a la #30 (PR #67); es fa servir la DP-074.
+- **Context:** `ActivitiesMap` (`_locateOnOpen`, `minimumZoomFor`, `boundsAround`).
+- **Decisions de l’usuari:**
+  - En obrir la pestanya Mapa per primer cop es demana el permís d’ubicació (si cal) i, si es dona, el mapa mostra uns 5 km al voltant de la persona. Si no, es queda a Catalunya com abans, sense cap avís (el botó «La meva ubicació» explica el motiu).
+  - Es pot allunyar fins a veure el món sencer, però no més: abans, a la web, el món es repetia de costat i quedaven franges grises.
+- **Deduït (sense confirmar):**
+  - El zoom mínim depèn de la mida del mapa: el món (256 px a zoom 0) ha d’omplir l’amplada i l’alçada. En un mòbil vertical és ≈ 1,7; en una finestra ampla, ≈ 2,9.
+  - El permís es demana en veure la pestanya i no en obrir l’app, perquè `MainShell` construeix totes les pestanyes alhora.
+  - No es limita l’apropament (el màxim és el de Google).
+- **Codi:** `TODO(DP-074)` a `activities_map.dart`.
+- **Qui decideix:** equip/PO (radi inicial i moment de demanar el permís)
+- **Resolució:**
