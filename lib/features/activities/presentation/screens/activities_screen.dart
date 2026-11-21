@@ -276,6 +276,7 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
           bar: bar,
           map: ActivitiesMap(
             activities: activities,
+            preferredCategories: viewModel.filters.categories,
             onActivitySelected: onActivitySelected,
             onOverlayHeightChanged: widget.onMapOverlayChanged,
             interactive: _activeFilterRoute == null,
@@ -404,6 +405,7 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
                     return ActivityCard(
                       key: ValueKey(activity.id),
                       activity: activity,
+                      preferredCategories: viewModel.filters.categories,
                       onTap: () => onActivitySelected(activity.id),
                       participationAction: EnrollmentAction(
                         viewModel: enrollmentViewModel,
@@ -438,6 +440,7 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
           bar: bar,
           map: ActivitiesMap(
             activities: activities,
+            preferredCategories: filters.categories,
             onActivitySelected:
                 widget.onMapActivitySelected ?? onActivitySelected,
             onOverlayHeightChanged: widget.onMapOverlayChanged,

@@ -5,11 +5,13 @@ import '../../../../core/formatters/reliability_formatter.dart';
 import '../../../../core/l10n/date_labels.dart';
 import '../../../../core/links/open_external_link.dart';
 import '../../models/activity.dart';
+import '../../models/activity_category_labels.dart';
 import '../../repositories/activity_details_repository.dart';
 import '../formatters/activity_date_formatter.dart';
 import '../formatters/activity_modality_formatter.dart';
 import '../formatters/activity_price_formatter.dart';
 import '../view_models/activity_details_view_model.dart';
+import '../../models/activity_start.dart';
 import '../view_models/enrollment_view_model.dart';
 import '../widgets/activity_badges.dart';
 import '../widgets/activity_information_row.dart';
@@ -261,6 +263,10 @@ class _ActivityDetailsContent extends StatelessWidget {
     final creator = activity.creator;
     final description = activity.description?.trim();
 
+    final categories = orderActivityCategoriesForFilter(activity.categories);
+    final visibleCategories = categories.take(maxDetailActivityCategories);
+    final extraCategories = categories.length - maxDetailActivityCategories;
+
     return ListView(
       key: PageStorageKey<String>('activity-details-${activity.id}'),
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
@@ -280,8 +286,11 @@ class _ActivityDetailsContent extends StatelessWidget {
           runSpacing: 8,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
-            for (final category in activity.categories)
+            for (final category in visibleCategories)
               ActivityCategoryBadge(category: category),
+            // TODO(DP-081): Cap detail chips at 3 with a compact `+N` badge.
+            if (extraCategories > 0)
+              ActivityCategoryOverflowBadge(count: extraCategories),
             EnrollmentStatusBadge(
               viewModel: enrollmentViewModel,
               activityId: activity.id,
@@ -710,13 +719,20 @@ class _ParticipationAction extends StatelessWidget {
       ),
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: EnrollmentAction(
-          viewModel: viewModel,
-          activityId: activity.id,
-          activityTitle: activity.title,
-          primary: true,
-          showHelper: true,
-        ),
+        child: activityHasEnded(activity, activityClock())
+            ? Text(
+                context.l10n.actPastEvent,
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyMedium
+                    ?.copyWith(color: colors.onSurfaceVariant),
+              )
+            : EnrollmentAction(
+                viewModel: viewModel,
+                activityId: activity.id,
+                activityTitle: activity.title,
+                primary: true,
+                showHelper: true,
+              ),
       ),
     );
   }

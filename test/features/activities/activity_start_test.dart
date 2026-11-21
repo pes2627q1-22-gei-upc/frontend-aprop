@@ -59,4 +59,40 @@ void main() {
       expect(activityHasStarted(activity, DateTime(2026, 11, 22)), isTrue);
     });
   });
+
+  group('activityHasEnded', () {
+    final now = DateTime(2026, 11, 21, 10);
+    test('A one-day plan ends when its day is over', () {
+      expect(activityHasEnded(_activity(DateTime(2026, 11, 19)), now), isTrue);
+      expect(activityHasEnded(_activity(DateTime(2026, 11, 21)), now), isFalse);
+    });
+
+    test('A multi-day plan lasts until its end day', () {
+      final festival = Activity(
+        id: 'f',
+        title: 'Festival',
+        category: 'Música',
+        municipality: 'Barcelona',
+        startsAt: DateTime(2026, 11, 20),
+        endsAt: DateTime(2026, 11, 22),
+        imageAsset: 'assets/images/jazz_al_parc.jpg',
+        source: ActivitySource.culturalAgenda,
+      );
+      expect(activityHasEnded(festival, now), isFalse);
+    });
+
+    test('Permanent plans never end', () {
+      final permanent = Activity(
+        id: 'p',
+        title: 'Museu',
+        category: 'Museus',
+        municipality: 'Barcelona',
+        startsAt: DateTime(2020, 1, 1),
+        isPermanent: true,
+        imageAsset: 'assets/images/jazz_al_parc.jpg',
+        source: ActivitySource.culturalAgenda,
+      );
+      expect(activityHasEnded(permanent, now), isFalse);
+    });
+  });
 }

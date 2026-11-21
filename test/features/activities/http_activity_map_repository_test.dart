@@ -84,8 +84,8 @@ void main() {
     expect(activity.description, 'Concerts gratuïts cada dissabte.');
     expect(activity.directions, 'Sala Salamandra · Av. del Carrilet, 235');
     expect(activity.price, 0);
-    expect(activity.category, 'Musica');
-    expect(activity.categories, ['Musica', 'Concerts']);
+    expect(activity.category, 'Música');
+    expect(activity.categories, ['Música', 'Concerts']);
   });
 
   test('Unnamed map categories do not hide the first usable badge', () async {

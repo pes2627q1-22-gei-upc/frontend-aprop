@@ -66,12 +66,12 @@ class ApiClient {
   final http.Client _client;
   final Duration timeout;
 
-  /// Current UI language; sent as `lang` on the `events` endpoints so the
-  /// backend can return translated event texts.
+  /// Current UI language; sent as `lang` on the `events` and
+  /// `preferences/test` endpoints so the backend can return translated texts.
   final String Function()? language;
 
   static final _translatedPaths = RegExp(
-    r'^(events(/|$)|users/[^/]+/(events|created-events)$)',
+    r'^(events(/|$)|users/[^/]+/(events|created-events)$|preferences/test$)',
   );
 
   /// Construeix la URI completa a partir d'un camí relatiu i paràmetres opcionals.

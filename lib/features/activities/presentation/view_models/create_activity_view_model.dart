@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 
 import '../../models/activity.dart';
 import '../../models/activity_category.dart';
+import '../../models/activity_category_labels.dart';
 import '../../models/activity_options.dart';
 import '../../models/geo_point.dart';
 import '../../models/new_activity.dart';
@@ -190,7 +191,8 @@ class CreateActivityViewModel extends ChangeNotifier {
             .where(
               (c) =>
                   c.value == name ||
-                  c.label.toLowerCase() == name.toLowerCase(),
+                  canonicalActivityCategoryKey(c.label) ==
+                      canonicalActivityCategoryKey(name),
             )
             .firstOrNull
             ?.value,

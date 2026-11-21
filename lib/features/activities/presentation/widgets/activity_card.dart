@@ -13,11 +13,15 @@ class ActivityCard extends StatelessWidget {
     required this.activity,
     required this.onTap,
     this.participationAction,
+    this.preferredCategories = const [],
   });
 
   final Activity activity;
   final VoidCallback onTap;
   final Widget? participationAction;
+
+  /// Active category filter values, if any, prioritized first on the badge.
+  final Iterable<String> preferredCategories;
 
   @override
   Widget build(BuildContext context) {
@@ -106,6 +110,7 @@ class ActivityCard extends StatelessWidget {
                       children: [
                         ActivityCategoriesSummary(
                           categories: activity.categories,
+                          preferredCategories: preferredCategories,
                         ),
                         const SizedBox(height: 6),
                         InkWell(

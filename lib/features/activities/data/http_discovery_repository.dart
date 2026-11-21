@@ -1,3 +1,4 @@
+import '../models/activity_start.dart';
 import '../../../core/network/api_client.dart';
 import '../models/activity.dart';
 import '../models/activity_search_page.dart';
@@ -140,6 +141,7 @@ class HttpDiscoveryRepository implements DiscoveryRepository {
         throw const FormatException('Expected an activity');
       }
       final activity = activityFromJson(row);
+      if (activityHasEnded(activity, activityClock())) continue;
       activities.putIfAbsent(activity.id, () => activity);
     }
     return List.unmodifiable(activities.values);

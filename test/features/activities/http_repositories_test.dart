@@ -77,7 +77,7 @@ void main() {
       expect(list, hasLength(1));
       expect(list.single.id, '101');
       expect(list.single.title, 'Concert de Jazz a Girona');
-      expect(list.single.category, 'Musica');
+      expect(list.single.category, 'Música');
       expect(list.single.municipality, 'Girona');
 
       final detail = await repo.getActivityById('101');

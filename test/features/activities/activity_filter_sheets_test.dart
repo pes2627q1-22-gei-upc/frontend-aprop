@@ -20,7 +20,9 @@ import 'package:aprop/features/activities/presentation/widgets/activity_categori
 import 'package:aprop/features/activities/presentation/widgets/activity_date_filter_sheet.dart';
 import 'package:aprop/features/activities/presentation/widgets/activity_filter_calendar.dart';
 import 'package:aprop/features/activities/presentation/widgets/activity_filter_feedback.dart';
+import 'package:aprop/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
@@ -314,12 +316,23 @@ void main() {
           .singleWhere((marker) => marker.markerId.value == '1')
           .onTap!();
       await tester.pumpAndSettle();
-      expect(find.text('Musica'), findsOneWidget);
+      expect(find.text('Música'), findsOneWidget);
 
       await open(tester, 'categories');
       await tester.tap(category('Concerts'));
       await apply(tester);
       expect(map(tester).markers.single.markerId.value, '1');
+      // With the Concerts filter active, the map card surfaces Concerts first.
+      map(tester).markers.single.onTap!();
+      await tester.pumpAndSettle();
+      expect(
+        find.descendant(of: find.byType(Card), matching: find.text('Concerts')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: find.byType(Card), matching: find.text('+1')),
+        findsOneWidget,
+      );
       expect(find.byType(MapFilterFeedback), findsNothing);
       expect(model.filters.categories, {'Concerts'});
       expect(filterIds, [null, '4']);
@@ -719,4 +732,45 @@ void main() {
     expect(model.filters.isActive, isFalse);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets(
+    'Category filter sheet localizes and sorts labels cleanly in es and en',
+    (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.light,
+          locale: const Locale('en'),
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          home: const Scaffold(
+            body: ActivityCategoriesFilterSheet(
+              initialCategories: {'Espectacles'},
+              categories: [
+                'agenda:ambits/zz-altres-ambits',
+                'agenda:ambits/espectacles',
+                'agenda:categories/any-gaudi',
+                'agenda:categories/musica',
+              ],
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Gaudí Year'), findsOneWidget);
+      expect(find.text('Music'), findsOneWidget);
+      expect(find.text('Other fields'), findsOneWidget);
+      expect(find.text('Performing arts'), findsOneWidget);
+      expect(find.textContaining('Zz'), findsNothing);
+      final performingArtsTile = tester.widget<CheckboxListTile>(
+        find.byKey(const ValueKey('activity-filter-category-Performing arts')),
+      );
+      expect(performingArtsTile.value, isTrue);
+    },
+  );
 }

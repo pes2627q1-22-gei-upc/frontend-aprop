@@ -18,6 +18,9 @@ abstract interface class UserSyncRepository {
   /// actualitzat. L'usuari ja ha d'existir (després de [sync]).
   Future<UserProfile> updateName(String name);
 
+  /// Desa l'idioma inicial (`ca`, `es` o `en`) al perfil acabat de crear.
+  Future<void> updateLanguage(String language);
+
   /// Esborra l'usuari de la sessió i les seves dades. Retorna cert si també
   /// s'ha esborrat el compte d'autenticació (el backend ho fa amb Firebase);
   /// si no, ho ha de fer l'app.

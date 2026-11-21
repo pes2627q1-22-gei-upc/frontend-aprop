@@ -1,3 +1,5 @@
+import '../models/activity_start.dart';
+
 import 'dart:async';
 
 import 'package:http/http.dart' as http;
@@ -41,9 +43,13 @@ class HttpActivityMapRepository implements ActivityMapRepository {
       },
     );
     final events = decoded as List<Object?>? ?? const [];
+    final now = activityClock();
     return [
       for (final event in events)
-        if (event is Map<String, Object?>) activityFromJson(event),
+        if (event is Map<String, Object?>)
+          if (activityFromJson(event) case final a
+              when !activityHasEnded(a, now))
+            a,
     ];
   }
 

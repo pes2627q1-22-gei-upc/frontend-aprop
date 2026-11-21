@@ -12,7 +12,9 @@ import '../features/activities/repositories/user_location_repository.dart';
 import '../features/activity_chat/repositories/activity_chat_repository.dart';
 import '../features/ratings/repositories/rating_repository.dart';
 import '../features/assistant/repositories/assistant_repository.dart';
+import '../features/auth/presentation/screens/language_selection_screen.dart';
 import '../features/auth/repositories/auth_repository.dart';
+import '../features/interest_test/repositories/interest_test_onboarding_memory.dart';
 import '../features/interest_test/repositories/interest_test_repository.dart';
 import '../features/notifications/repositories/notification_repository.dart';
 import '../features/profile/repositories/profile_repository.dart';
@@ -44,6 +46,7 @@ class APropApp extends StatelessWidget {
     this.friendsRepository,
     this.attendanceRepository,
     this.interestTestRepository,
+    this.interestTestOnboardingMemory,
     this.activityCategoryRepository,
     this.userLocationRepository,
     this.activityChatRepository,
@@ -75,6 +78,7 @@ class APropApp extends StatelessWidget {
   final FriendsRepository? friendsRepository;
   final AttendanceRepository? attendanceRepository;
   final InterestTestRepository? interestTestRepository;
+  final InterestTestOnboardingMemory? interestTestOnboardingMemory;
 
   /// Categories per crear activitats. Si no hi és, el formulari fa servir la
   /// llista provisional.
@@ -100,11 +104,14 @@ class APropApp extends StatelessWidget {
         friendsRepository,
         attendanceRepository,
         interestTestRepository,
+        interestTestOnboardingMemory,
         activityCategoryRepository,
         userLocationRepository,
         activityChatRepository,
+        localeController,
       )),
       authRepository: authRepository,
+      localeController: localeController,
       activityRepository: activityRepository,
       activityMapRepository: activityMapRepository,
       enrollmentRepository: enrollmentRepository,
@@ -120,6 +127,7 @@ class APropApp extends StatelessWidget {
       friendsRepository: friendsRepository,
       attendanceRepository: attendanceRepository,
       interestTestRepository: interestTestRepository,
+      interestTestOnboardingMemory: interestTestOnboardingMemory,
       activityCategoryRepository: activityCategoryRepository,
       userLocationRepository: userLocationRepository,
       activityChatRepository: activityChatRepository,
@@ -142,7 +150,9 @@ class APropApp extends StatelessWidget {
           ? null
           : (context, child) =>
                 LocaleScope(controller: controller, child: child!),
-      home: authGate,
+      home: controller != null && controller.needsInitialSelection
+          ? LanguageSelectionScreen(controller: controller)
+          : authGate,
     );
     if (controller == null) return app(LocaleController.defaultLocale);
     return ListenableBuilder(

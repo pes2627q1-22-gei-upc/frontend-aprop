@@ -7,9 +7,12 @@ import 'package:aprop/features/activities/models/activity.dart';
 import 'package:aprop/features/activities/presentation/formatters/activity_date_formatter.dart';
 import 'package:aprop/features/activities/presentation/screens/activity_details_screen.dart';
 import 'package:aprop/features/activities/presentation/view_models/enrollment_view_model.dart';
+import 'package:aprop/features/activities/presentation/widgets/activity_badges.dart';
 import 'package:aprop/features/activities/repositories/activity_repository.dart';
+import 'package:aprop/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'fake_activity_repository.dart';
@@ -445,4 +448,98 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Obrir des de l’agenda').hitTestable(), findsOneWidget);
   });
+
+  testWidgets('Limits detail category chips to 3 with a +N badge', (
+    tester,
+  ) async {
+    final semantics = tester.ensureSemantics();
+    // disposed at the end of the test body
+    final repository = FakeActivityRepository()
+      ..findActivity = (id) async => Activity(
+        id: id,
+        title: 'Gran festival',
+        category: 'Llibres i lletres',
+        categories: const [
+          'Llibres i lletres',
+          'Espectacles',
+          'Any Gaudí',
+          'Altres àmbits',
+          'Concerts',
+          'Cinema',
+          'Teatre',
+          'Dansa',
+          'Òpera',
+          'Màgia',
+        ],
+        municipality: 'Barcelona',
+        startsAt: DateTime(2026, 11, 14),
+        imageAsset: '',
+        source: ActivitySource.culturalAgenda,
+      );
+
+    await pumpDetails(tester, id: '500', repository: repository);
+    await tester.pumpAndSettle();
+
+    expect(find.byType(ActivityCategoryBadge), findsNWidgets(3));
+    expect(find.text('Llibres i lletres'), findsOneWidget);
+    expect(find.text('Espectacles'), findsOneWidget);
+    expect(find.text('Any Gaudí'), findsOneWidget);
+    expect(find.text('Altres àmbits'), findsNothing);
+    expect(find.text('+7'), findsOneWidget);
+    expect(find.bySemanticsLabel(RegExp('7 categories més')), findsOneWidget);
+    semantics.dispose();
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets(
+    'Detail screen shows 3 chips without +N and localizes in English',
+    (tester) async {
+      final repository = FakeActivityRepository()
+        ..findActivity = (id) async => Activity(
+          id: id,
+          title: 'Gala',
+          category: 'Espectacles',
+          categories: const ['Espectacles', 'Any Gaudí', 'Altres àmbits'],
+          municipality: 'Barcelona',
+          startsAt: DateTime(2026, 11, 14),
+          imageAsset: '',
+          source: ActivitySource.culturalAgenda,
+        );
+      final enrollments = FakeEnrollmentRepository();
+      final enrollmentViewModel = EnrollmentViewModel(
+        userId: 'test-user',
+        repository: enrollments,
+      )..load();
+      addTearDown(() async {
+        enrollmentViewModel.dispose();
+        await enrollments.dispose();
+      });
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.light,
+          locale: const Locale('en'),
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          home: ActivityDetailsScreen(
+            activityId: '501',
+            repository: repository,
+            enrollmentViewModel: enrollmentViewModel,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ActivityCategoryBadge), findsNWidgets(3));
+      expect(find.text('Performing arts'), findsOneWidget);
+      expect(find.text('Gaudí Year'), findsOneWidget);
+      expect(find.text('Other fields'), findsOneWidget);
+      expect(find.byType(ActivityCategoryOverflowBadge), findsNothing);
+    },
+  );
 }

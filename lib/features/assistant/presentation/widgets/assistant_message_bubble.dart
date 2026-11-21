@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../activities/models/activity.dart';
 import '../../models/assistant_message.dart';
 import 'assistant_activity_tile.dart';
+import 'assistant_markdown_text.dart';
 import '../../../../core/l10n/locale_controller.dart';
 
 class AssistantMessageBubble extends StatelessWidget {
@@ -176,8 +177,8 @@ class _AssistantBubble extends StatelessWidget {
                       ],
                       if (interpretation != null && interpretation.hasAny)
                         const SizedBox(height: 8),
-                      Text(
-                        message.text,
+                      AssistantMarkdownText(
+                        text: message.text,
                         style: theme.textTheme.bodyLarge?.copyWith(
                           color: colors.onSurface,
                         ),

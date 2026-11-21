@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../../core/l10n/locale_controller.dart';
 import '../../features/activities/data/combined_activity_repository.dart';
 import '../../features/activities/data/demo_activity_repository.dart';
 import '../../features/activities/data/demo_discovery_repository.dart';
@@ -22,6 +23,7 @@ import '../../features/auth/presentation/screens/verify_email_screen.dart';
 import '../../features/auth/repositories/auth_repository.dart';
 import '../../features/interest_test/data/demo_interest_test_repository.dart';
 import '../../features/interest_test/presentation/screens/interest_test_screen.dart';
+import '../../features/interest_test/repositories/interest_test_onboarding_memory.dart';
 import '../../features/interest_test/repositories/interest_test_repository.dart';
 import '../../features/notifications/data/demo_notification_repository.dart';
 import '../../features/notifications/repositories/notification_repository.dart';
@@ -65,12 +67,15 @@ class AuthGate extends StatefulWidget {
     this.friendsRepository,
     this.attendanceRepository,
     this.interestTestRepository,
+    this.interestTestOnboardingMemory,
     this.activityCategoryRepository,
     this.userLocationRepository,
     this.activityChatRepository,
+    this.localeController,
   });
 
   final AuthRepository authRepository;
+  final LocaleController? localeController;
 
   /// On és la persona, per al mapa d'Inici. Sense, el mapa no la mostra.
   final UserLocationRepository? userLocationRepository;
@@ -91,6 +96,7 @@ class AuthGate extends StatefulWidget {
   final FriendsRepository? friendsRepository;
   final AttendanceRepository? attendanceRepository;
   final InterestTestRepository? interestTestRepository;
+  final InterestTestOnboardingMemory? interestTestOnboardingMemory;
   final ActivityCategoryRepository? activityCategoryRepository;
 
   /// Repositori opcional per al mapa d'Inici. Si és nul, el mapa mostra les
@@ -116,15 +122,16 @@ class _AuthGateState extends State<AuthGate> {
   late final FriendsRepository _friendsRepository;
   late final AttendanceRepository _attendanceRepository;
   late final InterestTestRepository _interestTestRepository;
+  late final InterestTestOnboardingMemory _interestTestOnboardingMemory;
   DemoEnrollmentRepository? _ownedEnrollmentRepository;
   DemoFriendshipRepository? _ownedFriendshipRepository;
   late final FriendshipRepository _friendshipRepository;
   String? _activeUserId;
+  String? _languageSyncedUserId;
 
   // Users whose onboarding interest test was already completed, skipped or
-  // bypassed during this app run.
-  // TODO(DP-066): Keep the skip decision in memory only for this run; decide
-  // whether skipping should persist across restarts.
+  // bypassed during this app run (fast-path before querying persistent memory
+  // and server-side Users.InterestTestPrompted; TODO(DP-078)).
   final Set<String> _onboardingHandledUsers = {};
 
   @override
@@ -199,6 +206,9 @@ class _AuthGateState extends State<AuthGate> {
     _interestTestRepository =
         widget.interestTestRepository ??
         DemoInterestTestRepository(activityRepository: _activityRepository);
+    _interestTestOnboardingMemory =
+        widget.interestTestOnboardingMemory ??
+        InMemoryInterestTestOnboardingMemory();
   }
 
   @override
@@ -227,6 +237,7 @@ class _AuthGateState extends State<AuthGate> {
         _activeUserId = user?.id;
 
         if (user == null) {
+          _languageSyncedUserId = null;
           return LoginScreen(repository: widget.authRepository);
         }
 
@@ -245,10 +256,26 @@ class _AuthGateState extends State<AuthGate> {
           );
         }
 
+        final localeController =
+            widget.localeController ?? LocaleScope.maybeOf(context);
+        if (localeController != null && _languageSyncedUserId != user.id) {
+          return _LanguageSyncGate(
+            key: ValueKey(('lang-sync', user.id)),
+            userId: user.id,
+            repository: _profileSettingsRepository,
+            localeController: localeController,
+            onDone: () => setState(() {
+              _languageSyncedUserId = user.id;
+            }),
+          );
+        }
+
         if (!_onboardingHandledUsers.contains(user.id)) {
           return _InterestTestOnboardingGate(
             key: ValueKey(user.id),
+            userId: user.id,
             repository: _interestTestRepository,
+            onboardingMemory: _interestTestOnboardingMemory,
             onDone: () => setState(() {
               _onboardingHandledUsers.add(user.id);
             }),
@@ -286,18 +313,23 @@ class _AuthGateState extends State<AuthGate> {
   }
 }
 
-/// Checks once whether the signed-in user has completed the interest test.
-/// Shows [InterestTestScreen] (skippable via «Ara no») if not completed; on
-/// completion, skip, or any status error it calls [onDone] so the app is never
-/// blocked.
+/// Checks once whether a newly registered account should see the onboarding
+/// interest test. Shows [InterestTestScreen] (pausable via «Més tard») only
+/// when the account has never been prompted, started, or completed; immediately
+/// marks onboarding as prompted (server-side + local fallback) so skipping or
+/// closing the app never forces it again on later logins.
 class _InterestTestOnboardingGate extends StatefulWidget {
   const _InterestTestOnboardingGate({
     super.key,
+    required this.userId,
     required this.repository,
+    required this.onboardingMemory,
     required this.onDone,
   });
 
+  final String userId;
   final InterestTestRepository repository;
+  final InterestTestOnboardingMemory onboardingMemory;
   final VoidCallback onDone;
 
   @override
@@ -308,7 +340,9 @@ class _InterestTestOnboardingGate extends StatefulWidget {
 class _InterestTestOnboardingGateState
     extends State<_InterestTestOnboardingGate> {
   bool _showTest = false;
+  int _initialAnsweredCount = 0;
   int _checkGeneration = 0;
+  bool _promptMarked = false;
 
   @override
   void initState() {
@@ -319,22 +353,46 @@ class _InterestTestOnboardingGateState
   @override
   void didUpdateWidget(covariant _InterestTestOnboardingGate oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.repository != widget.repository && !_showTest) {
+    if ((oldWidget.repository != widget.repository ||
+            oldWidget.userId != widget.userId) &&
+        !_showTest) {
       _checkStatus();
     }
+  }
+
+  void _markPrompted() {
+    if (_promptMarked) return;
+    _promptMarked = true;
+    unawaited(widget.onboardingMemory.markPrompted(widget.userId));
+    unawaited(
+      widget.repository.markOnboardingPrompted().catchError((Object _) {}),
+    );
   }
 
   Future<void> _checkStatus() async {
     final generation = ++_checkGeneration;
     try {
-      final completed = await widget.repository.hasCompletedTest().timeout(
+      if (await widget.onboardingMemory.wasPrompted(widget.userId)) {
+        if (!mounted || generation != _checkGeneration) return;
+        widget.onDone();
+        return;
+      }
+
+      final status = await widget.repository.getTestStatus().timeout(
         const Duration(seconds: 3),
       );
       if (!mounted || generation != _checkGeneration) return;
-      if (completed) {
+      if (!status.shouldPromptOnboarding) {
+        unawaited(widget.onboardingMemory.markPrompted(widget.userId));
         widget.onDone();
       } else {
-        setState(() => _showTest = true);
+        // Mark as prompted as soon as onboarding is shown so even force-closing
+        // the app counts and the test never reappears on later logins.
+        _markPrompted();
+        setState(() {
+          _initialAnsweredCount = status.answeredCount;
+          _showTest = true;
+        });
       }
     } catch (_) {
       // Never block entry into the app when the status check fails.
@@ -350,8 +408,84 @@ class _InterestTestOnboardingGateState
     }
     return InterestTestScreen(
       repository: widget.repository,
+      initialAnsweredCount: _initialAnsweredCount,
       onSkip: widget.onDone,
       onDone: widget.onDone,
     );
   }
+}
+
+/// Synchronizes the UI language with the signed-in user's profile once per
+/// session before onboarding / [MainShell]: if the profile already has a
+/// supported language, applies it locally; otherwise pushes the local one.
+/// Failures never block entering the app.
+class _LanguageSyncGate extends StatefulWidget {
+  const _LanguageSyncGate({
+    super.key,
+    required this.userId,
+    required this.repository,
+    required this.localeController,
+    required this.onDone,
+  });
+
+  final String userId;
+  final ProfileSettingsRepository repository;
+  final LocaleController localeController;
+  final VoidCallback onDone;
+
+  @override
+  State<_LanguageSyncGate> createState() => _LanguageSyncGateState();
+}
+
+class _LanguageSyncGateState extends State<_LanguageSyncGate> {
+  int _syncGeneration = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _sync();
+  }
+
+  @override
+  void didUpdateWidget(covariant _LanguageSyncGate oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.userId != widget.userId ||
+        oldWidget.repository != widget.repository ||
+        oldWidget.localeController != widget.localeController) {
+      _sync();
+    }
+  }
+
+  Future<void> _sync() async {
+    final generation = ++_syncGeneration;
+    try {
+      final settings = await widget.repository
+          .getSettings(widget.userId)
+          .timeout(const Duration(seconds: 3));
+      if (!mounted || generation != _syncGeneration) return;
+      final profileLocale = LocaleController.supportedLocaleFor(
+        settings.language,
+      );
+      if (profileLocale != null) {
+        if (profileLocale != widget.localeController.locale) {
+          await widget.localeController.setLocale(profileLocale);
+        }
+      } else {
+        await widget.repository
+            .updateLanguage(
+              userId: widget.userId,
+              language: widget.localeController.locale.languageCode,
+            )
+            .timeout(const Duration(seconds: 3));
+      }
+    } catch (_) {
+      // Never block entry into the app when language sync fails.
+    }
+    if (!mounted || generation != _syncGeneration) return;
+    widget.onDone();
+  }
+
+  @override
+  Widget build(BuildContext context) =>
+      const Scaffold(body: Center(child: CircularProgressIndicator()));
 }

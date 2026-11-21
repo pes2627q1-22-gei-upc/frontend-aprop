@@ -405,6 +405,7 @@ class _MainShellState extends State<MainShell> {
         builder: (context) => InterestTestScreen(
           repository: repository,
           onBack: () => Navigator.of(context).pop(),
+          onSkip: () => Navigator.of(context).pop(),
           onCompleted: _onInterestTestCompleted,
         ),
       ),
@@ -644,6 +645,7 @@ class _MainShellState extends State<MainShell> {
                   builder: (context) => InterestTestScreen(
                     repository: repository,
                     onBack: () => Navigator.of(context).pop(),
+                    onSkip: () => Navigator.of(context).pop(),
                     onCompleted: _onInterestTestCompleted,
                   ),
                 ),

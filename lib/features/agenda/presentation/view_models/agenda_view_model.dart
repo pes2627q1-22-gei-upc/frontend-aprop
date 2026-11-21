@@ -8,7 +8,16 @@ import '../../../activities/repositories/activity_repository.dart';
 import '../../../activities/repositories/enrollment_repository.dart';
 import '../../../../core/l10n/locale_controller.dart';
 
-/// Month calendar of the signed-in user's own plans (confirmed enrollments).
+/// Signed-up plans happening on a single calendar [day], ordered by start time.
+class AgendaDayGroup {
+  const AgendaDayGroup({required this.day, required this.plans});
+
+  final DateTime day;
+  final List<Activity> plans;
+}
+
+/// Month calendar and full list of the signed-in user's own plans
+/// (confirmed enrollments).
 class AgendaViewModel extends ChangeNotifier {
   AgendaViewModel({
     required this.userId,
@@ -49,21 +58,104 @@ class AgendaViewModel extends ChangeNotifier {
   bool get hasLoaded => _hasLoaded;
   String? get errorMessage => _errorMessage;
 
+  /// Longest range, in days, that is expanded day by day.
+  // TODO(DP-079): 14 is an assumption; exhibitions longer than this stay on their start day.
+  static const maxExpandedDays = 14;
+
+  /// Number of days of a short multi-day [activity], or null when it is a
+  /// single-day plan or too long to be expanded.
+  static int? spanDays(Activity activity) {
+    final end = activity.endsAt;
+    if (end == null) return null;
+    final start = _dateOnly(activity.startsAt);
+    final days = _dateOnly(end).difference(start).inDays + 1;
+    return days > 1 && days <= maxExpandedDays ? days : null;
+  }
+
+  /// «Dia X de N» position of [activity] on [day], or null for one-day plans.
+  ({int day, int of})? dayPosition(Activity activity, DateTime day) {
+    final total = spanDays(activity);
+    if (total == null) return null;
+    final index = _dateOnly(day)
+        .difference(_dateOnly(activity.startsAt))
+        .inDays;
+    return index < 0 || index >= total ? null : (day: index + 1, of: total);
+  }
+
   bool hasPlansOn(DateTime day) => _plansByDay.containsKey(_dateOnly(day));
+
+  bool get hasAnyPlans => _plansByDay.isNotEmpty;
+
+  /// Plans of [day], ordered by start time.
+  List<Activity> plansOn(DateTime day) =>
+      _plansByDay[_dateOnly(day)] ?? const [];
 
   /// Plans of the selected day, ordered by start time.
   List<Activity> get selectedDayPlans => _plansByDay[_selectedDay] ?? const [];
+
+  /// Upcoming signed-up plans (from [today] onwards), grouped by day in
+  /// chronological order.
+  // TODO(DP-079): today stays in upcoming so same-day events (including
+  // midnight backend dates per DP-029) and rating blocks remain directly
+  // visible below the calendar.
+  List<AgendaDayGroup> get upcomingPlanGroups =>
+      _groups(upcoming: true, newestFirst: false);
+
+  /// A plan is still "upcoming" if it starts today or later, or it started
+  /// earlier but has not ended yet (exhibitions, festivals).
+  bool _isUpcoming(Activity plan, DateTime day, DateTime currentDay) {
+    if (!day.isBefore(currentDay)) return true;
+    // Expanded plans: each day counts by itself.
+    if (spanDays(plan) != null) return false;
+    final end = plan.endsAt;
+    return end != null && !_dateOnly(end).isBefore(currentDay);
+  }
+
+  List<AgendaDayGroup> _groups({
+    required bool upcoming,
+    required bool newestFirst,
+  }) {
+    final currentDay = today;
+    final days = _plansByDay.keys.toList()
+      ..sort((a, b) => newestFirst ? b.compareTo(a) : a.compareTo(b));
+    return List.unmodifiable([
+      for (final day in days)
+        if ([
+              for (final p in _plansByDay[day]!)
+                if (_isUpcoming(p, day, currentDay) == upcoming) p,
+            ]
+            case final plans when plans.isNotEmpty)
+          AgendaDayGroup(day: day, plans: plans),
+    ]);
+  }
+
+  /// All upcoming signed-up plans (from [today] onwards), ordered by date and
+  /// start time.
+  List<Activity> get upcomingPlans => List.unmodifiable([
+    for (final group in upcomingPlanGroups) ...group.plans,
+  ]);
+
+  /// Past signed-up plans (strictly before [today]), grouped by day with the
+  /// most recent day first.
+  // TODO(DP-079): past days are grouped newest-first inside a collapsible
+  // secondary section below upcoming plans.
+  List<AgendaDayGroup> get pastPlanGroups =>
+      _groups(upcoming: false, newestFirst: true);
+
+  /// All past signed-up plans (strictly before [today]).
+  List<Activity> get pastPlans =>
+      List.unmodifiable([for (final group in pastPlanGroups) ...group.plans]);
 
   /// Plans that have already started, newest first, whatever day is
   /// selected: the ones «Com va anar?» asks about (#64, R8).
   List<Activity> get startedPlans {
     final now = _now();
     return List.unmodifiable(
-      [
+      {
         for (final plans in _plansByDay.values)
           for (final plan in plans)
-            if (activityHasStarted(plan, now)) plan,
-      ]..sort((a, b) => b.startsAt.compareTo(a.startsAt)),
+            if (activityHasStarted(plan, now)) plan.id: plan,
+      }.values.toList()..sort((a, b) => b.startsAt.compareTo(a.startsAt)),
     );
   }
 
@@ -137,12 +229,20 @@ class AgendaViewModel extends ChangeNotifier {
     for (final id in ids) {
       final activity = _activityCache[id];
       if (activity == null) continue;
-      plansByDay
-          .putIfAbsent(_dateOnly(activity.startsAt), () => [])
-          .add(activity);
+      // Short multi-day plans (festivals) show on every day of their range;
+      // long ones (exhibitions) stay on their start day to keep lists short.
+      final start = _dateOnly(activity.startsAt);
+      for (var i = 0; i < (spanDays(activity) ?? 1); i++) {
+        plansByDay
+            .putIfAbsent(
+              DateTime(start.year, start.month, start.day + i),
+              () => [],
+            )
+            .add(activity);
+      }
     }
     for (final plans in plansByDay.values) {
-      plans.sort((a, b) => a.startsAt.compareTo(b.startsAt));
+      plans.sort(_comparePlans);
     }
     _plansByDay = {
       for (final entry in plansByDay.entries)
@@ -165,6 +265,14 @@ class AgendaViewModel extends ChangeNotifier {
     _isLoading = false;
     _errorMessage = currentL10n.agendaLoadError;
     notifyListeners();
+  }
+
+  static int _comparePlans(Activity a, Activity b) {
+    final timeA = activityStartTime(a) ?? a.startsAt;
+    final timeB = activityStartTime(b) ?? b.startsAt;
+    final byTime = timeA.compareTo(timeB);
+    if (byTime != 0) return byTime;
+    return a.id.compareTo(b.id);
   }
 
   static DateTime _dateOnly(DateTime date) =>

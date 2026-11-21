@@ -1,4 +1,5 @@
 import 'activity.dart';
+import 'activity_category_labels.dart';
 
 /// Calendar days are kept as local civil dates, matching the catalogue.
 class ActivityDateRange {
@@ -101,10 +102,7 @@ class ActivityFilters {
             .where(
               (activity) =>
                   (dates?.contains(activity.startsAt) ?? true) &&
-                  activity.categories.every(
-                    (category) =>
-                        {'', 'activitat'}.contains(_categoryKey(category)),
-                  ),
+                  activity.categories.every(isUncategorizedActivityCategory),
             )
             .length;
 
@@ -121,14 +119,4 @@ class ActivityFilters {
 
 DateTime _day(DateTime value) => DateTime(value.year, value.month, value.day);
 
-String _categoryKey(String value) => value
-    .toLowerCase()
-    .replaceAll(RegExp('[àáâäãå]'), 'a')
-    .replaceAll(RegExp('[èéêë]'), 'e')
-    .replaceAll(RegExp('[ìíîï]'), 'i')
-    .replaceAll(RegExp('[òóôöõ]'), 'o')
-    .replaceAll(RegExp('[ùúûü]'), 'u')
-    .replaceAll('ç', 'c')
-    .replaceAll(RegExp('[\u0300-\u036f]'), '')
-    .trim()
-    .replaceAll(RegExp(r'\s+'), ' ');
+String _categoryKey(String value) => canonicalActivityCategoryKey(value);

@@ -22,6 +22,19 @@ bool activityHasStarted(Activity activity, DateTime now) {
   return !DateTime(day.year, day.month, day.day + 1).isAfter(now);
 }
 
+/// Clock used to hide finished activities; tests replace it.
+DateTime Function() activityClock = DateTime.now;
+
+/// Whether [activity] is over at [now]: its last day (the end day, or the
+/// start day for one-day plans) has finished. Permanent activities never end.
+/// The API still lists one-day events whose date passed when they have no end
+/// date, so the app hides them (DP-080).
+bool activityHasEnded(Activity activity, DateTime now) {
+  if (activity.isPermanent) return false;
+  final last = activity.endsAt ?? activity.startsAt;
+  return !DateTime(last.year, last.month, last.day + 1).isAfter(now);
+}
+
 /// The first hour written in [schedule]: «20 h», «19.30 h», «19:30».
 ({int hour, int minute})? scheduleStartHour(String? schedule) {
   final text = schedule?.trim();

@@ -1,4 +1,8 @@
 import 'package:aprop/app/aprop_app.dart';
+import 'package:aprop/features/activities/data/demo_activity_repository.dart';
+import 'package:aprop/features/activities/models/activity.dart';
+import 'package:aprop/features/activities/models/geo_point.dart';
+import 'package:aprop/features/activities/models/new_activity.dart';
 import 'package:aprop/features/auth/data/demo_auth_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -13,60 +17,129 @@ Future<void> answerLater(WidgetTester tester, String activityId) async {
 }
 
 void main() {
-  testWidgets('Plans joined in Inici appear in Agenda and open details', (
-    tester,
-  ) async {
-    tester.view.physicalSize = const Size(390, 844);
-    tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.resetPhysicalSize);
-    addTearDown(tester.view.resetDevicePixelRatio);
-    final auth = DemoAuthRepository();
-    await auth.signIn(usernameOrEmail: 'laiasoler', password: 'Aprop2026!');
-    await tester.pumpWidget(APropApp(authRepository: auth));
-    await tester.pumpAndSettle();
-    await openMapTab(tester);
-    await tapMarker(tester, 'demo-jazz');
+  testWidgets(
+    'Plans joined in Mapa appear in Agenda day sheet and past list, and open details',
+    (tester) async {
+      tester.view.physicalSize = const Size(390, 844);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final auth = DemoAuthRepository();
+      await auth.signIn(usernameOrEmail: 'laiasoler', password: 'Aprop2026!');
+      await tester.pumpWidget(APropApp(authRepository: auth));
+      await tester.pumpAndSettle();
+      await openMapTab(tester);
+      await tapMarker(tester, 'demo-jazz');
 
-    final jazzCard = find.byKey(const ValueKey('demo-jazz'));
-    await tester.tap(
-      find.descendant(of: jazzCard, matching: find.text('M’hi apunto')),
-    );
-    await tester.pumpAndSettle();
+      final jazzCard = find.byKey(const ValueKey('demo-jazz'));
+      await tester.tap(
+        find.descendant(of: jazzCard, matching: find.text('M’hi apunto')),
+      );
+      await tester.pumpAndSettle();
 
-    await tester.tap(find.widgetWithText(NavigationDestination, 'Agenda'));
-    await tester.pumpAndSettle();
-    await answerLater(tester, 'demo-jazz');
+      await tester.tap(find.widgetWithText(NavigationDestination, 'Agenda'));
+      await tester.pumpAndSettle();
+      await answerLater(tester, 'demo-jazz');
 
-    // The agenda opens on the real current month; the demo plan is in
-    // September 2026.
-    final now = DateTime.now();
-    final monthOffset = (now.year - 2026) * 12 + now.month - 9;
-    final button = monthOffset > 0 ? 'Mes anterior' : 'Mes següent';
-    for (var i = 0; i < monthOffset.abs(); i++) {
-      await tester.tap(find.byTooltip(button));
-      await tester.pump();
-    }
-    expect(find.text('Setembre de 2026'), findsOneWidget);
+      // The demo plan (September 2026) is accessible immediately via the
+      // collapsed past section as well as on its calendar day modal.
+      expect(find.text('Plans passats (1)'), findsOneWidget);
 
-    await tester.tap(find.byKey(const ValueKey('agenda-day-2026-9-26')));
-    await tester.pump();
-    await tester.tap(find.text('Jazz al parc'));
-    await tester.pumpAndSettle();
+      // Navigate calendar to September 2026 and tap the marked day.
+      final now = DateTime.now();
+      final monthOffset = (now.year - 2026) * 12 + now.month - 9;
+      final button = monthOffset > 0 ? 'Mes anterior' : 'Mes següent';
+      for (var i = 0; i < monthOffset.abs(); i++) {
+        await tester.tap(find.byTooltip(button));
+        await tester.pump();
+      }
+      expect(find.text('Setembre de 2026'), findsOneWidget);
 
-    expect(find.widgetWithText(AppBar, 'Activitat'), findsOneWidget);
-    expect(find.text('Apuntat'), findsOneWidget);
-    expect(
-      tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex,
-      1,
-    );
+      await tester.tap(find.byKey(const ValueKey('agenda-day-2026-9-26')));
+      await tester.pumpAndSettle();
 
-    await tester.binding.handlePopRoute();
-    await tester.pumpAndSettle();
-    expect(find.widgetWithText(AppBar, 'Agenda'), findsOneWidget);
-    expect(find.text('Setembre de 2026'), findsOneWidget);
-    expect(find.text('Jazz al parc').hitTestable(), findsOneWidget);
-    expect(tester.takeException(), isNull);
-  });
+      final sheet = find.byKey(const ValueKey('agenda-day-sheet'));
+      expect(sheet, findsOneWidget);
+      await tester.tap(
+        find.descendant(of: sheet, matching: find.text('Jazz al parc')),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.widgetWithText(AppBar, 'Activitat'), findsOneWidget);
+      expect(find.text('Apuntat'), findsOneWidget);
+      expect(
+        tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex,
+        1,
+      );
+
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
+      expect(find.widgetWithText(AppBar, 'Agenda'), findsOneWidget);
+      expect(find.text('Setembre de 2026'), findsOneWidget);
+      expect(sheet, findsNothing);
+      expect(find.text('Plans passats (1)'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'Upcoming plans appear directly below the calendar without tapping their day',
+    (tester) async {
+      tester.view.physicalSize = const Size(390, 844);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final catalogue = DemoActivityRepository();
+      final upcomingDate = DateTime.now().add(const Duration(days: 10));
+      final futurePlan = await catalogue.createActivity(
+        NewActivity(
+          title: 'Concert de tardor',
+          description: 'Música en directe.',
+          categories: ['agenda:categories/musica'],
+          startsAt: DateTime(
+            upcomingDate.year,
+            upcomingDate.month,
+            upcomingDate.day,
+            19,
+          ),
+          imageAsset: 'assets/images/jazz_al_parc.jpg',
+          location: const GeoPoint(latitude: 41.6176, longitude: 0.62),
+          creator: const ActivityCreator(
+            name: 'Laia Soler',
+            userId: 'demo-laiasoler',
+            isFriend: false,
+          ),
+        ),
+      );
+
+      final auth = DemoAuthRepository();
+      await auth.signIn(usernameOrEmail: 'laiasoler', password: 'Aprop2026!');
+      await tester.pumpWidget(
+        APropApp(authRepository: auth, activityRepository: catalogue),
+      );
+      await tester.pumpAndSettle();
+      await openMapTab(tester);
+      await tapMarker(tester, futurePlan.id);
+
+      final card = find.byKey(ValueKey(futurePlan.id));
+      await tester.tap(
+        find.descendant(of: card, matching: find.text('M’hi apunto')),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.widgetWithText(NavigationDestination, 'Agenda'));
+      await tester.pumpAndSettle();
+
+      // Visible directly in the upcoming list below the calendar!
+      await tester.scrollUntilVisible(find.text('Concert de tardor'), 200);
+      expect(find.text('Concert de tardor').hitTestable(), findsOneWidget);
+
+      await tester.tap(find.text('Concert de tardor'));
+      await tester.pumpAndSettle();
+      expect(find.widgetWithText(AppBar, 'Activitat'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   testWidgets('Unenrolling from details removes the plan from Agenda', (
     tester,
@@ -99,8 +172,13 @@ void main() {
       await tester.pump();
     }
     await tester.tap(find.byKey(const ValueKey('agenda-day-2026-9-26')));
-    await tester.pump();
-    await tester.tap(find.text('Jazz al parc'));
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.descendant(
+        of: find.byKey(const ValueKey('agenda-day-sheet')),
+        matching: find.text('Jazz al parc'),
+      ),
+    );
     await tester.pumpAndSettle();
 
     await tester.tap(find.widgetWithText(OutlinedButton, 'Desapunta’m'));
@@ -115,6 +193,10 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.widgetWithText(AppBar, 'Agenda'), findsOneWidget);
     expect(find.text('Jazz al parc'), findsNothing);
+    expect(find.text('Encara no t’has apuntat a cap pla.'), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('agenda-day-2026-9-26')));
+    await tester.pumpAndSettle();
     expect(find.text('No tens cap pla per a aquest dia.'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
@@ -142,14 +224,13 @@ void main() {
     await tester.tap(find.widgetWithText(NavigationDestination, 'Agenda'));
     await tester.pumpAndSettle();
     await answerLater(tester, 'demo-jazz');
-    final now = DateTime.now();
-    final monthOffset = (now.year - 2026) * 12 + now.month - 9;
-    final button = monthOffset > 0 ? 'Mes anterior' : 'Mes següent';
-    for (var i = 0; i < monthOffset.abs(); i++) {
-      await tester.tap(find.byTooltip(button));
-      await tester.pump();
-    }
-    await tester.tap(find.byKey(const ValueKey('agenda-day-2026-9-26')));
+
+    await tester.tap(find.byKey(const ValueKey('agenda-past-toggle')));
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.byKey(const ValueKey('demo-jazz')).hitTestable(),
+      200,
+    );
     await tester.pumpAndSettle();
 
     // Same badge and button as the activity cards.
@@ -179,7 +260,7 @@ void main() {
     await tester.pump(const Duration(seconds: 5));
     await tester.pumpAndSettle();
 
-    expect(find.text('No tens cap pla per a aquest dia.'), findsOneWidget);
+    expect(find.text('Encara no t’has apuntat a cap pla.'), findsOneWidget);
     expect(find.text('Jazz al parc').hitTestable(), findsNothing);
     expect(tester.takeException(), isNull);
   });

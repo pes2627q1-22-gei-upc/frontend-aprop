@@ -53,6 +53,7 @@ class DemoUserSyncRepository implements UserSyncRepository {
       username: saved ?? username!,
       email: _currentEmail() ?? '',
       name: await _preferences.getString('auth.name.$uid') ?? '',
+      created: saved == null,
     );
   }
 
@@ -68,5 +69,12 @@ class DemoUserSyncRepository implements UserSyncRepository {
       email: _currentEmail() ?? '',
       name: name,
     );
+  }
+
+  @override
+  Future<void> updateLanguage(String language) async {
+    final uid = _currentUid();
+    if (uid == null) return;
+    await _preferences.setString('auth.language.$uid', language);
   }
 }

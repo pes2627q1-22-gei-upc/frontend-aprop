@@ -119,7 +119,12 @@ class FirebaseAuthRepository implements AuthRepository {
     await _ignoreFailure(() => user.updateDisplayName('$firstName $lastName'));
     await _ignoreFailure(() async {
       try {
-        await _syncUsername(user.uid, username);
+        final profile = await _syncUsername(user.uid, username);
+        if (profile.created) {
+          // TODO(DP-077): new accounts default to 'ca' on the backend; push
+          // the locally selected language immediately after creation.
+          await _ignoreFailure(() => _userSync.updateLanguage(_emailLanguage));
+        }
         await _saveName(user.uid, '$firstName $lastName');
       } on AuthFailure catch (failure) {
         if (failure != AuthFailure.usernameAlreadyInUse) rethrow;
@@ -178,6 +183,9 @@ class FirebaseAuthRepository implements AuthRepository {
   Future<void> chooseUsername(String username) async {
     final user = _requireCurrentUser();
     final profile = await _syncUsername(user.uid, username);
+    if (profile.created) {
+      await _ignoreFailure(() => _userSync.updateLanguage(_emailLanguage));
+    }
     // Primer accés amb Google (o nom rebutjat en registrar-se): el backend
     // encara no té el nom, i el de Firebase és el bo.
     if (profile.name.isEmpty) {

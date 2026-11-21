@@ -1,7 +1,9 @@
 import 'package:aprop/app/theme/app_theme.dart';
 import 'package:aprop/features/activities/models/activity.dart';
 import 'package:aprop/features/activities/presentation/widgets/activity_card.dart';
+import 'package:aprop/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -87,5 +89,93 @@ void main() {
     expect(find.text('+2'), findsOneWidget);
     expect(find.text('Teatre'), findsNothing);
     expect(find.textContaining('18.00 h'), findsOneWidget);
+  });
+
+  testWidgets(
+    'Amb filtre de categoria actiu, mostra primer la categoria coincident i +N',
+    (tester) async {
+      final multiCategory = Activity(
+        id: '102',
+        title: 'Festival de tardor',
+        category: 'Llibres i lletres',
+        categories: const [
+          'Llibres i lletres',
+          'Arts visuals',
+          'Divulgació',
+          'Espectacles',
+          'Concerts',
+          'Cinema',
+          'Teatre',
+          'Dansa',
+          'Any Gaudí',
+          'Altres àmbits',
+        ],
+        municipality: 'Barcelona',
+        startsAt: DateTime(2026, 11, 14),
+        imageAsset: '',
+        source: ActivitySource.culturalAgenda,
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.light,
+          home: Scaffold(
+            body: SingleChildScrollView(
+              child: ActivityCard(
+                activity: multiCategory,
+                preferredCategories: const {'Concerts', 'Cinema'},
+                onTap: () {},
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('Concerts'), findsOneWidget);
+      expect(find.text('+9'), findsOneWidget);
+      expect(find.text('Llibres i lletres'), findsNothing);
+    },
+  );
+
+  testWidgets('Tradueix les categories de la targeta en castellà i anglès', (
+    tester,
+  ) async {
+    final activityWithAmbits = Activity(
+      id: '103',
+      title: 'Gala cultural',
+      category: 'Espectacles',
+      categories: const ['Espectacles', 'Altres àmbits'],
+      municipality: 'Girona',
+      startsAt: DateTime(2026, 11, 14),
+      imageAsset: '',
+      source: ActivitySource.culturalAgenda,
+    );
+
+    Widget buildLocalized(Locale locale) => MaterialApp(
+      theme: AppTheme.light,
+      locale: locale,
+      supportedLocales: AppLocalizations.supportedLocales,
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      home: Scaffold(
+        body: SingleChildScrollView(
+          child: ActivityCard(activity: activityWithAmbits, onTap: () {}),
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(buildLocalized(const Locale('es')));
+    await tester.pumpAndSettle();
+    expect(find.text('Espectáculos'), findsOneWidget);
+    expect(find.text('+1'), findsOneWidget);
+
+    await tester.pumpWidget(buildLocalized(const Locale('en')));
+    await tester.pumpAndSettle();
+    expect(find.text('Performing arts'), findsOneWidget);
+    expect(find.text('+1'), findsOneWidget);
   });
 }

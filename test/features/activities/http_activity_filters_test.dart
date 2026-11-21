@@ -92,10 +92,10 @@ void main() {
           }),
         ),
       );
-      expect(await repository.getFilterCategories(), ['Concerts', 'Musica']);
+      expect(await repository.getFilterCategories(), ['Concerts', 'Música']);
       final filters = ActivityFilters(categories: ['Concerts']);
       final page = await repository.getActivitiesPage(filters: filters);
-      expect(page.items.single.categories, ['Musica', 'Concerts']);
+      expect(page.items.single.categories, ['Música', 'Concerts']);
       expect(filters.applyTo(page.items), hasLength(1));
       await repository.getActivitiesPage(page: 1, filters: filters);
       expect(requestedIds, ['73', '73']);
@@ -375,4 +375,36 @@ void main() {
     await loading;
     expect(maximum, 4);
   });
+
+  test(
+    'Localized filter labels and Zz sort keys resolve to real server IDs',
+    () async {
+      final requestedIds = <String?>[];
+      final repository = HttpActivityRepository(
+        apiClient: ApiClient(
+          client: MockClient((request) async {
+            if (request.url.path == '/categories') {
+              return json([
+                {'id': 11, 'name': 'agenda:ambits/zz-altres-ambits'},
+                {'id': 22, 'name': 'agenda:ambits/espectacles'},
+              ]);
+            }
+            requestedIds.add(request.url.queryParameters['filterCategory']);
+            return json([]);
+          }),
+        ),
+      );
+
+      expect(await repository.getFilterCategories(), [
+        'Altres àmbits',
+        'Espectacles',
+      ]);
+      await repository.getActivitiesPage(
+        filters: ActivityFilters(
+          categories: ['Other fields', 'Performing arts'],
+        ),
+      );
+      expect(requestedIds, ['11', '22']);
+    },
+  );
 }

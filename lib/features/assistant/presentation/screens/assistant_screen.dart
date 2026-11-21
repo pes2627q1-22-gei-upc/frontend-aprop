@@ -8,6 +8,7 @@ import '../../../activities/models/activity.dart';
 import '../../models/assistant_message.dart';
 import '../view_models/assistant_view_model.dart';
 import '../widgets/assistant_input_bar.dart';
+import '../widgets/assistant_markdown_text.dart';
 import '../widgets/assistant_message_bubble.dart';
 import '../../../../core/l10n/locale_controller.dart';
 
@@ -90,7 +91,9 @@ class _AssistantScreenState extends State<AssistantScreen> {
         messages.last.sender == AssistantMessageSender.assistant) {
       SemanticsService.sendAnnouncement(
         View.of(context),
-        context.l10n.assistantAnnouncement(messages.last.text),
+        context.l10n.assistantAnnouncement(
+          assistantMarkdownPlainText(messages.last.text),
+        ),
         Directionality.of(context),
       );
     }

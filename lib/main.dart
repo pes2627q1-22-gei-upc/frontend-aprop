@@ -21,6 +21,7 @@ import 'features/auth/data/http_user_sync_repository.dart';
 import 'features/auth/repositories/auth_repository.dart';
 import 'features/auth/repositories/user_sync_repository.dart';
 import 'features/interest_test/data/http_interest_test_repository.dart';
+import 'features/interest_test/data/shared_preferences_interest_test_onboarding_memory.dart';
 import 'features/notifications/data/http_notification_repository.dart';
 import 'features/profile/data/http_profile_repository.dart';
 import 'features/profile/data/http_friendship_repository.dart';
@@ -47,6 +48,10 @@ Future<APropApp> createConfiguredApp() async {
   const userLocationRepository = GeolocatorUserLocationRepository();
   final localeController = LocaleController();
   await localeController.load();
+  // Existing installs have no stored language: don't ask a signed-in user.
+  if (Firebase.apps.isNotEmpty && FirebaseAuth.instance.currentUser != null) {
+    localeController.skipInitialSelection();
+  }
 
   if (!ApiConfig.isConfigured) {
     return APropApp(
@@ -93,6 +98,8 @@ Future<APropApp> createConfiguredApp() async {
       apiClient: apiClient,
     ),
     interestTestRepository: HttpInterestTestRepository(apiClient: apiClient),
+    interestTestOnboardingMemory:
+        const SharedPreferencesInterestTestOnboardingMemory(),
     userLocationRepository: userLocationRepository,
     ratingRepository: HttpRatingRepository(apiClient: apiClient),
     activityChatRepository: HttpActivityChatRepository(apiClient: apiClient),

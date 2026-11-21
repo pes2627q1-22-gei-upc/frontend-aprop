@@ -1211,10 +1211,19 @@ class AppLocalizationsEn extends AppLocalizations {
       'We couldn’t save your answers. Please try again.';
 
   @override
-  String get interestTestSkip => 'Not now';
+  String get interestTestSkip => 'Later';
 
   @override
   String get interestTestContinue => 'Continue';
+
+  @override
+  String get interestTestReadMore => 'Read more';
+
+  @override
+  String get interestTestReadLess => 'Read less';
+
+  @override
+  String get interestTestLeaveWithoutSaving => 'Leave without saving';
 
   @override
   String get ratingDeleteTitle => 'Delete your rating?';
@@ -1303,8 +1312,33 @@ class AppLocalizationsEn extends AppLocalizations {
   String get agendaEmptyDay => 'You have no plans for this day.';
 
   @override
+  String get agendaEmptyAll => 'You haven’t signed up for any plans yet.';
+
+  @override
+  String get agendaEmptyUpcoming => 'You have no upcoming plans.';
+
+  @override
   String get agendaEmptyHint =>
       'Sign up for activities from Home and you’ll see them here.';
+
+  @override
+  String agendaDayOfTotal(int day, int total) {
+    return 'Day $day of $total';
+  }
+
+  @override
+  String get actPastEvent => 'This activity has already taken place';
+
+  @override
+  String get agendaUpcomingTitle => 'Upcoming plans';
+
+  @override
+  String agendaPastSection(int count) {
+    return 'Past plans ($count)';
+  }
+
+  @override
+  String get agendaCloseDaySheet => 'Close day plans';
 
   @override
   String get agendaLoadError =>
@@ -2263,4 +2297,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get friendOptions => 'Friendship options';
+
+  @override
+  String get languagePickerTitle => 'Choose your language';
+
+  @override
+  String get languagePickerSubtitle =>
+      'You can change it anytime from settings.';
+
+  @override
+  String get languagePickerContinue => 'Continue';
+
+  @override
+  String get languagePickerSelectedSemantics => 'Selected language';
 }

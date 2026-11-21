@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../models/activity_category_labels.dart';
 import 'activity_filter_sheet.dart';
 import '../../../../core/l10n/locale_controller.dart';
 
@@ -27,9 +28,40 @@ class _ActivityCategoriesFilterSheetState
     extends State<ActivityCategoriesFilterSheet> {
   late final Set<String> _selected = {...widget.initialCategories};
 
+  bool _isSelected(String canonicalKey) => _selected.any(
+    (item) => canonicalActivityCategoryKey(item) == canonicalKey,
+  );
+
+  void _toggle(String category, String canonicalKey, bool selected) {
+    setState(() {
+      _selected.removeWhere(
+        (item) => canonicalActivityCategoryKey(item) == canonicalKey,
+      );
+      if (selected) _selected.add(category);
+    });
+  }
+
+  List<({String raw, String key, String label})> _options(String languageCode) {
+    final seen = <String>{};
+    final items = <({String raw, String key, String label})>[];
+    for (final category in widget.categories) {
+      final key = canonicalActivityCategoryKey(category);
+      if (key.isEmpty || !seen.add(key)) continue;
+      final label = localizeActivityCategory(
+        category,
+        languageCode: languageCode,
+      );
+      if (label.isEmpty) continue;
+      items.add((raw: category, key: key, label: label));
+    }
+    items.sort((a, b) => compareActivityCategoryLabels(a.label, b.label));
+    return items;
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final options = _options(context.l10n.localeName);
     return ActivityFilterSheet(
       title: context.l10n.actCategoriesTitle,
       subtitle: context.l10n.actCategoriesSubtitle,
@@ -66,7 +98,7 @@ class _ActivityCategoriesFilterSheetState
                 ),
               ],
             )
-          else if (widget.categories.isEmpty)
+          else if (options.isEmpty)
             Column(
               children: [
                 Text(context.l10n.actCategoriesEmpty),
@@ -77,13 +109,13 @@ class _ActivityCategoriesFilterSheetState
                   ),
               ],
             ),
-          for (final category in widget.categories)
+          for (final option in options)
             Padding(
               padding: const EdgeInsets.only(bottom: 4),
               child: ConstrainedBox(
                 constraints: const BoxConstraints(minHeight: 48),
                 child: CheckboxListTile(
-                  key: ValueKey('activity-filter-category-$category'),
+                  key: ValueKey('activity-filter-category-${option.label}'),
                   dense: true,
                   contentPadding: const EdgeInsets.symmetric(horizontal: 12),
                   shape: RoundedRectangleBorder(
@@ -94,25 +126,20 @@ class _ActivityCategoriesFilterSheetState
                     borderRadius: BorderRadius.circular(4),
                   ),
                   title: Text(
-                    category,
+                    option.label,
                     style: theme.textTheme.bodyLarge?.copyWith(
                       color: theme.colorScheme.onSurface,
                     ),
                   ),
-                  selected: _selected.contains(category),
+                  selected: _isSelected(option.key),
                   selectedTileColor: theme.colorScheme.primary.withValues(
                     alpha: .06,
                   ),
                   activeColor: theme.colorScheme.primary,
                   checkColor: theme.colorScheme.onPrimary,
-                  value: _selected.contains(category),
-                  onChanged: (selected) => setState(() {
-                    if (selected == true) {
-                      _selected.add(category);
-                    } else {
-                      _selected.remove(category);
-                    }
-                  }),
+                  value: _isSelected(option.key),
+                  onChanged: (selected) =>
+                      _toggle(option.raw, option.key, selected == true),
                 ),
               ),
             ),
