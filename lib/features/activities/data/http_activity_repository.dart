@@ -160,6 +160,24 @@ class HttpActivityRepository
     return _fromResponse(decoded, activity);
   }
 
+  @override
+  Future<void> cancelActivity(String id) async {
+    try {
+      await apiClient.postJson('events/${Uri.encodeComponent(id)}/cancel');
+    } on ApiException catch (error) {
+      switch (error.statusCode) {
+        case 403 || 422:
+          throw ActivityCancelFailure.notAllowed;
+        case 409 when error.message.contains('finished'):
+          throw ActivityCancelFailure.finished;
+        // «event is not active»: ja estava cancel·lada.
+        case 409:
+          return;
+      }
+      rethrow;
+    }
+  }
+
   /// L'activitat que torna el backend, completada amb el que s'ha enviat si
   /// la resposta no ho porta.
   Activity _fromResponse(Map<String, Object?> decoded, NewActivity activity) {

@@ -24,6 +24,12 @@ class FakeActivityRepository implements ActivityRepository {
   /// Si no és nul, [createActivity] espera que es completi.
   Completer<void>? pendingCreate;
 
+  /// Activitats rebudes per [cancelActivity].
+  final cancelled = <String>[];
+
+  /// Si no és nul, [cancelActivity] el llança.
+  Object? cancelError;
+
   @override
   Future<List<Activity>> getActivities() async {
     listRequests++;
@@ -52,6 +58,12 @@ class FakeActivityRepository implements ActivityRepository {
   Future<Activity?> getActivityById(String id) {
     requestedIds.add(id);
     return findActivity?.call(id) ?? Future.value(null);
+  }
+
+  @override
+  Future<void> cancelActivity(String id) async {
+    cancelled.add(id);
+    if (cancelError case final error?) throw error;
   }
 
   @override

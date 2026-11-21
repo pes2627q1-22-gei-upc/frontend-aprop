@@ -32,4 +32,19 @@ abstract interface class ActivityRepository
   /// retorna actualitzada. Llança una excepció si no s'ha pogut desar (per
   /// exemple, si qui ho demana no n'és qui l'ha creada).
   Future<Activity> updateActivity(String id, NewActivity activity);
+
+  /// Cancel·la una activitat no oficial de qui l'ha creada abans que comenci
+  /// (#46); el servidor avisa les persones apuntades. Si ja estava
+  /// cancel·lada, acaba bé. Llança [ActivityCancelFailure] si el servidor la
+  /// rebutja, o una altra excepció si no s'ha pogut fer.
+  Future<void> cancelActivity(String id);
+}
+
+/// Per què no es pot cancel·lar una activitat.
+enum ActivityCancelFailure implements Exception {
+  /// Ja ha acabat.
+  finished,
+
+  /// Qui ho demana no l'ha creada (o és oficial).
+  notAllowed,
 }

@@ -46,7 +46,7 @@ El formatador de dates escriu «d’octubre», «d’abril» i «d’agost» en 
 - Imatges: de moment, les tres fotografies de demostració fan de plantilla. Pujar fotos pròpies és la tasca #94: caldrà un paquet per obrir la galeria (com `image_picker`) i que el backend guardi la foto (S3, segons el CA1). El botó «Puja una foto» ja és al panell, desactivat.
 - Ubicació: municipi, indicacions i punt al mapa. Els municipis coneguts són una llista de demostració; caldrà geocodificació real (backend o API de Google). Mostrar les activitats al mapa d'Inici (CA2) és la història #21. Vegeu DP-020 i DP-004.
 - Quan el backend apunti la persona creadora en crear l'activitat, la crida a `enroll` de `MainShell` sobrarà (`TODO(DP-017)`).
-- Editar i esborrar les activitats pròpies queda per a una altra història.
+- Editar-les és la #50. Cancel·lar-les és la #46: secció següent.
 
 ## Proves
 
@@ -54,3 +54,11 @@ El formatador de dates escriu «d’octubre», «d’abril» i «d’agost» en 
 - `test/features/activities/create_activity_screen_test.dart`: omplir el formulari (portada, categoria, rodes de data i hora) i publicar; panell de la portada; rodes, moment passat i cancel·lar; errors si falten camps.
 - `test/app/create_activity_flow_test.dart`: des d'Inici fins a la fitxa (amb «Apuntat») i la llista.
 - Ubicació: el ViewModel (municipi trobat, marcador ajustat, municipi nou, municipi desconegut) i el mapa del formulari (marcador i `onTap`). A les proves, `test/flutter_test_config.dart` substitueix Google Maps per un espai buit.
+
+## Cancel·lar una activitat pròpia (#46, DP-069)
+
+A la fitxa, qui ha creat una activitat no oficial que encara no ha començat veu «Cancel·lar l’activitat» (en vermell, sota el xat). Un diàleg demana confirmació: no es pot desfer i s’avisa les persones apuntades. `MainShell._cancelActivity` crida `ActivityRepository.cancelActivity` (`POST /events/{id}/cancel`); si va bé, `EnrollmentViewModel.markCancelled` la marca i tots els botons d’apuntar-se (fitxa, Agenda, mapa, Inici i cerca) passen a mostrar el distintiu «Cancel·lada». Ja no s’hi pot apuntar ni editar-la. Errors: ja ha començat o acabat, no ets qui l’ha creada, o error de connexió (avís a la part de baix).
+
+L’API no torna l’estat de les activitats: en tornar a obrir l’app es veu com si no estigués cancel·lada (DP-069).
+
+Proves: `test/features/activities/cancel_activity_test.dart` (HTTP i que no s’hi pugui apuntar) i `test/app/cancel_activity_flow_test.dart` (diàleg, «Tornar», cancel·lar, distintiu a la fitxa i al mapa, i que qui no l’ha creada no ho pugui fer).

@@ -2266,6 +2266,72 @@ abstract class AppLocalizations {
   /// **'Edita l’activitat'**
   String get actEdit;
 
+  /// No description provided for @activityCancel.
+  ///
+  /// In ca, this message translates to:
+  /// **'Cancel·lar l’activitat'**
+  String get activityCancel;
+
+  /// No description provided for @activityCancelling.
+  ///
+  /// In ca, this message translates to:
+  /// **'Cancel·lant…'**
+  String get activityCancelling;
+
+  /// No description provided for @activityCancelTitle.
+  ///
+  /// In ca, this message translates to:
+  /// **'Vols cancel·lar l’activitat?'**
+  String get activityCancelTitle;
+
+  /// No description provided for @activityCancelBody.
+  ///
+  /// In ca, this message translates to:
+  /// **'Avisarem les persones apuntades a «{title}» i ja no s’hi podrà apuntar ningú. No es pot desfer.'**
+  String activityCancelBody(String title);
+
+  /// No description provided for @activityCancelKeep.
+  ///
+  /// In ca, this message translates to:
+  /// **'Tornar'**
+  String get activityCancelKeep;
+
+  /// No description provided for @activityCancelConfirm.
+  ///
+  /// In ca, this message translates to:
+  /// **'Cancel·la-la'**
+  String get activityCancelConfirm;
+
+  /// No description provided for @activityCancelledBadge.
+  ///
+  /// In ca, this message translates to:
+  /// **'Cancel·lada'**
+  String get activityCancelledBadge;
+
+  /// No description provided for @activityCancelDone.
+  ///
+  /// In ca, this message translates to:
+  /// **'Has cancel·lat l’activitat. Hem avisat les persones apuntades.'**
+  String get activityCancelDone;
+
+  /// No description provided for @activityCancelFinished.
+  ///
+  /// In ca, this message translates to:
+  /// **'L’activitat ja ha començat o ha acabat: no es pot cancel·lar.'**
+  String get activityCancelFinished;
+
+  /// No description provided for @activityCancelNotAllowed.
+  ///
+  /// In ca, this message translates to:
+  /// **'Només qui ha creat l’activitat la pot cancel·lar.'**
+  String get activityCancelNotAllowed;
+
+  /// No description provided for @activityCancelError.
+  ///
+  /// In ca, this message translates to:
+  /// **'No hem pogut cancel·lar l’activitat. Torna-ho a provar.'**
+  String get activityCancelError;
+
   /// No description provided for @actNotFound.
   ///
   /// In ca, this message translates to:
