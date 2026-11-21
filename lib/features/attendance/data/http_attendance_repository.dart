@@ -31,9 +31,17 @@ class HttpAttendanceRepository implements AttendanceRepository {
     required String activityId,
     required bool? attended,
   }) async {
-    await apiClient.patchJson(
-      'events/${Uri.encodeComponent(activityId)}/enrollment/attendance',
-      body: {'attendance': attended},
-    );
+    try {
+      await apiClient.patchJson(
+        'events/${Uri.encodeComponent(activityId)}/enrollment/attendance',
+        body: {'attendance': attended},
+      );
+    } on ApiException catch (error) {
+      throw switch (error.statusCode) {
+        409 => AttendanceFailure.notStarted,
+        404 => AttendanceFailure.notEnrolled,
+        _ => error,
+      };
+    }
   }
 }

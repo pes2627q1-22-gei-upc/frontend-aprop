@@ -3,7 +3,8 @@
 ## Abast i ús
 
 El cercador de les figures 15–16 manté una única entrada i el selector «Activitats / Persones».
-S’hi entra des d’Inici o des de la barra del Mapa (#273/#274). La consulta visible es comparteix
+S’hi entra des d’Inici, des de la barra del Mapa (#273/#274) o, ja amb «Persones», des de la icona
+«Cerca persones» de la capçalera del Perfil. La consulta visible es comparteix
 en canviar de mode; cada mode conserva el seu propi resultat si la consulta no ha canviat.
 
 «Persones» permet cercar per nom o nom d’usuari, veure avatar/inicials, nom i `@username`, i
@@ -49,7 +50,7 @@ Els missatges i plurals són als ARB ca/es/en; noms i usernames no es tradueixen
 - ViewModel: debounce, cerca immediata, concurrència, neteja, reintent, continuació, refresc i dispose.
 - Interfície: prompt/càrrega/contingut/buit/error, canvi de mode, paginació, ca/es/en i 320 px amb text ×2.
 - Flux HTTP simulat: dues pàgines → perfil privat → retorn → canvi de pestanya, sense repetir la cerca.
-- Fluxos Demo: accés des de Mapa i propi resultat cap a Perfil.
+- Fluxos Demo: accés des de Mapa i des del Perfil, i propi resultat cap a Perfil.
 
 Les proves HTTP utilitzen un transport simulat amb el contracte real, sense connectar a Render.
 Queden la comprovació autenticada al desplegament, la prova manual en Android i la revisió humana.
