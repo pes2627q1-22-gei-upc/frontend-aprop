@@ -35,6 +35,48 @@ const _cardClickEcho = Duration(milliseconds: 500);
 /// voltant.
 const _locateZoom = 14.0;
 
+/// En obrir el mapa es veu un radi d'uns 5 km al voltant de la persona: prou
+/// a prop per veure les activitats del voltant.
+const _openRadiusMeters = 5000.0;
+
+/// El món que dibuixa Google: la projecció acaba a ±85,05° de latitud. Les
+/// longituds no poden ser ±180: es convertirien en la mateixa i, a la web,
+/// Google rebutjaria el límit («eastern longitude cannot equal western»).
+final _worldBounds = LatLngBounds(
+  southwest: const LatLng(-85.0511, -179.9999),
+  northeast: const LatLng(85.0511, 179.9999),
+);
+
+/// Mida, en píxels lògics, de la imatge del món sencer a zoom 0.
+const _worldSize = 256.0;
+
+/// Zoom mínim perquè el món ompli el mapa: més enllà, Google el repeteix de
+/// costat i deixa franges grises a dalt i a baix.
+double minimumZoomFor(Size size) {
+  final side = math.max(size.width, size.height);
+  if (side <= _worldSize) return 0;
+  return math.log(side / _worldSize) / math.ln2;
+}
+
+/// Requadre que conté un cercle de [radiusMeters] al voltant de [center].
+GeoBounds boundsAround(GeoPoint center, double radiusMeters) {
+  const metersPerDegree = 111320.0;
+  final latitudeDelta = radiusMeters / metersPerDegree;
+  final cosine = math.cos(center.latitude * math.pi / 180).abs();
+  final longitudeDelta =
+      radiusMeters / (metersPerDegree * math.max(cosine, 0.01));
+  return GeoBounds(
+    southWest: GeoPoint(
+      latitude: math.max(center.latitude - latitudeDelta, -85),
+      longitude: center.longitude - longitudeDelta,
+    ),
+    northEast: GeoPoint(
+      latitude: math.min(center.latitude + latitudeDelta, 85),
+      longitude: center.longitude + longitudeDelta,
+    ),
+  );
+}
+
 /// Distància des de baix del botó «La meva ubicació»: queda just per sobre del
 /// botó «Assistent» (`FloatingActionButton.extended` de 56 amb 16 de marge,
 /// a MainShell), que també puja amb la targeta.
@@ -106,6 +148,13 @@ class ActivitiesMap extends StatefulWidget {
 
 class _ActivitiesMapState extends State<ActivitiesMap> {
   GoogleMapController? _controller;
+
+  /// Ja s'ha anat a buscar la persona en obrir el mapa (només la primera
+  /// vegada que es veu la pestanya).
+  bool _locatedOnOpen = false;
+
+  /// On anar quan el mapa estigui creat, si la posició arriba abans.
+  GeoPoint? _pendingFocus;
   String? _selectedId;
   double _cardHeight = 0;
   double _reportedOverlay = 0;
@@ -237,6 +286,56 @@ class _ActivitiesMapState extends State<ActivitiesMap> {
       );
     }
     return _userLocationIcon;
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // MainShell construeix totes les pestanyes en obrir l'app: el permís es
+    // demana quan la pestanya Mapa es veu per primer cop, no abans.
+    if (!_locatedOnOpen &&
+        widget.userLocation != null &&
+        TickerMode.valuesOf(context).enabled) {
+      _locatedOnOpen = true;
+      _locateOnOpen();
+    }
+  }
+
+  /// En obrir el mapa, demana el permís si cal i hi mostra uns 5 km al
+  /// voltant de la persona. Si no es pot, es queda a Catalunya sense avisar:
+  /// el botó «La meva ubicació» ja explica per què.
+  // TODO(DP-074): radi de 5 km i permís en obrir el mapa, a petició de
+  // l'usuari; sense mockup.
+  Future<void> _locateOnOpen() async {
+    final location = widget.userLocation;
+    if (location == null) return;
+    final LocateResult result;
+    try {
+      result = await location.locate();
+    } catch (_) {
+      return;
+    }
+    final position = location.position;
+    if (!mounted || result != LocateResult.located || position == null) return;
+    _focusAround(position.point);
+  }
+
+  void _focusAround(GeoPoint point) {
+    final controller = _controller;
+    if (controller == null) {
+      _pendingFocus = point;
+      return;
+    }
+    final bounds = boundsAround(point, _openRadiusMeters);
+    controller.animateCamera(
+      CameraUpdate.newLatLngBounds(
+        LatLngBounds(
+          southwest: _toLatLng(bounds.southWest),
+          northeast: _toLatLng(bounds.northEast),
+        ),
+        0,
+      ),
+    );
   }
 
   /// «La meva ubicació»: demana el permís si cal i porta el mapa on és la
@@ -482,93 +581,108 @@ class _ActivitiesMapState extends State<ActivitiesMap> {
         Positioned.fill(
           child: Semantics(
             label: context.l10n.actMapLabel,
-            child: GoogleMap(
-              initialCameraPosition: CameraPosition(
-                target: _toLatLng(cataloniaCenter),
-                zoom: _initialZoom,
-              ),
-              onMapCreated: (controller) {
-                _controller = controller;
-                _reportVisibleArea();
-              },
-              onCameraMove: (position) => _cameraZoom = position.zoom,
-              onCameraIdle: () {
-                if (_cameraZoom != _zoom) {
-                  setState(() => _zoom = _cameraZoom);
-                }
-                _reportVisibleArea();
-              },
-              onTap: (_) {
-                _onMapTap();
-              },
-              // Amb un panell a sobre, el mapa no es mou: a la web, si no,
-              // la roda i els arrossegaments hi arribarien igualment.
-              scrollGesturesEnabled: _isInteractive,
-              zoomGesturesEnabled: _isInteractive,
-              rotateGesturesEnabled: _isInteractive,
-              tiltGesturesEnabled: _isInteractive,
-              // Els grups els fa l'app (activity_map_groups.dart) i no Google,
-              // perquè siguin iguals a la web i al mòbil i amb els colors de
-              // l'app.
-              markers: {
-                for (final group in groups)
-                  if (group.isSingle)
-                    Marker(
-                      markerId: MarkerId(group.id),
-                      position: _toLatLng(group.center),
-                      consumeTapEvents: true,
-                      icon: AssetMapBitmap(
-                        activityMarkerAssets[activityMarkerKind(
-                          group.activities.single,
-                        )]!,
-                        width: 36,
+            child: LayoutBuilder(
+              builder: (context, constraints) => GoogleMap(
+                initialCameraPosition: CameraPosition(
+                  target: _toLatLng(cataloniaCenter),
+                  zoom: _initialZoom,
+                ),
+                // Es pot allunyar fins a veure el món sencer, però no més: el
+                // món no es repeteix ni queden franges grises.
+                minMaxZoomPreference: MinMaxZoomPreference(
+                  minimumZoomFor(constraints.biggest),
+                  null,
+                ),
+                // Ni més enllà dels pols: a la web, Google deixaria passar i
+                // es veuria gris a dalt o a baix.
+                cameraTargetBounds: CameraTargetBounds(_worldBounds),
+                onMapCreated: (controller) {
+                  _controller = controller;
+                  if (_pendingFocus case final point?) {
+                    _pendingFocus = null;
+                    _focusAround(point);
+                  }
+                  _reportVisibleArea();
+                },
+                onCameraMove: (position) => _cameraZoom = position.zoom,
+                onCameraIdle: () {
+                  if (_cameraZoom != _zoom) {
+                    setState(() => _zoom = _cameraZoom);
+                  }
+                  _reportVisibleArea();
+                },
+                onTap: (_) {
+                  _onMapTap();
+                },
+                // Amb un panell a sobre, el mapa no es mou: a la web, si no,
+                // la roda i els arrossegaments hi arribarien igualment.
+                scrollGesturesEnabled: _isInteractive,
+                zoomGesturesEnabled: _isInteractive,
+                rotateGesturesEnabled: _isInteractive,
+                tiltGesturesEnabled: _isInteractive,
+                // Els grups els fa l'app (activity_map_groups.dart) i no Google,
+                // perquè siguin iguals a la web i al mòbil i amb els colors de
+                // l'app.
+                markers: {
+                  for (final group in groups)
+                    if (group.isSingle)
+                      Marker(
+                        markerId: MarkerId(group.id),
+                        position: _toLatLng(group.center),
+                        consumeTapEvents: true,
+                        icon: AssetMapBitmap(
+                          activityMarkerAssets[activityMarkerKind(
+                            group.activities.single,
+                          )]!,
+                          width: 36,
+                        ),
+                        onTap: () => _onMarkerTap(group.activities.single),
+                      )
+                    else
+                      Marker(
+                        markerId: MarkerId(group.id),
+                        position: _toLatLng(group.center),
+                        anchor: const Offset(0.5, 0.5),
+                        // Per sobre dels marcadors sols que hi pugui haver a prop.
+                        zIndexInt: 1,
+                        consumeTapEvents: true,
+                        icon: _groupIcon(
+                          mapGroupLabel(group.activities.length),
+                          colors,
+                        ),
+                        onTap: () => _onGroupTap(group),
                       ),
-                      onTap: () => _onMarkerTap(group.activities.single),
-                    )
-                  else
+                  // L'app dibuixa on és la persona en lloc de Google, perquè a
+                  // la web Google no ho fa.
+                  if (userPosition != null && userIcon != null)
                     Marker(
-                      markerId: MarkerId(group.id),
-                      position: _toLatLng(group.center),
+                      markerId: const MarkerId(userLocationMarkerId),
+                      position: _toLatLng(userPosition.point),
                       anchor: const Offset(0.5, 0.5),
-                      // Per sobre dels marcadors sols que hi pugui haver a prop.
-                      zIndexInt: 1,
+                      // Per sobre dels marcadors i dels grups.
+                      zIndexInt: 2,
                       consumeTapEvents: true,
-                      icon: _groupIcon(
-                        mapGroupLabel(group.activities.length),
-                        colors,
-                      ),
-                      onTap: () => _onGroupTap(group),
+                      icon: userIcon,
                     ),
-                // L'app dibuixa on és la persona en lloc de Google, perquè a
-                // la web Google no ho fa.
-                if (userPosition != null && userIcon != null)
-                  Marker(
-                    markerId: const MarkerId(userLocationMarkerId),
-                    position: _toLatLng(userPosition.point),
-                    anchor: const Offset(0.5, 0.5),
-                    // Per sobre dels marcadors i dels grups.
-                    zIndexInt: 2,
-                    consumeTapEvents: true,
-                    icon: userIcon,
-                  ),
-              },
-              circles: {
-                if (userPosition != null)
-                  Circle(
-                    circleId: const CircleId(userLocationMarkerId),
-                    center: _toLatLng(userPosition.point),
-                    radius: userPosition.accuracyMeters,
-                    fillColor: userDot.withValues(alpha: 0.15),
-                    strokeColor: userDot.withValues(alpha: 0.4),
-                    strokeWidth: 1,
-                  ),
-              },
-              myLocationButtonEnabled: false,
-              mapToolbarEnabled: false,
-              zoomControlsEnabled: false,
-              // A la web, Google posa el control de càmera (fletxes i +/−) a
-              // baix a la dreta, sota «Crear activitat»: el pugem a dalt.
-              webCameraControlPosition: WebCameraControlPosition.rightTop,
+                },
+                circles: {
+                  if (userPosition != null)
+                    Circle(
+                      circleId: const CircleId(userLocationMarkerId),
+                      center: _toLatLng(userPosition.point),
+                      radius: userPosition.accuracyMeters,
+                      fillColor: userDot.withValues(alpha: 0.15),
+                      strokeColor: userDot.withValues(alpha: 0.4),
+                      strokeWidth: 1,
+                    ),
+                },
+                myLocationButtonEnabled: false,
+                mapToolbarEnabled: false,
+                zoomControlsEnabled: false,
+                // A la web, Google posa el control de càmera (fletxes i +/−) a
+                // baix a la dreta, sota «Crear activitat»: el pugem a dalt.
+                webCameraControlPosition: WebCameraControlPosition.rightTop,
+              ),
             ),
           ),
         ),
