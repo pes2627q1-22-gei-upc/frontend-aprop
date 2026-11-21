@@ -598,6 +598,18 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Qui decideix:** equip (disseny)
 - **Resolució:**
 
+### DP-066 · Onboarding del test d’interessos (#30): «Ara no» en memòria, `/preferences/test/status` i Demo
+- **Estat:** oberta · 2026-11-21 · agent (Antigravity, Gemini) · Taiga #30
+- **Context:** `AuthGate` (`_InterestTestOnboardingGate`), `InterestTestRepository.hasCompletedTest`, `HttpInterestTestRepository`, `DemoInterestTestRepository`, `InterestTestScreen`.
+- **Dubte:**
+  - `GET /preferences/test/status` (`{"completed": bool, "date-taken": RFC3339|null}`) s’implementa en paral·lel al backend i pot no estar desplegat encara.
+  - Si l’usuari prem «Ara no» durant l’onboarding, no està decidit si l’omissió ha de durar només l’execució actual o persistir al dispositiu entre reinicis.
+  - En mode Demo, mostrar l’onboarding automàticament a tots els comptes interrompria els fluxos de demostració i les proves existents d’`AuthGate`.
+- **Opcions:** persistència de «Ara no»: A) només en memòria durant l’execució actual (com ara) · B) persistir per compte a `shared_preferences`. Mode Demo: A) `completed = true` per defecte i configurable al constructor (com ara) · B) `completed = false` per defecte.
+- **Provisionalment:** A en tots dos casos. Si `hasCompletedTest()` falla (error HTTP, xarxa o format), l’onboarding s’omet i mai no bloqueja l’entrada a `MainShell`. L’omissió es guarda a `_onboardingHandledUsers` dins d’`AuthGate` durant l’execució actual (`TODO(DP-066)`). `DemoInterestTestRepository` parteix de `completed = true` (passa a `true` en enviar respostes i accepta `completed: false` per provar l’onboarding). Les categories del test reutilitzen `parseActivityCategories` (`agenda:categories/*` i `agenda:ambits/*` netejades i deduplicades, coherent amb `activityFromJson`) i la descripció a la targeta es trunca a 3 línies amb el·lipsi.
+- **Qui decideix:** equip + backend (contracte `/preferences/test/status` i UX d’omissió)
+- **Resolució:**
+
 ## Resoltes
 
 ### DP-058 · Enllaços de la fitxa: obrir-los amb `url_launcher`

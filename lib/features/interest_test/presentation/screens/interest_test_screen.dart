@@ -12,35 +12,107 @@ class InterestTestScreen extends StatefulWidget {
   const InterestTestScreen({
     super.key,
     required this.repository,
-    required this.onBack,
-  });
+    this.onBack,
+    this.onSkip,
+    this.onDone,
+    this.onCompleted,
+  }) : assert(
+         onBack != null || onSkip != null || onDone != null,
+         'Provide onBack, onSkip or onDone',
+       );
+
   final InterestTestRepository repository;
-  final VoidCallback onBack;
+
+  /// Back button action when opened from Settings or Assistant.
+  final VoidCallback? onBack;
+
+  /// «Ara no» action shown during onboarding while the test is not completed.
+  final VoidCallback? onSkip;
+
+  /// Action for the final completion / empty-state button; defaults to
+  /// [onBack] or [onSkip].
+  final VoidCallback? onDone;
+
+  /// Notified once answers are saved successfully.
+  final VoidCallback? onCompleted;
 
   @override
   State<InterestTestScreen> createState() => _InterestTestScreenState();
 }
 
 class _InterestTestScreenState extends State<InterestTestScreen> {
-  late final _viewModel = InterestTestViewModel(repository: widget.repository)
-    ..load();
+  late InterestTestViewModel _viewModel;
+  bool _notifiedCompleted = false;
+
+  void _createViewModel() {
+    _notifiedCompleted = false;
+    final viewModel = InterestTestViewModel(repository: widget.repository);
+    _viewModel = viewModel;
+    viewModel
+      ..addListener(_onModelChanged)
+      ..load();
+  }
+
+  void _onModelChanged() {
+    if (!_notifiedCompleted && _viewModel.isCompleted) {
+      _notifiedCompleted = true;
+      widget.onCompleted?.call();
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _createViewModel();
+  }
+
+  @override
+  void didUpdateWidget(covariant InterestTestScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.repository != widget.repository) {
+      _viewModel.removeListener(_onModelChanged);
+      _viewModel.dispose();
+      _createViewModel();
+    }
+  }
 
   @override
   void dispose() {
+    _viewModel.removeListener(_onModelChanged);
     _viewModel.dispose();
     super.dispose();
   }
+
+  VoidCallback get _finish => widget.onDone ?? widget.onBack ?? widget.onSkip!;
+  bool get _isOnboarding => widget.onBack == null;
 
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(
       title: Text(context.l10n.interestTestTitle),
       centerTitle: true,
-      leading: IconButton(
-        tooltip: context.l10n.goBack,
-        onPressed: widget.onBack,
-        icon: const Icon(Icons.arrow_back),
-      ),
+      automaticallyImplyLeading: false,
+      leading: widget.onBack == null
+          ? null
+          : IconButton(
+              tooltip: context.l10n.goBack,
+              onPressed: widget.onBack,
+              icon: const Icon(Icons.arrow_back),
+            ),
+      actions: [
+        if (widget.onSkip case final onSkip?)
+          ListenableBuilder(
+            listenable: _viewModel,
+            builder: (context, _) =>
+                _viewModel.isCompleted || _viewModel.isSubmitting
+                ? const SizedBox.shrink()
+                : TextButton(
+                    key: const ValueKey('interest-test-skip'),
+                    onPressed: onSkip,
+                    child: Text(context.l10n.interestTestSkip),
+                  ),
+          ),
+      ],
     ),
     body: SafeArea(
       child: Padding(
@@ -71,15 +143,19 @@ class _InterestTestScreenState extends State<InterestTestScreen> {
     if (model.questions.isEmpty) {
       return _Message(
         text: context.l10n.interestTestEmpty,
-        action: context.l10n.interestTestBack,
-        onPressed: widget.onBack,
+        action: _isOnboarding
+            ? context.l10n.interestTestContinue
+            : context.l10n.interestTestBack,
+        onPressed: _finish,
       );
     }
     if (model.isCompleted) {
       return _Message(
         text: context.l10n.interestTestDone,
-        action: context.l10n.interestTestBackToSettings,
-        onPressed: widget.onBack,
+        action: _isOnboarding
+            ? context.l10n.interestTestContinue
+            : context.l10n.interestTestBackToSettings,
+        onPressed: _finish,
       );
     }
     final question = model.current;
@@ -214,7 +290,12 @@ class _QuestionCard extends StatelessWidget {
                   ],
                   if (question.description.isNotEmpty) ...[
                     const SizedBox(height: 8),
-                    Text(question.description),
+                    Text(
+                      question.description,
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                      style: textTheme.bodyMedium,
+                    ),
                   ],
                 ],
               ),

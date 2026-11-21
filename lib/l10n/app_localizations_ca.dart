@@ -1171,6 +1171,12 @@ class AppLocalizationsCa extends AppLocalizations {
       'No hem pogut desar les respostes. Torna-ho a provar.';
 
   @override
+  String get interestTestSkip => 'Ara no';
+
+  @override
+  String get interestTestContinue => 'Continua';
+
+  @override
   String get ratingDeleteTitle => 'Eliminar la valoració?';
 
   @override
