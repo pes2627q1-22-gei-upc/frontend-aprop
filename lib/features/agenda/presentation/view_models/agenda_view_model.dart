@@ -53,6 +53,19 @@ class AgendaViewModel extends ChangeNotifier {
   /// Plans of the selected day, ordered by start time.
   List<Activity> get selectedDayPlans => _plansByDay[_selectedDay] ?? const [];
 
+  /// Plans that have already started, newest first, whatever day is
+  /// selected: the ones «Com va anar?» asks about (#64, R8).
+  List<Activity> get startedPlans {
+    final now = _now();
+    return List.unmodifiable(
+      [
+        for (final plans in _plansByDay.values)
+          for (final plan in plans)
+            if (plan.startsAt.isBefore(now)) plan,
+      ]..sort((a, b) => b.startsAt.compareTo(a.startsAt)),
+    );
+  }
+
   void selectDay(DateTime day) {
     final date = _dateOnly(day);
     if (date == _selectedDay) return;

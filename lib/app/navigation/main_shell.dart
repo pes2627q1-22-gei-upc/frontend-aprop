@@ -26,6 +26,9 @@ import '../../features/activity_chat/data/demo_activity_chat_repository.dart';
 import '../../features/activity_chat/presentation/screens/activity_chat_screen.dart';
 import '../../features/activity_chat/repositories/activity_chat_repository.dart';
 import '../../features/agenda/presentation/screens/agenda_screen.dart';
+import '../../features/attendance/data/demo_attendance_repository.dart';
+import '../../features/attendance/presentation/view_models/attendance_view_model.dart';
+import '../../features/attendance/repositories/attendance_repository.dart';
 import '../../features/assistant/models/assistant_message.dart';
 import '../../features/assistant/presentation/screens/assistant_screen.dart';
 import '../../features/assistant/presentation/view_models/assistant_view_model.dart';
@@ -70,6 +73,7 @@ class MainShell extends StatefulWidget {
     this.friendshipRepository,
     this.userSearchRepository,
     this.friendsRepository,
+    this.attendanceRepository,
     this.interestTestRepository,
     this.activityCategoryRepository,
     this.userLocationRepository,
@@ -102,6 +106,10 @@ class MainShell extends StatefulWidget {
   /// Llistes d'amics (#54). Si no hi és, el comptador «Amics» és només un
   /// número.
   final FriendsRepository? friendsRepository;
+
+  /// Respostes a «Com va anar?» (#64). Si no hi és, es fa servir una
+  /// memòria de demostració.
+  final AttendanceRepository? attendanceRepository;
 
   /// Si no hi és, «Tornar a fer el test d’interessos» queda pendent.
   final InterestTestRepository? interestTestRepository;
@@ -147,6 +155,7 @@ class _MainShellState extends State<MainShell> {
   UserLocationViewModel? _userLocationViewModel;
   late final EnrollmentViewModel _enrollmentViewModel;
   late final RatingViewModel _ratingViewModel;
+  late final AttendanceViewModel _attendanceViewModel;
   late final AssistantViewModel _assistantViewModel;
   late final ProfileViewModel _profileViewModel;
 
@@ -187,6 +196,10 @@ class _MainShellState extends State<MainShell> {
     _ratingViewModel = RatingViewModel(
       userId: _enrollmentUserId,
       repository: widget.ratingRepository,
+    );
+    _attendanceViewModel = AttendanceViewModel(
+      userId: _enrollmentUserId,
+      repository: widget.attendanceRepository ?? DemoAttendanceRepository(),
     );
     _assistantViewModel = AssistantViewModel(
       repository: widget.assistantRepository,
@@ -244,6 +257,7 @@ class _MainShellState extends State<MainShell> {
     _userLocationViewModel?.dispose();
     _enrollmentViewModel.dispose();
     _ratingViewModel.dispose();
+    _attendanceViewModel.dispose();
     _assistantViewModel.dispose();
     _profileViewModel.dispose();
     super.dispose();
@@ -253,6 +267,8 @@ class _MainShellState extends State<MainShell> {
     if (index == _selectedIndex) return;
     // Refresh ownership/history after changes made in another section.
     if (index == 4) _profileViewModel.load();
+    // «Més tard» only lasts for one visit to the Agenda.
+    if (index == 1) _attendanceViewModel.startVisit();
 
     setState(() {
       _selectedIndex = index;
@@ -281,12 +297,15 @@ class _MainShellState extends State<MainShell> {
     );
   }
 
-  /// Rating stars for plans the user joined and that already started.
-  // TODO(DP-053): attendance («Com va anar?») is not modelled; once it is,
-  // require a confirmed attendance instead of an enrollment.
+  /// Rating stars for plans the user said they went to («Com va anar?»,
+  /// #64): only who went can rate (R10).
   Widget _buildRating(Activity activity) {
+    _attendanceViewModel.ensureLoaded([activity.id]);
     return ListenableBuilder(
-      listenable: _enrollmentViewModel,
+      listenable: Listenable.merge([
+        _enrollmentViewModel,
+        _attendanceViewModel,
+      ]),
       builder: (context, child) {
         final creatorId = activity.creator?.userId;
         // The organizer cannot rate their own event (it would feed their own
@@ -296,7 +315,8 @@ class _MainShellState extends State<MainShell> {
             (creatorId == widget.user.id || creatorId == widget.user.serverId);
         if (isOwn ||
             !_enrollmentViewModel.isEnrolled(activity.id) ||
-            activity.startsAt.isAfter((widget.now ?? DateTime.now)())) {
+            activity.startsAt.isAfter((widget.now ?? DateTime.now)()) ||
+            !_attendanceViewModel.attended(activity.id)) {
           return const SizedBox.shrink();
         }
         return ActivityRating(
@@ -859,6 +879,7 @@ class _MainShellState extends State<MainShell> {
                     activityTitle: activity.title,
                   ),
                   ratingBuilder: _buildRating,
+                  attendanceViewModel: _attendanceViewModel,
                   now: widget.now,
                 ),
               ),

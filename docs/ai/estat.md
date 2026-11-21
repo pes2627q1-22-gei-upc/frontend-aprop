@@ -10,9 +10,10 @@
 
 | Taiga | Tasca | Branca | Estat |
 |---|---|---|---|
-| #168 | [FE] Targeta de sol·licitud amb Acceptar/Rebutjar a NotificationsScreen + tests | `feature/friend-request-notification-card-168` | Implementada; 843 proves, anàlisi, format i APK correctes; revisió tècnica aprovada; sense commit/push |
+| #168 | [FE] Targeta de sol·licitud amb Acceptar/Rebutjar a NotificationsScreen + tests | `feature/friend-request-notification-card-168` | Publicada a `314bd93`; merge amb develop verificat: 856 proves, anàlisi, format i APK correctes; pendent commit/push de la resolució |
 | #193 | [FE] Acció «Rebutjar» a Avisos i perfil + tests | `feature/reject-friend-request-193` | Integrada a develop amb PR #68; DP-067 oberta |
 | #164 | [FE] Acceptar en avís social i perfil + comptadors/distintiu reactius + tests | `feature/accept-friend-request-164` | Integrada a develop amb PR #66; DP-066 oberta |
+| #212 | [FE] Targeta «Com va anar?» a `AgendaScreen` (fig. 13) + `AgendaViewModel` + tests (història #64) | `feature/confirmar-assistencia` | Integrada a develop amb PR #69; DP-068 oberta |
 | #160 | [FE] Botó d'acció d'amistat al perfil aliè + integració al ViewModel + tests | `feature/boto-amistat` | Integrada a develop amb PR #63; DP-064 oberta |
 | #162 | [FE] Vista y `UserSearchViewModel` integrada en el buscador de Descobreix (fig. 16) + navegación al perfil conservando estado + tests | `feature/user-search-162` | Integrada a develop amb PR #64 |
 | #148 | [FE] Xat de l'activitat | `feature/xat-activitat` | Integrada a develop amb PR #59; correccions de la revisió (límit en runes, refresc sense encavalcar-se i pausat en segon pla, proves d'estats, documentació); DP-062 oberta |
@@ -28,7 +29,7 @@
 
 ## Base i abast actual (#168)
 
-- Branca `feature/friend-request-notification-card-168` des de `origin/develop@550d9a9`.
+- Branca `feature/friend-request-notification-card-168`, commit publicat `314bd93`; merge local de `origin/develop@d2d5303` sense commit.
 - #164 integrada amb PR #66 i #193 amb PR #68; cap branca pare pendent.
 - Presentació de la petició extreta a `FriendRequestNotificationActions`, reutilitzada per `NotificationCard`.
 - Mateix ViewModel/repositoris compartits; no es duplica estat ni s’afegeixen endpoints.
@@ -74,8 +75,8 @@
 
 ## Pendents / següents passos
 
-1. Canvis de #168 preparats per a revisió humana; `git diff --check` correcte.
-2. L’usuari fa commit/push de #168 i PR a develop; CI i aprovació humana obligatòries.
+1. Resolució del merge de #168 preparada per a revisió humana; `git diff --check` correcte.
+2. Revisar la resolució, fer el commit del merge i push a la mateixa branca per actualitzar la PR existent; CI i aprovació humana obligatòries.
 3. Comprovar el recorregut amb dos comptes reals al desplegament i en Android.
 4. Backend/equip: avís automàtic en enviar sol·licitud i política de zona de `request-date` (DP-066).
    Si cal historial resolt o lectura de sol·licituds després de reiniciar, falten aquests contractes.
@@ -87,3 +88,12 @@
 - DP-065 queda reservada a la llista d’amics. L’acceptació de #164 passa a DP-066 amb les seves referències.
 - Traduccions ca/es/en regenerades després de combinar els ARB. Conjunt verificat: 807 proves superades, anàlisi sense incidències, format de 343 fitxers i APK debug correctes. Revisió tècnica independent sense bloquejos.
 - El commit funcional `1bd9dc7` ja està publicat; la resolució del merge encara no té commit ni push; l’usuari actualitza la mateixa PR després de revisar-la.
+
+## Resolució de conflictes de #168 (2026-11-21)
+
+- `origin/develop@d2d5303` incorpora #212, confirmació d’assistència a Agenda (PR #69).
+- Únic conflicte textual a `docs/ai/estat.md`: es conserven totes dues tasques i els estats d’integració actuals.
+- La composició d’assistència, la condició per valorar i els seus tests es conserven tal com arriben de develop.
+- La targeta de sol·licitud #168, focus/teclat, estats i callbacks es mantenen intactes.
+- Traduccions ca/es/en regenerades amb les claus d’ambdues tasques. Conjunt verificat: 856 proves superades, anàlisi sense incidències, format de 359 fitxers i APK debug correctes. Revisió tècnica independent aprovada.
+- Sense commit ni push de la resolució; l’usuari actualitza la mateixa PR després de revisar-la.

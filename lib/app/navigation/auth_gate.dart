@@ -34,6 +34,8 @@ import '../../features/profile/repositories/profile_repository.dart';
 import '../../features/profile/repositories/profile_settings_repository.dart';
 import '../../features/profile/repositories/public_profile_repository.dart';
 import '../../features/profile/repositories/friendship_repository.dart';
+import '../../features/attendance/data/demo_attendance_repository.dart';
+import '../../features/attendance/repositories/attendance_repository.dart';
 import '../../features/profile/repositories/friends_repository.dart';
 import '../../features/profile/repositories/user_search_repository.dart';
 import '../../features/ratings/data/demo_rating_repository.dart';
@@ -60,6 +62,7 @@ class AuthGate extends StatefulWidget {
     this.friendshipRepository,
     this.userSearchRepository,
     this.friendsRepository,
+    this.attendanceRepository,
     this.interestTestRepository,
     this.activityCategoryRepository,
     this.userLocationRepository,
@@ -85,6 +88,7 @@ class AuthGate extends StatefulWidget {
   final FriendshipRepository? friendshipRepository;
   final UserSearchRepository? userSearchRepository;
   final FriendsRepository? friendsRepository;
+  final AttendanceRepository? attendanceRepository;
   final InterestTestRepository? interestTestRepository;
   final ActivityCategoryRepository? activityCategoryRepository;
 
@@ -109,6 +113,7 @@ class _AuthGateState extends State<AuthGate> {
   late final PublicProfileRepository _publicProfileRepository;
   late final UserSearchRepository _userSearchRepository;
   late final FriendsRepository _friendsRepository;
+  late final AttendanceRepository _attendanceRepository;
   late final InterestTestRepository _interestTestRepository;
   DemoEnrollmentRepository? _ownedEnrollmentRepository;
   DemoFriendshipRepository? _ownedFriendshipRepository;
@@ -176,6 +181,9 @@ class _AuthGateState extends State<AuthGate> {
     _userSearchRepository =
         widget.userSearchRepository ?? const DemoUserSearchRepository();
     _friendsRepository = widget.friendsRepository ?? DemoFriendsRepository();
+    // One for the whole run, so answers survive signing out and in again.
+    _attendanceRepository =
+        widget.attendanceRepository ?? DemoAttendanceRepository();
     _interestTestRepository =
         widget.interestTestRepository ??
         DemoInterestTestRepository(activityRepository: _activityRepository);
@@ -244,6 +252,7 @@ class _AuthGateState extends State<AuthGate> {
           friendshipRepository: _friendshipRepository,
           userSearchRepository: _userSearchRepository,
           friendsRepository: _friendsRepository,
+          attendanceRepository: _attendanceRepository,
           interestTestRepository: _interestTestRepository,
           activityCategoryRepository: widget.activityCategoryRepository,
           userLocationRepository: widget.userLocationRepository,

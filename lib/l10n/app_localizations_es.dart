@@ -1271,6 +1271,26 @@ class AppLocalizationsEs extends AppLocalizations {
       'No hemos podido cargar tu agenda. Vuelve a intentarlo.';
 
   @override
+  String get attendanceQuestion => '¿Qué tal fue?';
+
+  @override
+  String get attendanceHint =>
+      'Dinos si fuiste. Solo quien fue puede valorar la actividad.';
+
+  @override
+  String get attendanceYes => 'Sí, fui';
+
+  @override
+  String get attendanceNo => 'No fui';
+
+  @override
+  String get attendanceLater => 'Más tarde';
+
+  @override
+  String get attendanceSaveError =>
+      'No hemos podido guardar la respuesta. Vuelve a intentarlo.';
+
+  @override
   String agendaPublishedBy(String name) {
     return 'Publicado por $name';
   }
