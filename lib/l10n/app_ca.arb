@@ -806,6 +806,12 @@
   "agendaEmptyDay": "No tens cap pla per a aquest dia.",
   "agendaEmptyHint": "Apunta’t a activitats des d’Inici i les veuràs aquí.",
   "agendaLoadError": "No hem pogut carregar la teva agenda. Torna-ho a provar.",
+  "attendanceQuestion": "Com va anar?",
+  "attendanceHint": "Digues-nos si hi vas anar. Només qui hi va anar pot valorar l’activitat.",
+  "attendanceYes": "Sí, hi vaig anar",
+  "attendanceNo": "No hi vaig anar",
+  "attendanceLater": "Més tard",
+  "attendanceSaveError": "No hem pogut desar la resposta. Torna-ho a provar.",
   "agendaPublishedBy": "Publicat per {name}",
   "@agendaPublishedBy": {
     "placeholders": {

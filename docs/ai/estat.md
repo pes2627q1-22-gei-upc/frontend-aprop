@@ -10,6 +10,7 @@
 
 | Taiga | Tasca | Branca | Estat |
 |---|---|---|---|
+| #212 | [FE] Targeta «Com va anar?» a `AgendaScreen` (fig. 13) + `AgendaViewModel` + tests (història #64) | `feature/confirmar-assistencia` | Implementada (HTTP i Demo); DP-067 oberta; pendent revisió humana |
 | #164 | [FE] Acceptar en avís social i perfil + comptadors/distintiu reactius + tests | `feature/accept-friend-request-164` | Implementada amb HTTP/Demo; 807 proves després del merge; revisió tècnica correcta; APK debug correcte; DP-066 oberta; resolució del merge pendent de commit/push |
 | #160 | [FE] Botó d'acció d'amistat al perfil aliè + integració al ViewModel + tests | `feature/boto-amistat` | Integrada a develop amb PR #63; DP-064 oberta |
 | #162 | [FE] Vista y `UserSearchViewModel` integrada en el buscador de Descobreix (fig. 16) + navegación al perfil conservando estado + tests | `feature/user-search-162` | Integrada a develop amb PR #64 |

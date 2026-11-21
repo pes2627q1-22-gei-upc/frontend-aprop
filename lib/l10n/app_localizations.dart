@@ -2104,6 +2104,42 @@ abstract class AppLocalizations {
   /// **'No hem pogut carregar la teva agenda. Torna-ho a provar.'**
   String get agendaLoadError;
 
+  /// No description provided for @attendanceQuestion.
+  ///
+  /// In ca, this message translates to:
+  /// **'Com va anar?'**
+  String get attendanceQuestion;
+
+  /// No description provided for @attendanceHint.
+  ///
+  /// In ca, this message translates to:
+  /// **'Digues-nos si hi vas anar. Només qui hi va anar pot valorar l’activitat.'**
+  String get attendanceHint;
+
+  /// No description provided for @attendanceYes.
+  ///
+  /// In ca, this message translates to:
+  /// **'Sí, hi vaig anar'**
+  String get attendanceYes;
+
+  /// No description provided for @attendanceNo.
+  ///
+  /// In ca, this message translates to:
+  /// **'No hi vaig anar'**
+  String get attendanceNo;
+
+  /// No description provided for @attendanceLater.
+  ///
+  /// In ca, this message translates to:
+  /// **'Més tard'**
+  String get attendanceLater;
+
+  /// No description provided for @attendanceSaveError.
+  ///
+  /// In ca, this message translates to:
+  /// **'No hem pogut desar la resposta. Torna-ho a provar.'**
+  String get attendanceSaveError;
+
   /// No description provided for @agendaPublishedBy.
   ///
   /// In ca, this message translates to:

@@ -16,7 +16,9 @@ Agenda (section 1 of `MainShell`) shows a Monday-first month calendar (`Dl`–`D
 
 Tapping a plan's image or title calls `onActivitySelected(activity.id)`. `MainShell` pushes the shared detail route onto Agenda's own navigator, so the bottom bar stays visible and returning restores the month and selected day. New enrollments made from Inici or the detail appear without reloading.
 
-Out of scope: the reminder row and sheet (fig. 12, removed until the reminders story), «Com va anar?» (fig. 13), unenrollment and multi-day events (the dot uses `Activity.startsAt` only, because the model has no end date).
+«Com va anar?» (fig. 13, #64): above the calendar, whatever day is selected, a card asks about every plan that already started and has no answer: «Sí, hi vaig anar», «No hi vaig anar» (same visual weight) and «Més tard» (hidden until the Agenda tab is opened again). Answers go through `AttendanceViewModel` (`features/attendance/`), shared with the ratings: the stars appear only after «Sí» (R10). The API cannot read back «No», so the device remembers it (DP-067).
+
+Out of scope: the reminder row and sheet (fig. 12, removed until the reminders story), unenrollment and multi-day events (the dot uses `Activity.startsAt` only, because the model has no end date).
 
 ## Files
 
