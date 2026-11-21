@@ -87,6 +87,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get friendAlready => 'Friend';
 
   @override
+  String get friendRejecting => 'Declining…';
+
+  @override
+  String get friendRejectError => 'We couldn’t decline the request. Try again.';
+
+  @override
   String get friendAccepting => 'Accepting…';
 
   @override

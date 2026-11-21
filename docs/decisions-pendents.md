@@ -774,3 +774,13 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Resolució:**
 
 **Actualització #164 de DP-023/DP-039/DP-064 (2026-11-20):** l’abast fora de l’Sprint 1 es manté com a històric. A l’Sprint 2 ja hi ha acceptació/rebuig amb HTTP i estat compartit. Les sol·licituds **rebudes** es consulten i permeten «Acceptar» al perfil; les sortints i els bloquejos continuen sense estat explícit al DTO del perfil (DP-064). No es crea ni es modifica cap endpoint.
+
+### DP-067 · Accions rebudes i feedback de rebuig al perfil (#193)
+- **Estat:** oberta · 2026-11-21 · Taiga #193, història #52 · només frontend.
+- **Context:** el backend `fb266a7` ja retorna `Rejected` amb `/users/{sender}/friend-requests/{date}/deny`. #164 aporta el repositori compartit i Avisos ja té les dues accions. No hi ha mockup específic de la petició rebuda dins del perfil públic.
+- **Deduït de la figura 17 i del flux existent:** afegir «Rebutjar» com a botó secundari al costat d’«Acceptar», amb Compartir a sota. Totes dues accions queden desactivades mentre es confirma la resposta; cap diàleg addicional, igual que a Avisos.
+- **Després de confirmar:** mostrar «Sol·licitud rebutjada» i recuperar l’acció normal «Afegeix com a amic». No s’envia una nova petició automàticament; no es bloqueja la persona ni es canvien comptadors o privacitat. Una petició pendent posterior substitueix aquest feedback. Les confirmacions són de sessió com a DP-066, sense historial resolt inventat en reiniciar.
+- **Dependència de lliurament:** branca #193 sobre `94793c2` de #164 mentre aquella PR és pendent. Per revisar només #193 es compara amb la pare; abans de fusionar #193 cap a `develop`, #164 ha d’estar integrada.
+- **Codi:** `TODO(DP-067)` a `public_profile_screen.dart`. Documentació del flux a `docs/friend-requests.md`.
+- **Qui decideix:** equip frontend (presentació i acció posterior al rebuig).
+- **Resolució:**

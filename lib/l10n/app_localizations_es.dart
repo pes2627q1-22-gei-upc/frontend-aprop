@@ -89,6 +89,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get friendAlready => 'Amiga/Amigo';
 
   @override
+  String get friendRejecting => 'Rechazando…';
+
+  @override
+  String get friendRejectError =>
+      'No hemos podido rechazar la solicitud. Vuelve a intentarlo.';
+
+  @override
   String get friendAccepting => 'Aceptando…';
 
   @override

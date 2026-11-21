@@ -273,3 +273,16 @@ Avisos comparteix només models i el contracte de Perfil, mai el seu ViewModel. 
 són escriptures independents: un error de lectura no desfà una amistat confirmada. La reconciliació
 entre avisos i sol·licituds usa participants i data exacta; el text lliure no dona permisos d’acció.
 Vegeu [contracte, estat i límits](friend-requests.md), DP-064 i DP-066.
+
+### Rebuig de sol·licituds — Taiga #193
+
+S’amplia el flux de #164: el perfil exposa `rejectFriendRequest()` i totes dues respostes passen per
+un únic mètode privat del seu ViewModel i el `FriendshipRepository` injectat. Avisos conserva el
+mateix `respond(accept: false)`. Els widgets no decideixen ni transformen estats de domini.
+El feedback de rebuig es deriva de les resolucions compartides, sense duplicar-lo en una bandera.
+
+`ProfileHeader.secondaryAction` reserva una segona acció al costat de la principal i baixa Compartir
+perfil a una fila pròpia. Només el perfil amb petició rebuda fa servir aquest paràmetre. Les dues
+accions s’inhabiliten en enviar i no es sobreescriuen amb un refresc. Després de confirmar Rejected,
+la targeta i el perfil es reconcilien; no es modifica amistat, comptadors ni permisos de plans.
+Disseny/retorn després de rebutjar a DP-067; contracte i límits a [sol·licituds d’amistat](friend-requests.md).

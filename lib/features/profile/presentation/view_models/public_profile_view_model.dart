@@ -24,6 +24,7 @@ class PublicProfileViewModel extends ChangeNotifier {
           .listen((change) {
             if (_isDisposed || change.request.senderId != userId) return;
             _incoming = null;
+            _outgoingState = FriendshipAction.add;
             _friendship = change.status == FriendRequestStatus.accepted
                 ? FriendshipAction.friends
                 : FriendshipAction.add;
@@ -80,11 +81,34 @@ class PublicProfileViewModel extends ChangeNotifier {
   /// The friend button (#160); null hides it (no session, or unknown).
   FriendshipAction? get friendship => _friendship;
 
-  /// Why the last request could not be sent; the button allows a retry.
+  /// Why the last friendship action failed; the available actions allow retry.
   String? get friendRequestError => _friendRequestError;
 
+  /// A resolved incoming request is feedback, not an error or a new friendship.
+  String? get friendRequestFeedback {
+    final account = currentUserId;
+    if (account == null ||
+        _friendship != FriendshipAction.add ||
+        _incoming != null) {
+      return null;
+    }
+    final latest = friendshipRepository
+        ?.resolutions(account)
+        .reversed
+        .where((r) => r.request.senderId == userId)
+        .firstOrNull;
+    return latest?.status == FriendRequestStatus.rejected
+        ? currentL10n.notifRequestDeclined
+        : null;
+  }
+
   Future<void> load() async {
-    if (_isDisposed || _isLoading) return;
+    if (_isDisposed ||
+        _isLoading ||
+        _friendship == FriendshipAction.accepting ||
+        _friendship == FriendshipAction.rejecting) {
+      return;
+    }
     final revision = _revision;
     _isLoading = true;
     _errorMessage = null;
@@ -179,31 +203,41 @@ class PublicProfileViewModel extends ChangeNotifier {
     }
   }
 
-  Future<void> acceptFriendRequest() async {
+  Future<void> acceptFriendRequest() => _respondToFriendRequest(accept: true);
+
+  Future<void> rejectFriendRequest() => _respondToFriendRequest(accept: false);
+
+  Future<void> _respondToFriendRequest({required bool accept}) async {
     final request = _incoming;
     final friends = friendshipRepository;
     final account = currentUserId;
     if (_isDisposed ||
+        _isLoading ||
         _friendship != FriendshipAction.incoming ||
         request == null ||
         friends == null ||
         account == null) {
       return;
     }
-    _friendship = FriendshipAction.accepting;
+    final revision = _revision;
+    _friendship = accept
+        ? FriendshipAction.accepting
+        : FriendshipAction.rejecting;
     _friendRequestError = null;
     notifyListeners();
     try {
       await friends.respond(
         userId: account,
         requestId: request.id,
-        accept: true,
+        accept: accept,
       );
-      // The shared confirmation subscription updates all open profiles/inbox.
+      // One shared confirmation updates all open profiles and the inbox.
     } catch (_) {
-      if (_isDisposed) return;
+      if (_isDisposed || revision != _revision) return;
       _friendship = FriendshipAction.incoming;
-      _friendRequestError = currentL10n.friendAcceptError;
+      _friendRequestError = accept
+          ? currentL10n.friendAcceptError
+          : currentL10n.friendRejectError;
     } finally {
       if (!_isDisposed) notifyListeners();
     }
@@ -291,6 +325,7 @@ enum FriendshipAction {
   retry,
   incoming,
   accepting,
+  rejecting,
   sending,
 
   /// «Sol·licitud enviada», disabled.

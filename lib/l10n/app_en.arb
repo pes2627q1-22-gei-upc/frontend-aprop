@@ -24,6 +24,8 @@
   "friendSending": "Sending…",
   "friendRequestSent": "Request sent",
   "friendAlready": "Friend",
+  "friendRejecting": "Declining…",
+  "friendRejectError": "We couldn’t decline the request. Try again.",
   "friendAccepting": "Accepting…",
   "friendAcceptError": "We couldn’t accept the request. Try again.",
   "friendStatusError": "We couldn’t load friend requests. Try again.",
