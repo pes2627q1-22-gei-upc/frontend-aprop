@@ -59,6 +59,19 @@ class HttpProfileSettingsRepository implements ProfileSettingsRepository {
       headers: session.headers,
       body: {'show-plans': enabled},
     );
-    return _settings(validateOwnProfile(decoded, userId));
+    final profile = validateOwnProfile(decoded, userId);
+    if ((profile['id'] as String).toLowerCase() !=
+        (session.profile['id'] as String).toLowerCase()) {
+      throw const FormatException(
+        'The updated profile belongs to another account',
+      );
+    }
+    final confirmed = _settings(profile);
+    if (confirmed.showMyPlans != enabled) {
+      throw const FormatException(
+        'The requested privacy setting was not saved',
+      );
+    }
+    return confirmed;
   }
 }

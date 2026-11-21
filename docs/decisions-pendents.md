@@ -902,3 +902,15 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Codi:** `TODO(DP-077)` a `public_profile_screen.dart` i `blocked_users_screen.dart`. Guia `docs/user-blocking.md`.
 - **Qui decideix:** equip/PO (presentació i abast del bloqueig).
 - **Resolució:**
+
+### DP-078 · Compartició de plans: confirmació, reintent i autorització (#199)
+- **Estat:** oberta · 2026-11-21 · Taiga #199, història #55 · només frontend. DP-077 correspon a #179, integrada a develop amb PR #77.
+- **Context:** fig. 19 i `api-aprop@4f98835`: `GET /users/me` i `PATCH /users/me` amb `show-plans`; el perfil propi té `plans-visible=true` fins i tot quan no comparteix. En un perfil aliè el servei calcula `plans-visible = amistat && show-plans`.
+- **Deduït:** es conserven els noms reals `ProfileSettingsScreen`/`ProfileSettingsViewModel`; no es creen duplicats anomenats `SettingsScreen`. Estat textual de compartició sota el switch, progrés i error amb reintent al mateix control. El switch manté el valor anterior fins que el repositori confirma el canvi; no hi ha un botó Desar separat.
+- **Identitat i dades:** la resposta ha de conservar el UUID real capturat i confirmar el booleà demanat; JSON invàlid o una resposta que ignora el canvi són errors. La lectura usa `show-plans`, mai `plans-visible` del perfil propi. No se sobreescriu un valor inicial real del servidor (la migració 000007 té default true) amb el default false del model Demo.
+- **Concurrència:** preferències i idioma no s’escriuen simultàniament des de Configuració; cap reintent duplicat ni resposta d’un compte anterior modifica la pantalla actual.
+- **Abast:** compartir només afecta els plans personals per a amistats; no es retiren activitats publicades, inscripcions de l’Agenda ni avisos. Demo conserva preferències per compte en memòria i perfils públics sembrats; no prova privacitat entre comptes reals.
+- **Pendent backend (mateixa carència que DP-011):** `SignUpHandler.ListUserEvents` / `SignUpService.ListUserEvents` encara no comproven el sol·licitant, l’amistat ni `show-plans` a `GET /users/{userId}/events`. Cal autoritzar el propietari o una amistat amb compartició activada, i rebutjar la resta, també quan es crida l’endpoint directament. Ocultar la llista al client no substitueix aquest control. No s’ha modificat el backend.
+- **Codi:** `TODO(DP-078)` a `profile_settings_screen.dart`; guia `docs/plan-visibility.md` amb missatge per al backend i prova manual de dos comptes.
+- **Qui decideix:** frontend/PO per a la presentació; backend per a l’autorització i proves reals.
+- **Resolució:**

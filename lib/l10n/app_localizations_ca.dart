@@ -400,6 +400,12 @@ class AppLocalizationsCa extends AppLocalizations {
   String get settingsShowMyPlansHint => 'Els amics veuen a què t’apuntes';
 
   @override
+  String get settingsPlansShared => 'Compartició amb amics activada';
+
+  @override
+  String get settingsPlansPrivate => 'Compartició amb amics desactivada';
+
+  @override
   String get settingsBlockedUsers => 'Usuaris bloquejats';
 
   @override

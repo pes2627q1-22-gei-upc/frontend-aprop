@@ -57,9 +57,12 @@ class ProfileSettingsViewModel extends ChangeNotifier {
   bool _isSigningOut = false;
   bool _isDeletingAccount = false;
   bool _isDisposed = false;
+  int _languageWrites = 0;
   ProfilePreference? _savingPreference;
   String? _errorMessage;
   String? _actionError;
+  String? _preferenceError;
+  ({ProfilePreference preference, bool enabled})? _failedPreferenceChange;
 
   ProfileSettings? get settings => _settings;
   bool supports(ProfilePreference preference) =>
@@ -71,10 +74,26 @@ class ProfileSettingsViewModel extends ChangeNotifier {
   bool get canDeleteAccount => onDeleteAccount != null;
   bool get isDeletingAccount => _isDeletingAccount;
   bool get isBusy =>
-      _savingPreference != null || _isSigningOut || _isDeletingAccount;
+      _savingPreference != null ||
+      _isSigningOut ||
+      _isDeletingAccount ||
+      _languageWrites > 0;
   ProfilePreference? get savingPreference => _savingPreference;
   String? get errorMessage => _errorMessage;
   String? get actionError => _actionError;
+  String? get preferenceError => _preferenceError;
+  ProfilePreference? get failedPreference =>
+      _failedPreferenceChange?.preference;
+  bool get canRetryPreference =>
+      _failedPreferenceChange != null &&
+      canUpdatePreference(_failedPreferenceChange!.preference);
+
+  bool canUpdatePreference(ProfilePreference preference) =>
+      !_isDisposed &&
+      !_isLoading &&
+      !isBusy &&
+      _settings != null &&
+      supports(preference);
 
   Future<void> load() async {
     if (_isDisposed || _isLoading || isBusy) return;
@@ -84,7 +103,11 @@ class ProfileSettingsViewModel extends ChangeNotifier {
     unawaited(_loadBlocks());
     try {
       final result = await repository.getSettings(userId);
-      if (!_isDisposed) _settings = result;
+      if (!_isDisposed) {
+        _settings = result;
+        _preferenceError = null;
+        _failedPreferenceChange = null;
+      }
     } catch (_) {
       if (!_isDisposed) {
         _errorMessage = currentL10n.settingsLoadError;
@@ -101,16 +124,14 @@ class ProfileSettingsViewModel extends ChangeNotifier {
     ProfilePreference preference,
     bool enabled,
   ) async {
-    if (_isDisposed ||
-        _isLoading ||
-        isBusy ||
-        _settings == null ||
-        !supports(preference) ||
+    if (!canUpdatePreference(preference) ||
         _settings!.valueOf(preference) == enabled) {
       return;
     }
     _savingPreference = preference;
     _actionError = null;
+    _preferenceError = null;
+    _failedPreferenceChange = null;
     notifyListeners();
     try {
       final result = await repository.updatePreference(
@@ -118,10 +139,14 @@ class ProfileSettingsViewModel extends ChangeNotifier {
         preference: preference,
         enabled: enabled,
       );
+      if (result.valueOf(preference) != enabled) {
+        throw StateError('The requested preference was not confirmed');
+      }
       if (!_isDisposed) _settings = result;
     } catch (_) {
       if (!_isDisposed) {
-        _actionError = currentL10n.settingsSaveError;
+        _preferenceError = currentL10n.settingsSaveError;
+        _failedPreferenceChange = (preference: preference, enabled: enabled);
       }
     } finally {
       if (!_isDisposed) {
@@ -131,29 +156,47 @@ class ProfileSettingsViewModel extends ChangeNotifier {
     }
   }
 
+  /// Repeats the failed intent, without inverting the last confirmed value.
+  Future<void> retryPreference() async {
+    final change = _failedPreferenceChange;
+    if (change == null || !canRetryPreference) return;
+    await updatePreference(change.preference, change.enabled);
+  }
+
   /// Applies the language to the whole app at once (and stores it locally),
   /// then tells the account. A failed sync keeps the new language.
   int _languageRequest = 0;
 
   Future<void> changeLanguage(Locale locale) async {
     final controller = localeController;
-    if (_isDisposed || controller == null) return;
-    final request = ++_languageRequest;
-    _actionError = null;
-    await controller.setLocale(locale);
-    String? error;
-    try {
-      await repository.updateLanguage(
-        userId: userId,
-        language: locale.languageCode,
-      );
-    } catch (_) {
-      error = currentL10n.settingsLanguageSyncError;
+    if (_isDisposed ||
+        controller == null ||
+        _savingPreference != null ||
+        _isSigningOut ||
+        _isDeletingAccount) {
+      return;
     }
-    // A newer change owns the result; an older one must not overwrite it.
-    if (_isDisposed || request != _languageRequest) return;
-    _actionError = error;
+    final request = ++_languageRequest;
+    _languageWrites++;
+    _actionError = null;
     notifyListeners();
+    try {
+      await controller.setLocale(locale);
+      String? error;
+      try {
+        await repository.updateLanguage(
+          userId: userId,
+          language: locale.languageCode,
+        );
+      } catch (_) {
+        error = currentL10n.settingsLanguageSyncError;
+      }
+      // A newer change owns the result; an older one must not overwrite it.
+      if (!_isDisposed && request == _languageRequest) _actionError = error;
+    } finally {
+      _languageWrites--;
+      if (!_isDisposed) notifyListeners();
+    }
   }
 
   Future<void> signOut() async {

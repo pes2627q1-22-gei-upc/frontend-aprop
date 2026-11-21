@@ -4,6 +4,11 @@ Aplicació mòbil per descobrir i planificar activitats culturals a Catalunya. P
 
 ## Estat actual
 
+Visibilitat dels plans (**Taiga #199**): Configuració conserva el valor confirmat de «Mostrar els meus
+plans» mentre desa, mostra l’estat de compartició i permet reintentar un error al mateix control.
+Consulta i PATCH autenticats, sense superposar escriptures d’idioma i privacitat. El perfil aliè només
+carrega plans quan `plans-visible` ho permet. [Flux, proves i pendent del backend](docs/plan-visibility.md).
+
 Cerca de persones (**Taiga #162**): el selector «Activitats / Persones» del cercador compartit consulta `GET /users` amb autenticació, paginació, total real, càrrega, buit i error/reintent. Cada fila obre el perfil públic existent; tornar conserva consulta, mode, resultats, pàgines i desplaçament. Accessible des d’Inici i Mapa després de #273/#274. Interfície en ca/es/en, sense paquets nous ni canvis al backend. [Contracte, arquitectura i proves](docs/user-search.md).
 
 Logotip (**Taiga #262**): Inici i l’accés comparteixen `APropLogo`, amb un PNG transparent que s’integra

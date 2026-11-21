@@ -233,6 +233,8 @@
   "settingsGroupPrivacy": "PRIVACITAT",
   "settingsShowMyPlans": "Mostrar els meus plans",
   "settingsShowMyPlansHint": "Els amics veuen a què t’apuntes",
+  "settingsPlansShared": "Compartició amb amics activada",
+  "settingsPlansPrivate": "Compartició amb amics desactivada",
   "settingsBlockedUsers": "Usuaris bloquejats",
   "settingsGroupNotifications": "NOTIFICACIONS",
   "settingsReminders": "Recordatoris",

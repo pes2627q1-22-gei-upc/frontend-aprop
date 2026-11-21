@@ -394,6 +394,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsShowMyPlansHint => 'Friends can see what you sign up for';
 
   @override
+  String get settingsPlansShared => 'Sharing with friends is on';
+
+  @override
+  String get settingsPlansPrivate => 'Sharing with friends is off';
+
+  @override
   String get settingsBlockedUsers => 'Blocked users';
 
   @override
