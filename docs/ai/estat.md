@@ -10,6 +10,7 @@
 
 | Taiga | Tasca | Branca | Estat |
 |---|---|---|---|
+| #212 | [FE] Targeta «Com va anar?» a `AgendaScreen` (fig. 13) + `AgendaViewModel` + tests (història #64) | `feature/confirmar-assistencia` | Implementada (HTTP i Demo); DP-068 oberta; pendent revisió humana |
 | #193 | [FE] Acció «Rebutjar» a Avisos i perfil + tests | `feature/reject-friend-request-193` | Implementada; 825 proves, anàlisi, format i APK correctes; revisió tècnica aprovada; depèn de la PR de #164; DP-067 oberta; sense commit/push |
 | #164 | [FE] Acceptar en avís social i perfil + comptadors/distintiu reactius + tests | `feature/accept-friend-request-164` | Implementada amb HTTP/Demo; Publicada a `94793c2`; PR encara pendent a develop; 807 proves i APK correctes; DP-066 oberta |
 | #160 | [FE] Botó d'acció d'amistat al perfil aliè + integració al ViewModel + tests | `feature/boto-amistat` | Integrada a develop amb PR #63; DP-064 oberta |
