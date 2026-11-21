@@ -35,6 +35,10 @@ String notificationMessage(AppNotification notice) {
           : notice.person != null
           ? l10n.notifMessageSocialPerson(notice.person!.name)
           : l10n.notifMessageSocial,
+    NotificationType.activityCancelled =>
+      notice.activity == null
+          ? l10n.notifMessageCancelled
+          : l10n.notifMessageCancelledFor(notice.activity!.title),
     NotificationType.other => l10n.notifMessageOther,
     NotificationType.activityPublished => l10n.notifMessagePublished(
       notice.person!.name,

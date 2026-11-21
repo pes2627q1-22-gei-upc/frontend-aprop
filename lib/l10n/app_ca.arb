@@ -666,6 +666,15 @@
   },
   "notifMessageSocial": "Tens un nou avís social.",
   "notifMessageOther": "Tens un nou avís.",
+  "notifMessageCancelledFor": "S’ha cancel·lat «{title}».",
+  "@notifMessageCancelledFor": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "notifMessageCancelled": "S’ha cancel·lat una activitat on t’havies apuntat.",
   "notifMessagePublished": "{name} ha publicat “{title}”.",
   "@notifMessagePublished": {
     "placeholders": {

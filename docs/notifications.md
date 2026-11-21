@@ -93,3 +93,9 @@ Validació inicial de #86: format correcte, `flutter analyze` sense problemes, l
 El commit `c84a138` de `feature/notifications` ha estat publicat per Adam. El 2026-10-21 s'integra localment `origin/develop` (`740db0a`) per resoldre els conflictes de la PR, conservant el mapa i la creació d'activitats. La decisió d'Avisos passa de DP-017 a DP-023 per evitar la col·lisió amb la decisió de creació. El commit de fusió i el push queden pendents de revisió d'Adam.
 
 Validació de la integració: format correcte (111 fitxers, cap canvi), anàlisi sense problemes, 196 proves superades i APK Android debug compilat. Revisió de decisions sense bloquejos; es conserven les DP-017 a DP-022 de `develop`. No s'ha verificat el mapa real en un dispositiu físic.
+
+## Avís de cancel·lació (#47, DP-071)
+
+Quan qui ha creat una activitat la cancel·la (#46), el backend crea un avís de tipus «Cancelacio» per a cada persona apuntada. L’app el llegeix com a `NotificationType.activityCancelled`: surt a Avisos (filtre «Recordatoris») amb el text «S’ha cancel·lat «títol».», i en tocar-lo s’obre la fitxa. En carregar els avisos, `NotificationsScreen.onActivitiesCancelled` passa les activitats cancel·lades a `MainShell`, que les marca a `EnrollmentViewModel`: a tota l’app surt «Cancel·lada» i ja no s’hi pot apuntar (l’API no torna l’estat de l’activitat, DP-069).
+
+Proves: `test/app/cancellation_notice_flow_test.dart` (tipus del backend i flux HTTP: avís a «Recordatoris», fitxa amb «Cancel·lada»).

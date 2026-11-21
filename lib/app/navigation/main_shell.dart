@@ -967,6 +967,13 @@ class _MainShellState extends State<MainShell> {
                   userId: widget.user.id,
                   repository: widget.notificationRepository,
                   friendshipRepository: widget.friendshipRepository,
+                  // Qui s'hi havia apuntat sap per l'avís que s'ha cancel·lat
+                  // (#47): ja no s'hi pot tornar a apuntar.
+                  onActivitiesCancelled: (ids) {
+                    for (final id in ids) {
+                      _enrollmentViewModel.markCancelled(id);
+                    }
+                  },
                   onActivitySelected: (id) {
                     // A late read confirmation must not open another tab's route.
                     if (_selectedIndex == 3) _openActivityDetails(id);
