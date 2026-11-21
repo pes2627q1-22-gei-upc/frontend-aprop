@@ -800,3 +800,17 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Codi:** `TODO(DP-068)` a `http_attendance_repository.dart` i `main.dart`.
 - **Qui decideix:** backend (tornar el valor de l’assistència)
 - **Resolució:**
+
+### DP-069 · Cancel·lar una activitat (#46): l'estat només es coneix durant la sessió
+- **Estat:** oberta · 2026-11-21 · Claude Code (Opus 5.5) amb confirmació de l’usuari · Taiga #181 (història #46)
+- **Context:** botó «Cancel·lar l’activitat» d’`ActivityDetailsScreen`, `MainShell._cancelActivity`, `ActivityRepository.cancelActivity`, `EnrollmentViewModel.isCancelled`, `EnrollmentAction` (distintiu «Cancel·lada»). Backend consultat a `api-aprop@develop` sense modificar-lo: `POST /events/{id}/cancel` (només qui l’ha creada; 409 si ja ha acabat o ja no està activa; 422 si és oficial) marca l’activitat `Cancelled` i crea un avís «Cancelacio» per a cada persona apuntada.
+- **Dubte:** cap resposta d’activitats (`GET /events`, `/events/{id}`, mapa, cerca) no porta l’estat, i apuntar-se a una activitat cancel·lada continua funcionant al backend.
+- **Decisió de l’usuari:** després de cancel·lar, l’app la marca «Cancel·lada» durant la sessió a la fitxa, l’Agenda, el mapa, Inici i la cerca (on hi ha el botó d’apuntar-se), i no deixa apuntar-s’hi. En tornar a obrir l’app es torna a veure normal. Es demana al backend que torni `state` a l’activitat i que rebutgi les inscripcions a les cancel·lades; aleshores el mapper la marcarà en llegir-la.
+- **Deduït (sense confirmar):**
+  - El botó és a la fitxa, en vermell, sota el xat, només per a qui la pot editar (creadora i abans que comenci); el diàleg avisa que no es pot desfer i que s’avisarà les persones apuntades.
+  - Una activitat cancel·lada ja no es pot editar (el backend respondria 409).
+  - Si el servidor diu que ja no està activa (409), es tracta com a cancel·lada.
+  - Qui hi estava apuntat la continua tenint a l’Agenda: l’avís de cancel·lació és la #47.
+- **Codi:** `TODO(DP-069)` a `enrollment_view_model.dart`.
+- **Qui decideix:** backend (`state` a l’activitat i bloqueig d’inscripcions)
+- **Resolució:**

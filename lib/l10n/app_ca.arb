@@ -838,6 +838,24 @@
   "actCreate": "Crear activitat",
   "actDetailsTitle": "Activitat",
   "actEdit": "Edita l’activitat",
+  "activityCancel": "Cancel·lar l’activitat",
+  "activityCancelling": "Cancel·lant…",
+  "activityCancelTitle": "Vols cancel·lar l’activitat?",
+  "activityCancelBody": "Avisarem les persones apuntades a «{title}» i ja no s’hi podrà apuntar ningú. No es pot desfer.",
+  "@activityCancelBody": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "activityCancelKeep": "Tornar",
+  "activityCancelConfirm": "Cancel·la-la",
+  "activityCancelledBadge": "Cancel·lada",
+  "activityCancelDone": "Has cancel·lat l’activitat. Hem avisat les persones apuntades.",
+  "activityCancelFinished": "L’activitat ja ha començat o ha acabat: no es pot cancel·lar.",
+  "activityCancelNotAllowed": "Només qui ha creat l’activitat la pot cancel·lar.",
+  "activityCancelError": "No hem pogut cancel·lar l’activitat. Torna-ho a provar.",
   "actNotFound": "No hem trobat aquesta activitat.",
   "actAbout": "Sobre l’activitat",
   "actNoDescription": "Encara no hi ha una descripció disponible.",

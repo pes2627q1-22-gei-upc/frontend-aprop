@@ -63,3 +63,39 @@ class EnrollmentStatusBadge extends StatelessWidget {
     );
   }
 }
+
+/// Distintiu «Cancel·lada» (#46): qui l'havia creada l'ha cancel·lat.
+class CancelledBadge extends StatelessWidget {
+  const CancelledBadge({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    return DecoratedBox(
+      key: const ValueKey('activity-cancelled-badge'),
+      decoration: BoxDecoration(
+        color: colors.errorContainer,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.event_busy, size: 16, color: colors.onErrorContainer),
+            const SizedBox(width: 6),
+            Flexible(
+              child: Text(
+                context.l10n.activityCancelledBadge,
+                style: theme.textTheme.labelLarge?.copyWith(
+                  color: colors.onErrorContainer,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
