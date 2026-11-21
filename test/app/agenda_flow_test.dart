@@ -5,6 +5,13 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'app_navigation.dart';
 
+/// The plan already started, so the Agenda asks «Com va anar?» about it.
+/// These tests are about the plans: leave the question for later.
+Future<void> answerLater(WidgetTester tester, String activityId) async {
+  await tester.tap(find.byKey(ValueKey('attendance-later-$activityId')));
+  await tester.pumpAndSettle();
+}
+
 void main() {
   testWidgets('Plans joined in Inici appear in Agenda and open details', (
     tester,
@@ -28,6 +35,7 @@ void main() {
 
     await tester.tap(find.widgetWithText(NavigationDestination, 'Agenda'));
     await tester.pumpAndSettle();
+    await answerLater(tester, 'demo-jazz');
 
     // The agenda opens on the real current month; the demo plan is in
     // September 2026.
@@ -82,6 +90,7 @@ void main() {
 
     await tester.tap(find.widgetWithText(NavigationDestination, 'Agenda'));
     await tester.pumpAndSettle();
+    await answerLater(tester, 'demo-jazz');
     final now = DateTime.now();
     final monthOffset = (now.year - 2026) * 12 + now.month - 9;
     final button = monthOffset > 0 ? 'Mes anterior' : 'Mes següent';
@@ -132,6 +141,7 @@ void main() {
 
     await tester.tap(find.widgetWithText(NavigationDestination, 'Agenda'));
     await tester.pumpAndSettle();
+    await answerLater(tester, 'demo-jazz');
     final now = DateTime.now();
     final monthOffset = (now.year - 2026) * 12 + now.month - 9;
     final button = monthOffset > 0 ? 'Mes anterior' : 'Mes següent';

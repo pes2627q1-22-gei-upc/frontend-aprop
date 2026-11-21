@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../../activities/models/activity.dart';
+import '../../../attendance/presentation/view_models/attendance_view_model.dart';
+import '../../../attendance/presentation/widgets/how_did_it_go_card.dart';
 import '../../../activities/repositories/activity_repository.dart';
 import '../../../activities/repositories/enrollment_repository.dart';
 import '../formatters/agenda_date_formatter.dart';
@@ -19,6 +21,7 @@ class AgendaScreen extends StatefulWidget {
     this.activitiesChanged,
     this.participationActionBuilder,
     this.ratingBuilder,
+    this.attendanceViewModel,
     this.now,
   });
 
@@ -37,6 +40,9 @@ class AgendaScreen extends StatefulWidget {
 
   /// Rating block for each plan; the app decides when it can be rated.
   final Widget Function(Activity activity)? ratingBuilder;
+
+  /// Answers to «Com va anar?» (#64). Without it the question is not shown.
+  final AttendanceViewModel? attendanceViewModel;
   final DateTime Function()? now;
 
   @override
@@ -71,12 +77,19 @@ class _AgendaScreenState extends State<AgendaScreen> {
   }
 
   AgendaViewModel _createViewModel() {
-    return AgendaViewModel(
+    final model = AgendaViewModel(
       userId: widget.userId,
       enrollmentRepository: widget.enrollmentRepository,
       activityRepository: widget.activityRepository,
       now: widget.now,
-    )..load();
+    );
+    // Reads whether the started plans were attended («Com va anar?»).
+    model.addListener(
+      () => widget.attendanceViewModel?.ensureLoaded(
+        model.startedPlans.map((plan) => plan.id),
+      ),
+    );
+    return model..load();
   }
 
   @override
@@ -88,15 +101,29 @@ class _AgendaScreenState extends State<AgendaScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final attendance = widget.attendanceViewModel;
     return ListenableBuilder(
-      listenable: _viewModel,
+      listenable: Listenable.merge([_viewModel, ?attendance]),
       builder: (context, child) {
         final theme = Theme.of(context);
         final selectedDay = _viewModel.selectedDay;
+        final pending = attendance == null
+            ? const <Activity>[]
+            : [
+                for (final plan in _viewModel.startedPlans)
+                  if (attendance.isPending(plan.id) ||
+                      attendance.isAnswering(plan.id) ||
+                      attendance.errorFor(plan.id) != null)
+                    plan,
+              ];
         return ListView(
           key: const PageStorageKey<String>('agenda'),
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
           children: [
+            if (pending.isNotEmpty && attendance != null) ...[
+              HowDidItGoCard(activities: pending, viewModel: attendance),
+              const SizedBox(height: 16),
+            ],
             MonthCalendar(
               month: _viewModel.visibleMonth,
               selectedDay: selectedDay,

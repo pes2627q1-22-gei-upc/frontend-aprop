@@ -1255,6 +1255,26 @@ class AppLocalizationsCa extends AppLocalizations {
       'No hem pogut carregar la teva agenda. Torna-ho a provar.';
 
   @override
+  String get attendanceQuestion => 'Com va anar?';
+
+  @override
+  String get attendanceHint =>
+      'Digues-nos si hi vas anar. Només qui hi va anar pot valorar l’activitat.';
+
+  @override
+  String get attendanceYes => 'Sí, hi vaig anar';
+
+  @override
+  String get attendanceNo => 'No hi vaig anar';
+
+  @override
+  String get attendanceLater => 'Més tard';
+
+  @override
+  String get attendanceSaveError =>
+      'No hem pogut desar la resposta. Torna-ho a provar.';
+
+  @override
   String agendaPublishedBy(String name) {
     return 'Publicat per $name';
   }
