@@ -1942,6 +1942,18 @@ abstract class AppLocalizations {
   /// **'No hem pogut desar les respostes. Torna-ho a provar.'**
   String get interestTestSaveError;
 
+  /// No description provided for @interestTestSkip.
+  ///
+  /// In ca, this message translates to:
+  /// **'Ara no'**
+  String get interestTestSkip;
+
+  /// No description provided for @interestTestContinue.
+  ///
+  /// In ca, this message translates to:
+  /// **'Continua'**
+  String get interestTestContinue;
+
   /// No description provided for @ratingDeleteTitle.
   ///
   /// In ca, this message translates to:

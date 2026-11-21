@@ -307,6 +307,8 @@
   "interestTestDislike": "Not interested",
   "interestTestLoadError": "We couldn’t load the test. Please try again.",
   "interestTestSaveError": "We couldn’t save your answers. Please try again.",
+  "interestTestSkip": "Not now",
+  "interestTestContinue": "Continue",
   "ratingDeleteTitle": "Delete your rating?",
   "ratingDeleteBody": "Your rating will be deleted and you’ll be able to rate the activity again.",
   "cancel": "Cancel",
