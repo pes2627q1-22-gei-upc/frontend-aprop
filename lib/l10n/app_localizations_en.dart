@@ -2269,4 +2269,70 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get friendOptions => 'Friendship options';
+
+  @override
+  String get blockedLoading => 'Loading blocked users';
+
+  @override
+  String get blockedLoadError => 'We couldn’t load blocked users. Try again.';
+
+  @override
+  String get blockedEmptyTitle => 'You have no blocked users';
+
+  @override
+  String get blockedEmptyMessage => 'People you block will appear here.';
+
+  @override
+  String get userBlock => 'Block';
+
+  @override
+  String get userUnblock => 'Unblock';
+
+  @override
+  String get userBlocking => 'Blocking user';
+
+  @override
+  String get userUnblocking => 'Unblocking user';
+
+  @override
+  String userBlockTitle(String name) {
+    return 'Block $name?';
+  }
+
+  @override
+  String userUnblockTitle(String name) {
+    return 'Unblock $name?';
+  }
+
+  @override
+  String get userBlockMessage =>
+      'You won’t be able to send each other friend requests. If you are friends, the friendship will be removed.';
+
+  @override
+  String get userUnblockMessage =>
+      'Unblocking does not restore the previous friendship.';
+
+  @override
+  String get userBlockError => 'We couldn’t block this user. Try again.';
+
+  @override
+  String get userUnblockError => 'We couldn’t unblock this user. Try again.';
+
+  @override
+  String userBlockSuccess(String name) {
+    return 'You blocked $name.';
+  }
+
+  @override
+  String userUnblockSuccess(String name) {
+    return 'You unblocked $name.';
+  }
+
+  @override
+  String userUnblockFrom(String name) {
+    return 'Unblock $name';
+  }
+
+  @override
+  String get userBlockedState => 'You have blocked this user.';
 }

@@ -10,10 +10,11 @@
 
 | Taiga | Tasca | Branca | Estat |
 |---|---|---|---|
-| #199 | [FE] Switch «Mostrar els meus plans» + ViewModel + tests (història #55) | `feature/show-my-plans-199` | Verificada: 972 proves, anàlisi, format i APK correctes; revisió independent aprovada; DP-078 (presentació i autorització backend); sense commit/push |
-| #212 i #266 | Arreglos generals de la prova a l’emulador: «Com va anar?» no pregunta abans d’hora i en mostra tres; zoom del mapa amb GPS lent; «00.00 h» als avisos; ajuda del diàleg d’eliminar; icona «Cerca persones» al Perfil | `fix/com-va-anar` (inclou `feature/mapa-zoom-ubicacio`) | Implementada; DP-068 i DP-074 actualitzades; pendent revisió humana |
-| #266 | Mapa: zoom de 5 km a la persona en obrir-lo i límit d’allunyament | `feature/mapa-zoom-ubicacio` | Commit `d2357d1`; entra a develop amb `fix/com-va-anar` |
-| #195 | [FE] Eliminar amistat a la llista i perfil amb confirmació + tests (història #53) | `feature/remove-friend-195` | HTTP/Demo verificats: 933 proves, anàlisi, format i APK correctes; revisió tècnica aprovada; DP-076 de presentació; sense commit/push |
+| #199 | [FE] Switch «Mostrar els meus plans» + ViewModel + tests (història #55) | `feature/show-my-plans-199` | Publicada a `642bbd1`; conflictes amb `origin/develop@d11d342` resolts localment; 1009 proves, anàlisi, format i APK correctes; revisió independent aprovada; DP-078; sense commit/push de la resolució |
+| #179 | [FE] Bloqueig al perfil + BlockedUsersScreen a Configuració + tests (història #45) | `feature/block-users-179` | Integrada a develop amb PR #77 (`d11d342`); DP-077 oberta |
+| #212 i #266 | Arreglos generals de la prova a l’emulador: «Com va anar?» no pregunta abans d’hora i en mostra tres; zoom del mapa amb GPS lent; «00.00 h» als avisos; ajuda del diàleg d’eliminar; icona «Cerca persones» al Perfil | `fix/com-va-anar` (inclou `feature/mapa-zoom-ubicacio`) | Integrada a develop amb PR #76 (`ee9e34f`); DP-068 i DP-074 actualitzades |
+| #266 | Mapa: zoom de 5 km a la persona en obrir-lo i límit d’allunyament | `feature/mapa-zoom-ubicacio` | Commit `d2357d1`; integrada a develop amb PR #76 |
+| #195 | [FE] Eliminar amistat a la llista i perfil amb confirmació + tests (història #53) | `feature/remove-friend-195` | Integrada a develop amb PR #75 (`a5ed55f`); DP-076 oberta |
 | #183 | [FE] Targeta d’avís de cancel·lació a `NotificationsScreen` + tests (història #47) | `feature/avis-cancel-lacio` | Integrada a develop amb PR #74; DP-071 oberta |
 | #170 | [FE] Targeta d’amistat acceptada a NotificationsScreen amb navegació al perfil + tests | `feature/accepted-friendship-notification-170` | Integrada a develop amb PR #72; classificació HTTP pendent (DP-070) |
 | #181 | [FE] Botó i diàleg de cancel·lació a la fitxa per a qui l’ha creada + reflex visual a l’Agenda i el catàleg + tests (història #46) | `feature/cancel-lar-activitat` | Integrada a develop amb PR #71 (`085a03a`); DP-069 oberta |
@@ -37,11 +38,11 @@
 
 ## Base i abast actual (#199)
 
-- Branca independent des de `origin/develop@ee9e34f`. #179 continua publicada a la seva branca; no s’inclou en aquesta PR.
+- Branca `feature/show-my-plans-199`, commit publicat `642bbd1`; merge local de `origin/develop@d11d342` sense commit. #179 ja integrada amb PR #77; es conserven bloquejos i privacitat de plans.
 - Backend `4f98835` consultat sense modificar. GET/PATCH de `show-plans` existents; falta autorització a la consulta directa d’inscripcions alienes (DP-078 / DP-011).
 - Es reutilitza la configuració existent: valor confirmat, estat textual, progrés, error i reintent de la mateixa intenció. Sense paquets ni endpoints nous.
 - Repositori valida UUID i booleà confirmats. ViewModel separa errors i impedeix escriptures d’idioma/privacitat simultànies; canvi de compte/dispose ignoren resultats antics.
-- Guia `docs/plan-visibility.md`; verificació local i revisió independent aprovades. Sense commit/push.
+- Guia `docs/plan-visibility.md`; resolució del merge verificada i revisió independent aprovada, sense commit/push.
 
 ## Verificació #199 (2026-11-21)
 
@@ -52,6 +53,54 @@
 - `flutter analyze` sense incidències; format de 381 fitxers sense canvis; `git diff --check` correcte; APK debug compilada.
 - Captures Flutter amb Roboto i repositori simulat revisades a `PES/output/frontend/task-199-{comparticio-activada,error-reintent,comparticio-desactivada}.png`.
 - Backend net a `4f98835`. Sense migracions ni escriptures a Render. Verificació amb dos comptes reals/Android, autorització de DP-078, CI i revisió humana pendents.
+
+## Resolució de conflictes de #199 (2026-11-21)
+
+- `origin/develop@d11d342` incorpora el bloqueig d’usuaris #179 amb PR #77.
+- Conflictes textuals a `docs/ai/estat.md` i `docs/decisions-pendents.md`: es conserven les dues tasques,
+  les verificacions anteriors i DP-077/DP-078 sense reutilitzar identificadors.
+- `ProfileSettingsScreen` i el seu ViewModel conserven el switch confirmat, error/reintent i guards
+  d’idioma/privacitat, juntament amb la navegació, recompte i font compartida de bloquejos.
+- Traduccions ca/es/en regenerades amb totes les claus d’ambdues branques.
+- **1009 proves superades**, anàlisi sense incidències, format de 390 fitxers sense canvis,
+  `git diff --cached --check` i APK debug correctes. Revisió tècnica independent aprovada.
+- Backend intacte; l’autorització pendent de DP-078 no es dona per resolta. Sense commit ni push de
+  la resolució; l’usuari revisa i actualitza la mateixa PR. CI i revisió humana pendents.
+
+## Context anterior (#179)
+
+- Branca `feature/block-users-179`, commit publicat `52ee01b`; merge local de `origin/develop@ee9e34f` sense commit. #195 ja integrada amb PR #75; les millores de #212/#266 de PR #76 es conserven.
+- Backend `4f98835` consultat sense canvis: GET bloquejats, POST block (201) i DELETE block (204).
+- Contracte `UserBlockingRepository` i font compartida d’amistat; snapshots per compte, agrupació d’operacions, confirmacions autenticades i protecció de lectures antigues.
+- Perfil, Configuració, llista de bloquejats i Avisos coordinats; bloquejar elimina amistat/peticions actives, desbloquejar no les recupera.
+- Interfície ca/es/en, confirmació i reintent; cap paquet o endpoint nou, cap política d’ocultació de contingut inventada.
+- Guia `docs/user-blocking.md`, presentació/abast i dependència a DP-077. Resolució del merge verificada i revisió tècnica independent aprovada, sense commit/push.
+
+## Verificació #179 (2026-11-21)
+
+- 37 proves noves: contracte HTTP i autenticació, errors/reintent, consultes antigues, concurrència,
+  canvi de compte/dispose, peticions resoltes, comptadors i navegació de perfil/Configuració/llista.
+- 269 proves de regressió del conjunt de perfils, notificacions i recorreguts superades. Suite completa:
+  **970 proves superades**. Després de la neteja final, conjunt focal i render: 38 proves superades.
+- Revisió independent aprovada després de corregir dues regressions: llegir avisos d’una persona
+  bloquejada continua disponible, i un bloqueig conegut es conserva si falla una consulta posterior.
+- ca/es/en a 390 px i 320 px amb text ×2, controls natius i superfícies de 48 px comprovats.
+- `flutter analyze` sense incidències; format de 382 fitxers i `git diff --check` correctes.
+- `flutter build apk --debug` correcte. Captures Flutter amb fonts Roboto i Demo revisades a
+  `PES/output/frontend/task-179-{menu-perfil,confirmar-bloqueig,perfil-bloquejat,configuracio,usuaris-bloquejats,confirmar-desbloqueig,llista-buida}.png`.
+- Backend net a `4f98835`; cap migració ni escriptura a Render. Prova amb dos comptes reals en
+  Android, CI i revisió humana pendents. Sense commit/push.
+
+## Resolució de conflictes de #179 (2026-11-21)
+
+- `origin/develop@ee9e34f` incorpora #195 (PR #75) i els ajustos d’assistència, mapa/GPS tardà,
+  horaris d’Avisos, ajuda d’eliminació de compte i cerca de persones des de Perfil (PR #76).
+- Únic conflicte textual a `docs/ai/estat.md`: es conserven totes dues branques i els estats d’integració.
+  `MainShell`, Configuració i `NotificationCard` mantenen tant #179 com els canvis de develop.
+- Traduccions ca/es/en regenerades amb les claus d’ambdues branques. Cap funcionalitat descartada.
+- **986 proves superades**, `flutter analyze` sense incidències, format de 386 fitxers sense canvis,
+  `git diff --cached --check` i APK debug correctes. Revisió tècnica independent aprovada.
+- Backend intacte. Sense commit ni push de la resolució; l’usuari revisa i actualitza la mateixa PR.
 
 ## Context anterior (#195)
 
@@ -136,7 +185,7 @@
 
 ## Pendents / següents passos
 
-1. Revisió dels canvis #199, commit i PR cap a develop. CI, aprovació humana i prova amb dos comptes reals en Android pendents. Comunicar l’autorització pendent de DP-078 al backend.
+1. L’usuari revisa la resolució del merge de #199, fa commit/push i actualitza la mateixa PR. CI, aprovació humana i prova amb dos comptes reals en Android pendents. Comunicar l’autorització pendent de DP-078 al backend.
 2. Backend/equip: discriminador estructurat d’acceptació a la bústia (DP-070); després integrar el JSON real i comprovar el recorregut amb dos comptes al desplegament i Android.
 3. Backend/equip: avís automàtic en enviar sol·licitud i política de zona de `request-date` (DP-066).
    Si cal historial resolt o lectura de sol·licituds després de reiniciar, falten aquests contractes.

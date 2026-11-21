@@ -4,6 +4,7 @@ import '../../../../core/l10n/locale_controller.dart';
 import '../../../auth/models/app_user.dart';
 import '../../models/profile_settings.dart';
 import '../../repositories/profile_settings_repository.dart';
+import '../../repositories/user_blocking_repository.dart';
 import '../view_models/profile_settings_view_model.dart';
 import '../widgets/settings_group.dart';
 import '../widgets/settings_preference_tile.dart';
@@ -18,12 +19,16 @@ class ProfileSettingsScreen extends StatefulWidget {
     this.onOpenInterestTest,
     this.onDeleteAccount,
     this.localeController,
+    this.blockingRepository,
+    this.onOpenBlockedUsers,
   });
   final AppUser user;
   final ProfileSettingsRepository repository;
   final Future<void> Function() onSignOut;
   final VoidCallback onBack;
   final VoidCallback? onOpenInterestTest;
+  final UserBlockingRepository? blockingRepository;
+  final VoidCallback? onOpenBlockedUsers;
 
   /// Esborra el compte (#10). Sense, «Eliminar compte» queda pendent.
   final Future<void> Function()? onDeleteAccount;
@@ -42,6 +47,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
     _viewModel = ProfileSettingsViewModel(
       userId: widget.user.id,
       repository: widget.repository,
+      blockingRepository: widget.blockingRepository,
       onSignOut: widget.onSignOut,
       onDeleteAccount: widget.onDeleteAccount,
       localeController: widget.localeController ?? LocaleScope.maybeOf(context),
@@ -58,7 +64,8 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
   void didUpdateWidget(covariant ProfileSettingsScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.user.id != widget.user.id ||
-        oldWidget.repository != widget.repository) {
+        oldWidget.repository != widget.repository ||
+        oldWidget.blockingRepository != widget.blockingRepository) {
       _viewModel.dispose();
       _createViewModel();
     }
@@ -164,10 +171,31 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                       context.l10n.settingsShowMyPlans,
                       context.l10n.settingsShowMyPlansHint,
                     ),
-                    PendingSettingsTile(
-                      title: context.l10n.settingsBlockedUsers,
-                      icon: Icons.block,
-                    ),
+                    if (widget.onOpenBlockedUsers == null)
+                      PendingSettingsTile(
+                        title: context.l10n.settingsBlockedUsers,
+                        icon: Icons.block,
+                      )
+                    else
+                      ListTile(
+                        key: const ValueKey('settings-blocked-users'),
+                        leading: const SettingsIcon(icon: Icons.block),
+                        title: Text(context.l10n.settingsBlockedUsers),
+                        subtitle: model.blocksError == null
+                            ? null
+                            : Text(model.blocksError!),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (model.blockedUserCount case final count?)
+                              Text('$count'),
+                            const SizedBox(width: 4),
+                            const Icon(Icons.chevron_right),
+                          ],
+                        ),
+                        onTap: model.isBusy ? null : widget.onOpenBlockedUsers,
+                        minVerticalPadding: 12,
+                      ),
                   ],
                 ),
                 SettingsGroup(

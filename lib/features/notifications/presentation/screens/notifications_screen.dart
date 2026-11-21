@@ -267,6 +267,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                     ),
                   ),
                 NotificationCard(
+                  personBlocked: _viewModel.isPersonBlocked(notice.person?.id),
                   key: ValueKey('notification-${notice.id}'),
                   notification: notice,
                   onOpen: () => _open(notice),

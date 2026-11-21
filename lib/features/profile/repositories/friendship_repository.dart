@@ -1,9 +1,11 @@
 import '../models/received_friend_request.dart';
 import '../models/friendship_removal.dart';
+import 'user_blocking_repository.dart';
 
 /// Shared, account-scoped source of received requests and confirmed responses.
 /// Errors propagate; callers must never replace a failure with a local success.
-abstract interface class FriendshipRepository {
+abstract interface class FriendshipRepository
+    implements UserBlockingRepository {
   Future<List<ReceivedFriendRequest>> getReceivedRequests(String userId);
   Future<FriendRequestResolution> respond({
     required String userId,

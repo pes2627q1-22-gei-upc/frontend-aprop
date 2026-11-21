@@ -69,4 +69,11 @@ Resultat local (2026-11-21): **972 proves superades**, amb 23 de noves per a #19
 incidències, format de 381 fitxers correcte i APK debug compilada. Després de l’ajust final de
 `liveRegion`, les 9 proves de widgets i el render tornen a passar. Revisió tècnica independent aprovada.
 Captures Flutter amb Roboto a `PES/output/frontend/task-199-{comparticio-activada,error-reintent,comparticio-desactivada}.png`.
-Canvis sense commit ni push; queden CI i revisió humana abans de fusionar.
+La implementació #199 es va publicar a `642bbd1`. La resolució local del merge amb
+`origin/develop@d11d342` incorpora #179 (PR #77) i conserva el recompte, la llista i les accions
+de bloqueig juntament amb aquest control de privacitat. La resolució encara no té commit ni push;
+queden CI i revisió humana abans de fusionar.
+
+Verificació del merge: **1009 proves superades**, anàlisi sense incidències, format de 390 fitxers
+correcte, APK debug compilada i revisió independent aprovada. Backend intacte; el pendent
+d’autorització de DP-078 es manté.

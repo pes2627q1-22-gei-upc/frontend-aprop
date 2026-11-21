@@ -2299,4 +2299,74 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get friendOptions => 'Opciones de amistad';
+
+  @override
+  String get blockedLoading => 'Cargando usuarios bloqueados';
+
+  @override
+  String get blockedLoadError =>
+      'No hemos podido cargar los usuarios bloqueados. Vuelve a intentarlo.';
+
+  @override
+  String get blockedEmptyTitle => 'No tienes usuarios bloqueados';
+
+  @override
+  String get blockedEmptyMessage =>
+      'Los usuarios que bloquees aparecerán aquí.';
+
+  @override
+  String get userBlock => 'Bloquear';
+
+  @override
+  String get userUnblock => 'Desbloquear';
+
+  @override
+  String get userBlocking => 'Bloqueando al usuario';
+
+  @override
+  String get userUnblocking => 'Desbloqueando al usuario';
+
+  @override
+  String userBlockTitle(String name) {
+    return '¿Bloquear a $name?';
+  }
+
+  @override
+  String userUnblockTitle(String name) {
+    return '¿Desbloquear a $name?';
+  }
+
+  @override
+  String get userBlockMessage =>
+      'No podréis enviaros solicitudes de amistad. Si ya sois amigos, se eliminará la amistad.';
+
+  @override
+  String get userUnblockMessage =>
+      'Desbloquear no recupera la amistad anterior.';
+
+  @override
+  String get userBlockError =>
+      'No hemos podido bloquear al usuario. Vuelve a intentarlo.';
+
+  @override
+  String get userUnblockError =>
+      'No hemos podido desbloquear al usuario. Vuelve a intentarlo.';
+
+  @override
+  String userBlockSuccess(String name) {
+    return 'Has bloqueado a $name.';
+  }
+
+  @override
+  String userUnblockSuccess(String name) {
+    return 'Has desbloqueado a $name.';
+  }
+
+  @override
+  String userUnblockFrom(String name) {
+    return 'Desbloquear a $name';
+  }
+
+  @override
+  String get userBlockedState => 'Has bloqueado a este usuario.';
 }

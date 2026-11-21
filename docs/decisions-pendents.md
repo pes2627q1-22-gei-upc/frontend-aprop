@@ -891,8 +891,20 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Qui decideix:** equip frontend/PO (presentació i interpretació del nom de pantalla de la tasca).
 - **Resolució:**
 
+### DP-077 · Bloqueig personal: confirmació, abast i dependència (#179)
+- **Estat:** oberta · 2026-11-21 · Taiga #179, història #45 · només frontend.
+- **Context:** backend `4f98835`: `GET /users/me/blocked`, `POST /users/{id}/block` (201 amb persona/data) i `DELETE /users/{id}/block` (204). Bloquejar elimina l’amistat i rebutja peticions Pending/Accepted en transacció; desbloquejar no recupera l’amistat. La cerca del servidor exclou bloquejos, però el backend no oculta activitats, xats ni avisos per aquest motiu (DP-042 backend).
+- **Deduït:** al menú del perfil aliè hi ha Bloquejar o Desbloquejar segons els bloquejos propis coneguts. Confirmació amb nom i efecte exacte, sense prometre amagar contingut. Configuració → Usuaris bloquejats mostra recompte carregat, llista, buit, càrrega, error/reintent i acció de desbloqueig amb confirmació. La navegació al perfil conserva Configuració i la llista.
+- **Estat compartit:** contracte `UserBlockingRepository` implementat per la mateixa font d’amistat, amb snapshots per compte. Una llista desconeguda no es presenta com a zero; 409/404 només es reconcilien consultant la llista pròpia autenticada. Les peticions antigues queden resoltes i no es recupera l’amistat en desbloquejar.
+- **Límits:** només es poden gestionar els bloquejos fets pel compte actual; no es dedueix que l’altra persona t’hagi bloquejat. No es creen controls de moderació ni un filtre general de contingut. Demo conserva els canvis en memòria durant l’execució.
+- **Dependència:** branca #179 sobre `fd95352` de #195, encara pendent de merge en començar. Per revisar només #179: comparar amb `feature/remove-friend-195`. Abans de fusionar #179 cap a develop, #195 ha d’estar integrada.
+- **Actualització (2026-11-21):** #195 integrada a develop amb PR #75 (`a5ed55f`); dependència de branca satisfeta. El merge local amb `ee9e34f` conserva #179 i els ajustos de PR #76.
+- **Codi:** `TODO(DP-077)` a `public_profile_screen.dart` i `blocked_users_screen.dart`. Guia `docs/user-blocking.md`.
+- **Qui decideix:** equip/PO (presentació i abast del bloqueig).
+- **Resolució:**
+
 ### DP-078 · Compartició de plans: confirmació, reintent i autorització (#199)
-- **Estat:** oberta · 2026-11-21 · Taiga #199, història #55 · només frontend. DP-077 reservada a #179, encara en una altra branca.
+- **Estat:** oberta · 2026-11-21 · Taiga #199, història #55 · només frontend. DP-077 correspon a #179, integrada a develop amb PR #77.
 - **Context:** fig. 19 i `api-aprop@4f98835`: `GET /users/me` i `PATCH /users/me` amb `show-plans`; el perfil propi té `plans-visible=true` fins i tot quan no comparteix. En un perfil aliè el servei calcula `plans-visible = amistat && show-plans`.
 - **Deduït:** es conserven els noms reals `ProfileSettingsScreen`/`ProfileSettingsViewModel`; no es creen duplicats anomenats `SettingsScreen`. Estat textual de compartició sota el switch, progrés i error amb reintent al mateix control. El switch manté el valor anterior fins que el repositori confirma el canvi; no hi ha un botó Desar separat.
 - **Identitat i dades:** la resposta ha de conservar el UUID real capturat i confirmar el booleà demanat; JSON invàlid o una resposta que ignora el canvi són errors. La lectura usa `show-plans`, mai `plans-visible` del perfil propi. No se sobreescriu un valor inicial real del servidor (la migració 000007 té default true) amb el default false del model Demo.
