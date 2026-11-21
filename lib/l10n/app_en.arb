@@ -626,5 +626,34 @@
   "userSearchLoaded": "{count, plural, =1{1 person loaded} other{{count} people loaded}}",
   "userSearchLoadMore": "Load more people",
   "userSearchMoreError": "We couldn’t load more people. Try again.",
-  "userSearchTooLong": "Search can contain up to {limit} characters."
+  "userSearchTooLong": "Search can contain up to {limit} characters.",
+  "friendRemove": "Remove friend",
+  "friendRemoveTitle": "Remove this friend?",
+  "friendRemoveMessage": "Do you want to remove {name} from your friends?",
+  "@friendRemoveMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "friendRemoveSuccess": "You removed {name} from your friends.",
+  "@friendRemoveSuccess": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "friendRemoveError": "We couldn’t remove this friend. Try again.",
+  "friendRemoving": "Removing friend",
+  "friendRemoveFrom": "Remove {name} from your friends",
+  "@friendRemoveFrom": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "friendOptions": "Friendship options"
 }

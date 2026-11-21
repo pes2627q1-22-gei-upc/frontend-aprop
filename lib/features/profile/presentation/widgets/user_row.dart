@@ -5,10 +5,16 @@ import '../../models/user_summary.dart';
 /// A person in a list (search results, friends): photo or initials, name and
 /// `@username`. Tapping it opens their profile.
 class UserRow extends StatelessWidget {
-  const UserRow({super.key, required this.user, required this.onTap});
+  const UserRow({
+    super.key,
+    required this.user,
+    required this.onTap,
+    this.trailing,
+  });
 
   final UserSummary user;
   final VoidCallback onTap;
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
@@ -84,7 +90,7 @@ class UserRow extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 8),
-                const Icon(Icons.chevron_right),
+                trailing ?? const Icon(Icons.chevron_right),
               ],
             ),
           ),

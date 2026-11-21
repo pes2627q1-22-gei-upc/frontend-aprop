@@ -8,6 +8,15 @@ class ControlledFriendshipRepository extends CachedFriendshipRepository {
   Future<FriendRequestResolution> Function(bool accept)? onRespond;
   int reads = 0;
   int writes = 0;
+  final removals = <(String, String)>[];
+  Future<void> Function()? onRemove;
+
+  @override
+  Future<void> sendRemoval(String userId, String friendId) async {
+    removals.add((userId, friendId));
+    await onRemove?.call();
+  }
+
   @override
   Future<List<ReceivedFriendRequest>> fetchReceived(String userId) async {
     reads++;

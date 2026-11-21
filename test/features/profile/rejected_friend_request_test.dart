@@ -38,7 +38,11 @@ void main() {
       userId: 'demo-person-marc',
       currentUserId: profileUser.id,
       friendshipRepository: friendships,
-      repository: DemoPublicProfileRepository(activityRepository: activities),
+      repository: DemoPublicProfileRepository(
+        activityRepository: activities,
+        friendshipRepository: friendships,
+        currentUserId: () => profileUser.id,
+      ),
     );
     inbox = NotificationsViewModel(
       userId: profileUser.id,
