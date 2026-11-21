@@ -610,6 +610,21 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Qui decideix:** equip + backend (contracte `/preferences/test/status` i UX d’omissió)
 - **Resolució:**
 
+### DP-075 · Eliminar compte (#10): confirmació i comportament sense backend
+- **Estat:** oberta · 2026-11-21 · Claude Code (Opus 5.5) amb confirmació de l’usuari · Taiga #117 (història #10)
+- **Identificador:** les DP-071 a DP-074 són a altres branques o PR; es fa servir la DP-075.
+- **Context:** `AuthRepository.deleteAccount`, `UserSyncRepository.deleteAccount`, `ProfileSettingsViewModel.deleteAccount`, `_DeleteAccountDialog` a `profile_settings_screen.dart`. Backend consultat a `api-aprop@develop` sense modificar-lo (#116, tancada): `DELETE /users/me` esborra les dades de PostgreSQL, la foto de S3 i el compte de Firebase, i respon 204 (502 si Firebase falla).
+- **Decisions de l’usuari:**
+  - El diàleg explica què s’esborra i que és irreversible, i el botó coral només s’activa en escriure «ELIMINAR» («DELETE» en anglès).
+  - En mode Demo, el compte s’esborra durant l’execució: no s’hi pot tornar a entrar fins a reiniciar l’app.
+- **Deduït (sense confirmar):**
+  - El mockup (fig. 19) només mostra l’opció en coral; el text del diàleg i dels errors no té mockup.
+  - Un 404 es tracta com a esborrat (el compte ja no existia).
+  - Si falla, el compte es conserva, la sessió continua oberta i surt un avís a baix (l’error de dalt de Configuració quedaria fora de la pantalla).
+  - Amb Firebase però sense backend, l’app esborra el compte de Firebase ella mateixa; Firebase pot demanar haver iniciat sessió fa poc i aleshores surt l’error.
+- **Codi:** sense `TODO`; vegeu `docs/profile.md`.
+- **Qui decideix:** equip/PO (textos i confirmació)
+
 ## Resoltes
 
 ### DP-058 · Enllaços de la fitxa: obrir-los amb `url_launcher`
@@ -827,18 +842,13 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Qui decideix:** backend (`state` a l’activitat i bloqueig d’inscripcions)
 - **Resolució:**
 
-### DP-075 · Eliminar compte (#10): confirmació i comportament sense backend
-- **Estat:** oberta · 2026-11-21 · Claude Code (Opus 5.5) amb confirmació de l’usuari · Taiga #117 (història #10)
-- **Identificador:** les DP-070 a DP-074 són a altres branques o PR sense fusionar; es fa servir la DP-075.
-- **Context:** `AuthRepository.deleteAccount`, `UserSyncRepository.deleteAccount`, `ProfileSettingsViewModel.deleteAccount`, `_DeleteAccountDialog` a `profile_settings_screen.dart`. Backend consultat a `api-aprop@develop` sense modificar-lo (#116, tancada): `DELETE /users/me` esborra les dades de PostgreSQL, la foto de S3 i el compte de Firebase, i respon 204 (502 si Firebase falla).
-- **Decisions de l’usuari:**
-  - El diàleg explica què s’esborra i que és irreversible, i el botó coral només s’activa en escriure «ELIMINAR» («DELETE» en anglès).
-  - En mode Demo, el compte s’esborra durant l’execució: no s’hi pot tornar a entrar fins a reiniciar l’app.
-- **Deduït (sense confirmar):**
-  - El mockup (fig. 19) només mostra l’opció en coral; el text del diàleg i dels errors no té mockup.
-  - Un 404 es tracta com a esborrat (el compte ja no existia).
-  - Si falla, el compte es conserva, la sessió continua oberta i surt un avís a baix (l’error de dalt de Configuració quedaria fora de la pantalla).
-  - Amb Firebase però sense backend, l’app esborra el compte de Firebase ella mateixa; Firebase pot demanar haver iniciat sessió fa poc i aleshores surt l’error.
-- **Codi:** sense `TODO`; vegeu `docs/profile.md`.
-- **Qui decideix:** equip/PO (textos i confirmació)
+### DP-070 · Avís d’amistat acceptada sense subtipus al backend (#170)
+- **Estat:** oberta · 2026-11-21 · Taiga #170, història #38 · només frontend.
+- **Identificador:** renumerada de DP-069 a DP-070 en integrar `origin/develop@085a03a`, per conservar la DP-069 de cancel·lació d’activitats #181.
+- **Context:** backend `fb266a7`: acceptar crea un avís amb tipus Social, `friend-id`, `request-date` i text lliure. El DTO de notificacions no conté un subtipus/estat d’acceptació. `/users/me/friend-requests` només retorna rebudes Pending; no és historial d’acceptacions sortints. L’usuari confirma que no hi ha una altra branca.
+- **Presentació:** reutilitzar `AppNotification.friendRequestAccepted`, el missatge i la navegació ja existents; afegir l’accés explícit «Veure perfil» amb nom accessible. Cap Acceptar/Rebutjar. Mateix flux de lectura confirmada, errors i protecció de respostes tardanes de la bústia.
+- **Límit:** es completa la interfície amb el model tipat/Demo i proves. La classificació HTTP d’acceptacions queda pendent: un Social genèric continua genèric, encara que el text digui «ha acceptat». Ni el text ni ser amics ara demostren l’esdeveniment concret. No es crea cap historial ni avís fictici.
+- **Pendent backend/equip:** acordar un discriminador estructurat d’acceptació i publicar-ne l’esquema, amb destinatari, persona que accepta, data i referència de sol·licitud. Els noms del nou camp/subtipus s’han d’acordar; no es pressuposa un endpoint o camp nou. Després, adaptar `notification_json_mapper.dart`/`HttpNotificationRepository` i afegir una prova del JSON real.
+- **Codi:** `TODO(DP-070)` a `http_notification_repository.dart`. Flux i missatge de traspàs a `docs/accepted-friendship-notification.md`. Backend intacte; segueixen obertes DP-039/DP-066.
+- **Qui decideix:** equip frontend/backend (contracte de l’avís).
 - **Resolució:**

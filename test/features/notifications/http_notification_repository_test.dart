@@ -5,6 +5,7 @@ import 'package:aprop/core/network/api_client.dart';
 import 'package:aprop/features/activities/data/activity_json_mapper.dart';
 import 'package:aprop/features/notifications/data/http_notification_repository.dart';
 import 'package:aprop/features/notifications/models/app_notification.dart';
+import 'package:aprop/features/profile/data/http_friendship_repository.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
@@ -36,6 +37,46 @@ void main() {
     ),
     activityRepository: activities,
   );
+
+  test('Acceptance wording in a generic Social notice does not invent a structured acceptance event', () async {
+    final client = ApiClient(
+      idToken: () async => 'test-token',
+      client: MockClient((request) async {
+        switch (request.url.path) {
+          case '/users/me':
+            return json(backendOwnProfile());
+          case '/users/me/friend-requests':
+            return json([]);
+          case '/notifications/user/$backendUserId':
+            return json([
+              {
+                ...backendNotification(8, type: 41, event: null),
+                'friend-id': backendOtherUserId,
+                'request-date': '2026-10-25T12:34:56.123456',
+                'text': "Marc ha acceptat la teva sol·licitud d'amistat",
+              },
+            ]);
+          case '/notificationtypes':
+            return json(backendNotificationTypes);
+          case '/users/$backendOtherUserId':
+            return json({'id': backendOtherUserId, 'name': 'Marc Vidal'});
+          default:
+            throw StateError('Unexpected endpoint ${request.url}');
+        }
+      }),
+    );
+    final repo = HttpNotificationRepository(
+      apiClient: client,
+      activityRepository: activities,
+      friendshipRepository: HttpFriendshipRepository(apiClient: client),
+    );
+    final notice = (await repo.getNotifications(firebaseAccountId)).single;
+    expect(notice.type, NotificationType.socialUpdate);
+    expect(notice.category, NotificationCategory.social);
+    expect(notice.person!.id, backendOtherUserId);
+    expect(notice.requestId, isNull);
+    expect(notice.requestStatus, isNull);
+  });
 
   test(
     'Uses the real profile UUID and names from the type catalogue',

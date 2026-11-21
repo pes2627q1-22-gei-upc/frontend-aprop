@@ -1918,6 +1918,12 @@ abstract class AppLocalizations {
   /// **'Rebutjar la sol·licitud d’amistat de {name}'**
   String notifDeclineRequestFrom(String name);
 
+  /// No description provided for @notifViewFriendProfile.
+  ///
+  /// In ca, this message translates to:
+  /// **'Veure el perfil de {name}'**
+  String notifViewFriendProfile(String name);
+
   /// No description provided for @notifAccept.
   ///
   /// In ca, this message translates to:

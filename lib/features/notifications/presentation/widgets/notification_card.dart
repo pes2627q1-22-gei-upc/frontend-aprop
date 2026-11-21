@@ -189,6 +189,27 @@ class NotificationCard extends StatelessWidget {
               responding: responding,
               onRespond: onRespond,
             ),
+          if (notice.type == NotificationType.friendRequestAccepted &&
+              profileAvailable)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton.icon(
+                  key: ValueKey('notification-friend-profile-${notice.id}'),
+                  onPressed: busy ? null : onOpen,
+                  style: TextButton.styleFrom(minimumSize: const Size(0, 48)),
+                  icon: const Icon(Icons.person_outline),
+                  label: Text(
+                    context.l10n.actViewProfile,
+                    semanticsLabel: context.l10n.notifViewFriendProfile(
+                      notice.person!.name,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+            ),
           if (error != null)
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),

@@ -317,6 +317,14 @@
       }
     }
   },
+  "notifViewFriendProfile": "Ver el perfil de {name}",
+  "@notifViewFriendProfile": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "notifAccept": "Aceptar",
   "notifDecline": "Rechazar",
   "notifRequestAccepted": "Solicitud aceptada",
