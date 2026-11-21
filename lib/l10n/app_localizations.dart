@@ -112,6 +112,12 @@ abstract class AppLocalizations {
   /// **'Perfil'**
   String get profileTitleFallback;
 
+  /// No description provided for @profileFindPeople.
+  ///
+  /// In ca, this message translates to:
+  /// **'Cerca persones'**
+  String get profileFindPeople;
+
   /// No description provided for @profilePeopleSearchSoon.
   ///
   /// In ca, this message translates to:
@@ -873,6 +879,12 @@ abstract class AppLocalizations {
   /// In ca, this message translates to:
   /// **'Eliminar compte'**
   String get settingsDeleteAccount;
+
+  /// No description provided for @settingsDeleteAccountHint.
+  ///
+  /// In ca, this message translates to:
+  /// **'Escriu-ho aquí'**
+  String get settingsDeleteAccountHint;
 
   /// No description provided for @settingsDeletingAccount.
   ///
@@ -2235,6 +2247,42 @@ abstract class AppLocalizations {
   /// In ca, this message translates to:
   /// **'No hem pogut desar la resposta. Torna-ho a provar.'**
   String get attendanceSaveError;
+
+  /// No description provided for @attendanceShowMore.
+  ///
+  /// In ca, this message translates to:
+  /// **'Veure’n {count} més'**
+  String attendanceShowMore(int count);
+
+  /// No description provided for @attendanceShowLess.
+  ///
+  /// In ca, this message translates to:
+  /// **'Veure’n menys'**
+  String get attendanceShowLess;
+
+  /// No description provided for @attendanceThanksYes.
+  ///
+  /// In ca, this message translates to:
+  /// **'Gràcies! Ja pots valorar «{title}».'**
+  String attendanceThanksYes(String title);
+
+  /// No description provided for @attendanceThanksNo.
+  ///
+  /// In ca, this message translates to:
+  /// **'D’acord, no t’ho tornarem a preguntar.'**
+  String get attendanceThanksNo;
+
+  /// No description provided for @attendanceNotStarted.
+  ///
+  /// In ca, this message translates to:
+  /// **'Aquesta activitat encara no ha començat.'**
+  String get attendanceNotStarted;
+
+  /// No description provided for @attendanceNotEnrolled.
+  ///
+  /// In ca, this message translates to:
+  /// **'Ja no hi estàs apuntat.'**
+  String get attendanceNotEnrolled;
 
   /// No description provided for @agendaPublishedBy.
   ///

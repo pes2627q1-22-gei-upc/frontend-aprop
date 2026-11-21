@@ -475,7 +475,9 @@ class _DeleteAccountDialogState extends State<_DeleteAccountDialog> {
               controller: _text,
               autofocus: true,
               textCapitalization: TextCapitalization.characters,
-              decoration: InputDecoration(hintText: word),
+              decoration: InputDecoration(
+                hintText: context.l10n.settingsDeleteAccountHint,
+              ),
               onChanged: (_) => setState(() {}),
             ),
           ],

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 
 import '../../../activities/models/activity.dart';
+import '../../../activities/models/activity_start.dart';
 import '../../../activities/repositories/activity_repository.dart';
 import '../../../activities/repositories/enrollment_repository.dart';
 import '../../../../core/l10n/locale_controller.dart';
@@ -61,7 +62,7 @@ class AgendaViewModel extends ChangeNotifier {
       [
         for (final plans in _plansByDay.values)
           for (final plan in plans)
-            if (plan.startsAt.isBefore(now)) plan,
+            if (activityHasStarted(plan, now)) plan,
       ]..sort((a, b) => b.startsAt.compareTo(a.startsAt)),
     );
   }

@@ -16,6 +16,9 @@ class AppLocalizationsCa extends AppLocalizations {
   String get profileTitleFallback => 'Perfil';
 
   @override
+  String get profileFindPeople => 'Cerca persones';
+
+  @override
   String get profilePeopleSearchSoon =>
       'Cerca de persones disponible properament';
 
@@ -451,6 +454,9 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get settingsDeleteAccount => 'Eliminar compte';
+
+  @override
+  String get settingsDeleteAccountHint => 'Escriu-ho aquí';
 
   @override
   String get settingsDeletingAccount => 'Eliminant el compte…';
@@ -1328,6 +1334,28 @@ class AppLocalizationsCa extends AppLocalizations {
   @override
   String get attendanceSaveError =>
       'No hem pogut desar la resposta. Torna-ho a provar.';
+
+  @override
+  String attendanceShowMore(int count) {
+    return 'Veure’n $count més';
+  }
+
+  @override
+  String get attendanceShowLess => 'Veure’n menys';
+
+  @override
+  String attendanceThanksYes(String title) {
+    return 'Gràcies! Ja pots valorar «$title».';
+  }
+
+  @override
+  String get attendanceThanksNo => 'D’acord, no t’ho tornarem a preguntar.';
+
+  @override
+  String get attendanceNotStarted => 'Aquesta activitat encara no ha començat.';
+
+  @override
+  String get attendanceNotEnrolled => 'Ja no hi estàs apuntat.';
 
   @override
   String agendaPublishedBy(String name) {

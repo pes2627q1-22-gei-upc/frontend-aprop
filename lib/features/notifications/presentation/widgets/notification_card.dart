@@ -137,9 +137,7 @@ class NotificationCard extends StatelessWidget {
                                 const SizedBox(width: 6),
                                 Expanded(
                                   child: Text(
-                                    notificationActivitySchedule(
-                                      activity.startsAt,
-                                    ),
+                                    notificationActivitySchedule(activity),
                                     style: theme.textTheme.bodySmall?.copyWith(
                                       color: colors.onSurface,
                                     ),

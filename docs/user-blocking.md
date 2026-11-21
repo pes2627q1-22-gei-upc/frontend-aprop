@@ -4,8 +4,8 @@
 
 Bloqueig des del perfil aliè i gestió a Configuració (figura 19). Només frontend, amb endpoints
 existents; backend `4f98835` consultat sense modificar-lo. `feature/block-users-179` parteix de
-`fd95352` de #195. Aquella PR ha d’estar integrada abans de fusionar #179 a develop. La comparació
-amb `feature/remove-friend-195` mostra només aquesta tasca, sense els canvis de #195.
+`fd95352` de #195, integrada a develop amb PR #75 (`a5ed55f`). La resolució local del merge amb
+`origin/develop@ee9e34f` conserva també els ajustos de #212/#266 de PR #76.
 
 ## Interfície
 
@@ -67,4 +67,8 @@ Després de la neteja final, les proves focals i el render tornen a passar (38 p
 Revisió tècnica independent aprovada. Les regressions comproven que un avís d’una persona
 bloquejada continua sent llegible i que un bloqueig conegut no desapareix quan falla el refresc.
 Captures amb Flutter, Roboto i repositoris Demo revisades a `PES/output/frontend/task-179-*.png`.
-Canvis preparats sense commit ni push; #195 ha d’estar integrada abans de fusionar #179 a develop.
+Implementació publicada a `52ee01b`; la resolució del merge amb develop encara no té commit ni push.
+
+Merge amb `origin/develop@ee9e34f` verificat: **986 proves superades**, anàlisi sense incidències,
+format de 386 fitxers correcte, APK debug compilada i revisió tècnica independent aprovada.
+Es conserven els ajustos de PR #76, inclosa la cerca de persones des de Perfil, i el bloqueig #179.

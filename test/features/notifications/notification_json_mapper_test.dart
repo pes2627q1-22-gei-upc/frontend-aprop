@@ -1,6 +1,7 @@
 import 'package:aprop/features/notifications/data/notification_json_mapper.dart';
 import 'package:aprop/features/notifications/models/app_notification.dart';
 import 'package:aprop/features/notifications/presentation/formatters/notification_formatter.dart';
+import 'package:aprop/features/activities/models/activity.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'backend_notification_fixture.dart';
@@ -88,7 +89,20 @@ void main() {
     expect(read.activityUnavailable, isTrue);
     expect(read.canOpenActivity, isFalse);
     expect(notificationMessage(read), 'Tens un recordatori cultural.');
-    expect(notificationActivitySchedule(DateTime(1)), 'Data no informada');
+    expect(
+      notificationActivitySchedule(
+        Activity(
+          id: 'unknown',
+          title: 'Concert',
+          category: 'Música',
+          municipality: 'Manresa',
+          startsAt: DateTime(1),
+          imageAsset: 'assets/images/jazz_al_parc.jpg',
+          source: ActivitySource.culturalAgenda,
+        ),
+      ),
+      'Data no informada',
+    );
     expect(
       () => original.resolveRequest(FriendRequestStatus.accepted),
       throwsArgumentError,

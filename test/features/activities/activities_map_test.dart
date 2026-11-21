@@ -563,6 +563,19 @@ void main() {
       expect(find.byTooltip('La meva ubicació'), findsNothing);
     });
 
+    testWidgets('El mapa no deixa allunyar-se més enllà del món sencer', (
+      tester,
+    ) async {
+      await pumpInici(tester);
+
+      final size = tester.getSize(find.byType(GoogleMap));
+      expect(map(tester).minMaxZoomPreference.minZoom, minimumZoomFor(size));
+      // Nor past the poles, where the web map would show grey.
+      final bounds = map(tester).cameraTargetBounds.bounds!;
+      expect(bounds.northeast.latitude, closeTo(85.05, 0.01));
+      expect(bounds.southwest.latitude, closeTo(-85.05, 0.01));
+    });
+
     testWidgets('Amb el permís, el mapa mostra on ets amb la precisió', (
       tester,
     ) async {
@@ -590,19 +603,21 @@ void main() {
       expect(find.text('On ets tu'), findsOneWidget);
     });
 
-    testWidgets('El botó demana el permís i, si es dona, troba on ets', (
+    testWidgets('Si en obrir el mapa es denega, el botó ho torna a demanar', (
       tester,
     ) async {
       await pumpWithLocation(tester);
+      // Opening the map already asked once (and the person said no).
+      await tester.pumpAndSettle();
+      expect(repository.requests, 1);
       repository.answer = LocationAccess.granted;
-      expect(repository.requests, 0);
 
       await tester.tap(find.byTooltip('La meva ubicació'));
       await tester.pump();
       repository.positions.add(here);
       await tester.pumpAndSettle();
 
-      expect(repository.requests, 1);
+      expect(repository.requests, 2);
       expect(map(tester).circles.single.center, const LatLng(41.3874, 2.1686));
       expect(find.byType(SnackBar), findsNothing);
     });
@@ -692,5 +707,28 @@ void main() {
       activityMarkerKind(community(friend: true)),
       ActivityMarkerKind.friend,
     );
+  });
+
+  group('Zoom en obrir el mapa', () {
+    test('El zoom mínim fa que el món ompli el mapa', () {
+      // A phone: the height decides; the world is 256 dp at zoom 0.
+      expect(minimumZoomFor(const Size(390, 844)), closeTo(1.72, 0.01));
+      // A wide browser window: the width decides.
+      expect(minimumZoomFor(const Size(1920, 900)), closeTo(2.91, 0.01));
+      expect(minimumZoomFor(const Size(200, 200)), 0);
+    });
+
+    test('El requadre de 5 km envolta la persona', () {
+      final bounds = boundsAround(
+        const GeoPoint(latitude: 41.3874, longitude: 2.1686),
+        5000,
+      );
+
+      // About 0.045° of latitude and 0.06° of longitude at Barcelona.
+      expect(bounds.southWest.latitude, closeTo(41.3425, 0.001));
+      expect(bounds.northEast.latitude, closeTo(41.4323, 0.001));
+      expect(bounds.southWest.longitude, closeTo(2.1087, 0.001));
+      expect(bounds.northEast.longitude, closeTo(2.2285, 0.001));
+    });
   });
 }

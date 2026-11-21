@@ -10,8 +10,10 @@
 
 | Taiga | Tasca | Branca | Estat |
 |---|---|---|---|
-| #179 | [FE] Bloqueig al perfil + BlockedUsersScreen a Configuració + tests (història #45) | `feature/block-users-179` | HTTP/Demo verificats: 970 proves, anàlisi, format i APK; revisió tècnica aprovada; branca sobre #195 (`fd95352`); DP-077; sense commit/push |
-| #195 | [FE] Eliminar amistat a la llista i perfil amb confirmació + tests (història #53) | `feature/remove-friend-195` | Publicada a `fd95352`; pendent d’integrar en començar #179. Verificada amb 933 proves, anàlisi i APK; DP-076 oberta |
+| #179 | [FE] Bloqueig al perfil + BlockedUsersScreen a Configuració + tests (història #45) | `feature/block-users-179` | Publicada a `52ee01b`; conflictes amb `origin/develop@ee9e34f` resolts localment; 986 proves, anàlisi, format i APK correctes; revisió tècnica aprovada; DP-077; sense commit/push de la resolució |
+| #212 i #266 | Arreglos generals de la prova a l’emulador: «Com va anar?» no pregunta abans d’hora i en mostra tres; zoom del mapa amb GPS lent; «00.00 h» als avisos; ajuda del diàleg d’eliminar; icona «Cerca persones» al Perfil | `fix/com-va-anar` (inclou `feature/mapa-zoom-ubicacio`) | Integrada a develop amb PR #76 (`ee9e34f`); DP-068 i DP-074 actualitzades |
+| #266 | Mapa: zoom de 5 km a la persona en obrir-lo i límit d’allunyament | `feature/mapa-zoom-ubicacio` | Commit `d2357d1`; integrada a develop amb PR #76 |
+| #195 | [FE] Eliminar amistat a la llista i perfil amb confirmació + tests (història #53) | `feature/remove-friend-195` | Integrada a develop amb PR #75 (`a5ed55f`); DP-076 oberta |
 | #183 | [FE] Targeta d’avís de cancel·lació a `NotificationsScreen` + tests (història #47) | `feature/avis-cancel-lacio` | Integrada a develop amb PR #74; DP-071 oberta |
 | #170 | [FE] Targeta d’amistat acceptada a NotificationsScreen amb navegació al perfil + tests | `feature/accepted-friendship-notification-170` | Integrada a develop amb PR #72; classificació HTTP pendent (DP-070) |
 | #181 | [FE] Botó i diàleg de cancel·lació a la fitxa per a qui l’ha creada + reflex visual a l’Agenda i el catàleg + tests (història #46) | `feature/cancel-lar-activitat` | Integrada a develop amb PR #71 (`085a03a`); DP-069 oberta |
@@ -35,12 +37,12 @@
 
 ## Base i abast actual (#179)
 
-- Branca `feature/block-users-179` sobre `fd95352` de #195; cal integrar #195 abans de fusionar #179 cap a develop. Per revisar només #179 es compara amb `feature/remove-friend-195`.
+- Branca `feature/block-users-179`, commit publicat `52ee01b`; merge local de `origin/develop@ee9e34f` sense commit. #195 ja integrada amb PR #75; les millores de #212/#266 de PR #76 es conserven.
 - Backend `4f98835` consultat sense canvis: GET bloquejats, POST block (201) i DELETE block (204).
 - Contracte `UserBlockingRepository` i font compartida d’amistat; snapshots per compte, agrupació d’operacions, confirmacions autenticades i protecció de lectures antigues.
 - Perfil, Configuració, llista de bloquejats i Avisos coordinats; bloquejar elimina amistat/peticions actives, desbloquejar no les recupera.
 - Interfície ca/es/en, confirmació i reintent; cap paquet o endpoint nou, cap política d’ocultació de contingut inventada.
-- Guia `docs/user-blocking.md`, presentació/abast i dependència a DP-077. Verificació local i revisió tècnica independent aprovades; sense commit/push.
+- Guia `docs/user-blocking.md`, presentació/abast i dependència a DP-077. Resolució del merge verificada i revisió tècnica independent aprovada, sense commit/push.
 
 ## Verificació #179 (2026-11-21)
 
@@ -56,6 +58,17 @@
   `PES/output/frontend/task-179-{menu-perfil,confirmar-bloqueig,perfil-bloquejat,configuracio,usuaris-bloquejats,confirmar-desbloqueig,llista-buida}.png`.
 - Backend net a `4f98835`; cap migració ni escriptura a Render. Prova amb dos comptes reals en
   Android, CI i revisió humana pendents. Sense commit/push.
+
+## Resolució de conflictes de #179 (2026-11-21)
+
+- `origin/develop@ee9e34f` incorpora #195 (PR #75) i els ajustos d’assistència, mapa/GPS tardà,
+  horaris d’Avisos, ajuda d’eliminació de compte i cerca de persones des de Perfil (PR #76).
+- Únic conflicte textual a `docs/ai/estat.md`: es conserven totes dues branques i els estats d’integració.
+  `MainShell`, Configuració i `NotificationCard` mantenen tant #179 com els canvis de develop.
+- Traduccions ca/es/en regenerades amb les claus d’ambdues branques. Cap funcionalitat descartada.
+- **986 proves superades**, `flutter analyze` sense incidències, format de 386 fitxers sense canvis,
+  `git diff --cached --check` i APK debug correctes. Revisió tècnica independent aprovada.
+- Backend intacte. Sense commit ni push de la resolució; l’usuari revisa i actualitza la mateixa PR.
 
 ## Context anterior (#195)
 
@@ -140,7 +153,7 @@
 
 ## Pendents / següents passos
 
-1. Revisió de l’usuari, commit i PR de #179; integrar #195 abans de fusionar-la a develop. CI, revisió humana i prova amb dos comptes reals en Android pendents.
+1. L’usuari revisa la resolució del merge de #179, fa commit/push i actualitza la mateixa PR. CI, revisió humana i prova amb dos comptes reals en Android pendents.
 2. Backend/equip: discriminador estructurat d’acceptació a la bústia (DP-070); després integrar el JSON real i comprovar el recorregut amb dos comptes al desplegament i Android.
 3. Backend/equip: avís automàtic en enviar sol·licitud i política de zona de `request-date` (DP-066).
    Si cal historial resolt o lectura de sol·licituds després de reiniciar, falten aquests contractes.

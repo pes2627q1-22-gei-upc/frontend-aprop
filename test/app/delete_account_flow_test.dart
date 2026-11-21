@@ -65,6 +65,12 @@ void main() {
 
       expect(find.text('Vols eliminar el compte?'), findsOneWidget);
       expect(confirmButton(tester).onPressed, isNull);
+      // The field starts empty; the hint does not look like a typed word.
+      final field = tester.widget<TextField>(
+        find.byKey(const ValueKey('profile-delete-account-word')),
+      );
+      expect(field.controller?.text ?? '', isEmpty);
+      expect(field.decoration?.hintText, 'Escriu-ho aquí');
 
       // «Cancel·la» keeps everything.
       await tester.tap(find.text('Cancel·la'));

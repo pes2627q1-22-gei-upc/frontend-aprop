@@ -33,7 +33,7 @@ La tasca implementa la bústia frontend. No configura ni envia notificacions del
 | Buit | Missatge diferent per bústia global o filtre; «Veure tots els avisos» només si existeixen altres avisos |
 | Tornar | Conserva filtre i desplaçament; cada secció manté el seu historial i la barra inferior fixa |
 
-Els recordatoris rebuts continuen visibles encara que l'activitat hagi començat. Es mostren dates absolutes de l'activitat, separades de l'hora de recepció, per evitar textos històrics enganyosos com «Comença avui». No s'inclouen recordatoris futurs com si s'haguessin rebut.
+Els recordatoris rebuts continuen visibles encara que l'activitat hagi començat. Es mostren dates absolutes de l'activitat (amb l'hora de l'«Horari»; si no se'n sap, només el dia, i no «00.00 h»), separades de l'hora de recepció, per evitar textos històrics enganyosos com «Comença avui». No s'inclouen recordatoris futurs com si s'haguessin rebut.
 
 ## Fitxers i flux per aprendre el codi
 

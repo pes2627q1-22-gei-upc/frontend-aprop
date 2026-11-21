@@ -1,3 +1,4 @@
+import 'package:aprop/features/activities/models/activity.dart';
 import 'package:aprop/features/notifications/models/app_notification.dart';
 import 'package:aprop/features/notifications/presentation/formatters/notification_formatter.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -85,8 +86,34 @@ void main() {
     );
     expect(notificationTime(DateTime(2026, 9, 27, 9, 5)), '09.05 h');
     expect(
-      notificationActivitySchedule(notificationActivity.startsAt),
+      notificationActivitySchedule(notificationActivity),
       '26 de setembre de 2026 · 19.00 h',
+    );
+    // Only the day is known (the backend stores 00:00): no «00.00 h».
+    final dayOnly = Activity(
+      id: 'day',
+      title: 'Concert',
+      category: 'Música',
+      municipality: 'Manresa',
+      startsAt: DateTime(2026, 11, 21),
+      imageAsset: 'assets/images/jazz_al_parc.jpg',
+      source: ActivitySource.culturalAgenda,
+    );
+    expect(notificationActivitySchedule(dayOnly), '21 de novembre de 2026');
+    // The schedule gives the hour, as in the activity's card.
+    final withSchedule = Activity(
+      id: 'schedule',
+      title: 'Concert',
+      category: 'Música',
+      municipality: 'Manresa',
+      startsAt: DateTime(2026, 11, 21),
+      schedule: '20 h',
+      imageAsset: 'assets/images/jazz_al_parc.jpg',
+      source: ActivitySource.culturalAgenda,
+    );
+    expect(
+      notificationActivitySchedule(withSchedule),
+      '21 de novembre de 2026 · 20 h',
     );
   });
 }

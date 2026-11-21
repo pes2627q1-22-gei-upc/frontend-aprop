@@ -16,6 +16,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get profileTitleFallback => 'Perfil';
 
   @override
+  String get profileFindPeople => 'Buscar personas';
+
+  @override
   String get profilePeopleSearchSoon =>
       'Búsqueda de personas disponible próximamente';
 
@@ -455,6 +458,9 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get settingsDeleteAccount => 'Eliminar cuenta';
+
+  @override
+  String get settingsDeleteAccountHint => 'Escríbelo aquí';
 
   @override
   String get settingsDeletingAccount => 'Eliminando la cuenta…';
@@ -1334,6 +1340,29 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get attendanceSaveError =>
       'No hemos podido guardar la respuesta. Vuelve a intentarlo.';
+
+  @override
+  String attendanceShowMore(int count) {
+    return 'Ver $count más';
+  }
+
+  @override
+  String get attendanceShowLess => 'Ver menos';
+
+  @override
+  String attendanceThanksYes(String title) {
+    return '¡Gracias! Ya puedes valorar «$title».';
+  }
+
+  @override
+  String get attendanceThanksNo =>
+      'De acuerdo, no te lo volveremos a preguntar.';
+
+  @override
+  String get attendanceNotStarted => 'Esta actividad todavía no ha empezado.';
+
+  @override
+  String get attendanceNotEnrolled => 'Ya no estás apuntado.';
 
   @override
   String agendaPublishedBy(String name) {
