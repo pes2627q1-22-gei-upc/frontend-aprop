@@ -1111,6 +1111,11 @@ class AppLocalizationsCa extends AppLocalizations {
   }
 
   @override
+  String notifViewFriendProfile(String name) {
+    return 'Veure el perfil de $name';
+  }
+
+  @override
   String get notifAccept => 'Acceptar';
 
   @override

@@ -737,6 +737,14 @@
       }
     }
   },
+  "notifViewFriendProfile": "Veure el perfil de {name}",
+  "@notifViewFriendProfile": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "notifAccept": "Acceptar",
   "notifDecline": "Rebutjar",
   "notifRequestAccepted": "Sol·licitud acceptada",

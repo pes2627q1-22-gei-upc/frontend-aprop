@@ -310,6 +310,14 @@
       }
     }
   },
+  "notifViewFriendProfile": "View the profile of {name}",
+  "@notifViewFriendProfile": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "notifAccept": "Accept",
   "notifDecline": "Decline",
   "notifRequestAccepted": "Request accepted",
