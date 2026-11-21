@@ -4,13 +4,14 @@
 
 ## Sprint
 
-- Sprint 2 · només frontend. Tasca activa #170: targeta d’amistat acceptada, navegació al perfil i proves. Classificació HTTP pendent de contracte (DP-069).
+- Sprint 2 · només frontend. Tasca activa #170: targeta d’amistat acceptada, navegació al perfil i proves. Classificació HTTP pendent de contracte (DP-070).
 
 ## En curs
 
 | Taiga | Tasca | Branca | Estat |
 |---|---|---|---|
-| #170 | [FE] Targeta d’amistat acceptada a NotificationsScreen amb navegació al perfil + tests | `feature/accepted-friendship-notification-170` | Interfície verificada: 870 proves, anàlisi, format i APK correctes; HTTP pendent de subtipus backend (DP-069); sense commit/push |
+| #170 | [FE] Targeta d’amistat acceptada a NotificationsScreen amb navegació al perfil + tests | `feature/accepted-friendship-notification-170` | Publicada a `df48032`; merge amb develop `085a03a` verificat: 877 proves, anàlisi, format i APK correctes; pendent commit/push de la resolució; HTTP pendent (DP-070) |
+| #181 | [FE] Botó i diàleg de cancel·lació a la fitxa per a qui l’ha creada + reflex visual a l’Agenda i el catàleg + tests (història #46) | `feature/cancel-lar-activitat` | Integrada a develop amb PR #71 (`085a03a`); DP-069 oberta |
 | #168 | [FE] Targeta de sol·licitud amb Acceptar/Rebutjar a NotificationsScreen + tests | `feature/friend-request-notification-card-168` | Integrada a develop amb PR #70 (base `c7f4895`); verificació del merge: 856 proves, anàlisi, format i APK correctes |
 | #193 | [FE] Acció «Rebutjar» a Avisos i perfil + tests | `feature/reject-friend-request-193` | Integrada a develop amb PR #68; DP-067 oberta |
 | #164 | [FE] Acceptar en avís social i perfil + comptadors/distintiu reactius + tests | `feature/accept-friend-request-164` | Integrada a develop amb PR #66; DP-066 oberta |
@@ -30,11 +31,11 @@
 
 ## Base i abast actual (#170)
 
-- Branca independent `feature/accepted-friendship-notification-170` des de `origin/develop@c7f4895`, amb PR #66/#68/#70 integrades. Sense commit/push.
+- Branca `feature/accepted-friendship-notification-170`, commit publicat `df48032`; merge local de `origin/develop@085a03a` sense commit. #181 (cancel·lació, PR #71) preservada.
 - `NotificationCard` afegeix «Veure perfil» només al model tipat `friendRequestAccepted`, amb nom accessible, ca/es/en i mida mínima de 48 px.
 - Reutilitza model, formatador, lectura confirmada, ViewModel, callbacks i navegació existents; cap estat de negoci duplicat ni dependència nova.
 - 14 proves noves; conjunt focal de 28 proves superat: targeta en 3 idiomes a 390/320 px, lectura/error/reintent, canvi de compte/dispose, retorn amb estat i guard HTTP.
-- Backend `fb266a7` intacte. L’usuari confirma que no hi ha una altra branca: Social no identifica l’acceptació estructuradament. La classificació HTTP queda pendent a DP-069; no s’interpreta text lliure.
+- Backend `fb266a7` intacte. L’usuari confirma que no hi ha una altra branca: Social no identifica l’acceptació estructuradament. La classificació HTTP queda pendent a DP-070; no s’interpreta text lliure.
 - Guia i missatge per al backend: `docs/accepted-friendship-notification.md`. Revisió tècnica independent aprovada; pendent revisió humana i CI.
 
 ## Verificació #170 (2026-11-21)
@@ -86,8 +87,8 @@
 
 ## Pendents / següents passos
 
-1. Revisió de l’usuari dels canvis #170, commit i PR cap a develop amb l’abast UI i DP-069 explícits. CI i aprovació humana obligatòries.
-2. Backend/equip: discriminador estructurat d’acceptació a la bústia (DP-069); després integrar el JSON real i comprovar el recorregut amb dos comptes al desplegament i Android.
+1. Revisió de la resolució dels conflictes #170, commit del merge i push a la mateixa branca per actualitzar la PR existent. CI i aprovació humana obligatòries; abast UI i DP-070 explícits.
+2. Backend/equip: discriminador estructurat d’acceptació a la bústia (DP-070); després integrar el JSON real i comprovar el recorregut amb dos comptes al desplegament i Android.
 3. Backend/equip: avís automàtic en enviar sol·licitud i política de zona de `request-date` (DP-066).
    Si cal historial resolt o lectura de sol·licituds després de reiniciar, falten aquests contractes.
 
@@ -107,3 +108,15 @@
 - La targeta de sol·licitud #168, focus/teclat, estats i callbacks es mantenen intactes.
 - Traduccions ca/es/en regenerades amb les claus d’ambdues tasques. Conjunt verificat: 856 proves superades, anàlisi sense incidències, format de 359 fitxers i APK debug correctes. Revisió tècnica independent aprovada.
 - Sense commit ni push de la resolució; l’usuari actualitza la mateixa PR després de revisar-la.
+
+## Resolució de conflictes de #170 (2026-11-21)
+
+- `origin/develop@085a03a` incorpora #181, cancel·lació d’activitats (PR #71).
+- Conflictes a `docs/ai/estat.md` i `docs/decisions-pendents.md`: es conserven totes dues tasques i decisions.
+- DP-069 es manté per a la cancel·lació; la dependència del subtipus d’acceptació passa a DP-070,
+  amb totes les referències de codi, guia, README i arquitectura actualitzades.
+- Lògica i proves de #170 i #181 preservades. Traduccions ca/es/en regenerades amb les claus d’ambdues branques.
+- Conjunt verificat: **877 proves superades**, anàlisi sense incidències, format de 364 fitxers,
+  `git diff --cached --check` i APK debug correctes. Revisió tècnica independent aprovada.
+- Cap canvi al backend ni escriptura a Render. Sense commit ni push de la resolució;
+  l’usuari actualitza la mateixa PR després de revisar-la.

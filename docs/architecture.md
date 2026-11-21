@@ -314,5 +314,5 @@ al navegador d’Avisos; tornar conserva filtre, desplaçament i lectura. No s�
 ViewModel o ruta duplicats. Si no s’injecta una destinació, no hi ha botó i el cos permet llegir.
 
 El model tipat i Demo ja existien. L’adaptador HTTP manté Social genèric perquè el DTO no distingeix
-l’acceptació. No s’interpreta el text ni s’infereix l’esdeveniment de l’amistat actual (DP-069).
+l’acceptació. No s’interpreta el text ni s’infereix l’esdeveniment de l’amistat actual (DP-070).
 Vegeu [contracte pendent i proves](accepted-friendship-notification.md).

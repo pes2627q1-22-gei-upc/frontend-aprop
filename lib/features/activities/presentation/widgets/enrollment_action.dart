@@ -33,6 +33,18 @@ class EnrollmentAction extends StatelessWidget {
     return ListenableBuilder(
       listenable: viewModel,
       builder: (context, child) {
+        // Cancel·lada (#46): ni s'hi pot apuntar ni desapuntar.
+        if (viewModel.isCancelled(activityId)) {
+          return GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            excludeFromSemantics: true,
+            onTap: () {},
+            child: Align(
+              alignment: primary ? Alignment.center : Alignment.centerRight,
+              child: const CancelledBadge(),
+            ),
+          );
+        }
         final enrolled = viewModel.isEnrolled(activityId);
         final saving = viewModel.isEnrolling(activityId);
         final leaving = viewModel.isUnenrolling(activityId);

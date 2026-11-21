@@ -160,7 +160,7 @@ class HttpNotificationRepository implements NotificationRepository {
           ),
         );
       } else {
-        // TODO(DP-069): Social has no structured acceptance subtype. Keep it
+        // TODO(DP-070): Social has no structured acceptance subtype. Keep it
         // generic; neither free text nor current friendship proves this event.
         result.add(
           AppNotification.received(

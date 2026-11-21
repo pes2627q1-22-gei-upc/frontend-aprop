@@ -1349,6 +1349,45 @@ class AppLocalizationsEs extends AppLocalizations {
   String get actEdit => 'Edita la actividad';
 
   @override
+  String get activityCancel => 'Cancelar la actividad';
+
+  @override
+  String get activityCancelling => 'Cancelando…';
+
+  @override
+  String get activityCancelTitle => '¿Quieres cancelar la actividad?';
+
+  @override
+  String activityCancelBody(String title) {
+    return 'Avisaremos a las personas apuntadas a «$title» y ya nadie podrá apuntarse. No se puede deshacer.';
+  }
+
+  @override
+  String get activityCancelKeep => 'Volver';
+
+  @override
+  String get activityCancelConfirm => 'Cancelarla';
+
+  @override
+  String get activityCancelledBadge => 'Cancelada';
+
+  @override
+  String get activityCancelDone =>
+      'Has cancelado la actividad. Hemos avisado a las personas apuntadas.';
+
+  @override
+  String get activityCancelFinished =>
+      'La actividad ya ha empezado o ha terminado: no se puede cancelar.';
+
+  @override
+  String get activityCancelNotAllowed =>
+      'Solo quien ha creado la actividad puede cancelarla.';
+
+  @override
+  String get activityCancelError =>
+      'No hemos podido cancelar la actividad. Vuelve a intentarlo.';
+
+  @override
   String get actNotFound => 'No hemos encontrado esta actividad.';
 
   @override

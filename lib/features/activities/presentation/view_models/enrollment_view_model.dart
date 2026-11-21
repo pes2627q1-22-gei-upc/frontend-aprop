@@ -18,6 +18,11 @@ class EnrollmentViewModel extends ChangeNotifier {
   Set<String> _enrolledActivityIds = const {};
   final Set<String> _pendingActivityIds = {};
   final Set<String> _unenrollingActivityIds = {};
+
+  /// Activitats cancel·lades durant aquesta sessió (#46).
+  // TODO(DP-069): l'API no diu si una activitat està cancel·lada; en tornar
+  // a obrir l'app es torna a veure com si no ho estigués.
+  final Set<String> _cancelledActivityIds = {};
   final Map<String, String> _errors = {};
   final Map<String, String> _unenrollErrors = {};
 
@@ -47,6 +52,15 @@ class EnrollmentViewModel extends ChangeNotifier {
   bool isEnrolling(String id) => _pendingActivityIds.contains(id);
   bool isUnenrolling(String id) => _unenrollingActivityIds.contains(id);
   String? errorFor(String id) => _errors[id] ?? _unenrollErrors[id];
+
+  /// Cancel·lada per qui l'ha creada: ja no s'hi pot apuntar ningú.
+  bool isCancelled(String id) => _cancelledActivityIds.contains(id);
+
+  /// Marca l'activitat com a cancel·lada a totes les pantalles.
+  void markCancelled(String id) {
+    if (_isDisposed || !_cancelledActivityIds.add(id)) return;
+    notifyListeners();
+  }
 
   Future<void> load() async {
     if (_isDisposed || _isLoading) return;
@@ -97,6 +111,7 @@ class EnrollmentViewModel extends ChangeNotifier {
       return;
     }
     if (_isDisposed ||
+        isCancelled(activityId) ||
         !_hasLoaded ||
         _isLoading ||
         _loadError != null ||

@@ -7,7 +7,7 @@ el perfil. Base `origin/develop@c7f4895`, amb #164, #193 i #168 integrades. Nom�
 
 El model `AppNotification.friendRequestAccepted`, el missatge i la navegació genèrica al perfil ja
 existien. #170 afegeix l’accés explícit «Veure perfil» i comprova el recorregut i els casos límit.
-La integració HTTP d’aquest subtipus **no està completada**: depèn del contracte indicat a DP-069.
+La integració HTTP d’aquest subtipus **no està completada**: depèn del contracte indicat a DP-070.
 
 ## Flux i responsabilitats
 

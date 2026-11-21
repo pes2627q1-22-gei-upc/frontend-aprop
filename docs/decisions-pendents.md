@@ -801,12 +801,27 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Qui decideix:** backend (tornar el valor de l’assistència)
 - **Resolució:**
 
-### DP-069 · Avís d’amistat acceptada sense subtipus al backend (#170)
+### DP-069 · Cancel·lar una activitat (#46): l'estat només es coneix durant la sessió
+- **Estat:** oberta · 2026-11-21 · Claude Code (Opus 5.5) amb confirmació de l’usuari · Taiga #181 (història #46)
+- **Context:** botó «Cancel·lar l’activitat» d’`ActivityDetailsScreen`, `MainShell._cancelActivity`, `ActivityRepository.cancelActivity`, `EnrollmentViewModel.isCancelled`, `EnrollmentAction` (distintiu «Cancel·lada»). Backend consultat a `api-aprop@develop` sense modificar-lo: `POST /events/{id}/cancel` (només qui l’ha creada; 409 si ja ha acabat o ja no està activa; 422 si és oficial) marca l’activitat `Cancelled` i crea un avís «Cancelacio» per a cada persona apuntada.
+- **Dubte:** cap resposta d’activitats (`GET /events`, `/events/{id}`, mapa, cerca) no porta l’estat, i apuntar-se a una activitat cancel·lada continua funcionant al backend.
+- **Decisió de l’usuari:** després de cancel·lar, l’app la marca «Cancel·lada» durant la sessió a la fitxa, l’Agenda, el mapa, Inici i la cerca (on hi ha el botó d’apuntar-se), i no deixa apuntar-s’hi. En tornar a obrir l’app es torna a veure normal. Es demana al backend que torni `state` a l’activitat i que rebutgi les inscripcions a les cancel·lades; aleshores el mapper la marcarà en llegir-la.
+- **Deduït (sense confirmar):**
+  - El botó és a la fitxa, en vermell, sota el xat, només per a qui la pot editar (creadora i abans que comenci); el diàleg avisa que no es pot desfer i que s’avisarà les persones apuntades.
+  - Una activitat cancel·lada ja no es pot editar (el backend respondria 409).
+  - Si el servidor diu que ja no està activa (409), es tracta com a cancel·lada.
+  - Qui hi estava apuntat la continua tenint a l’Agenda: l’avís de cancel·lació és la #47.
+- **Codi:** `TODO(DP-069)` a `enrollment_view_model.dart`.
+- **Qui decideix:** backend (`state` a l’activitat i bloqueig d’inscripcions)
+- **Resolució:**
+
+### DP-070 · Avís d’amistat acceptada sense subtipus al backend (#170)
 - **Estat:** oberta · 2026-11-21 · Taiga #170, història #38 · només frontend.
+- **Identificador:** renumerada de DP-069 a DP-070 en integrar `origin/develop@085a03a`, per conservar la DP-069 de cancel·lació d’activitats #181.
 - **Context:** backend `fb266a7`: acceptar crea un avís amb tipus Social, `friend-id`, `request-date` i text lliure. El DTO de notificacions no conté un subtipus/estat d’acceptació. `/users/me/friend-requests` només retorna rebudes Pending; no és historial d’acceptacions sortints. L’usuari confirma que no hi ha una altra branca.
 - **Presentació:** reutilitzar `AppNotification.friendRequestAccepted`, el missatge i la navegació ja existents; afegir l’accés explícit «Veure perfil» amb nom accessible. Cap Acceptar/Rebutjar. Mateix flux de lectura confirmada, errors i protecció de respostes tardanes de la bústia.
 - **Límit:** es completa la interfície amb el model tipat/Demo i proves. La classificació HTTP d’acceptacions queda pendent: un Social genèric continua genèric, encara que el text digui «ha acceptat». Ni el text ni ser amics ara demostren l’esdeveniment concret. No es crea cap historial ni avís fictici.
 - **Pendent backend/equip:** acordar un discriminador estructurat d’acceptació i publicar-ne l’esquema, amb destinatari, persona que accepta, data i referència de sol·licitud. Els noms del nou camp/subtipus s’han d’acordar; no es pressuposa un endpoint o camp nou. Després, adaptar `notification_json_mapper.dart`/`HttpNotificationRepository` i afegir una prova del JSON real.
-- **Codi:** `TODO(DP-069)` a `http_notification_repository.dart`. Flux i missatge de traspàs a `docs/accepted-friendship-notification.md`. Backend intacte; segueixen obertes DP-039/DP-066.
+- **Codi:** `TODO(DP-070)` a `http_notification_repository.dart`. Flux i missatge de traspàs a `docs/accepted-friendship-notification.md`. Backend intacte; segueixen obertes DP-039/DP-066.
 - **Qui decideix:** equip frontend/backend (contracte de l’avís).
 - **Resolució:**

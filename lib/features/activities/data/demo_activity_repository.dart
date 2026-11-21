@@ -128,6 +128,23 @@ class DemoActivityRepository implements ActivityRepository {
   }
 
   /// Canvia l'activitat de la llista en memòria, amb el mateix ID i autor.
+  /// Activitats cancel·lades durant aquesta execució.
+  final _cancelled = <String>{};
+
+  @override
+  Future<void> cancelActivity(String id) async {
+    final activity = _activities.where((stored) => stored.id == id).firstOrNull;
+    if (activity == null) throw StateError('No hi ha cap activitat $id.');
+    if (activity.source != ActivitySource.community) {
+      throw ActivityCancelFailure.notAllowed;
+    }
+    if (!activity.startsAt.isAfter(DateTime.now()) &&
+        !_cancelled.contains(id)) {
+      throw ActivityCancelFailure.finished;
+    }
+    _cancelled.add(id);
+  }
+
   @override
   Future<Activity> updateActivity(String id, NewActivity activity) async {
     final index = _activities.indexWhere((stored) => stored.id == id);

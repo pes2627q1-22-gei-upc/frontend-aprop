@@ -28,6 +28,7 @@ class ActivityDetailsScreen extends StatefulWidget {
     this.ratingBuilder,
     this.canEdit,
     this.onEdit,
+    this.onCancel,
     this.onOpenChat,
     this.onCreatorSelected,
     this.openLink = openExternalLink,
@@ -50,6 +51,10 @@ class ActivityDetailsScreen extends StatefulWidget {
   /// Obre el formulari d'edició; acaba amb `true` si s'han desat canvis, i
   /// llavors la fitxa es torna a carregar.
   final Future<bool> Function(Activity activity)? onEdit;
+
+  /// Cancel·la l'activitat (#46), un cop confirmat al diàleg; acaba amb
+  /// `true` si s'ha cancel·lat. Només surt per a qui la pot editar.
+  final Future<bool> Function(Activity activity)? onCancel;
 
   /// Obre el perfil de qui ha creat l'activitat (rep el seu ID). Sense,
   /// «Veure perfil» queda desactivat.
@@ -92,6 +97,44 @@ class _ActivityDetailsScreenState extends State<ActivityDetailsScreen> {
   Future<void> _edit(Activity activity) async {
     final saved = await widget.onEdit?.call(activity) ?? false;
     if (saved && mounted) _viewModel.load();
+  }
+
+  bool _isCancelling = false;
+
+  /// Pregunta abans de cancel·lar: no es pot desfer i avisa les persones
+  /// apuntades (CA1).
+  Future<void> _cancel(Activity activity) async {
+    final cancel = widget.onCancel;
+    if (cancel == null || _isCancelling) return;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(context.l10n.activityCancelTitle),
+        content: Text(context.l10n.activityCancelBody(activity.title)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(context.l10n.activityCancelKeep),
+          ),
+          FilledButton(
+            key: const ValueKey('activity-cancel-confirm'),
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+              foregroundColor: Theme.of(context).colorScheme.onError,
+            ),
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(context.l10n.activityCancelConfirm),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    setState(() => _isCancelling = true);
+    try {
+      await cancel(activity);
+    } finally {
+      if (mounted) setState(() => _isCancelling = false);
+    }
   }
 
   @override
@@ -167,6 +210,12 @@ class _ActivityDetailsScreenState extends State<ActivityDetailsScreen> {
                     onOpenChat: widget.onOpenChat,
                     openLink: widget.openLink,
                     onCreatorSelected: widget.onCreatorSelected,
+                    isCancelling: _isCancelling,
+                    onCancel:
+                        widget.onCancel != null &&
+                            (widget.canEdit?.call(activity) ?? false)
+                        ? () => _cancel(activity)
+                        : null,
                   ),
                 ),
                 _ParticipationAction(
@@ -190,6 +239,8 @@ class _ActivityDetailsContent extends StatelessWidget {
     this.onOpenChat,
     required this.openLink,
     this.onCreatorSelected,
+    this.onCancel,
+    this.isCancelling = false,
   });
 
   final Activity activity;
@@ -198,6 +249,10 @@ class _ActivityDetailsContent extends StatelessWidget {
   final void Function(Activity activity)? onOpenChat;
   final Future<bool> Function(Uri uri) openLink;
   final ValueChanged<String>? onCreatorSelected;
+
+  /// «Cancel·lar l'activitat»; nul si qui mira no la pot cancel·lar.
+  final VoidCallback? onCancel;
+  final bool isCancelling;
 
   @override
   Widget build(BuildContext context) {
@@ -383,6 +438,42 @@ class _ActivityDetailsContent extends StatelessWidget {
             );
           },
         ),
+        // Qui l'ha creada la pot cancel·lar abans que comenci (#46).
+        if (onCancel case final cancel?)
+          ListenableBuilder(
+            listenable: enrollmentViewModel,
+            builder: (context, child) {
+              if (enrollmentViewModel.isCancelled(activity.id)) {
+                return const SizedBox.shrink();
+              }
+              return Padding(
+                padding: const EdgeInsets.only(top: 24),
+                child: OutlinedButton.icon(
+                  key: const ValueKey('activity-cancel'),
+                  onPressed: isCancelling ? null : cancel,
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size(0, 48),
+                    foregroundColor: colors.error,
+                    side: BorderSide(color: colors.error),
+                  ),
+                  icon: isCancelling
+                      ? SizedBox.square(
+                          dimension: 18,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: colors.error,
+                          ),
+                        )
+                      : const Icon(Icons.event_busy_outlined),
+                  label: Text(
+                    isCancelling
+                        ? context.l10n.activityCancelling
+                        : context.l10n.activityCancel,
+                  ),
+                ),
+              );
+            },
+          ),
       ],
     );
   }

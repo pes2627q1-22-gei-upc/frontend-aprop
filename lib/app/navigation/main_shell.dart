@@ -291,6 +291,7 @@ class _MainShellState extends State<MainShell> {
         ratingBuilder: _buildRating,
         canEdit: _canEdit,
         onEdit: _editActivity,
+        onCancel: _cancelActivity,
         onOpenChat: _openActivityChat,
         onCreatorSelected: _creatorProfileOpener,
       ),
@@ -444,6 +445,7 @@ class _MainShellState extends State<MainShell> {
                   ratingBuilder: _buildRating,
                   canEdit: _canEdit,
                   onEdit: _editActivity,
+                  onCancel: _cancelActivity,
                   onOpenChat: _openActivityChat,
                   onCreatorSelected: _creatorProfileOpener,
                 ),
@@ -498,6 +500,7 @@ class _MainShellState extends State<MainShell> {
                 ratingBuilder: _buildRating,
                 canEdit: _canEdit,
                 onEdit: _editActivity,
+                onCancel: _cancelActivity,
                 onOpenChat: _openActivityChat,
                 onCreatorSelected: _creatorProfileOpener,
               ),
@@ -539,7 +542,40 @@ class _MainShellState extends State<MainShell> {
     return activity.source == ActivitySource.community &&
         creatorId != null &&
         (creatorId == widget.user.serverId || creatorId == widget.user.id) &&
-        activity.startsAt.isAfter(DateTime.now());
+        activity.startsAt.isAfter(DateTime.now()) &&
+        // Una activitat cancel·lada ja no es pot modificar (#46).
+        !_enrollmentViewModel.isCancelled(activity.id);
+  }
+
+  /// Cancel·la una activitat pròpia (#46): el servidor avisa les persones
+  /// apuntades i, a l'app, passa a «Cancel·lada» a totes les pantalles.
+  Future<bool> _cancelActivity(Activity activity) async {
+    final messenger = ScaffoldMessenger.of(context);
+    String message;
+    var cancelled = false;
+    try {
+      await _activityRepository.cancelActivity(activity.id);
+      cancelled = true;
+      message = currentL10n.activityCancelDone;
+    } on ActivityCancelFailure catch (failure) {
+      message = switch (failure) {
+        ActivityCancelFailure.finished => currentL10n.activityCancelFinished,
+        ActivityCancelFailure.notAllowed =>
+          currentL10n.activityCancelNotAllowed,
+      };
+    } catch (_) {
+      message = currentL10n.activityCancelError;
+    }
+    if (!mounted) return cancelled;
+    if (cancelled) {
+      _enrollmentViewModel.markCancelled(activity.id);
+      _activitiesMapViewModel?.refresh();
+      _activitiesChanged.value++;
+    }
+    messenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(message)));
+    return cancelled;
   }
 
   /// Obre el formulari amb l'activitat i, si es desa, posa al dia Inici, la
@@ -642,6 +678,7 @@ class _MainShellState extends State<MainShell> {
                 ratingBuilder: _buildRating,
                 canEdit: _canEdit,
                 onEdit: _editActivity,
+                onCancel: _cancelActivity,
                 onOpenChat: _openActivityChat,
                 onCreatorSelected: _creatorProfileOpener,
               ),
@@ -763,6 +800,7 @@ class _MainShellState extends State<MainShell> {
         ratingBuilder: _buildRating,
         canEdit: _canEdit,
         onEdit: _editActivity,
+        onCancel: _cancelActivity,
         onOpenChat: _openActivityChat,
         onCreatorSelected: _creatorProfileOpener,
       ),

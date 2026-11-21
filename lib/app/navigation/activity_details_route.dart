@@ -13,6 +13,7 @@ Route<void> activityDetailsRoute({
   Widget Function(Activity activity)? ratingBuilder,
   bool Function(Activity activity)? canEdit,
   Future<bool> Function(Activity activity)? onEdit,
+  Future<bool> Function(Activity activity)? onCancel,
   void Function(Activity activity)? onOpenChat,
   ValueChanged<String>? onCreatorSelected,
 }) {
@@ -27,6 +28,7 @@ Route<void> activityDetailsRoute({
       ratingBuilder: ratingBuilder,
       canEdit: canEdit,
       onEdit: onEdit,
+      onCancel: onCancel,
       onOpenChat: onOpenChat,
       onCreatorSelected: onCreatorSelected,
     ),
