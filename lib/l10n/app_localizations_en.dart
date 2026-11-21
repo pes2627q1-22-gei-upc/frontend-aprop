@@ -1095,6 +1095,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notifSendingResponse => 'Sending your answer';
 
   @override
+  String notifAcceptRequestFrom(String name) {
+    return 'Accept the friend request from $name';
+  }
+
+  @override
+  String notifDeclineRequestFrom(String name) {
+    return 'Decline the friend request from $name';
+  }
+
+  @override
   String get notifAccept => 'Accept';
 
   @override

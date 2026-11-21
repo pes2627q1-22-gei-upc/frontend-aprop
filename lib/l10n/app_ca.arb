@@ -721,6 +721,22 @@
   "notifActivityGone": "L’activitat ja no està disponible.",
   "notifActivityLoadError": "No s’ha pogut carregar la informació de l’activitat. Pots provar d’obrir-la.",
   "notifSendingResponse": "Enviant la resposta",
+  "notifAcceptRequestFrom": "Acceptar la sol·licitud d’amistat de {name}",
+  "@notifAcceptRequestFrom": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "notifDeclineRequestFrom": "Rebutjar la sol·licitud d’amistat de {name}",
+  "@notifDeclineRequestFrom": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "notifAccept": "Acceptar",
   "notifDecline": "Rebutjar",
   "notifRequestAccepted": "Sol·licitud acceptada",
