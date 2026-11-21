@@ -105,6 +105,37 @@ class HttpUserSyncRepository implements UserSyncRepository {
     return _userFrom(_decode(response) as Map);
   }
 
+  /// `DELETE /users/me` (#116): el backend esborra les dades de la base de
+  /// dades, la foto de S3 i el compte de Firebase. Respon 204.
+  @override
+  Future<bool> deleteAccount() async {
+    final token = await _idToken();
+    if (token == null) throw StateError('No hi ha cap sessió iniciada.');
+
+    final http.Response response;
+    try {
+      response = await _client
+          .delete(
+            _endpoint('users/me'),
+            headers: {
+              'Accept': 'application/json',
+              'Authorization': 'Bearer $token',
+            },
+          )
+          .timeout(timeout);
+    } on http.ClientException {
+      throw AuthFailure.network;
+    } on TimeoutException {
+      throw AuthFailure.network;
+    }
+
+    // Ja no existia: el resultat és el mateix.
+    if (response.statusCode == 204 || response.statusCode == 404) return true;
+    throw StateError(
+      'DELETE /users/me ha respost ${response.statusCode}: ${response.body}',
+    );
+  }
+
   UserProfile _userFrom(Map user) {
     return UserProfile(
       id: '${user['id']}',

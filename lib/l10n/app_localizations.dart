@@ -874,6 +874,48 @@ abstract class AppLocalizations {
   /// **'Eliminar compte'**
   String get settingsDeleteAccount;
 
+  /// No description provided for @settingsDeletingAccount.
+  ///
+  /// In ca, this message translates to:
+  /// **'Eliminant el compte…'**
+  String get settingsDeletingAccount;
+
+  /// No description provided for @settingsDeleteAccountTitle.
+  ///
+  /// In ca, this message translates to:
+  /// **'Vols eliminar el compte?'**
+  String get settingsDeleteAccountTitle;
+
+  /// No description provided for @settingsDeleteAccountBody.
+  ///
+  /// In ca, this message translates to:
+  /// **'S’esborraran el teu perfil, la foto, els plans, les activitats que has creat, les valoracions, els amics i els avisos, i també el compte per iniciar sessió. No es pot desfer.'**
+  String get settingsDeleteAccountBody;
+
+  /// No description provided for @settingsDeleteAccountTypeWord.
+  ///
+  /// In ca, this message translates to:
+  /// **'Per confirmar-ho, escriu {word}:'**
+  String settingsDeleteAccountTypeWord(String word);
+
+  /// No description provided for @settingsDeleteAccountWord.
+  ///
+  /// In ca, this message translates to:
+  /// **'ELIMINAR'**
+  String get settingsDeleteAccountWord;
+
+  /// No description provided for @settingsDeleteAccountConfirm.
+  ///
+  /// In ca, this message translates to:
+  /// **'Eliminar el compte'**
+  String get settingsDeleteAccountConfirm;
+
+  /// No description provided for @settingsDeleteAccountError.
+  ///
+  /// In ca, this message translates to:
+  /// **'No hem pogut eliminar el compte. Torna-ho a provar.'**
+  String get settingsDeleteAccountError;
+
   /// No description provided for @settingsLoadError.
   ///
   /// In ca, this message translates to:

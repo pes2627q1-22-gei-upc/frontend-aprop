@@ -457,6 +457,31 @@ class AppLocalizationsEs extends AppLocalizations {
   String get settingsDeleteAccount => 'Eliminar cuenta';
 
   @override
+  String get settingsDeletingAccount => 'Eliminando la cuenta…';
+
+  @override
+  String get settingsDeleteAccountTitle => '¿Quieres eliminar la cuenta?';
+
+  @override
+  String get settingsDeleteAccountBody =>
+      'Se borrarán tu perfil, la foto, los planes, las actividades que has creado, las valoraciones, los amigos y los avisos, y también la cuenta para iniciar sesión. No se puede deshacer.';
+
+  @override
+  String settingsDeleteAccountTypeWord(String word) {
+    return 'Para confirmarlo, escribe $word:';
+  }
+
+  @override
+  String get settingsDeleteAccountWord => 'ELIMINAR';
+
+  @override
+  String get settingsDeleteAccountConfirm => 'Eliminar la cuenta';
+
+  @override
+  String get settingsDeleteAccountError =>
+      'No hemos podido eliminar la cuenta. Vuelve a intentarlo.';
+
+  @override
   String get settingsLoadError =>
       'No hemos podido cargar la configuración. Vuelve a intentarlo.';
 

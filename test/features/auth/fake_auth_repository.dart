@@ -93,6 +93,14 @@ class FakeAuthRepository implements AuthRepository {
   @override
   Future<void> signOut() => _respond();
 
+  int deleteAccountCalls = 0;
+
+  @override
+  Future<void> deleteAccount() {
+    deleteAccountCalls++;
+    return _respond();
+  }
+
   /// Resposta de [currentIdToken].
   String? idToken;
 

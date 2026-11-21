@@ -826,3 +826,19 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Codi:** `TODO(DP-069)` a `enrollment_view_model.dart`.
 - **Qui decideix:** backend (`state` a l’activitat i bloqueig d’inscripcions)
 - **Resolució:**
+
+### DP-075 · Eliminar compte (#10): confirmació i comportament sense backend
+- **Estat:** oberta · 2026-11-21 · Claude Code (Opus 5.5) amb confirmació de l’usuari · Taiga #117 (història #10)
+- **Identificador:** les DP-070 a DP-074 són a altres branques o PR sense fusionar; es fa servir la DP-075.
+- **Context:** `AuthRepository.deleteAccount`, `UserSyncRepository.deleteAccount`, `ProfileSettingsViewModel.deleteAccount`, `_DeleteAccountDialog` a `profile_settings_screen.dart`. Backend consultat a `api-aprop@develop` sense modificar-lo (#116, tancada): `DELETE /users/me` esborra les dades de PostgreSQL, la foto de S3 i el compte de Firebase, i respon 204 (502 si Firebase falla).
+- **Decisions de l’usuari:**
+  - El diàleg explica què s’esborra i que és irreversible, i el botó coral només s’activa en escriure «ELIMINAR» («DELETE» en anglès).
+  - En mode Demo, el compte s’esborra durant l’execució: no s’hi pot tornar a entrar fins a reiniciar l’app.
+- **Deduït (sense confirmar):**
+  - El mockup (fig. 19) només mostra l’opció en coral; el text del diàleg i dels errors no té mockup.
+  - Un 404 es tracta com a esborrat (el compte ja no existia).
+  - Si falla, el compte es conserva, la sessió continua oberta i surt un avís a baix (l’error de dalt de Configuració quedaria fora de la pantalla).
+  - Amb Firebase però sense backend, l’app esborra el compte de Firebase ella mateixa; Firebase pot demanar haver iniciat sessió fa poc i aleshores surt l’error.
+- **Codi:** sense `TODO`; vegeu `docs/profile.md`.
+- **Qui decideix:** equip/PO (textos i confirmació)
+- **Resolució:**

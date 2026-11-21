@@ -250,6 +250,20 @@
   "settingsSigningOut": "Tancant sessió…",
   "settingsSignOut": "Tancar sessió",
   "settingsDeleteAccount": "Eliminar compte",
+  "settingsDeletingAccount": "Eliminant el compte…",
+  "settingsDeleteAccountTitle": "Vols eliminar el compte?",
+  "settingsDeleteAccountBody": "S’esborraran el teu perfil, la foto, els plans, les activitats que has creat, les valoracions, els amics i els avisos, i també el compte per iniciar sessió. No es pot desfer.",
+  "settingsDeleteAccountTypeWord": "Per confirmar-ho, escriu {word}:",
+  "@settingsDeleteAccountTypeWord": {
+    "placeholders": {
+      "word": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsDeleteAccountWord": "ELIMINAR",
+  "settingsDeleteAccountConfirm": "Eliminar el compte",
+  "settingsDeleteAccountError": "No hem pogut eliminar el compte. Torna-ho a provar.",
   "settingsLoadError": "No hem pogut carregar la configuració. Torna-ho a provar.",
   "settingsSaveError": "No hem pogut desar el canvi. Torna-ho a provar.",
   "settingsSignOutError": "No hem pogut tancar la sessió. Torna-ho a provar.",

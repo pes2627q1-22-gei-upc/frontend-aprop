@@ -103,3 +103,9 @@ El comptador «Amics» de la capçalera és un botó (48 dp) que obre `FriendsLi
 - **Navegació:** `MainShell._openFriendsList` l’obre al navegador de la secció activa.
 
 Prova manual: amb un compte nou, a la pestanya Mapa obrir «Teatre sota les estrelles» → «Veure perfil» (Laia, amb plans); a Avisos → Social, tocar la sol·licitud de Marc (plans privats) i prémer «Afegeix com a amic»; al Perfil, tocar «Amics» i després Júlia.
+
+## Eliminar compte (#10, DP-075)
+
+A Configuració, «Eliminar compte» (en coral) obre un diàleg que explica què s’esborra (perfil, foto, plans, activitats creades, valoracions, amics, avisos i el compte per iniciar sessió) i que no es pot desfer. El botó «Eliminar el compte» només s’activa en escriure «ELIMINAR». `ProfileSettingsViewModel.deleteAccount` crida `AuthRepository.deleteAccount`: amb backend, `DELETE /users/me` (el servidor esborra també el compte de Firebase) i després es tanca la sessió, de manera que `AuthGate` mostra l’inici de sessió. Si falla, el compte es conserva i surt un avís. En Demo, el compte desapareix durant l’execució.
+
+Proves: `http_user_sync_repository_test.dart` (204, 404, errors i xarxa), `demo_auth_repository_test.dart` i `test/app/delete_account_flow_test.dart` (paraula de confirmació, «Cancel·la», eliminació i retorn a l’inici de sessió, error i 320 px amb lletra doble).

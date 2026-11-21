@@ -9,6 +9,7 @@ class ProfileSettingsViewModel extends ChangeNotifier {
     required this.userId,
     required this.repository,
     required this.onSignOut,
+    this.onDeleteAccount,
     this.localeController,
   });
 
@@ -16,9 +17,13 @@ class ProfileSettingsViewModel extends ChangeNotifier {
   final String userId;
   final ProfileSettingsRepository repository;
   final Future<void> Function() onSignOut;
+
+  /// Esborra el compte i tanca la sessió (#10). Sense, l'opció és pendent.
+  final Future<void> Function()? onDeleteAccount;
   ProfileSettings? _settings;
   bool _isLoading = false;
   bool _isSigningOut = false;
+  bool _isDeletingAccount = false;
   bool _isDisposed = false;
   ProfilePreference? _savingPreference;
   String? _errorMessage;
@@ -31,7 +36,10 @@ class ProfileSettingsViewModel extends ChangeNotifier {
   bool get hasLocaleController => localeController != null;
   bool get isLoading => _isLoading;
   bool get isSigningOut => _isSigningOut;
-  bool get isBusy => _savingPreference != null || _isSigningOut;
+  bool get canDeleteAccount => onDeleteAccount != null;
+  bool get isDeletingAccount => _isDeletingAccount;
+  bool get isBusy =>
+      _savingPreference != null || _isSigningOut || _isDeletingAccount;
   ProfilePreference? get savingPreference => _savingPreference;
   String? get errorMessage => _errorMessage;
   String? get actionError => _actionError;
@@ -129,6 +137,29 @@ class ProfileSettingsViewModel extends ChangeNotifier {
     } finally {
       if (!_isDisposed) {
         _isSigningOut = false;
+        notifyListeners();
+      }
+    }
+  }
+
+  /// Només es crida després de la confirmació del diàleg. Si va bé, la
+  /// sessió es tanca i AuthGate mostra l'inici de sessió; si falla, el compte
+  /// es conserva i es pot tornar a provar.
+  Future<void> deleteAccount() async {
+    final delete = onDeleteAccount;
+    if (_isDisposed || isBusy || delete == null) return;
+    _isDeletingAccount = true;
+    _actionError = null;
+    notifyListeners();
+    try {
+      await delete();
+    } catch (_) {
+      if (!_isDisposed) {
+        _actionError = currentL10n.settingsDeleteAccountError;
+      }
+    } finally {
+      if (!_isDisposed) {
+        _isDeletingAccount = false;
         notifyListeners();
       }
     }

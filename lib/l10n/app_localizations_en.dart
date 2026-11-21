@@ -447,6 +447,31 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsDeleteAccount => 'Delete account';
 
   @override
+  String get settingsDeletingAccount => 'Deleting the account…';
+
+  @override
+  String get settingsDeleteAccountTitle => 'Delete your account?';
+
+  @override
+  String get settingsDeleteAccountBody =>
+      'Your profile, photo, plans, the activities you created, ratings, friends and notices will be erased, and so will your sign-in account. This can’t be undone.';
+
+  @override
+  String settingsDeleteAccountTypeWord(String word) {
+    return 'To confirm, type $word:';
+  }
+
+  @override
+  String get settingsDeleteAccountWord => 'DELETE';
+
+  @override
+  String get settingsDeleteAccountConfirm => 'Delete the account';
+
+  @override
+  String get settingsDeleteAccountError =>
+      'We couldn’t delete the account. Please try again.';
+
+  @override
   String get settingsLoadError =>
       'We couldn’t load your settings. Please try again.';
 

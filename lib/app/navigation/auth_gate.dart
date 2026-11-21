@@ -256,6 +256,7 @@ class _AuthGateState extends State<AuthGate> {
           key: ValueKey((user.id, user.serverId)),
           user: user,
           onSignOut: widget.authRepository.signOut,
+          onDeleteAccount: widget.authRepository.deleteAccount,
           activityRepository: _activityRepository,
           enrollmentRepository: _enrollmentRepository,
           assistantRepository: _assistantRepository,

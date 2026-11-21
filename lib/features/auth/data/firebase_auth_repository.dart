@@ -222,6 +222,14 @@ class FirebaseAuthRepository implements AuthRepository {
   Future<String?> currentIdToken() async => _auth.currentUser?.getIdToken();
 
   @override
+  Future<void> deleteAccount() async {
+    final deletedByServer = await _userSync.deleteAccount();
+    // Sense backend, el compte de Firebase s'esborra des d'aquí.
+    if (!deletedByServer) await _auth.currentUser?.delete();
+    await signOut();
+  }
+
+  @override
   Future<void> signOut() async {
     try {
       // També es tanca la sessió de Google perquè la propera vegada es pugui

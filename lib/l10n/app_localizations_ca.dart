@@ -453,6 +453,31 @@ class AppLocalizationsCa extends AppLocalizations {
   String get settingsDeleteAccount => 'Eliminar compte';
 
   @override
+  String get settingsDeletingAccount => 'Eliminant el compte…';
+
+  @override
+  String get settingsDeleteAccountTitle => 'Vols eliminar el compte?';
+
+  @override
+  String get settingsDeleteAccountBody =>
+      'S’esborraran el teu perfil, la foto, els plans, les activitats que has creat, les valoracions, els amics i els avisos, i també el compte per iniciar sessió. No es pot desfer.';
+
+  @override
+  String settingsDeleteAccountTypeWord(String word) {
+    return 'Per confirmar-ho, escriu $word:';
+  }
+
+  @override
+  String get settingsDeleteAccountWord => 'ELIMINAR';
+
+  @override
+  String get settingsDeleteAccountConfirm => 'Eliminar el compte';
+
+  @override
+  String get settingsDeleteAccountError =>
+      'No hem pogut eliminar el compte. Torna-ho a provar.';
+
+  @override
   String get settingsLoadError =>
       'No hem pogut carregar la configuració. Torna-ho a provar.';
 
