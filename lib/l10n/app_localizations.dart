@@ -1696,6 +1696,12 @@ abstract class AppLocalizations {
   /// **'Tens un nou avís.'**
   String get notifMessageOther;
 
+  /// No description provided for @pushView.
+  ///
+  /// In ca, this message translates to:
+  /// **'Veure'**
+  String get pushView;
+
   /// No description provided for @notifMessagePublished.
   ///
   /// In ca, this message translates to:

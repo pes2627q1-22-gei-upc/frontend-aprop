@@ -17,6 +17,7 @@ class NotificationsScreen extends StatefulWidget {
     required this.onActivitySelected,
     this.onPersonSelected,
     this.friendshipRepository,
+    this.reload,
     this.now,
   });
 
@@ -27,6 +28,9 @@ class NotificationsScreen extends StatefulWidget {
   // App composition supplies the profile destination; responding is independent.
   final ValueChanged<String>? onPersonSelected;
   final DateTime Function()? now;
+
+  /// Notifies when the inbox has to be read again (a push arrived, #265).
+  final Listenable? reload;
 
   @override
   State<NotificationsScreen> createState() => _NotificationsScreenState();
@@ -40,7 +44,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   void initState() {
     super.initState();
     _createViewModel();
+    widget.reload?.addListener(_reload);
   }
+
+  void _reload() => _viewModel.load();
 
   void _createViewModel() {
     _viewModel = NotificationsViewModel(
@@ -55,6 +62,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   @override
   void didUpdateWidget(covariant NotificationsScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.reload != widget.reload) {
+      oldWidget.reload?.removeListener(_reload);
+      widget.reload?.addListener(_reload);
+    }
     if (oldWidget.userId != widget.userId ||
         oldWidget.repository != widget.repository ||
         oldWidget.friendshipRepository != widget.friendshipRepository ||
@@ -88,6 +99,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
   @override
   void dispose() {
+    widget.reload?.removeListener(_reload);
     _viewModel.dispose();
     super.dispose();
   }

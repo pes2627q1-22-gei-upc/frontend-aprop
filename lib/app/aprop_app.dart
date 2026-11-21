@@ -20,6 +20,7 @@ import '../features/profile/repositories/profile_settings_repository.dart';
 import '../features/profile/repositories/public_profile_repository.dart';
 import '../features/profile/repositories/friendship_repository.dart';
 import '../features/attendance/repositories/attendance_repository.dart';
+import '../features/push/repositories/push_repository.dart';
 import '../features/profile/repositories/friends_repository.dart';
 import '../features/profile/repositories/user_search_repository.dart';
 import 'navigation/auth_gate.dart';
@@ -43,6 +44,8 @@ class APropApp extends StatelessWidget {
     this.userSearchRepository,
     this.friendsRepository,
     this.attendanceRepository,
+    this.pushMessaging,
+    this.pushDeviceRepository,
     this.interestTestRepository,
     this.activityCategoryRepository,
     this.userLocationRepository,
@@ -74,6 +77,10 @@ class APropApp extends StatelessWidget {
   final UserSearchRepository? userSearchRepository;
   final FriendsRepository? friendsRepository;
   final AttendanceRepository? attendanceRepository;
+
+  /// Notificacions push (#265); només amb Firebase i backend.
+  final PushMessaging? pushMessaging;
+  final PushDeviceRepository? pushDeviceRepository;
   final InterestTestRepository? interestTestRepository;
 
   /// Categories per crear activitats. Si no hi és, el formulari fa servir la
@@ -99,6 +106,8 @@ class APropApp extends StatelessWidget {
         userSearchRepository,
         friendsRepository,
         attendanceRepository,
+        pushMessaging,
+        pushDeviceRepository,
         interestTestRepository,
         activityCategoryRepository,
         userLocationRepository,
@@ -119,6 +128,8 @@ class APropApp extends StatelessWidget {
       userSearchRepository: userSearchRepository,
       friendsRepository: friendsRepository,
       attendanceRepository: attendanceRepository,
+      pushMessaging: pushMessaging,
+      pushDeviceRepository: pushDeviceRepository,
       interestTestRepository: interestTestRepository,
       activityCategoryRepository: activityCategoryRepository,
       userLocationRepository: userLocationRepository,

@@ -266,6 +266,7 @@
   "notifMessageSocialPerson": "Tienes un aviso social relacionado con {name}.",
   "notifMessageSocial": "Tienes un nuevo aviso social.",
   "notifMessageOther": "Tienes un nuevo aviso.",
+  "pushView": "Ver",
   "notifMessagePublished": "{name} ha publicado “{title}”.",
   "notifMessageEnrolled": "{name} se ha apuntado a “{title}”.",
   "notifMessageFriendRequest": "{name} te ha enviado una solicitud de amistad.",

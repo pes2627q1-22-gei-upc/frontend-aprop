@@ -1003,6 +1003,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get notifMessageOther => 'Tienes un nuevo aviso.';
 
   @override
+  String get pushView => 'Ver';
+
+  @override
   String notifMessagePublished(String name, String title) {
     return '$name ha publicado “$title”.';
   }

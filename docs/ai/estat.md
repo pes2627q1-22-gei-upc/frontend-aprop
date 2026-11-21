@@ -10,6 +10,7 @@
 
 | Taiga | Tasca | Branca | Estat |
 |---|---|---|---|
+| #276 | [FE] Notificacions push + configuració de Firebase (història #265) | `feature/notificacions-push` | Implementada contra la PR de la #275 (sense fusionar); DP-072 oberta; pendent prova en dispositiu i revisió humana |
 | #181 | [FE] Botó i diàleg de cancel·lació a la fitxa per a qui l’ha creada + reflex visual a l’Agenda i el catàleg + tests (història #46) | `feature/cancel-lar-activitat` | Implementada (HTTP i Demo); DP-069 oberta; pendent revisió humana |
 | #168 | [FE] Targeta de sol·licitud amb Acceptar/Rebutjar a NotificationsScreen + tests | `feature/friend-request-notification-card-168` | Publicada a `314bd93`; merge amb develop verificat: 856 proves, anàlisi, format i APK correctes; pendent commit/push de la resolució |
 | #193 | [FE] Acció «Rebutjar» a Avisos i perfil + tests | `feature/reject-friend-request-193` | Integrada a develop amb PR #68; DP-067 oberta |

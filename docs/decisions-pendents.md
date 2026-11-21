@@ -814,3 +814,20 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Codi:** `TODO(DP-069)` a `enrollment_view_model.dart`.
 - **Qui decideix:** backend (`state` a l’activitat i bloqueig d’inscripcions)
 - **Resolució:**
+
+### DP-072 · Notificacions push (#265): paquet, plataformes i backend sense fusionar
+- **Estat:** oberta · 2026-11-21 · Claude Code (Opus 5.5) a petició de l’usuari · Taiga #276 (història #265)
+- **Identificador:** la DP-070 és de la #170 (Adam) i la DP-071 de la #47 (sense fusionar); es fa servir la DP-072.
+- **Context:** `features/push/` (`PushViewModel`, `FirebasePushMessaging`, `HttpPushDeviceRepository`), `MainShell` i `main.dart`. Backend: PR de la #275 (Arnau, branca `feature/push-notifications`), **encara no fusionada a `develop`**: `PUT /users/me/devices` (`{"token", "platform": "android|ios|web"}`, 204), `DELETE /users/me/devices/{token}` (204) i, a cada push, títol, text i les dades `notification-id`, `type`, `event-id` i `friend-id`.
+- **Decisions de l’usuari:** es fa contra el contracte de la PR d’Arnau, encara que no estigui a `develop`. La història no té criteris a Taiga: els proposa l’agent (vegeu `docs/push-notifications.md`) i l’usuari els hi posarà.
+- **Paquet nou:** `firebase_messaging` (de la mateixa família que `firebase_core` i `firebase_auth`). Fa servir l’API nova (`register()` i `onRegistered`, que dona el Firebase Installation ID); el backend accepta tant aquests ID com els tokens antics.
+- **Deduït (sense confirmar):**
+  - Només Android, on Firebase ja està configurat per al login. iOS no té configuració de Firebase (DP-026) i la web només serveix per desenvolupar (caldria un *service worker* i una clau VAPID).
+  - El permís de notificacions es demana en entrar a l’app; si es denega, l’app funciona igual i els avisos continuen a Avisos.
+  - Amb l’app tancada o en segon pla, el sistema mostra el push; en tocar-lo s’obre Avisos i, si parla d’una activitat, la seva fitxa. Amb l’app oberta, el sistema no el mostra: surt un avís a baix amb «Veure» i Avisos es torna a carregar.
+  - En tancar la sessió (abans de perdre el token), el mòbil es dona de baixa perquè la propera persona no rebi els pushes del compte anterior.
+  - No hi ha interruptor de push a Configuració: és la zona de la #19 (Adam). El backend ja té `push-enabled` al perfil.
+- **Pendent:** prova de punta a punta en un dispositiu amb el backend de la #275 i les credencials de Firebase del servidor (les té configurades Arnau).
+- **Codi:** `TODO(DP-072)` a `firebase_push_messaging.dart` i `main.dart`.
+- **Qui decideix:** equip (paquet, plataformes) + backend (fusió de la #275)
+- **Resolució:**
