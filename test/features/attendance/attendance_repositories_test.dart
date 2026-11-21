@@ -110,9 +110,27 @@ void main() {
         throwsFormatException,
       );
       expect(
-        repository((request) async => _json({'error': 'x'}, 409))
+        repository((request) async => _json({'error': 'x'}, 500))
             .setAttendance(userId: 'u', activityId: '42', attended: true),
         throwsA(isA<ApiException>()),
+      );
+    });
+
+    test('The server’s refusals say why', () async {
+      expect(
+        repository(
+          (request) async => _json({
+            'error': 'attendance can only be set once the event has started',
+          }, 409),
+        ).setAttendance(userId: 'u', activityId: '42', attended: true),
+        throwsA(AttendanceFailure.notStarted),
+      );
+      expect(
+        repository(
+          (request) async =>
+              _json({'error': 'user is not enrolled in the event'}, 404),
+        ).setAttendance(userId: 'u', activityId: '42', attended: true),
+        throwsA(AttendanceFailure.notEnrolled),
       );
     });
   });

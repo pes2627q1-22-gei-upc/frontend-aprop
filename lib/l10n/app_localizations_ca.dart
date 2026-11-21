@@ -1330,6 +1330,20 @@ class AppLocalizationsCa extends AppLocalizations {
       'No hem pogut desar la resposta. Torna-ho a provar.';
 
   @override
+  String attendanceThanksYes(String title) {
+    return 'Gràcies! Ja pots valorar «$title».';
+  }
+
+  @override
+  String get attendanceThanksNo => 'D’acord, no t’ho tornarem a preguntar.';
+
+  @override
+  String get attendanceNotStarted => 'Aquesta activitat encara no ha començat.';
+
+  @override
+  String get attendanceNotEnrolled => 'Ja no hi estàs apuntat.';
+
+  @override
   String agendaPublishedBy(String name) {
     return 'Publicat per $name';
   }

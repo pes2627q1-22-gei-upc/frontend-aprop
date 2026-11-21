@@ -863,6 +863,17 @@
   "attendanceNo": "No hi vaig anar",
   "attendanceLater": "Més tard",
   "attendanceSaveError": "No hem pogut desar la resposta. Torna-ho a provar.",
+  "attendanceThanksYes": "Gràcies! Ja pots valorar «{title}».",
+  "@attendanceThanksYes": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "attendanceThanksNo": "D’acord, no t’ho tornarem a preguntar.",
+  "attendanceNotStarted": "Aquesta activitat encara no ha començat.",
+  "attendanceNotEnrolled": "Ja no hi estàs apuntat.",
   "agendaPublishedBy": "Publicat per {name}",
   "@agendaPublishedBy": {
     "placeholders": {

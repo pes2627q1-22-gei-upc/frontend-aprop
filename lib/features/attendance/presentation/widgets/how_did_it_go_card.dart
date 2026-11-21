@@ -66,16 +66,43 @@ class _Question extends StatelessWidget {
   final Activity activity;
   final AttendanceViewModel viewModel;
 
+  /// Sends the answer and says so: the question disappears, and the stars
+  /// may be on another day of the calendar.
+  Future<void> _answer(BuildContext context, {required bool attended}) async {
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    final thanks = attended
+        ? context.l10n.attendanceThanksYes(activity.title)
+        : context.l10n.attendanceThanksNo;
+    final saved = await viewModel.answer(activity.id, attended: attended);
+    if (!saved) return;
+    messenger
+      ?..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(thanks)));
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
     final busy = viewModel.isAnswering(activity.id);
-    // «Sí» and «No» look the same: «No» is not a bad rating.
+    // «Sí» and «No» look the same (CA1): «No» is not a bad rating.
     final answerStyle = FilledButton.styleFrom(
       minimumSize: const Size(0, 48),
-      backgroundColor: colors.surface,
-      foregroundColor: colors.onSurface,
+      backgroundColor: colors.secondaryContainer,
+      foregroundColor: colors.onSecondaryContainer,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    );
+    final yes = FilledButton(
+      key: ValueKey('attendance-yes-${activity.id}'),
+      style: answerStyle,
+      onPressed: busy ? null : () => _answer(context, attended: true),
+      child: Text(context.l10n.attendanceYes, textAlign: TextAlign.center),
+    );
+    final no = FilledButton(
+      key: ValueKey('attendance-no-${activity.id}'),
+      style: answerStyle,
+      onPressed: busy ? null : () => _answer(context, attended: false),
+      child: Text(context.l10n.attendanceNo, textAlign: TextAlign.center),
     );
     return DecoratedBox(
       key: ValueKey('how-did-it-go-${activity.id}'),
@@ -95,41 +122,48 @@ class _Question extends StatelessWidget {
                 color: colors.onSurfaceVariant,
               ),
             ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                FilledButton.tonal(
-                  key: ValueKey('attendance-yes-${activity.id}'),
-                  style: answerStyle,
-                  onPressed: busy
-                      ? null
-                      : () => viewModel.answer(activity.id, attended: true),
-                  child: Text(context.l10n.attendanceYes),
-                ),
-                FilledButton.tonal(
-                  key: ValueKey('attendance-no-${activity.id}'),
-                  style: answerStyle,
-                  onPressed: busy
-                      ? null
-                      : () => viewModel.answer(activity.id, attended: false),
-                  child: Text(context.l10n.attendanceNo),
-                ),
-                TextButton(
-                  key: ValueKey('attendance-later-${activity.id}'),
-                  style: TextButton.styleFrom(minimumSize: const Size(0, 48)),
-                  onPressed: busy
-                      ? null
-                      : () => viewModel.postpone(activity.id),
-                  child: Text(context.l10n.attendanceLater),
-                ),
-              ],
+            const SizedBox(height: 12),
+            // Side by side and the same width; one under the other if they
+            // do not fit (narrow screen or large text).
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final stacked =
+                    constraints.maxWidth < 300 ||
+                    MediaQuery.textScalerOf(context).scale(14) > 21;
+                if (stacked) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [yes, const SizedBox(height: 8), no],
+                  );
+                }
+                return Row(
+                  children: [
+                    Expanded(child: yes),
+                    const SizedBox(width: 8),
+                    Expanded(child: no),
+                  ],
+                );
+              },
             ),
-            if (viewModel.errorFor(activity.id) case final error?)
+            const SizedBox(height: 4),
+            Center(
+              child: TextButton(
+                key: ValueKey('attendance-later-${activity.id}'),
+                style: TextButton.styleFrom(minimumSize: const Size(0, 48)),
+                onPressed: busy ? null : () => viewModel.postpone(activity.id),
+                child: Text(context.l10n.attendanceLater),
+              ),
+            ),
+            if (busy)
+              const LinearProgressIndicator()
+            else if (viewModel.errorFor(activity.id) case final error?)
               Semantics(
                 liveRegion: true,
-                child: Text(error, style: TextStyle(color: colors.error)),
+                child: Text(
+                  error,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: colors.error),
+                ),
               ),
           ],
         ),

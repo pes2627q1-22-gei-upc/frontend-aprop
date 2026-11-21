@@ -1336,6 +1336,21 @@ class AppLocalizationsEs extends AppLocalizations {
       'No hemos podido guardar la respuesta. Vuelve a intentarlo.';
 
   @override
+  String attendanceThanksYes(String title) {
+    return '¡Gracias! Ya puedes valorar «$title».';
+  }
+
+  @override
+  String get attendanceThanksNo =>
+      'De acuerdo, no te lo volveremos a preguntar.';
+
+  @override
+  String get attendanceNotStarted => 'Esta actividad todavía no ha empezado.';
+
+  @override
+  String get attendanceNotEnrolled => 'Ya no estás apuntado.';
+
+  @override
   String agendaPublishedBy(String name) {
     return 'Publicado por $name';
   }

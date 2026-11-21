@@ -104,6 +104,35 @@ void main() {
     expect(find.text('Com va anar?'), findsNothing);
     expect(find.text('Com t’ha anat?'), findsOneWidget);
     expect(find.textContaining('organitzador'), findsNothing);
+    // It says so: the stars may be on another day of the calendar.
+    expect(
+      find.text('Gràcies! Ja pots valorar «Jazz al parc».'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('«Sí» i «No» es veuen igual i un al costat de l’altre', (
+    tester,
+  ) async {
+    await _pumpAgenda(tester, now: DateTime(2026, 9, 26, 20), enrolled: true);
+    final yes = find.byKey(const ValueKey('attendance-yes-demo-jazz'));
+    final no = find.byKey(const ValueKey('attendance-no-demo-jazz'));
+
+    expect(tester.getSize(yes), tester.getSize(no));
+    expect(tester.getTopLeft(yes).dy, tester.getTopLeft(no).dy);
+    final yesColor = tester
+        .widget<FilledButton>(yes)
+        .style!
+        .backgroundColor!
+        .resolve({});
+    final noColor = tester
+        .widget<FilledButton>(no)
+        .style!
+        .backgroundColor!
+        .resolve({});
+    // A background that is not the card's: the buttons can be seen.
+    expect(yesColor, isNot(Theme.of(tester.element(yes)).colorScheme.surface));
+    expect(yesColor, noColor);
   });
 
   testWidgets('«No hi vaig anar» closes the question without stars', (

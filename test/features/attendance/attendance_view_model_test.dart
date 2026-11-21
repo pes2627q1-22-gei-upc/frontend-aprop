@@ -98,4 +98,16 @@ void main() {
     model.startVisit();
     expect(model.isPending('a'), isTrue);
   });
+
+  test('A refusal of the server is explained', () async {
+    await model.ensureLoaded(['a', 'b']);
+
+    repository.writeError = AttendanceFailure.notStarted;
+    await model.answer('a', attended: true);
+    expect(model.errorFor('a'), 'Aquesta activitat encara no ha començat.');
+
+    repository.writeError = AttendanceFailure.notEnrolled;
+    await model.answer('b', attended: true);
+    expect(model.errorFor('b'), 'Ja no hi estàs apuntat.');
+  });
 }
