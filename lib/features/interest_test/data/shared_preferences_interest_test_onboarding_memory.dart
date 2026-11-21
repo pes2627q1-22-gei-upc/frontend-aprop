@@ -3,7 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../repositories/interest_test_onboarding_memory.dart';
 
 /// Persists per-account onboarding prompt state in [SharedPreferences].
-// TODO(DP-078): Local per-uid fallback complementing server-side
+// TODO(DP-080): Local per-uid fallback complementing server-side
 // Users.InterestTestPrompted.
 class SharedPreferencesInterestTestOnboardingMemory
     implements InterestTestOnboardingMemory {

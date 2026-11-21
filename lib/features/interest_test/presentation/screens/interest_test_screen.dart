@@ -352,7 +352,7 @@ class _QuestionCard extends StatelessWidget {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // TODO(DP-078): Fixed 16:9 capped banner with allowUpscaling: false
+              // TODO(DP-080): Fixed 16:9 capped banner with allowUpscaling: false
               // and FilterQuality.high avoids pixelating smaller Gencat covers
               // while leaving most of the card height for title and description.
               SizedBox(

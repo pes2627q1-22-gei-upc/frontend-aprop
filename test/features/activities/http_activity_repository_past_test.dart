@@ -10,7 +10,7 @@ import 'backend_event_fixture.dart';
 
 void main() {
   test(
-    'Finished events are hidden without stopping pagination (DP-080)',
+    'Finished events are hidden without stopping pagination (DP-082)',
     () async {
       final repository = HttpActivityRepository(
         apiClient: ApiClient(

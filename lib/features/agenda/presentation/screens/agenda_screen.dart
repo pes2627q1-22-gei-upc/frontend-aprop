@@ -226,7 +226,7 @@ class _AgendaScreenState extends State<AgendaScreen> {
       ];
     }
 
-    // TODO(DP-079): full upcoming list grouped by date + collapsible past
+    // TODO(DP-081): full upcoming list grouped by date + collapsible past
     // section below the calendar (deviates from fig. 11 inline day list).
     final upcomingGroups = _viewModel.upcomingPlanGroups;
     final pastGroups = _viewModel.pastPlanGroups;

@@ -11,7 +11,7 @@ import 'agenda_plan_card.dart';
 ///
 /// Tapping a plan pops the sheet with that activity's ID so [AgendaScreen] can
 /// open its details route cleanly.
-// TODO(DP-079): cards inside the day sheet omit the inline «Desapunta’m» action
+// TODO(DP-081): cards inside the day sheet omit the inline «Desapunta’m» action
 // so the «Desfer» SnackBar is never trapped behind the modal barrier.
 class AgendaDaySheet extends StatelessWidget {
   const AgendaDaySheet({

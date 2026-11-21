@@ -131,7 +131,7 @@ class _AuthGateState extends State<AuthGate> {
 
   // Users whose onboarding interest test was already completed, skipped or
   // bypassed during this app run (fast-path before querying persistent memory
-  // and server-side Users.InterestTestPrompted; TODO(DP-078)).
+  // and server-side Users.InterestTestPrompted; TODO(DP-080)).
   final Set<String> _onboardingHandledUsers = {};
 
   @override

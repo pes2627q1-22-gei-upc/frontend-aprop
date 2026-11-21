@@ -59,7 +59,7 @@ class AgendaViewModel extends ChangeNotifier {
   String? get errorMessage => _errorMessage;
 
   /// Longest range, in days, that is expanded day by day.
-  // TODO(DP-079): 14 is an assumption; exhibitions longer than this stay on their start day.
+  // TODO(DP-081): 14 is an assumption; exhibitions longer than this stay on their start day.
   static const maxExpandedDays = 14;
 
   /// Number of days of a short multi-day [activity], or null when it is a
@@ -95,7 +95,7 @@ class AgendaViewModel extends ChangeNotifier {
 
   /// Upcoming signed-up plans (from [today] onwards), grouped by day in
   /// chronological order.
-  // TODO(DP-079): today stays in upcoming so same-day events (including
+  // TODO(DP-081): today stays in upcoming so same-day events (including
   // midnight backend dates per DP-029) and rating blocks remain directly
   // visible below the calendar.
   List<AgendaDayGroup> get upcomingPlanGroups =>
@@ -137,7 +137,7 @@ class AgendaViewModel extends ChangeNotifier {
 
   /// Past signed-up plans (strictly before [today]), grouped by day with the
   /// most recent day first.
-  // TODO(DP-079): past days are grouped newest-first inside a collapsible
+  // TODO(DP-081): past days are grouped newest-first inside a collapsible
   // secondary section below upcoming plans.
   List<AgendaDayGroup> get pastPlanGroups =>
       _groups(upcoming: false, newestFirst: true);

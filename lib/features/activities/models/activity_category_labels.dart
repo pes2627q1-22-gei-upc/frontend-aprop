@@ -1,7 +1,7 @@
 // Pure-Dart category normalization and trilingual (ca/es/en) label dictionary.
 // Kept in models/ with no Flutter dependency so models, mappers, filters,
 // ViewModels and widgets can share the exact same rules.
-// TODO(DP-081): Static frontend dictionary derived from Gencat Agenda Cultural
+// TODO(DP-083): Static frontend dictionary derived from Gencat Agenda Cultural
 // (`tags_categor_es` and `tags_mbits`) until the backend exposes localized
 // category labels.
 

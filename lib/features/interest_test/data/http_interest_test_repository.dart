@@ -9,7 +9,7 @@ class HttpInterestTestRepository implements InterestTestRepository {
   HttpInterestTestRepository({required this.apiClient});
   final ApiClient apiClient;
 
-  // TODO(DP-078): Supports extended status fields (`prompted`, `in-progress`,
+  // TODO(DP-080): Supports extended status fields (`prompted`, `in-progress`,
   // `answered-count`) while staying compatible with older payloads carrying
   // only `completed` and `date-taken`.
   @override

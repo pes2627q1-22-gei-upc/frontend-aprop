@@ -288,7 +288,7 @@ class _ActivityDetailsContent extends StatelessWidget {
           children: [
             for (final category in visibleCategories)
               ActivityCategoryBadge(category: category),
-            // TODO(DP-081): Cap detail chips at 3 with a compact `+N` badge.
+            // TODO(DP-083): Cap detail chips at 3 with a compact `+N` badge.
             if (extraCategories > 0)
               ActivityCategoryOverflowBadge(count: extraCategories),
             EnrollmentStatusBadge(

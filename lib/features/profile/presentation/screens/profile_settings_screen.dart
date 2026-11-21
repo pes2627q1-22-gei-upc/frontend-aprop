@@ -4,8 +4,10 @@ import '../../../../core/l10n/locale_controller.dart';
 import '../../../auth/models/app_user.dart';
 import '../../models/profile_settings.dart';
 import '../../repositories/profile_settings_repository.dart';
+import '../../repositories/user_blocking_repository.dart';
 import '../view_models/profile_settings_view_model.dart';
 import '../widgets/settings_group.dart';
+import '../widgets/settings_preference_tile.dart';
 
 class ProfileSettingsScreen extends StatefulWidget {
   const ProfileSettingsScreen({
@@ -17,12 +19,16 @@ class ProfileSettingsScreen extends StatefulWidget {
     this.onOpenInterestTest,
     this.onDeleteAccount,
     this.localeController,
+    this.blockingRepository,
+    this.onOpenBlockedUsers,
   });
   final AppUser user;
   final ProfileSettingsRepository repository;
   final Future<void> Function() onSignOut;
   final VoidCallback onBack;
   final VoidCallback? onOpenInterestTest;
+  final UserBlockingRepository? blockingRepository;
+  final VoidCallback? onOpenBlockedUsers;
 
   /// Esborra el compte (#10). Sense, «Eliminar compte» queda pendent.
   final Future<void> Function()? onDeleteAccount;
@@ -41,6 +47,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
     _viewModel = ProfileSettingsViewModel(
       userId: widget.user.id,
       repository: widget.repository,
+      blockingRepository: widget.blockingRepository,
       onSignOut: widget.onSignOut,
       onDeleteAccount: widget.onDeleteAccount,
       localeController: widget.localeController ?? LocaleScope.maybeOf(context),
@@ -57,7 +64,8 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
   void didUpdateWidget(covariant ProfileSettingsScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.user.id != widget.user.id ||
-        oldWidget.repository != widget.repository) {
+        oldWidget.repository != widget.repository ||
+        oldWidget.blockingRepository != widget.blockingRepository) {
       _viewModel.dispose();
       _createViewModel();
     }
@@ -120,14 +128,6 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                         ),
                       ),
                     ),
-                  if (model.savingPreference != null)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: Semantics(
-                        liveRegion: true,
-                        child: Text(context.l10n.settingsSavingChange),
-                      ),
-                    ),
                 ],
               ),
               if (settings != null) ...[
@@ -146,7 +146,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                       selected:
                           Localizations.maybeLocaleOf(context)?.languageCode ??
                           'ca',
-                      onChanged: model.hasLocaleController
+                      onChanged: model.hasLocaleController && !model.isBusy
                           ? (code) => model.changeLanguage(Locale(code))
                           : null,
                     ),
@@ -171,10 +171,31 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                       context.l10n.settingsShowMyPlans,
                       context.l10n.settingsShowMyPlansHint,
                     ),
-                    PendingSettingsTile(
-                      title: context.l10n.settingsBlockedUsers,
-                      icon: Icons.block,
-                    ),
+                    if (widget.onOpenBlockedUsers == null)
+                      PendingSettingsTile(
+                        title: context.l10n.settingsBlockedUsers,
+                        icon: Icons.block,
+                      )
+                    else
+                      ListTile(
+                        key: const ValueKey('settings-blocked-users'),
+                        leading: const SettingsIcon(icon: Icons.block),
+                        title: Text(context.l10n.settingsBlockedUsers),
+                        subtitle: model.blocksError == null
+                            ? null
+                            : Text(model.blocksError!),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (model.blockedUserCount case final count?)
+                              Text('$count'),
+                            const SizedBox(width: 4),
+                            const Icon(Icons.chevron_right),
+                          ],
+                        ),
+                        onTap: model.isBusy ? null : widget.onOpenBlockedUsers,
+                        minVerticalPadding: 12,
+                      ),
                   ],
                 ),
                 SettingsGroup(
@@ -317,16 +338,26 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
         subtitle: context.l10n.comingSoon,
       );
     }
-    return SwitchListTile.adaptive(
-      key: ValueKey('profile-preference-${preference.name}'),
-      secondary: SettingsIcon(icon: icon),
-      title: Text(title),
-      subtitle: subtitle == null ? null : Text(subtitle),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+    // TODO(DP-078): This controls sharing plans with friends, not public events.
+    return SettingsPreferenceTile(
+      switchKey: ValueKey('profile-preference-${preference.name}'),
+      icon: icon,
+      title: title,
+      hint: subtitle,
       value: model.settings!.valueOf(preference),
-      onChanged: model.isBusy || model.isLoading
-          ? null
-          : (value) => model.updatePreference(preference, value),
+      status: preference == ProfilePreference.showMyPlans
+          ? model.settings!.showMyPlans
+                ? context.l10n.settingsPlansShared
+                : context.l10n.settingsPlansPrivate
+          : null,
+      saving: model.savingPreference == preference,
+      error: model.failedPreference == preference
+          ? model.preferenceError
+          : null,
+      onRetry: model.canRetryPreference ? model.retryPreference : null,
+      onChanged: model.canUpdatePreference(preference)
+          ? (value) => model.updatePreference(preference, value)
+          : null,
     );
   }
 }

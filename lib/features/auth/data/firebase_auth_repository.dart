@@ -121,7 +121,7 @@ class FirebaseAuthRepository implements AuthRepository {
       try {
         final profile = await _syncUsername(user.uid, username);
         if (profile.created) {
-          // TODO(DP-077): new accounts default to 'ca' on the backend; push
+          // TODO(DP-079): new accounts default to 'ca' on the backend; push
           // the locally selected language immediately after creation.
           await _ignoreFailure(() => _userSync.updateLanguage(_emailLanguage));
         }

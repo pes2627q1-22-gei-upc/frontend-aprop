@@ -3,7 +3,7 @@
 ///
 /// Server-side `prompted` is the primary source of truth across devices; this
 /// local store guards against transient network failures or older backends
-/// (TODO(DP-078)).
+/// (TODO(DP-080)).
 abstract interface class InterestTestOnboardingMemory {
   Future<bool> wasPrompted(String userId);
 

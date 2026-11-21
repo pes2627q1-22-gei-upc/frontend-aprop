@@ -28,7 +28,7 @@ DateTime Function() activityClock = DateTime.now;
 /// Whether [activity] is over at [now]: its last day (the end day, or the
 /// start day for one-day plans) has finished. Permanent activities never end.
 /// The API still lists one-day events whose date passed when they have no end
-/// date, so the app hides them (DP-080).
+/// date, so the app hides them (DP-082).
 bool activityHasEnded(Activity activity, DateTime now) {
   if (activity.isPermanent) return false;
   final last = activity.endsAt ?? activity.startsAt;

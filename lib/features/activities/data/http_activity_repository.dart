@@ -113,7 +113,7 @@ class HttpActivityRepository
         ]),
       );
     }
-    // Finished events are hidden after the fact (DP-080); `hasMore` below uses
+    // Finished events are hidden after the fact (DP-082); `hasMore` below uses
     // the server's row count so filtering never stops pagination early.
     final now = activityClock();
     final items = <String, Activity>{

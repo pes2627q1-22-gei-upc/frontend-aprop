@@ -5,7 +5,7 @@ import '../../../../core/widgets/aprop_logo.dart';
 
 /// First-launch language picker shown before login/registration when no
 /// language preference is stored on the device yet.
-// TODO(DP-077): No mockup exists for this screen; uses the auth layout and
+// TODO(DP-079): No mockup exists for this screen; uses the auth layout and
 // previews the chosen language live before confirming with Continue.
 class LanguageSelectionScreen extends StatefulWidget {
   const LanguageSelectionScreen({super.key, required this.controller});

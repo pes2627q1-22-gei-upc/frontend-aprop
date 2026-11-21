@@ -5,7 +5,7 @@ import '../../models/activity_category_labels.dart';
 
 /// Maximum number of category chips shown on the activity detail screen before
 /// collapsing the rest into a `+N` badge.
-// TODO(DP-081): Detail chip cap without a dedicated mockup.
+// TODO(DP-083): Detail chip cap without a dedicated mockup.
 const maxDetailActivityCategories = 3;
 
 class ActivityCategoryBadge extends StatelessWidget {
