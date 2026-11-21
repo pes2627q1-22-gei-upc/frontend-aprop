@@ -4,6 +4,7 @@ import 'package:aprop/features/activities/models/activity.dart';
 import 'package:aprop/features/profile/models/profile_avatar.dart';
 import 'package:aprop/features/profile/models/profile_capabilities.dart';
 import 'package:aprop/features/profile/models/profile_settings.dart';
+import 'package:aprop/features/profile/models/notification_preferences.dart';
 import 'package:aprop/features/profile/repositories/profile_repository.dart';
 import 'package:aprop/features/profile/repositories/profile_image_picker.dart';
 import 'package:aprop/features/profile/repositories/profile_settings_repository.dart';
@@ -111,6 +112,43 @@ class FakeProfileSettingsRepository implements ProfileSettingsRepository {
   @override
   bool persistsPreferences = false;
   ProfileSettings settings = const ProfileSettings();
+  NotificationPreferences notifications = NotificationPreferences({
+    ProfilePreference.reminders: true,
+    ProfilePreference.social: true,
+    ProfilePreference.recommendations: false,
+    ProfilePreference.cancellations: true,
+  });
+  Future<NotificationPreferences> Function(String)? onGetNotifications;
+  Future<NotificationPreferences> Function(String, ProfilePreference, bool)?
+  onUpdateNotification;
+  final notificationUsers = <String>[];
+  final notificationUpdates =
+      <({String userId, ProfilePreference preference, bool enabled})>[];
+
+  @override
+  Future<NotificationPreferences> getNotificationPreferences(String userId) {
+    notificationUsers.add(userId);
+    return onGetNotifications?.call(userId) ?? Future.value(notifications);
+  }
+
+  @override
+  Future<NotificationPreferences> updateNotificationPreference({
+    required String userId,
+    required ProfilePreference preference,
+    required bool enabled,
+  }) {
+    notificationUpdates.add((
+      userId: userId,
+      preference: preference,
+      enabled: enabled,
+    ));
+    if (onUpdateNotification != null) {
+      return onUpdateNotification!(userId, preference, enabled);
+    }
+    notifications = notifications.withPreference(preference, enabled);
+    return Future.value(notifications);
+  }
+
   Future<ProfileSettings> Function(String userId)? onGet;
   Future<ProfileSettings> Function(
     String userId,

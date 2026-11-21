@@ -412,6 +412,32 @@ class AppLocalizationsCa extends AppLocalizations {
   String get settingsGroupNotifications => 'NOTIFICACIONS';
 
   @override
+  String get settingsNotificationsHint =>
+      'Tria quins avisos vols rebre. Els avisos que ja has rebut es conserven.';
+
+  @override
+  String get settingsNotificationsLoading =>
+      'Carregant les preferències d’avisos…';
+
+  @override
+  String get settingsNotificationsLoadError =>
+      'No hem pogut carregar les preferències d’avisos. Torna-ho a provar.';
+
+  @override
+  String get settingsSocial => 'Avisos socials';
+
+  @override
+  String get settingsSocialHint =>
+      'Sol·licituds d’amistat i activitat dels amics';
+
+  @override
+  String get settingsCancellations => 'Cancel·lacions';
+
+  @override
+  String get settingsCancellationsHint =>
+      'Quan es cancel·la un pla de la teva agenda';
+
+  @override
   String get settingsReminders => 'Recordatoris';
 
   @override

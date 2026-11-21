@@ -4,13 +4,14 @@
 
 ## Sprint
 
-- Sprint 2 · només frontend. Tasca activa #199: switch «Mostrar els meus plans», confirmació, reintent i proves de privacitat a Configuració.
+- Sprint 2 · només frontend. Tasca activa #132: secció d’interruptors d’avisos, ViewModel i proves.
 
 ## En curs
 
 | Taiga | Tasca | Branca | Estat |
 |---|---|---|---|
-| #199 | [FE] Switch «Mostrar els meus plans» + ViewModel + tests (història #55) | `feature/show-my-plans-199` | Publicada a `642bbd1`; conflictes amb `origin/develop@d11d342` resolts localment; 1009 proves, anàlisi, format i APK correctes; revisió independent aprovada; DP-078; sense commit/push de la resolució |
+| #132 | [FE] Interruptors de notificacions a Configuració + ViewModel + tests (història #19) | `feature/notification-settings-132` | Frontend verificat: 1041 proves, anàlisi, format i APK correctes; revisió independent aprovada; persistència real pendent del fix backend DP-079; sense commit/push |
+| #199 | [FE] Switch «Mostrar els meus plans» + ViewModel + tests (història #55) | `feature/show-my-plans-199` | Integrada a develop amb PR #78 (`dcecb75`); DP-078 oberta |
 | #179 | [FE] Bloqueig al perfil + BlockedUsersScreen a Configuració + tests (història #45) | `feature/block-users-179` | Integrada a develop amb PR #77 (`d11d342`); DP-077 oberta |
 | #212 i #266 | Arreglos generals de la prova a l’emulador: «Com va anar?» no pregunta abans d’hora i en mostra tres; zoom del mapa amb GPS lent; «00.00 h» als avisos; ajuda del diàleg d’eliminar; icona «Cerca persones» al Perfil | `fix/com-va-anar` (inclou `feature/mapa-zoom-ubicacio`) | Integrada a develop amb PR #76 (`ee9e34f`); DP-068 i DP-074 actualitzades |
 | #266 | Mapa: zoom de 5 km a la persona en obrir-lo i límit d’allunyament | `feature/mapa-zoom-ubicacio` | Commit `d2357d1`; integrada a develop amb PR #76 |
@@ -36,7 +37,31 @@
 | #277 | [FE] Perfil d'un altre usuari amb GET /users/{id} i privacitat dels plans (CA3) + tests | `feature/perfil-altre-usuari` | Implementada (HTTP i Demo); DP-063 oberta; pendent revisió humana |
 | #117 | [FE] Acció i diàleg de confirmació a Configuració + tancament de sessió + tests (història #10) | `feature/eliminar-compte` | Integrada a develop amb PR #73; DP-075 oberta |
 
-## Base i abast actual (#199)
+## Base i abast actual (#132)
+
+- Branca des de `origin/develop@dcecb75`; backend `4f98835` només consultat, sense canvis.
+- L’usuari aprova representar els quatre tipus reals: Recordatoris, Social, Recomanacions i Cancel·lacions.
+- `NotificationPreferences` independent de privacitat i bústia; mateix ViewModel i tile de #199, sense booleans de negoci a widgets.
+- GET Settings/catàleg, PATCH parcial, preservació d’IDs desconeguts i confirmació per lectura amb bearer/identitat fixats.
+- 32 proves noves i 43 de regressió superades; suite completa de 1041 proves, anàlisi, format i APK correctes; revisió independent aprovada.
+- **Backend necessari:** `UpdateSettings` retorna abans de guardar `AllowedNotifications` si `Language` és no buit. L’error es detecta al frontend, no es simula persistència. DP-079 i missatge a `docs/notification-settings.md`.
+- Sense nous paquets, endpoints, commits, push, migracions ni escriptures a Render.
+
+## Verificació #132 (2026-11-21)
+
+- 32 proves noves: HTTP (12), ViewModel (10), widgets (9) i recorregut d’app (1).
+- 31 proves focals inicials i 43 de regressió superades. Suite completa final: **1041 proves superades**.
+- La revisió independent ha demanat netejar l’error d’un refresc fallit després d’un guardat confirmat;
+  corregit i cobert amb regressió. Veredicte final: aprovar.
+- ca/es/en a 390 px i 320 px amb text ×2, semàntica nativa, progrés accessible i controls de 48 px.
+- `flutter analyze` sense incidències; format de 396 fitxers sense canvis; `git diff --check` correcte.
+- APK debug compilada. Captures Flutter amb Roboto i dades simulades revisades a
+  `PES/output/frontend/task-132-{configuracio,desactivats}.png`.
+- Backend net a `4f98835`; cap canvi ni escriptura a Render. No es dona per resolta la persistència:
+  cal el fix de `UpdateSettings` de DP-079 i la prova amb comptes reals. CI i revisió humana pendents.
+- Sense commit ni push. Guia i missatge concret per al backend: `docs/notification-settings.md`.
+
+## Context anterior (#199)
 
 - Branca `feature/show-my-plans-199`, commit publicat `642bbd1`; merge local de `origin/develop@d11d342` sense commit. #179 ja integrada amb PR #77; es conserven bloquejos i privacitat de plans.
 - Backend `4f98835` consultat sense modificar. GET/PATCH de `show-plans` existents; falta autorització a la consulta directa d’inscripcions alienes (DP-078 / DP-011).
@@ -185,9 +210,10 @@
 
 ## Pendents / següents passos
 
-1. L’usuari revisa la resolució del merge de #199, fa commit/push i actualitza la mateixa PR. CI, aprovació humana i prova amb dos comptes reals en Android pendents. Comunicar l’autorització pendent de DP-078 al backend.
-2. Backend/equip: discriminador estructurat d’acceptació a la bústia (DP-070); després integrar el JSON real i comprovar el recorregut amb dos comptes al desplegament i Android.
-3. Backend/equip: avís automàtic en enviar sol·licitud i política de zona de `request-date` (DP-066).
+1. L’usuari revisa #132 i fa commit/PR. CI i revisió humana pendents. Comunicar el fix de persistència DP-079 abans de validar el lliurament real d’avisos.
+2. Backend/equip: autorització de consulta directa de plans aliens (DP-078), ja comunicada en #199.
+3. Backend/equip: discriminador estructurat d’acceptació a la bústia (DP-070); després integrar el JSON real i comprovar el recorregut amb dos comptes al desplegament i Android.
+4. Backend/equip: avís automàtic en enviar sol·licitud i política de zona de `request-date` (DP-066).
    Si cal historial resolt o lectura de sol·licituds després de reiniciar, falten aquests contractes.
 
 ## Resolució de conflictes amb develop (2026-11-20)

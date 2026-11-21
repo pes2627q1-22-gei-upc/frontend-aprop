@@ -54,6 +54,10 @@ mantenen el flux sense barra, pendent de validar aquest detall de disseny a DP-0
 
 ## Estat actual vs mockups
 
+- #132 (DP-079): l’usuari tria els quatre tipus reals del backend a Configuració: Recordatoris,
+  Avisos socials, Recomanacions i Cancel·lacions. «Activitat dels amics» i «Sol·licituds d’amistat»
+  comparteixen Social i no es presenten com a preferències independents. Això no canvia els filtres d’Avisos.
+
 Taiga #87 implementa els panells Dates/Categories aprovats: calendari inclusiu, dreceres, caselles, esborrany, Aplicar/Netejar i cancel·lació sense guardar. Les vuit caselles del mockup són l’exemple Demo; en HTTP les opcions venen de `/categories`, amb càrrega/error/reintent. Des de la #274, els filtres són xips sobre el mapa que mostren la selecció. La llista consulta el servidor abans de paginar. #253 conserva les opcions vàlides si hi ha noms buits i permet reintentar un catàleg buit. Amb el contracte de mapa del backend `6f4979e`, es mostren les categories rebudes i es filtra localment per qualsevol categoria de l’activitat. Si genuïnament falta categoria es manté «Veure llista», sense confondre-ho amb absència d’esdeveniments. Font compartida i filtratge global pendents (DP-035/DP-038/DP-046). Zona/municipi continua pendent. Vegeu `docs/inici-server-filters.md`.
 
 Perfil propi i Configuració segueixen `perfil_1_principal.png` i `perfil_2_configuracio.png`. En HTTP, la identitat, comptadors i XP venen de `/users/me`; s’editen nom/username/biografia, es puja la foto i es desa `show-plans`. «Creats per mi» és la pestanya inicial i carrega a part amb error/reintent; «Plans fets» indica historial pendent perquè plans passats no confirmen assistència. Sense metadades de nivells no es dibuixen insígnies/llindars inventats. Municipi i preferències d’avisos queden pendents; Demo conserva els exemples i canvis en memòria. Compartir copia el username confirmat. Colors centralitzats i disposició adaptable. Taiga #230; DP-032/DP-033/DP-040 i `docs/profile-backend.md`.

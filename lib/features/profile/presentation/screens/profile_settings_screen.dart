@@ -198,35 +198,9 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                       ),
                   ],
                 ),
-                SettingsGroup(
-                  title: context.l10n.settingsGroupNotifications,
-                  children: [
-                    _preference(
-                      ProfilePreference.reminders,
-                      Icons.notifications_outlined,
-                      context.l10n.settingsReminders,
-                      context.l10n.settingsRemindersHint,
-                    ),
-                    _preference(
-                      ProfilePreference.friendActivity,
-                      Icons.people_outline,
-                      context.l10n.settingsFriendActivity,
-                      context.l10n.settingsFriendActivityHint,
-                    ),
-                    _preference(
-                      ProfilePreference.recommendations,
-                      Icons.lightbulb_outline,
-                      context.l10n.settingsRecommendations,
-                      null,
-                    ),
-                    _preference(
-                      ProfilePreference.friendRequests,
-                      Icons.chat_bubble_outline,
-                      context.l10n.settingsFriendRequests,
-                      null,
-                    ),
-                  ],
-                ),
+              ],
+              _notificationSection(),
+              if (settings != null || model.notificationPreferences != null)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 16),
                   child: Text(
@@ -235,7 +209,6 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                         : context.l10n.settingsPersistsSession,
                   ),
                 ),
-              ],
               SettingsGroup(
                 title: context.l10n.settingsGroupAccount,
                 children: [
@@ -306,6 +279,73 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
     ),
   );
 
+  Widget _notificationSection() {
+    final model = _viewModel;
+    final loaded = model.notificationPreferences != null;
+    final available = model.repository.supportedPreferences.any(
+      (preference) => preference != ProfilePreference.showMyPlans,
+    );
+    return SettingsGroup(
+      title: context.l10n.settingsGroupNotifications,
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: Text(context.l10n.settingsNotificationsHint),
+        ),
+        if (model.isLoadingNotifications)
+          LinearProgressIndicator(
+            semanticsLabel: context.l10n.settingsNotificationsLoading,
+          ),
+        if (model.notificationsError case final message?)
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Semantics(liveRegion: true, child: Text(message)),
+                TextButton(
+                  key: const ValueKey('retry-notification-settings'),
+                  onPressed: model.isBusy || model.isLoadingNotifications
+                      ? null
+                      : model.loadNotificationPreferences,
+                  style: TextButton.styleFrom(minimumSize: const Size(48, 48)),
+                  child: Text(context.l10n.retry),
+                ),
+              ],
+            ),
+          ),
+        if (loaded || !available) ...[
+          _preference(
+            ProfilePreference.reminders,
+            Icons.notifications_outlined,
+            context.l10n.settingsReminders,
+            context.l10n.settingsRemindersHint,
+          ),
+          // TODO(DP-079): Social is one server type; it cannot be split into
+          // friend activity and friend requests without a backend contract.
+          _preference(
+            ProfilePreference.social,
+            Icons.people_outline,
+            context.l10n.settingsSocial,
+            context.l10n.settingsSocialHint,
+          ),
+          _preference(
+            ProfilePreference.recommendations,
+            Icons.lightbulb_outline,
+            context.l10n.settingsRecommendations,
+            null,
+          ),
+          _preference(
+            ProfilePreference.cancellations,
+            Icons.event_busy_outlined,
+            context.l10n.settingsCancellations,
+            context.l10n.settingsCancellationsHint,
+          ),
+        ],
+      ],
+    );
+  }
+
   /// CA1: un diàleg explica què s'esborra i que no es pot desfer; el botó
   /// només s'activa en escriure «ELIMINAR».
   Future<void> _confirmDeleteAccount() async {
@@ -344,7 +384,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
       icon: icon,
       title: title,
       hint: subtitle,
-      value: model.settings!.valueOf(preference),
+      value: model.preferenceValue(preference),
       status: preference == ProfilePreference.showMyPlans
           ? model.settings!.showMyPlans
                 ? context.l10n.settingsPlansShared

@@ -914,3 +914,16 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Codi:** `TODO(DP-078)` a `profile_settings_screen.dart`; guia `docs/plan-visibility.md` amb missatge per al backend i prova manual de dos comptes.
 - **Qui decideix:** frontend/PO per a la presentació; backend per a l’autorització i proves reals.
 - **Resolució:**
+
+### DP-079 · Configurar avisos: tipus reals i persistència bloquejada (#132)
+- **Estat:** oberta · 2026-11-21 · Taiga #132, història #19 · només frontend.
+- **Decisió de l’usuari:** es trien els quatre tipus reals del backend: Social, Recordatori, Recomanacio i Cancelacio. No s’inventa una separació entre activitats dels amics i sol·licituds d’amistat.
+- **Contracte contrastat:** `api-aprop@4f98835`: GET `/users/me/settings` retorna `id`, `show-plans`, `notification-before`, `allowed-notif-types` i `language`; GET `/notificationtypes` retorna IDs generats i noms; PATCH `/users/me` accepta `allowed-notif-types` però retorna `UserProfile`, sense aquella llista.
+- **Frontend:** snapshots separats de privacitat i preferències d’avisos; càrregues/errors independents, estat confirmat, progrés i reintent. Un canvi llegeix de nou el conjunt, conserva altres IDs (també els desconeguts), envia només `allowed-notif-types` i confirma la lectura posterior amb el mateix bearer/registre de Settings. No hi ha filtratge retroactiu ni esborrat de la bústia, permisos push o notificacions de dispositiu simulades.
+- **Bloqueig real al backend:** `internal/repositories/postgres/user_repository.go`, `UpdateSettings`, fa `return nil` dins de `if settings.Language != ""` abans d’actualitzar `AllowedNotifications`. En aquest camí el PATCH pot retornar 200 sense persistir les preferències. El frontend detecta la discrepància i conserva l’estat anterior amb error/reintent; no s’ha aplicat cap workaround ni canvi al backend.
+- **Petició al backend:** executar l’actualització de camps i de `AllowedNotifications` al camí comú, amb el mateix `qtx` i un `Commit`, sense el retorn anticipat. Provar amb `language="ca"`, conjunt buit, alternar un tipus i conservar la resta. Els productors SQL i `NotificationRepository.Create` ja consulten els tipus permesos; falta verificar el recorregut real després d’aquest canvi.
+- **Demo:** preferències en memòria i separades per compte; no simula generació ni lliurament. Els valors d’exemple no substitueixen una resposta del servidor.
+- **Deduït:** la càrrega fallida no dibuixa quatre switches apagats; la secció conserva valors confirmats en refrescar, amb error/reintent propi. Tipus absents al catàleg es mostren no disponibles. Un catàleg buit/invàlid és error.
+- **Codi:** `TODO(DP-079)` a `profile_settings_screen.dart` i `http_profile_settings_repository.dart`. Guia `docs/notification-settings.md`.
+- **Qui decideix:** presentació resolta per l’usuari; backend/equip per a persistència i prova real.
+- **Resolució:**

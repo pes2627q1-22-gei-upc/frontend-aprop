@@ -4,6 +4,12 @@ Aplicació mòbil per descobrir i planificar activitats culturals a Catalunya. P
 
 ## Estat actual
 
+Preferències d’avisos (**Taiga #132**): Configuració mostra Recordatoris, Avisos socials,
+Recomanacions i Cancel·lacions segons els tipus reals del servidor. Càrrega independent, confirmació
+per lectura, progrés i reintent al mateix control; els avisos rebuts es conserven. La persistència
+real necessita corregir el retorn anticipat de `UpdateSettings` al backend (DP-079).
+[Contracte, proves i missatge per al backend](docs/notification-settings.md).
+
 Visibilitat dels plans (**Taiga #199**): Configuració conserva el valor confirmat de «Mostrar els meus
 plans» mentre desa, mostra l’estat de compartició i permet reintentar un error al mateix control.
 Consulta i PATCH autenticats, sense superposar escriptures d’idioma i privacitat. El perfil aliè només

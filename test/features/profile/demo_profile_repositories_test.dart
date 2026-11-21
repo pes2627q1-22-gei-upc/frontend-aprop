@@ -208,16 +208,24 @@ void main() {
       preference: ProfilePreference.showMyPlans,
       enabled: true,
     );
-    final updated = await repository.updatePreference(
+    final updated = await repository.updateNotificationPreference(
       userId: 'a',
       preference: ProfilePreference.reminders,
       enabled: false,
     );
-    expect(updated.showMyPlans, isTrue);
-    expect(updated.reminders, isFalse);
-    expect((await repository.getSettings('a')).reminders, isFalse);
+    expect((await repository.getSettings('a')).showMyPlans, isTrue);
+    expect(updated.valueOf(ProfilePreference.reminders), isFalse);
+    expect(
+      (await repository.getNotificationPreferences('a'))
+          .valueOf(ProfilePreference.reminders),
+      isFalse,
+    );
     expect((await repository.getSettings('b')).showMyPlans, isFalse);
-    expect((await repository.getSettings('b')).reminders, isTrue);
+    expect(
+      (await repository.getNotificationPreferences('b'))
+          .valueOf(ProfilePreference.reminders),
+      isTrue,
+    );
   });
 }
 

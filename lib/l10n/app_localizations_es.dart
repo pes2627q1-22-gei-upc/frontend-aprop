@@ -413,6 +413,32 @@ class AppLocalizationsEs extends AppLocalizations {
   String get settingsGroupNotifications => 'NOTIFICACIONES';
 
   @override
+  String get settingsNotificationsHint =>
+      'Elige qué avisos quieres recibir. Los avisos que ya has recibido se conservan.';
+
+  @override
+  String get settingsNotificationsLoading =>
+      'Cargando las preferencias de avisos…';
+
+  @override
+  String get settingsNotificationsLoadError =>
+      'No hemos podido cargar las preferencias de avisos. Vuelve a intentarlo.';
+
+  @override
+  String get settingsSocial => 'Avisos sociales';
+
+  @override
+  String get settingsSocialHint =>
+      'Solicitudes de amistad y actividad de tus amigos';
+
+  @override
+  String get settingsCancellations => 'Cancelaciones';
+
+  @override
+  String get settingsCancellationsHint =>
+      'Cuando se cancela un plan de tu agenda';
+
+  @override
   String get settingsReminders => 'Recordatorios';
 
   @override
