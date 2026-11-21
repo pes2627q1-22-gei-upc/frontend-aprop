@@ -3,7 +3,7 @@ import '../repositories/attendance_repository.dart';
 
 /// `GET` and `PATCH /events/{id}/enrollment/attendance`; the person comes
 /// from the session token.
-// TODO(DP-067): `GET` only says `has-attended`, so «did not go» and «not
+// TODO(DP-068): `GET` only says `has-attended`, so «did not go» and «not
 // answered» both read as null here. `RememberedAttendanceRepository` keeps the
 // «No» answers on the device until the API returns the stored value.
 class HttpAttendanceRepository implements AttendanceRepository {

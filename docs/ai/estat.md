@@ -4,14 +4,15 @@
 
 ## Sprint
 
-- Sprint 2 · només frontend. Tasca activa #164: acceptar amistats des d’Avisos i Perfil amb estat reactiu compartit.
+- Sprint 2 · només frontend. Tasca activa #193: rebutjar sol·licituds des d’Avisos i Perfil, reutilitzant #164.
 
 ## En curs
 
 | Taiga | Tasca | Branca | Estat |
 |---|---|---|---|
-| #212 | [FE] Targeta «Com va anar?» a `AgendaScreen` (fig. 13) + `AgendaViewModel` + tests (història #64) | `feature/confirmar-assistencia` | Implementada (HTTP i Demo); DP-067 oberta; pendent revisió humana |
-| #164 | [FE] Acceptar en avís social i perfil + comptadors/distintiu reactius + tests | `feature/accept-friend-request-164` | Implementada amb HTTP/Demo; 807 proves després del merge; revisió tècnica correcta; APK debug correcte; DP-066 oberta; resolució del merge pendent de commit/push |
+| #212 | [FE] Targeta «Com va anar?» a `AgendaScreen` (fig. 13) + `AgendaViewModel` + tests (història #64) | `feature/confirmar-assistencia` | Implementada (HTTP i Demo); DP-068 oberta; pendent revisió humana |
+| #193 | [FE] Acció «Rebutjar» a Avisos i perfil + tests | `feature/reject-friend-request-193` | Implementada; 825 proves, anàlisi, format i APK correctes; revisió tècnica aprovada; depèn de la PR de #164; DP-067 oberta; sense commit/push |
+| #164 | [FE] Acceptar en avís social i perfil + comptadors/distintiu reactius + tests | `feature/accept-friend-request-164` | Implementada amb HTTP/Demo; Publicada a `94793c2`; PR encara pendent a develop; 807 proves i APK correctes; DP-066 oberta |
 | #160 | [FE] Botó d'acció d'amistat al perfil aliè + integració al ViewModel + tests | `feature/boto-amistat` | Integrada a develop amb PR #63; DP-064 oberta |
 | #162 | [FE] Vista y `UserSearchViewModel` integrada en el buscador de Descobreix (fig. 16) + navegación al perfil conservando estado + tests | `feature/user-search-162` | Integrada a develop amb PR #64 |
 | #148 | [FE] Xat de l'activitat | `feature/xat-activitat` | Integrada a develop amb PR #59; correccions de la revisió (límit en runes, refresc sense encavalcar-se i pausat en segon pla, proves d'estats, documentació); DP-062 oberta |
@@ -25,18 +26,26 @@
 | #262 | [FE] Ajustar contrast i color del logotip respecte al fons | `feature/fix-262-logo-contrast` | Implementada; preparació de PR autoritzada; pendent CI i revisió humana |
 | #277 | [FE] Perfil d'un altre usuari amb GET /users/{id} i privacitat dels plans (CA3) + tests | `feature/perfil-altre-usuari` | Implementada (HTTP i Demo); DP-063 oberta; pendent revisió humana |
 
-## Base i abast
+## Base i abast actual (#193)
 
-- Branca `feature/accept-friend-request-164`, base `44b7bf1`, amb `origin/develop@8b4b5dd` incorporat sense commit (#197 i #148).
-- Backend contrastat a `454e22b`, intacte. Només frontend; cap commit, push o PR automàtics.
-- Contracte `FriendshipRepository`, models de sol·licitud/resolució i adaptadors HTTP/Demo a Perfil.
-- Mateixa instància per a Avisos, perfil propi i perfils públics. Cap dependència entre ViewModels.
-- Consulta autoritativa de rebudes amb `/users/me/friend-requests`; acceptació/rebuig per remitent i data UTC exacta.
-- Sol·licituds rebudes com a targetes quan manca l’avís automàtic; la lectura real continua separada. DP-066.
-- Botó «Acceptar»/«Acceptant…»/«Amiga/Amic», error/reintent i textos ca/es/en.
-- Comptadors recarregats del servidor; refresc pendent durant càrregues/edicions i descart de respostes antigues.
-- La privacitat dels plans continua depenent de `plans-visible`.
-- Guia de flux/contracte/límits: `docs/friend-requests.md`.
+- Branca `feature/reject-friend-request-193` des de `94793c2` de #164, que ja inclou `develop@8b4b5dd`.
+- #164 encara pendent a `develop`: comparar amb la branca pare per revisar només #193; integrar la pare abans de fusionar #193.
+- Backend contrastat a `fb266a7`, intacte. Cap endpoint nou, paquet, commit ni push.
+- Reutilització de `FriendshipRepository` i resposta confirmada; el perfil afegeix Rebutjar i comparteix el mètode d’Acceptar.
+- Controls inhabilitats en respondre; errors/reintents, feedback neutral i privacitat intacta; textos ca/es/en.
+- DP-067 cobreix el petit canvi de distribució i el retorn després del rebuig. Guia `docs/friend-requests.md`.
+- Verificació final de #193: 18 proves noves; suite de 825 proves superada, anàlisi sense incidències, format de 347 fitxers i APK debug correctes. Revisió tècnica independent aprovada.
+
+## Verificació #193 (2026-11-21)
+
+- 18 proves noves: ViewModel, HTTP amb/sense avís persistent, error/reintent, lectura independent,
+  accions oposades concurrents, respostes antigues, dispose, comptadors/privacitat i recorreguts d’app.
+- Widgets comprovats a 320 px amb text ×2 en català, castellà i anglès.
+- Suite completa: **825 proves superades**. `flutter analyze` sense incidències; format de 347 fitxers sense canvis.
+- `flutter build apk --debug` correcte. `git diff --check` correcte.
+- Revisió tècnica independent aprovada, incloses les dues proves límit finals i la documentació.
+- Captures Flutter amb Demo i fonts Roboto revisades a `PES/output/frontend/task-193-{perfil-pendent,perfil-rebutjat,avisos-rebutjat,comptador-propi}.png`.
+- Backend intacte; no s’han executat escriptures a Render ni verificació amb comptes reals. Sense commit/push.
 
 ## Verificació #164 (2026-11-20)
 
@@ -51,8 +60,8 @@
 
 ## Pendents / següents passos
 
-1. Canvis preparats per revisar; `git diff --check` correcte.
-2. Revisar la resolució, fer el commit del merge i push a la mateixa branca per actualitzar la PR existent; l’usuari fa aquests passos personalment. Esperar CI i aprovació d’un company.
+1. Canvis de #193 preparats per a revisió humana abans del commit; `git diff --check` correcte.
+2. L’usuari fa commit/push de #193; revisar només el delta sobre #164 i esperar la integració de la pare abans del merge cap a develop. CI i aprovació humana obligatòries.
 3. Comprovar el recorregut amb dos comptes reals al desplegament i en Android.
 4. Backend/equip: avís automàtic en enviar sol·licitud i política de zona de `request-date` (DP-066).
    Si cal historial resolt o lectura de sol·licituds després de reiniciar, falten aquests contractes.

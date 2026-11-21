@@ -84,7 +84,7 @@ Future<APropApp> createConfiguredApp() async {
     publicProfileRepository: HttpPublicProfileRepository(apiClient: apiClient),
     userSearchRepository: HttpUserSearchRepository(apiClient: apiClient),
     friendsRepository: HttpFriendsRepository(apiClient: apiClient),
-    // TODO(DP-067): the API cannot say «did not go»; the device remembers it.
+    // TODO(DP-068): the API cannot say «did not go»; the device remembers it.
     attendanceRepository: RememberedAttendanceRepository(
       inner: HttpAttendanceRepository(apiClient: apiClient),
       memory: const SharedPreferencesAttendanceMemory(),

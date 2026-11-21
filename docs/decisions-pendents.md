@@ -724,7 +724,7 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Estat:** oberta 2026-11-17
 - **Context:** `features/ratings/`, `_buildRating` a `main_shell.dart`; R8–R10 (`docs/ai/20-model-domini.md`); mockup 13 «Com va anar?».
 - **Dubte:** (1) el `develop` del backend ja té `PATCH /events/{id}/enrollment/attendance` (`{"attendance": true|false|null}`), però el frontend encara no modela ni té UI per confirmar l'assistència («Sí, hi vaig anar»); R10 exigeix assistència certa per valorar. (2) #184 (`POST /events/{id}/ratings`, `{score}`) respon `409` (ja valorada), `403` (sense assistència) i `404` (no trobada) a `feature/event-rating` (PR #59), però encara no és desplegat a Render i no hi ha consulta prèvia de la valoració pròpia.
-- **Actualització (2026-11-21, #64):** les estrelles només surten si la persona ha contestat «Sí, hi vaig anar» a «Com va anar?» (DP-067); el punt (1) queda resolt al frontend.
+- **Actualització (2026-11-21, #64):** les estrelles només surten si la persona ha contestat «Sí, hi vaig anar» a «Com va anar?» (DP-068); el punt (1) queda resolt al frontend.
 - **Provisionalment (abans de #64):** les estrelles surten a la fitxa i a l'Agenda si l'usuari és inscrit i l'activitat ja ha començat (sense data de fi al model: `startsAt` fa de substitut, de manera que l'usuari pot valorar durant l'esdeveniment; R10 només es compleix al servidor); el servidor farà valdre R8–R10. `main.dart` injecta `HttpRatingRepository` quan `ApiConfig.isConfigured` és cert (mentre #184 no estigui desplegat, valorar mostrarà l'error de desament), i tradueix `409` a `AlreadyRatedException`. En mode Demo, `DemoRatingRepository` (en memòria) és el per defecte. Sense consulta prèvia de la valoració pròpia, l'estat «ja valorada» abans d'enviar només es coneix en Demo durant la sessió o en rebre `409`. `TODO(DP-053)` al codi.
 - **Qui decideix:** equip (frontend i backend)
 
@@ -763,21 +763,6 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Provisionalment:** (1) Els ViewModels, validadors i formatadors fan servir `currentL10n` (`LocaleController.active`, global) i els widgets `context.l10n`. Els missatges d'error que un ViewModel ja ha desat (p. ex. «No hem pogut carregar…») no es tornen a traduir fins al pròxim intent; els widgets sí que es redibuixen. El missatge de benvinguda de l'assistent es resol en cada renderitzat i els xips de suggeriments es tornen a demanar en canviar d'idioma. Els errors d'avatar (`AvatarSelectionException`) són un enum que el ViewModel tradueix. (2) Es queden en català: les dades de demostració (`demo_*_repository`: respostes de l'assistent, activitats, avisos), els missatges `ApiException`/`StateError` dels repositoris HTTP que no es mostren tal qual i els errors `{"error": "…"}` del backend. `updateLanguage` fa un `GET users/me` addicional abans del `PATCH` (acceptat, pendent de simplificar quan el backend ho permeti). (3) Els noms de categories i el contingut dels esdeveniments (títol, descripció) no van als ARB; la traducció d'esdeveniments és del backend (`?lang=`). (4) Mockup fig. 19 només mostrava ca/es: s'afegeix l'anglès per decisió de l'usuari.
 - **Qui decideix:** equip
 
-### DP-067 · Confirmar l’assistència (#64): el «No» només es recorda al dispositiu
-- **Estat:** oberta · 2026-11-21 · Claude Code (Opus 5.5) amb confirmació de l’usuari · Taiga #212 (història #64)
-- **Context:** `features/attendance/` (`AttendanceViewModel`, `HowDidItGoCard`, `HttpAttendanceRepository`, `RememberedAttendanceRepository`), `AgendaScreen`, `_buildRating` a `main_shell.dart`. Backend consultat a `api-aprop@develop` sense modificar-lo: `PATCH /events/{id}/enrollment/attendance` (`{"attendance": true|false|null}`, 404 sense inscripció, 409 abans de començar) i `GET /events/{id}/enrollment/attendance` (`{has-attended}`).
-- **Dubte:** el backend desa true/false/null, però cap resposta de lectura no torna el valor: `GET` només diu `has-attended`. L’app no pot distingir «No hi vaig anar» de «sense contestar», i el CA1 demana preguntar només en el segon cas.
-- **Decisió de l’usuari:** l’app recorda al dispositiu (`shared_preferences`, per compte) les activitats contestades «No», i es demana al backend que torni el valor (per exemple, `attendance` a `GET /events/{id}/enrollment`). Quan hi sigui, només canvia `HttpAttendanceRepository` i sobra `RememberedAttendanceRepository`.
-- **Limitació:** en un altre dispositiu o després de reinstal·lar, a qui va contestar «No» se li torna a preguntar.
-- **Deduït (sense confirmar):**
-  - «Com va anar?» surt a dalt de l’Agenda, sigui quin sigui el dia, per als plans que ja han començat (`startsAt` anterior a ara; el model no té data de fi) i sense resposta.
-  - «Més tard» l’amaga fins a la propera vegada que s’obre la pestanya Agenda.
-  - Si no es pot llegir l’assistència, no es pregunta (millor no preguntar que preguntar per error).
-  - Les estrelles de valoració (fitxa i Agenda) surten només si s’ha contestat «Sí, hi vaig anar» (R10): substitueix el criteri provisional de DP-053.
-- **Codi:** `TODO(DP-067)` a `http_attendance_repository.dart` i `main.dart`.
-- **Qui decideix:** backend (tornar el valor de l’assistència)
-- **Resolució:**
-
 ### DP-066 · Acceptació d’amistat i targetes rebudes sense avís automàtic (#164)
 - **Estat:** oberta · 2026-11-20 · Taiga #164, història #35 · només frontend.
 - **Identificador:** renumerada de DP-065 a DP-066 en integrar `origin/develop@8b4b5dd`, per conservar la DP-065 de la llista d’amics #197.
@@ -790,3 +775,28 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Resolució:**
 
 **Actualització #164 de DP-023/DP-039/DP-064 (2026-11-20):** l’abast fora de l’Sprint 1 es manté com a històric. A l’Sprint 2 ja hi ha acceptació/rebuig amb HTTP i estat compartit. Les sol·licituds **rebudes** es consulten i permeten «Acceptar» al perfil; les sortints i els bloquejos continuen sense estat explícit al DTO del perfil (DP-064). No es crea ni es modifica cap endpoint.
+
+### DP-067 · Accions rebudes i feedback de rebuig al perfil (#193)
+- **Estat:** oberta · 2026-11-21 · Taiga #193, història #52 · només frontend.
+- **Context:** el backend `fb266a7` ja retorna `Rejected` amb `/users/{sender}/friend-requests/{date}/deny`. #164 aporta el repositori compartit i Avisos ja té les dues accions. No hi ha mockup específic de la petició rebuda dins del perfil públic.
+- **Deduït de la figura 17 i del flux existent:** afegir «Rebutjar» com a botó secundari al costat d’«Acceptar», amb Compartir a sota. Totes dues accions queden desactivades mentre es confirma la resposta; cap diàleg addicional, igual que a Avisos.
+- **Després de confirmar:** mostrar «Sol·licitud rebutjada» i recuperar l’acció normal «Afegeix com a amic». No s’envia una nova petició automàticament; no es bloqueja la persona ni es canvien comptadors o privacitat. Una petició pendent posterior substitueix aquest feedback. Les confirmacions són de sessió com a DP-066, sense historial resolt inventat en reiniciar.
+- **Dependència de lliurament:** branca #193 sobre `94793c2` de #164 mentre aquella PR és pendent. Per revisar només #193 es compara amb la pare; abans de fusionar #193 cap a `develop`, #164 ha d’estar integrada.
+- **Codi:** `TODO(DP-067)` a `public_profile_screen.dart`. Documentació del flux a `docs/friend-requests.md`.
+- **Qui decideix:** equip frontend (presentació i acció posterior al rebuig).
+- **Resolució:**
+
+### DP-068 · Confirmar l’assistència (#64): el «No» només es recorda al dispositiu
+- **Estat:** oberta · 2026-11-21 · Claude Code (Opus 5.5) amb confirmació de l’usuari · Taiga #212 (història #64)
+- **Context:** `features/attendance/` (`AttendanceViewModel`, `HowDidItGoCard`, `HttpAttendanceRepository`, `RememberedAttendanceRepository`), `AgendaScreen`, `_buildRating` a `main_shell.dart`. Backend consultat a `api-aprop@develop` sense modificar-lo: `PATCH /events/{id}/enrollment/attendance` (`{"attendance": true|false|null}`, 404 sense inscripció, 409 abans de començar) i `GET /events/{id}/enrollment/attendance` (`{has-attended}`).
+- **Dubte:** el backend desa true/false/null, però cap resposta de lectura no torna el valor: `GET` només diu `has-attended`. L’app no pot distingir «No hi vaig anar» de «sense contestar», i el CA1 demana preguntar només en el segon cas.
+- **Decisió de l’usuari:** l’app recorda al dispositiu (`shared_preferences`, per compte) les activitats contestades «No», i es demana al backend que torni el valor (per exemple, `attendance` a `GET /events/{id}/enrollment`). Quan hi sigui, només canvia `HttpAttendanceRepository` i sobra `RememberedAttendanceRepository`.
+- **Limitació:** en un altre dispositiu o després de reinstal·lar, a qui va contestar «No» se li torna a preguntar.
+- **Deduït (sense confirmar):**
+  - «Com va anar?» surt a dalt de l’Agenda, sigui quin sigui el dia, per als plans que ja han començat (`startsAt` anterior a ara; el model no té data de fi) i sense resposta.
+  - «Més tard» l’amaga fins a la propera vegada que s’obre la pestanya Agenda.
+  - Si no es pot llegir l’assistència, no es pregunta (millor no preguntar que preguntar per error).
+  - Les estrelles de valoració (fitxa i Agenda) surten només si s’ha contestat «Sí, hi vaig anar» (R10): substitueix el criteri provisional de DP-053.
+- **Codi:** `TODO(DP-068)` a `http_attendance_repository.dart` i `main.dart`.
+- **Qui decideix:** backend (tornar el valor de l’assistència)
+- **Resolució:**

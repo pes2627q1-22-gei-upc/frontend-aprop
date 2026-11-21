@@ -26,7 +26,7 @@ Les tasques #75 i #82 afegeixen el detall i les inscripcions compartides entre l
 | `features/auth/` | Inici de sessió, registre i sessió, amb les mateixes capes que `activities/`. |
 | `features/assistant/` | Conversa amb l'assistent cultural («Assistent»), interpretació de consultes i recomanació d'activitats. |
 | `features/profile/` | Perfil propi, edició de detalls i preferències de Configuració, amb les mateixes capes i repositoris per compte. |
-| `features/attendance/` | «Com va anar?» (#64): respostes d’assistència compartides per l’Agenda i les valoracions; el «No» es recorda al dispositiu (DP-067). |
+| `features/attendance/` | «Com va anar?» (#64): respostes d’assistència compartides per l’Agenda i les valoracions; el «No» es recorda al dispositiu (DP-068). |
 | `features/activity_chat/` | Xat de cada activitat entre les persones apuntades (#148): missatges, enviament i refresc periòdic. Vegeu [Xat de l’activitat](activity-chat.md). |
 | `features/notifications/` | Bústia d’Avisos, filtres, lectura i respostes d’amistat confirmades mitjançant el contracte compartit de Perfil, separats de l’enviament de notificacions. |
 | `assets/images/` | Fotografies i imatges de contingut. |
@@ -274,3 +274,16 @@ Avisos comparteix només models i el contracte de Perfil, mai el seu ViewModel. 
 són escriptures independents: un error de lectura no desfà una amistat confirmada. La reconciliació
 entre avisos i sol·licituds usa participants i data exacta; el text lliure no dona permisos d’acció.
 Vegeu [contracte, estat i límits](friend-requests.md), DP-064 i DP-066.
+
+### Rebuig de sol·licituds — Taiga #193
+
+S’amplia el flux de #164: el perfil exposa `rejectFriendRequest()` i totes dues respostes passen per
+un únic mètode privat del seu ViewModel i el `FriendshipRepository` injectat. Avisos conserva el
+mateix `respond(accept: false)`. Els widgets no decideixen ni transformen estats de domini.
+El feedback de rebuig es deriva de les resolucions compartides, sense duplicar-lo en una bandera.
+
+`ProfileHeader.secondaryAction` reserva una segona acció al costat de la principal i baixa Compartir
+perfil a una fila pròpia. Només el perfil amb petició rebuda fa servir aquest paràmetre. Les dues
+accions s’inhabiliten en enviar i no es sobreescriuen amb un refresc. Després de confirmar Rejected,
+la targeta i el perfil es reconcilien; no es modifica amistat, comptadors ni permisos de plans.
+Disseny/retorn després de rebutjar a DP-067; contracte i límits a [sol·licituds d’amistat](friend-requests.md).

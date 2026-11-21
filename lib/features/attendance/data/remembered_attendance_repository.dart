@@ -1,7 +1,7 @@
 import '../repositories/attendance_repository.dart';
 
 /// Adds the «No hi vaig anar» answers kept on the device to a source that
-/// cannot return them (DP-067).
+/// cannot return them (DP-068).
 class RememberedAttendanceRepository implements AttendanceRepository {
   RememberedAttendanceRepository({required this.inner, required this.memory});
 

@@ -24,6 +24,8 @@
   "friendSending": "Enviando…",
   "friendRequestSent": "Solicitud enviada",
   "friendAlready": "Amiga/Amigo",
+  "friendRejecting": "Rechazando…",
+  "friendRejectError": "No hemos podido rechazar la solicitud. Vuelve a intentarlo.",
   "friendAccepting": "Aceptando…",
   "friendAcceptError": "No hemos podido aceptar la solicitud. Vuelve a intentarlo.",
   "friendStatusError": "No hemos podido consultar las solicitudes. Vuelve a intentarlo.",

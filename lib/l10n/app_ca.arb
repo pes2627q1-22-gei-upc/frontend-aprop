@@ -24,6 +24,8 @@
   "friendSending": "Enviant…",
   "friendRequestSent": "Sol·licitud enviada",
   "friendAlready": "Amiga/Amic",
+  "friendRejecting": "Rebutjant…",
+  "friendRejectError": "No hem pogut rebutjar la sol·licitud. Torna-ho a provar.",
   "friendAccepting": "Acceptant…",
   "friendAcceptError": "No hem pogut acceptar la sol·licitud. Torna-ho a provar.",
   "friendStatusError": "No hem pogut consultar les sol·licituds. Torna-ho a provar.",

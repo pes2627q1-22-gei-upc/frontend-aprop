@@ -1,15 +1,15 @@
-# Acceptar una sol·licitud d’amistat · #164
+# Respondre una sol·licitud d’amistat · #164 i #193
 
 ## Abast
 
-Sprint 2, història #35. Acceptar des de la targeta social d’Avisos o del perfil aliè.
-Ambdues entrades comparteixen la mateixa font de confirmacions i actualitzen la bústia, el distintiu
-«Amiga/Amic» i els comptadors dels perfils. Sense canvis al backend, paquets nous ni persistència local
+Sprint 2: acceptar (#164, història #35) i rebutjar (#193, història #52) des de la targeta social d’Avisos o del perfil aliè.
+Ambdues entrades comparteixen la mateixa font de confirmacions i actualitzen la bústia i el perfil.
+Acceptar mostra «Amiga/Amic» i recarrega els comptadors; rebutjar conserva l’amistat i els comptadors. Sense canvis al backend, paquets nous ni persistència local
 per substituir la confirmació del servidor. L’enviament de #160 es conserva quan no hi ha petició rebuda.
 
 ## Contracte comprovat
 
-Backend `api-aprop@454e22b` (lectura de handlers, servei, repositori i SQL):
+Backend contrastat de nou a `api-aprop@fb266a7` (lectura de handlers, servei, repositori i SQL):
 
 | Operació | Endpoint | Resultat |
 |---|---|---|
@@ -27,11 +27,11 @@ la resposta. El backend fa l’acceptació i l’amistat recíproca en una trans
 ## Flux i responsabilitats
 
 1. El ViewModel consulta el perfil i les sol·licituds rebudes. Si n’hi ha una d’aquella persona,
-   mostra «Acceptar». Un error de consulta ofereix reintent, no «Afegeix com a amic».
-2. Prémer «Acceptar» mostra «Acceptant…» i bloqueja pulsacions repetides. El repositori comparteix
+   mostra «Acceptar» i «Rebutjar». Un error de consulta ofereix reintent, no «Afegeix com a amic».
+2. Prémer «Acceptar» mostra «Acceptant…»; «Rebutjar» mostra «Rebutjant…». Ambdues accions queden desactivades durant la resposta, també davant de refrescos. El repositori comparteix
    la petició en curs entre pantalles; només publica després d’una resposta vàlida.
-3. La confirmació actualitza les targetes existents i el distintiu del perfil. Perfil propi i aliè
-   tornen a consultar els comptadors: no se’ls suma un amic manualment. Si hi havia una càrrega o
+3. La confirmació actualitza les targetes existents i el perfil. Si és una acceptació, es mostra el
+   distintiu d’amistat i perfil propi i aliè tornen a consultar els comptadors: no se’ls suma un amic manualment. Si hi havia una càrrega o
    edició en curs, s’executa després un refresc pendent. S’ignoren respostes de pantalles alliberades.
 4. Els plans no es fan públics per una acceptació: només es consulten quan el servidor autoritza
    `plans-visible`. La consulta, la navegació, el filtre i el scroll existents es conserven.
@@ -75,3 +75,44 @@ La font HTTP consulta la llista real en obrir-la/refrescar-la. La llista Demo de
 exemples fixos (DP-065): no és una representació completa del graf després d’acceptar una petició.
 L’estat i els comptadors Demo de #164 sí comparteixen la confirmació. Aquest límit no afecta la
 consulta HTTP de les amistats. La decisió de #164 s’ha renumerat a DP-066 per evitar la col·lisió.
+
+## Rebutjar des del perfil i Avisos · #193
+
+`PublicProfileViewModel.rejectFriendRequest()` i `acceptFriendRequest()` comparteixen el mateix
+mètode de resposta i el contracte de #164. `NotificationsViewModel.respond(accept: false)` continua
+usant aquell repositori. No hi ha una segona font d’amistat ni lògica HTTP als widgets.
+
+La confirmació `Rejected` resol la targeta i elimina els botons de la petició. Al perfil s’anuncia
+«Sol·licitud rebutjada» i torna l’acció «Afegeix com a amic». Rebutjar no bloqueja la persona, no envia
+una sol·licitud nova i no incrementa/decrementa comptadors. Els plans continuen subjectes a la
+privacitat retornada pel servidor. El feedback deriva de les confirmacions de la sessió; una altra
+petició pendent de la mateixa persona té prioritat i torna a oferir les accions.
+
+Sense diàleg addicional, com a la targeta d’Avisos aprovada. Durant l’enviament es manté la petició;
+un error restaura les dues accions amb un missatge i reintent. Les respostes competidores de dues
+pantalles comparteixen la primera operació al servidor i mostren el seu resultat confirmat, encara
+que aquella primera operació fos l’altra acció. Una fallada de lectura no desfà un rebuig confirmat.
+
+El `ProfileHeader` només adapta les accions quan rep `secondaryAction`: Acceptar/Rebutjar a la mateixa
+fila i Compartir perfil a sota. Perfil propi i la resta d’estats conserven la distribució anterior.
+Decisió de presentació i retorn posterior: DP-067.
+
+### Branca i revisió de #193
+
+`feature/reject-friend-request-193` parteix de `94793c2` a `feature/accept-friend-request-164`, perquè
+la PR de #164 encara no és a `develop`. Per revisar només #193, comparar amb aquesta branca pare.
+Abans de fusionar #193 a `develop`, cal haver-hi integrat #164 i comprovar la base de la PR. No es
+fusiona la PR pare automàticament ni es dupliquen els seus canvis.
+
+### Proves específiques de #193
+
+- `rejected_friend_request_test.dart`: sincronització, resposta pendent, error/reintent, accions
+  competidores, recàrrega antiga, estat sortint anterior, compte diferent i dispose.
+- `reject_friend_request_http_test.dart`: ruta/data de `/deny`, lectura independent, falta d’avís
+  automàtic i resposta amb estat incorrecte.
+- `reject_friend_request_screen_test.dart`: càrrega, errors, feedback, controls i 320 px amb text ×2 en ca/es/en.
+- `reject_friend_request_flow_test.dart`: rebutjar des de les dues entrades i conservar filtre,
+  navegació, comptadors i retorn al perfil.
+
+La comprovació autenticada amb dos comptes reals i la revisió humana continuen pendents. El backend
+ja ofereix l’operació necessària; no cal cap endpoint nou per completar aquesta tasca.

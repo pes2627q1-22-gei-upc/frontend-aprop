@@ -117,7 +117,7 @@ void main() {
     });
   });
 
-  group('The device remembers «No» (DP-067)', () {
+  group('The device remembers «No» (DP-068)', () {
     setUp(() => SharedPreferences.setMockInitialValues({}));
 
     test('«No» is read back as false; «Sí» and clearing forget it', () async {
