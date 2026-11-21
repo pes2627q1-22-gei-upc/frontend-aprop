@@ -2,6 +2,7 @@
   "@@locale": "ca",
   "appTitle": "AProp!",
   "profileTitleFallback": "Perfil",
+  "profileFindPeople": "Cerca persones",
   "profilePeopleSearchSoon": "Cerca de persones disponible properament",
   "settingsTooltip": "Configuració",
   "profileLoading": "Carregant el perfil",
@@ -250,6 +251,7 @@
   "settingsSigningOut": "Tancant sessió…",
   "settingsSignOut": "Tancar sessió",
   "settingsDeleteAccount": "Eliminar compte",
+  "settingsDeleteAccountHint": "Escriu-ho aquí",
   "settingsDeletingAccount": "Eliminant el compte…",
   "settingsDeleteAccountTitle": "Vols eliminar el compte?",
   "settingsDeleteAccountBody": "S’esborraran el teu perfil, la foto, els plans, les activitats que has creat, les valoracions, els amics i els avisos, i també el compte per iniciar sessió. No es pot desfer.",
@@ -863,6 +865,15 @@
   "attendanceNo": "No hi vaig anar",
   "attendanceLater": "Més tard",
   "attendanceSaveError": "No hem pogut desar la resposta. Torna-ho a provar.",
+  "attendanceShowMore": "Veure’n {count} més",
+  "@attendanceShowMore": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "attendanceShowLess": "Veure’n menys",
   "attendanceThanksYes": "Gràcies! Ja pots valorar «{title}».",
   "@attendanceThanksYes": {
     "placeholders": {

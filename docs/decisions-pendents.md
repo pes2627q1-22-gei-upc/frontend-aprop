@@ -820,7 +820,9 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Decisió de l’usuari:** l’app recorda al dispositiu (`shared_preferences`, per compte) les activitats contestades «No», i es demana al backend que torni el valor (per exemple, `attendance` a `GET /events/{id}/enrollment`). Quan hi sigui, només canvia `HttpAttendanceRepository` i sobra `RememberedAttendanceRepository`.
 - **Limitació:** en un altre dispositiu o després de reinstal·lar, a qui va contestar «No» se li torna a preguntar.
 - **Deduït (sense confirmar):**
-  - «Com va anar?» surt a dalt de l’Agenda, sigui quin sigui el dia, per als plans que ja han començat (`startsAt` anterior a ara; el model no té data de fi) i sense resposta.
+  - «Com va anar?» surt a dalt de l’Agenda, sigui quin sigui el dia, per als plans que ja han començat i sense resposta (el model no té data de fi).
+  - **Actualització (2026-11-21, prova a l’emulador):** el backend desa l’inici a les 00:00 (DP-029), i amb `startsAt` l’app preguntava pel concert del vespre al matí. Ara l’hora d’inici és la de `startsAt` si no és mitjanit; si no, la primera hora de l’«Horari» («20 h», «19.30 h», «19:00 – 21:00»); i, sense cap hora, el pla compta com a començat quan s’ha acabat el dia (`activity_start.dart`). La mateixa regla decideix si surten les estrelles.
+  - Amb més de tres plans per contestar, el quadre en mostra tres i «Veure’n N més»: si no, empeny el calendari molt avall.
   - «Més tard» l’amaga fins a la propera vegada que s’obre la pestanya Agenda.
   - Si no es pot llegir l’assistència, no es pregunta (millor no preguntar que preguntar per error).
   - Les estrelles de valoració (fitxa i Agenda) surten només si s’ha contestat «Sí, hi vaig anar» (R10): substitueix el criteri provisional de DP-053.
@@ -874,6 +876,7 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
   - El zoom mínim depèn de la mida del mapa: el món (256 px a zoom 0) ha d’omplir l’amplada i l’alçada. En un mòbil vertical és ≈ 1,7; en una finestra ampla, ≈ 2,9.
   - El permís es demana en veure la pestanya i no en obrir l’app, perquè `MainShell` construeix totes les pestanyes alhora.
   - No es limita l’apropament (el màxim és el de Google).
+  - **Actualització (2026-11-21, prova a l’emulador):** si el GPS tarda més que l’espera del primer intent, el mapa no feia el zoom. Ara, si la ubicació arriba durant els 30 s següents, s’hi apropa igualment; si mentrestant la persona prem «La meva ubicació», mana el botó.
 - **Codi:** `TODO(DP-074)` a `activities_map.dart`.
 - **Qui decideix:** equip/PO (radi inicial i moment de demanar el permís)
 - **Resolució:**

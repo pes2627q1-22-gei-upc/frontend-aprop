@@ -21,6 +21,7 @@ class ActivitySearchScreen extends StatefulWidget {
     required this.onBack,
     this.userSearchRepository,
     this.onUserSelected,
+    this.startWithPeople = false,
   });
 
   final DiscoveryRepository repository;
@@ -29,6 +30,9 @@ class ActivitySearchScreen extends StatefulWidget {
   final VoidCallback onBack;
   final UserSearchRepository? userSearchRepository;
   final ValueChanged<String>? onUserSelected;
+
+  /// Opens on «Persones» (from the profile's «Cerca persones»).
+  final bool startWithPeople;
 
   @override
   State<ActivitySearchScreen> createState() => _ActivitySearchScreenState();
@@ -46,6 +50,7 @@ class _ActivitySearchScreenState extends State<ActivitySearchScreen> {
   void initState() {
     super.initState();
     _createViewModels();
+    _searchPeople = widget.startWithPeople && _canSearchPeople;
   }
 
   bool get _canSearchPeople =>

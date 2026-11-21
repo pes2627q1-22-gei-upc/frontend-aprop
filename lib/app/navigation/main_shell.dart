@@ -5,6 +5,7 @@ import '../../core/l10n/locale_controller.dart';
 import '../../core/widgets/aprop_logo.dart';
 import '../../features/activities/data/demo_location_repository.dart';
 import '../../features/activities/models/activity.dart';
+import '../../features/activities/models/activity_start.dart';
 import '../../features/activities/presentation/screens/activities_screen.dart';
 import '../../features/activities/presentation/screens/activity_search_screen.dart';
 import '../../features/activities/presentation/screens/create_activity_screen.dart';
@@ -167,6 +168,7 @@ class _MainShellState extends State<MainShell> {
   /// (Descobreix) i el mapa, amb la llista, té la seva pestanya (#273).
   static const _homeTab = 0;
   static const _mapTab = 2;
+  static const _profileTab = 4;
 
   static String _title(BuildContext context, int index) => [
     context.l10n.appTitle,
@@ -320,7 +322,7 @@ class _MainShellState extends State<MainShell> {
             (creatorId == widget.user.id || creatorId == widget.user.serverId);
         if (isOwn ||
             !_enrollmentViewModel.isEnrolled(activity.id) ||
-            activity.startsAt.isAfter((widget.now ?? DateTime.now)()) ||
+            !activityHasStarted(activity, (widget.now ?? DateTime.now)()) ||
             !_attendanceViewModel.attended(activity.id)) {
           return const SizedBox.shrink();
         }
@@ -474,10 +476,13 @@ class _MainShellState extends State<MainShell> {
     }
   }
 
-  void _openDiscoverySearch() {
-    // Des de la capçalera d'Inici o de la barra del mapa (#274).
+  void _openDiscoverySearch({bool people = false}) {
+    // Des de la capçalera d'Inici, de la barra del mapa (#274) o, per cercar
+    // persones, del Perfil.
     final tab = _selectedIndex;
-    if (tab != _homeTab && tab != _mapTab) return;
+    if (tab != _homeTab && tab != _mapTab && tab != _profileTab) {
+      return;
+    }
     final navigator = _sectionNavigatorKeys[tab].currentState!;
     if (navigator.canPop()) return;
     navigator.push<void>(
@@ -486,6 +491,7 @@ class _MainShellState extends State<MainShell> {
         builder: (context) => ActivitySearchScreen(
           repository: widget.discoveryRepository,
           userSearchRepository: widget.userSearchRepository,
+          startWithPeople: people,
           onUserSelected: widget.publicProfileRepository == null
               ? null
               : (id) {
@@ -990,6 +996,11 @@ class _MainShellState extends State<MainShell> {
               4,
               (context) => ProfileScreen(
                 viewModel: _profileViewModel,
+                onFindPeople:
+                    widget.userSearchRepository == null ||
+                        widget.publicProfileRepository == null
+                    ? null
+                    : () => _openDiscoverySearch(people: true),
                 onSettingsPressed: _openProfileSettings,
                 onSharePressed: widget.user.username?.isNotEmpty == true
                     ? _shareOwnProfile

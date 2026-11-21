@@ -30,8 +30,10 @@
   web Google no ho fa, i així es veu igual a la web i al mòbil. La llegenda l'explica («On ets tu»).
 - **Botó «La meva ubicació»**, rodó, a baix a la dreta, per sobre d'«Assistent» (també puja amb la targeta).
   En prémer-lo, el mapa va on és la persona amb zoom 14 com a mínim, i es carreguen les activitats d'aquella zona.
-- **Permís**: només es demana en prémer el botó, mai en obrir el mapa. Si ja s'havia donat, el punt surt sol.
-  Si no es pot, un avís diu per què:
+- **En obrir el Mapa** (#266, DP-074): el primer cop que es veu la pestanya es demana el permís i, si es dona, el
+  mapa mostra uns 5 km al voltant de la persona. Si el GPS tarda, s'hi apropa quan arriba la posició (durant 30 s);
+  si mentrestant es prem «La meva ubicació», mana el botó. Sense permís es queda a Catalunya, sense cap avís.
+- **Permís**: si ja s'havia donat, el punt surt sol. En prémer el botó, si no es pot, un avís diu per què:
   - permís denegat: cal permetre-ho;
   - denegat per sempre: botó «Configuració» al mòbil; a la web, s'explica que es fa des de la icona del costat de
     l'adreça;

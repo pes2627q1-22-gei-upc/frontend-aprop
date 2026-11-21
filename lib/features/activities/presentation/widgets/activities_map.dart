@@ -209,6 +209,7 @@ class _ActivitiesMapState extends State<ActivitiesMap> {
   void didUpdateWidget(covariant ActivitiesMap oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.userLocation != widget.userLocation) {
+      _stopLateFocus(oldWidget.userLocation);
       _stopUserLocation(oldWidget.userLocation);
       _startUserLocation(widget.userLocation);
     }
@@ -240,6 +241,7 @@ class _ActivitiesMapState extends State<ActivitiesMap> {
   @override
   void dispose() {
     GestureBinding.instance.pointerRouter.removeGlobalRoute(_onPointer);
+    _stopLateFocus(widget.userLocation);
     _stopUserLocation(widget.userLocation);
     _lifecycle.dispose();
     _controller?.dispose();
@@ -315,9 +317,42 @@ class _ActivitiesMapState extends State<ActivitiesMap> {
     } catch (_) {
       return;
     }
+    if (!mounted) return;
     final position = location.position;
-    if (!mounted || result != LocateResult.located || position == null) return;
-    _focusAround(position.point);
+    if (result == LocateResult.located && position != null) {
+      _focusAround(position.point);
+    } else if (result == LocateResult.unavailable) {
+      // The GPS can take longer than the search (a phone just switched on,
+      // the emulator): go there when the position arrives, soon enough.
+      _focusWhenLocated(location);
+    }
+  }
+
+  /// How long after opening the map a late position still moves it: later,
+  /// the person may already be looking at another place.
+  static const _lateFocusWindow = Duration(seconds: 30);
+  VoidCallback? _lateFocus;
+
+  void _focusWhenLocated(UserLocationViewModel location) {
+    final deadline = DateTime.now().add(_lateFocusWindow);
+    void listener() {
+      final position = location.position;
+      if (position == null) return;
+      _stopLateFocus(location);
+      if (mounted && DateTime.now().isBefore(deadline)) {
+        _focusAround(position.point);
+      }
+    }
+
+    _stopLateFocus(location);
+    _lateFocus = listener;
+    location.addListener(listener);
+  }
+
+  void _stopLateFocus(UserLocationViewModel? location) {
+    final listener = _lateFocus;
+    _lateFocus = null;
+    if (listener != null) location?.removeListener(listener);
   }
 
   void _focusAround(GeoPoint point) {
@@ -343,6 +378,8 @@ class _ActivitiesMapState extends State<ActivitiesMap> {
   Future<void> _locate() async {
     final location = widget.userLocation;
     if (location == null) return;
+    // The button wins over a late move pending from opening the map.
+    _stopLateFocus(location);
     final result = await location.locate();
     if (!mounted) return;
 

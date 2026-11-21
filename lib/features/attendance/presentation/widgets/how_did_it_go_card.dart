@@ -7,7 +7,7 @@ import '../view_models/attendance_view_model.dart';
 
 /// «Com va anar?» (fig. 13): the plans that already started and still have
 /// no answer, whatever day is selected in the Agenda.
-class HowDidItGoCard extends StatelessWidget {
+class HowDidItGoCard extends StatefulWidget {
   const HowDidItGoCard({
     super.key,
     required this.activities,
@@ -17,8 +17,26 @@ class HowDidItGoCard extends StatelessWidget {
   final List<Activity> activities;
   final AttendanceViewModel viewModel;
 
+  /// Questions shown before «Veure'n més»: with many past plans, the card
+  /// would push the calendar far down.
+  static const collapsedCount = 3;
+
+  @override
+  State<HowDidItGoCard> createState() => _HowDidItGoCardState();
+}
+
+class _HowDidItGoCardState extends State<HowDidItGoCard> {
+  bool _expanded = false;
+
   @override
   Widget build(BuildContext context) {
+    final activities = widget.activities;
+    final hidden = _expanded
+        ? 0
+        : activities.length - HowDidItGoCard.collapsedCount;
+    final shown = hidden > 0
+        ? activities.take(HowDidItGoCard.collapsedCount)
+        : activities;
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
     return Card(
@@ -49,9 +67,30 @@ class HowDidItGoCard extends StatelessWidget {
                 color: colors.onSecondaryContainer,
               ),
             ),
-            for (final activity in activities) ...[
+            for (final activity in shown) ...[
               const SizedBox(height: 12),
-              _Question(activity: activity, viewModel: viewModel),
+              _Question(activity: activity, viewModel: widget.viewModel),
+            ],
+            if (hidden > 0 ||
+                (_expanded &&
+                    activities.length > HowDidItGoCard.collapsedCount)) ...[
+              const SizedBox(height: 4),
+              Center(
+                child: TextButton.icon(
+                  key: const ValueKey('how-did-it-go-more'),
+                  style: TextButton.styleFrom(
+                    minimumSize: const Size(0, 48),
+                    foregroundColor: colors.onSecondaryContainer,
+                  ),
+                  onPressed: () => setState(() => _expanded = !_expanded),
+                  icon: Icon(_expanded ? Icons.expand_less : Icons.expand_more),
+                  label: Text(
+                    _expanded
+                        ? context.l10n.attendanceShowLess
+                        : context.l10n.attendanceShowMore(hidden),
+                  ),
+                ),
+              ),
             ],
           ],
         ),

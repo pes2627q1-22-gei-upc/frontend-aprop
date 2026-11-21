@@ -16,6 +16,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileTitleFallback => 'Profile';
 
   @override
+  String get profileFindPeople => 'Find people';
+
+  @override
   String get profilePeopleSearchSoon => 'People search coming soon';
 
   @override
@@ -445,6 +448,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsDeleteAccount => 'Delete account';
+
+  @override
+  String get settingsDeleteAccountHint => 'Type it here';
 
   @override
   String get settingsDeletingAccount => 'Deleting the account…';
@@ -1323,6 +1329,14 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get attendanceSaveError =>
       'We couldn’t save your answer. Please try again.';
+
+  @override
+  String attendanceShowMore(int count) {
+    return 'Show $count more';
+  }
+
+  @override
+  String get attendanceShowLess => 'Show less';
 
   @override
   String attendanceThanksYes(String title) {

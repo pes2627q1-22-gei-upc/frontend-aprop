@@ -216,4 +216,47 @@ void main() {
     );
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('The Perfil icon opens the search already on «Persones»', (
+    tester,
+  ) async {
+    setSize(tester);
+    await tester.pumpWidget(APropApp(authRepository: await auth()));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(NavigationDestination, 'Perfil'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Cerca persones'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Nom o nom d’usuari'), findsOneWidget);
+    expect(
+      tester.widget<SegmentedButton<bool>>(find.byType(SegmentedButton<bool>)),
+      isA<SegmentedButton<bool>>().having(
+        (button) => button.selected,
+        'selected',
+        {false},
+      ),
+    );
+    await tester.enterText(find.byType(TextField), 'marc');
+    await tester.testTextInput.receiveAction(TextInputAction.search);
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.byKey(const ValueKey('user-search-demo-person-marc')),
+    );
+    await tester.pumpAndSettle();
+    expect(find.widgetWithText(AppBar, 'marcvidal'), findsOneWidget);
+    expect(
+      tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex,
+      4,
+    );
+
+    // Back: the search, then Perfil.
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    expect(find.text('@marcvidal'), findsOneWidget);
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    expect(find.text('Editar perfil'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
 }
