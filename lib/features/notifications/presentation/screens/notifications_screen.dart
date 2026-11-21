@@ -24,7 +24,7 @@ class NotificationsScreen extends StatefulWidget {
   final NotificationRepository repository;
   final FriendshipRepository? friendshipRepository;
   final ValueChanged<String> onActivitySelected;
-  // TODO(DP-023): App composition supplies this when real profiles exist.
+  // App composition supplies the profile destination; responding is independent.
   final ValueChanged<String>? onPersonSelected;
   final DateTime Function()? now;
 

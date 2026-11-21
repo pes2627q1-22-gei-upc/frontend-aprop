@@ -4,14 +4,15 @@
 
 ## Sprint
 
-- Sprint 2 · només frontend. Tasca activa #193: rebutjar sol·licituds des d’Avisos i Perfil, reutilitzant #164.
+- Sprint 2 · només frontend. Tasca activa #168: targeta de sol·licitud a Avisos, estats de presentació, accessibilitat i proves.
 
 ## En curs
 
 | Taiga | Tasca | Branca | Estat |
 |---|---|---|---|
-| #193 | [FE] Acció «Rebutjar» a Avisos i perfil + tests | `feature/reject-friend-request-193` | Implementada; 825 proves, anàlisi, format i APK correctes; revisió tècnica aprovada; depèn de la PR de #164; DP-067 oberta; sense commit/push |
-| #164 | [FE] Acceptar en avís social i perfil + comptadors/distintiu reactius + tests | `feature/accept-friend-request-164` | Implementada amb HTTP/Demo; Publicada a `94793c2`; PR encara pendent a develop; 807 proves i APK correctes; DP-066 oberta |
+| #168 | [FE] Targeta de sol·licitud amb Acceptar/Rebutjar a NotificationsScreen + tests | `feature/friend-request-notification-card-168` | Implementada; 843 proves, anàlisi, format i APK correctes; revisió tècnica aprovada; sense commit/push |
+| #193 | [FE] Acció «Rebutjar» a Avisos i perfil + tests | `feature/reject-friend-request-193` | Integrada a develop amb PR #68; DP-067 oberta |
+| #164 | [FE] Acceptar en avís social i perfil + comptadors/distintiu reactius + tests | `feature/accept-friend-request-164` | Integrada a develop amb PR #66; DP-066 oberta |
 | #160 | [FE] Botó d'acció d'amistat al perfil aliè + integració al ViewModel + tests | `feature/boto-amistat` | Integrada a develop amb PR #63; DP-064 oberta |
 | #162 | [FE] Vista y `UserSearchViewModel` integrada en el buscador de Descobreix (fig. 16) + navegación al perfil conservando estado + tests | `feature/user-search-162` | Integrada a develop amb PR #64 |
 | #148 | [FE] Xat de l'activitat | `feature/xat-activitat` | Integrada a develop amb PR #59; correccions de la revisió (límit en runes, refresc sense encavalcar-se i pausat en segon pla, proves d'estats, documentació); DP-062 oberta |
@@ -25,15 +26,29 @@
 | #262 | [FE] Ajustar contrast i color del logotip respecte al fons | `feature/fix-262-logo-contrast` | Implementada; preparació de PR autoritzada; pendent CI i revisió humana |
 | #277 | [FE] Perfil d'un altre usuari amb GET /users/{id} i privacitat dels plans (CA3) + tests | `feature/perfil-altre-usuari` | Implementada (HTTP i Demo); DP-063 oberta; pendent revisió humana |
 
-## Base i abast actual (#193)
+## Base i abast actual (#168)
 
-- Branca `feature/reject-friend-request-193` des de `94793c2` de #164, que ja inclou `develop@8b4b5dd`.
-- #164 encara pendent a `develop`: comparar amb la branca pare per revisar només #193; integrar la pare abans de fusionar #193.
-- Backend contrastat a `fb266a7`, intacte. Cap endpoint nou, paquet, commit ni push.
-- Reutilització de `FriendshipRepository` i resposta confirmada; el perfil afegeix Rebutjar i comparteix el mètode d’Acceptar.
-- Controls inhabilitats en respondre; errors/reintents, feedback neutral i privacitat intacta; textos ca/es/en.
-- DP-067 cobreix el petit canvi de distribució i el retorn després del rebuig. Guia `docs/friend-requests.md`.
-- Verificació final de #193: 18 proves noves; suite de 825 proves superada, anàlisi sense incidències, format de 347 fitxers i APK debug correctes. Revisió tècnica independent aprovada.
+- Branca `feature/friend-request-notification-card-168` des de `origin/develop@550d9a9`.
+- #164 integrada amb PR #66 i #193 amb PR #68; cap branca pare pendent.
+- Presentació de la petició extreta a `FriendRequestNotificationActions`, reutilitzada per `NotificationCard`.
+- Mateix ViewModel/repositoris compartits; no es duplica estat ni s’afegeixen endpoints.
+- Progrés visible, resultat amb text/icona i controls accessibles amb remitent; ca/es/en, 320 px amb text ×2.
+- 18 proves noves superades: 11 de component (incloent focus/teclat) i 7 de pantalla. Suite completa: 843 proves; anàlisi sense incidències, format de 350 fitxers i APK debug correctes. Revisió tècnica independent aprovada.
+- Backend `fb266a7` intacte; continuen els límits de generació automàtica d’avisos de DP-066.
+- Guia de renderitzat/estats i proves: `docs/notification-request-card.md`.
+
+## Verificació #168 (2026-11-21)
+
+- 18 proves noves: estats de la targeta, lectura independent, callbacks, errors/reintent,
+  altres peticions disponibles i destinació de perfil opcional.
+- Ca/es/en a 390 px i a 320 px amb text ×2; superfícies de 48 px, etiquetes amb remitent i focus natiu.
+- Prova de Tab/Enter/espai: focus accessible i activació de totes dues accions.
+- Suite completa de **843 proves** superada; anàlisi sense incidències i format de 350 fitxers sense canvis.
+- Poliment visual final verificat tornant a passar els 18 tests d’interfície i 2 recorreguts de render.
+- `flutter build apk --debug` correcte després de l’ajust visual final.
+- Revisió tècnica independent: incidència de semàntica nativa corregida i segona revisió aprovada.
+- Captures Flutter amb fonts Roboto i Demo revisades a `PES/output/frontend/task-168-avisos-{pendent,enviant-acceptar,enviant-rebutjar,acceptat,rebutjat}.png`.
+- Cap escriptura a Render ni prova amb comptes reals; backend intacte, sense commit ni push.
 
 ## Verificació #193 (2026-11-21)
 
@@ -59,8 +74,8 @@
 
 ## Pendents / següents passos
 
-1. Canvis de #193 preparats per a revisió humana abans del commit; `git diff --check` correcte.
-2. L’usuari fa commit/push de #193; revisar només el delta sobre #164 i esperar la integració de la pare abans del merge cap a develop. CI i aprovació humana obligatòries.
+1. Canvis de #168 preparats per a revisió humana; `git diff --check` correcte.
+2. L’usuari fa commit/push de #168 i PR a develop; CI i aprovació humana obligatòries.
 3. Comprovar el recorregut amb dos comptes reals al desplegament i en Android.
 4. Backend/equip: avís automàtic en enviar sol·licitud i política de zona de `request-date` (DP-066).
    Si cal historial resolt o lectura de sol·licituds després de reiniciar, falten aquests contractes.

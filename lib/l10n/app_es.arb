@@ -294,6 +294,22 @@
   "notifActivityGone": "La actividad ya no está disponible.",
   "notifActivityLoadError": "No se ha podido cargar la información de la actividad. Puedes probar a abrirla.",
   "notifSendingResponse": "Enviando la respuesta",
+  "notifAcceptRequestFrom": "Aceptar la solicitud de amistad de {name}",
+  "@notifAcceptRequestFrom": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "notifDeclineRequestFrom": "Rechazar la solicitud de amistad de {name}",
+  "@notifDeclineRequestFrom": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "notifAccept": "Aceptar",
   "notifDecline": "Rechazar",
   "notifRequestAccepted": "Solicitud aceptada",
