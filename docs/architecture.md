@@ -300,3 +300,19 @@ a una columna quan cal i afegeix etiquetes accessibles amb la persona remitent. 
 visual i semàntica és la mateixa: mentre s’envia no es pot repetir l’acció. Només `friendRequest`
 mostra els controls; els avisos socials genèrics no s’interpreten com a peticions. Guia i proves a
 [Targeta de sol·licitud rebuda](notification-request-card.md).
+
+### Avís d’amistat acceptada — Taiga #170
+
+`AppNotification.friendRequestAccepted` representa l’avís que rep qui va enviar una sol·licitud,
+quan l’altra persona l’accepta. És diferent de la petició rebuda que l’usuari acaba de resoldre.
+`NotificationCard` reutilitza el missatge localitzat existent i afegeix «Veure perfil», amb etiqueta
+accessible que identifica la persona. No té Acceptar/Rebutjar ni modifica l’amistat o comptadors.
+
+Tant el cos com el botó passen per `NotificationsScreen._open`: lectura confirmada pel ViewModel,
+comprovació de cicle de vida/compte/ruta i callback `onPersonSelected`. `MainShell` obre el perfil
+al navegador d’Avisos; tornar conserva filtre, desplaçament i lectura. No s’afegeix cap repositori,
+ViewModel o ruta duplicats. Si no s’injecta una destinació, no hi ha botó i el cos permet llegir.
+
+El model tipat i Demo ja existien. L’adaptador HTTP manté Social genèric perquè el DTO no distingeix
+l’acceptació. No s’interpreta el text ni s’infereix l’esdeveniment de l’amistat actual (DP-070).
+Vegeu [contracte pendent i proves](accepted-friendship-notification.md).

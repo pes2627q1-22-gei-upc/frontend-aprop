@@ -312,6 +312,14 @@
       }
     }
   },
+  "notifViewFriendProfile": "Ver el perfil de {name}",
+  "@notifViewFriendProfile": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "notifAccept": "Aceptar",
   "notifDecline": "Rechazar",
   "notifRequestAccepted": "Solicitud aceptada",
@@ -330,6 +338,8 @@
   "interestTestDislike": "No me interesa",
   "interestTestLoadError": "No hemos podido cargar el test. Vuelve a intentarlo.",
   "interestTestSaveError": "No hemos podido guardar las respuestas. Vuelve a intentarlo.",
+  "interestTestSkip": "Ahora no",
+  "interestTestContinue": "Continuar",
   "ratingDeleteTitle": "¿Eliminar la valoración?",
   "ratingDeleteBody": "Tu valoración se eliminará y podrás volver a valorar la actividad.",
   "cancel": "Cancelar",

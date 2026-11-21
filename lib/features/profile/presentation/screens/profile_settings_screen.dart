@@ -226,7 +226,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                       title: Text(context.l10n.settingsRetakeInterestTest),
                       minVerticalPadding: 12,
                       enabled: !model.isBusy,
-                      onTap: open,
+                      onTap: model.isBusy ? null : open,
                     )
                   else
                     PendingSettingsTile(

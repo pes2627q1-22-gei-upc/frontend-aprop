@@ -1888,6 +1888,12 @@ abstract class AppLocalizations {
   /// **'Rebutjar la sol·licitud d’amistat de {name}'**
   String notifDeclineRequestFrom(String name);
 
+  /// No description provided for @notifViewFriendProfile.
+  ///
+  /// In ca, this message translates to:
+  /// **'Veure el perfil de {name}'**
+  String notifViewFriendProfile(String name);
+
   /// No description provided for @notifAccept.
   ///
   /// In ca, this message translates to:
@@ -1995,6 +2001,18 @@ abstract class AppLocalizations {
   /// In ca, this message translates to:
   /// **'No hem pogut desar les respostes. Torna-ho a provar.'**
   String get interestTestSaveError;
+
+  /// No description provided for @interestTestSkip.
+  ///
+  /// In ca, this message translates to:
+  /// **'Ara no'**
+  String get interestTestSkip;
+
+  /// No description provided for @interestTestContinue.
+  ///
+  /// In ca, this message translates to:
+  /// **'Continua'**
+  String get interestTestContinue;
 
   /// No description provided for @ratingDeleteTitle.
   ///

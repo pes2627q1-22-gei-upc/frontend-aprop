@@ -746,6 +746,14 @@
       }
     }
   },
+  "notifViewFriendProfile": "Veure el perfil de {name}",
+  "@notifViewFriendProfile": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "notifAccept": "Acceptar",
   "notifDecline": "Rebutjar",
   "notifRequestAccepted": "Sol·licitud acceptada",
@@ -774,6 +782,8 @@
   "interestTestDislike": "No m’interessa",
   "interestTestLoadError": "No hem pogut carregar el test. Torna-ho a provar.",
   "interestTestSaveError": "No hem pogut desar les respostes. Torna-ho a provar.",
+  "interestTestSkip": "Ara no",
+  "interestTestContinue": "Continua",
   "ratingDeleteTitle": "Eliminar la valoració?",
   "ratingDeleteBody": "La teva valoració s’eliminarà i podràs tornar a valorar l’activitat.",
   "cancel": "Cancel·la",

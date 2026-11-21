@@ -598,6 +598,18 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Qui decideix:** equip (disseny)
 - **Resolució:**
 
+### DP-066 · Onboarding del test d’interessos (#30): «Ara no» en memòria, `/preferences/test/status` i Demo
+- **Estat:** oberta · 2026-11-21 · agent (Antigravity, Gemini) · Taiga #30
+- **Context:** `AuthGate` (`_InterestTestOnboardingGate`), `InterestTestRepository.hasCompletedTest`, `HttpInterestTestRepository`, `DemoInterestTestRepository`, `InterestTestScreen`.
+- **Dubte:**
+  - `GET /preferences/test/status` (`{"completed": bool, "date-taken": RFC3339|null}`) s’implementa en paral·lel al backend i pot no estar desplegat encara.
+  - Si l’usuari prem «Ara no» durant l’onboarding, no està decidit si l’omissió ha de durar només l’execució actual o persistir al dispositiu entre reinicis.
+  - En mode Demo, mostrar l’onboarding automàticament a tots els comptes interrompria els fluxos de demostració i les proves existents d’`AuthGate`.
+- **Opcions:** persistència de «Ara no»: A) només en memòria durant l’execució actual (com ara) · B) persistir per compte a `shared_preferences`. Mode Demo: A) `completed = true` per defecte i configurable al constructor (com ara) · B) `completed = false` per defecte.
+- **Provisionalment:** A en tots dos casos. Si `hasCompletedTest()` falla (error HTTP, xarxa o format), l’onboarding s’omet i mai no bloqueja l’entrada a `MainShell`. L’omissió es guarda a `_onboardingHandledUsers` dins d’`AuthGate` durant l’execució actual (`TODO(DP-066)`). `DemoInterestTestRepository` parteix de `completed = true` (passa a `true` en enviar respostes i accepta `completed: false` per provar l’onboarding). Les categories del test reutilitzen `parseActivityCategories` (`agenda:categories/*` i `agenda:ambits/*` netejades i deduplicades, coherent amb `activityFromJson`) i la descripció a la targeta es trunca a 3 línies amb el·lipsi.
+- **Qui decideix:** equip + backend (contracte `/preferences/test/status` i UX d’omissió)
+- **Resolució:**
+
 ## Resoltes
 
 ### DP-058 · Enllaços de la fitxa: obrir-los amb `url_launcher`
@@ -815,9 +827,19 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Qui decideix:** backend (`state` a l’activitat i bloqueig d’inscripcions)
 - **Resolució:**
 
+### DP-070 · Avís d’amistat acceptada sense subtipus al backend (#170)
+- **Estat:** oberta · 2026-11-21 · Taiga #170, història #38 · només frontend.
+- **Identificador:** renumerada de DP-069 a DP-070 en integrar `origin/develop@085a03a`, per conservar la DP-069 de cancel·lació d’activitats #181.
+- **Context:** backend `fb266a7`: acceptar crea un avís amb tipus Social, `friend-id`, `request-date` i text lliure. El DTO de notificacions no conté un subtipus/estat d’acceptació. `/users/me/friend-requests` només retorna rebudes Pending; no és historial d’acceptacions sortints. L’usuari confirma que no hi ha una altra branca.
+- **Presentació:** reutilitzar `AppNotification.friendRequestAccepted`, el missatge i la navegació ja existents; afegir l’accés explícit «Veure perfil» amb nom accessible. Cap Acceptar/Rebutjar. Mateix flux de lectura confirmada, errors i protecció de respostes tardanes de la bústia.
+- **Límit:** es completa la interfície amb el model tipat/Demo i proves. La classificació HTTP d’acceptacions queda pendent: un Social genèric continua genèric, encara que el text digui «ha acceptat». Ni el text ni ser amics ara demostren l’esdeveniment concret. No es crea cap historial ni avís fictici.
+- **Pendent backend/equip:** acordar un discriminador estructurat d’acceptació i publicar-ne l’esquema, amb destinatari, persona que accepta, data i referència de sol·licitud. Els noms del nou camp/subtipus s’han d’acordar; no es pressuposa un endpoint o camp nou. Després, adaptar `notification_json_mapper.dart`/`HttpNotificationRepository` i afegir una prova del JSON real.
+- **Codi:** `TODO(DP-070)` a `http_notification_repository.dart`. Flux i missatge de traspàs a `docs/accepted-friendship-notification.md`. Backend intacte; segueixen obertes DP-039/DP-066.
+- **Qui decideix:** equip frontend/backend (contracte de l’avís).
+
 ### DP-071 · Avís de cancel·lació (#47): filtre i estat de l’activitat
 - **Estat:** oberta · 2026-11-21 · Claude Code (Opus 5.5) a petició de l’usuari · Taiga #183 (història #47)
-- **Identificador:** la DP-070 és de la #170 (Adam, PR oberta); es fa servir la DP-071 per no col·lidir-hi.
+- **Identificador:** la DP-070 és de la #170 (Adam); es fa servir la DP-071 per no col·lidir-hi.
 - **Context:** `NotificationType.activityCancelled`, `notificationTypesFromJson`, `notificationMessage`, `NotificationsScreen.onActivitiesCancelled`, `MainShell`. Backend consultat a `api-aprop@develop` sense modificar-lo: en cancel·lar una activitat (#46) es crea un avís de tipus «Cancelacio» (amb l’activitat) per a cada persona apuntada, excepte qui l’ha creada.
 - **Deduït (sense confirmar):**
   - El mockup (fig. 17) només té els filtres Tots / Social / Recordatoris / Recomanacions. La cancel·lació va a «Recordatoris» perquè parla dels plans de la persona; el distintiu de la targeta diu «Recordatori» i el text diu «S’ha cancel·lat «…»».

@@ -1125,6 +1125,11 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String notifViewFriendProfile(String name) {
+    return 'Ver el perfil de $name';
+  }
+
+  @override
   String get notifAccept => 'Aceptar';
 
   @override
@@ -1184,6 +1189,12 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get interestTestSaveError =>
       'No hemos podido guardar las respuestas. Vuelve a intentarlo.';
+
+  @override
+  String get interestTestSkip => 'Ahora no';
+
+  @override
+  String get interestTestContinue => 'Continuar';
 
   @override
   String get ratingDeleteTitle => '¿Eliminar la valoración?';
