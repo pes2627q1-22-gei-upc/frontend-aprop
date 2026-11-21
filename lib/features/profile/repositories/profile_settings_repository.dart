@@ -13,7 +13,8 @@ abstract interface class ProfileSettingsRepository {
     required String language,
   });
 
-  /// Applies one preference and returns the confirmed snapshot. Throws on failure.
+  /// Applies one preference and returns a snapshot confirming the requested
+  /// value. Throws on failure or a response that does not confirm the change.
   Future<ProfileSettings> updatePreference({
     required String userId,
     required ProfilePreference preference,

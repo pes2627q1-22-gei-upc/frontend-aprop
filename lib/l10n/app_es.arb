@@ -111,6 +111,8 @@
   "settingsDarkThemeSoon": "Tema oscuro disponible próximamente",
   "settingsGroupPrivacy": "PRIVACIDAD",
   "settingsShowMyPlans": "Mostrar mis planes",
+  "settingsPlansShared": "Compartir con amigos activado",
+  "settingsPlansPrivate": "Compartir con amigos desactivado",
   "settingsShowMyPlansHint": "Tus amigos ven a qué te apuntas",
   "settingsBlockedUsers": "Usuarios bloqueados",
   "settingsGroupNotifications": "NOTIFICACIONES",

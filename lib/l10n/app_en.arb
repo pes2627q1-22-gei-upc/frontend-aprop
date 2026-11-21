@@ -111,6 +111,8 @@
   "settingsDarkThemeSoon": "Dark theme coming soon",
   "settingsGroupPrivacy": "PRIVACY",
   "settingsShowMyPlans": "Show my plans",
+  "settingsPlansShared": "Sharing with friends is on",
+  "settingsPlansPrivate": "Sharing with friends is off",
   "settingsShowMyPlansHint": "Friends can see what you sign up for",
   "settingsBlockedUsers": "Blocked users",
   "settingsGroupNotifications": "NOTIFICATIONS",

@@ -6,6 +6,7 @@ import '../../models/profile_settings.dart';
 import '../../repositories/profile_settings_repository.dart';
 import '../view_models/profile_settings_view_model.dart';
 import '../widgets/settings_group.dart';
+import '../widgets/settings_preference_tile.dart';
 
 class ProfileSettingsScreen extends StatefulWidget {
   const ProfileSettingsScreen({
@@ -120,14 +121,6 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                         ),
                       ),
                     ),
-                  if (model.savingPreference != null)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: Semantics(
-                        liveRegion: true,
-                        child: Text(context.l10n.settingsSavingChange),
-                      ),
-                    ),
                 ],
               ),
               if (settings != null) ...[
@@ -146,7 +139,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                       selected:
                           Localizations.maybeLocaleOf(context)?.languageCode ??
                           'ca',
-                      onChanged: model.hasLocaleController
+                      onChanged: model.hasLocaleController && !model.isBusy
                           ? (code) => model.changeLanguage(Locale(code))
                           : null,
                     ),
@@ -317,16 +310,26 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
         subtitle: context.l10n.comingSoon,
       );
     }
-    return SwitchListTile.adaptive(
-      key: ValueKey('profile-preference-${preference.name}'),
-      secondary: SettingsIcon(icon: icon),
-      title: Text(title),
-      subtitle: subtitle == null ? null : Text(subtitle),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+    // TODO(DP-078): This controls sharing plans with friends, not public events.
+    return SettingsPreferenceTile(
+      switchKey: ValueKey('profile-preference-${preference.name}'),
+      icon: icon,
+      title: title,
+      hint: subtitle,
       value: model.settings!.valueOf(preference),
-      onChanged: model.isBusy || model.isLoading
-          ? null
-          : (value) => model.updatePreference(preference, value),
+      status: preference == ProfilePreference.showMyPlans
+          ? model.settings!.showMyPlans
+                ? context.l10n.settingsPlansShared
+                : context.l10n.settingsPlansPrivate
+          : null,
+      saving: model.savingPreference == preference,
+      error: model.failedPreference == preference
+          ? model.preferenceError
+          : null,
+      onRetry: model.canRetryPreference ? model.retryPreference : null,
+      onChanged: model.canUpdatePreference(preference)
+          ? (value) => model.updatePreference(preference, value)
+          : null,
     );
   }
 }

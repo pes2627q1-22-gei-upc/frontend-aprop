@@ -195,6 +195,15 @@ La presentació es manté al cercador existent de `features/activities/`: `Activ
 
 ## Perfil propi i Configuració
 
+**Visibilitat dels plans (#199):** es reutilitzen `ProfileSettingsScreen` i `ProfileSettingsViewModel`
+(els noms de Configuració al projecte), sense afegir pantalles paral·leles. `SettingsPreferenceTile`
+representa el valor confirmat, progrés textual i error amb reintent. La intenció fallida es guarda al
+ViewModel, no al widget; el reintent repeteix aquell valor. Els errors de preferència són independents
+dels d’idioma/compte, i les escriptures d’idioma no se superposen amb les de preferències.
+`HttpProfileSettingsRepository` comprova identitat i valor retornats pel PATCH. L’accés a plans aliens
+continua depenent de `plans-visible` i de l’autorització del servidor, no del switch local d’un altre
+compte. Vegeu [el flux i els límits](plan-visibility.md), DP-078.
+
 `features/profile/` té models i contractes en Dart pur, adaptadors Demo/HTTP, ViewModels i presentació. Comparteix models i contractes d’Auth/activitats; no importa els seus widgets ni ViewModels. L’adaptador HTTP reutilitza el mapper d’activitats de la capa de dades. `ProfileRepository` separa metadades, activitats creades, edició i avatar; les inscripcions no s’interpreten com assistència. `ProfileCapabilities` indica els camps i col·leccions disponibles. `ProfileSettingsRepository` declara les preferències suportades i si són persistents.
 
 `AuthGate` crea/injecta els dos repositoris i els conserva durant l’execució. `MainShell`, identificat pel compte, crea i allibera `ProfileViewModel`, com ja fa amb el catàleg i les inscripcions; el refresca en entrar a Perfil perquè reflecteixi activitats creades des d’Inici. `ProfileScreen` conserva només la pestanya local i observa aquest ViewModel. El panell d’edició comparteix el mateix estat; cap perfil no es duplica dins d’un widget.

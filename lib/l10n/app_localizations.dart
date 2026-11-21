@@ -772,6 +772,18 @@ abstract class AppLocalizations {
   /// **'Els amics veuen a què t’apuntes'**
   String get settingsShowMyPlansHint;
 
+  /// No description provided for @settingsPlansShared.
+  ///
+  /// In ca, this message translates to:
+  /// **'Compartició amb amics activada'**
+  String get settingsPlansShared;
+
+  /// No description provided for @settingsPlansPrivate.
+  ///
+  /// In ca, this message translates to:
+  /// **'Compartició amb amics desactivada'**
+  String get settingsPlansPrivate;
+
   /// No description provided for @settingsBlockedUsers.
   ///
   /// In ca, this message translates to:

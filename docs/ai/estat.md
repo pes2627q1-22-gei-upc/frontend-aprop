@@ -4,12 +4,13 @@
 
 ## Sprint
 
-- Sprint 2 · només frontend. Tasca activa #195: eliminar amistats des de la llista pròpia i el perfil aliè, amb confirmació i proves.
+- Sprint 2 · només frontend. Tasca activa #199: switch «Mostrar els meus plans», confirmació, reintent i proves de privacitat a Configuració.
 
 ## En curs
 
 | Taiga | Tasca | Branca | Estat |
 |---|---|---|---|
+| #199 | [FE] Switch «Mostrar els meus plans» + ViewModel + tests (història #55) | `feature/show-my-plans-199` | Verificada: 972 proves, anàlisi, format i APK correctes; revisió independent aprovada; DP-078 (presentació i autorització backend); sense commit/push |
 | #212 i #266 | Arreglos generals de la prova a l’emulador: «Com va anar?» no pregunta abans d’hora i en mostra tres; zoom del mapa amb GPS lent; «00.00 h» als avisos; ajuda del diàleg d’eliminar; icona «Cerca persones» al Perfil | `fix/com-va-anar` (inclou `feature/mapa-zoom-ubicacio`) | Implementada; DP-068 i DP-074 actualitzades; pendent revisió humana |
 | #266 | Mapa: zoom de 5 km a la persona en obrir-lo i límit d’allunyament | `feature/mapa-zoom-ubicacio` | Commit `d2357d1`; entra a develop amb `fix/com-va-anar` |
 | #195 | [FE] Eliminar amistat a la llista i perfil amb confirmació + tests (història #53) | `feature/remove-friend-195` | HTTP/Demo verificats: 933 proves, anàlisi, format i APK correctes; revisió tècnica aprovada; DP-076 de presentació; sense commit/push |
@@ -34,7 +35,25 @@
 | #277 | [FE] Perfil d'un altre usuari amb GET /users/{id} i privacitat dels plans (CA3) + tests | `feature/perfil-altre-usuari` | Implementada (HTTP i Demo); DP-063 oberta; pendent revisió humana |
 | #117 | [FE] Acció i diàleg de confirmació a Configuració + tancament de sessió + tests (història #10) | `feature/eliminar-compte` | Integrada a develop amb PR #73; DP-075 oberta |
 
-## Base i abast actual (#195)
+## Base i abast actual (#199)
+
+- Branca independent des de `origin/develop@ee9e34f`. #179 continua publicada a la seva branca; no s’inclou en aquesta PR.
+- Backend `4f98835` consultat sense modificar. GET/PATCH de `show-plans` existents; falta autorització a la consulta directa d’inscripcions alienes (DP-078 / DP-011).
+- Es reutilitza la configuració existent: valor confirmat, estat textual, progrés, error i reintent de la mateixa intenció. Sense paquets ni endpoints nous.
+- Repositori valida UUID i booleà confirmats. ViewModel separa errors i impedeix escriptures d’idioma/privacitat simultànies; canvi de compte/dispose ignoren resultats antics.
+- Guia `docs/plan-visibility.md`; verificació local i revisió independent aprovades. Sense commit/push.
+
+## Verificació #199 (2026-11-21)
+
+- **23 proves noves**: HTTP (7), ViewModel (6), widgets (9) i flux de permisos entre repositoris/ViewModels (1).
+- Conjunt focal de 31 proves superat. Suite completa: **972 proves superades** sobre la base de develop, sense la PR #179 encara pendent a l’inici.
+- ca/es/en a 390 px i 320 px amb text ×2; semàntica nativa i superfícies de 48 px.
+- Revisió independent aprovada després de restaurar el `liveRegion` del progrés. Widgets i render després de l’ajust: 10 proves superades.
+- `flutter analyze` sense incidències; format de 381 fitxers sense canvis; `git diff --check` correcte; APK debug compilada.
+- Captures Flutter amb Roboto i repositori simulat revisades a `PES/output/frontend/task-199-{comparticio-activada,error-reintent,comparticio-desactivada}.png`.
+- Backend net a `4f98835`. Sense migracions ni escriptures a Render. Verificació amb dos comptes reals/Android, autorització de DP-078, CI i revisió humana pendents.
+
+## Context anterior (#195)
 
 - Branca independent `feature/remove-friend-195` des de `origin/develop@112d2f8`; backend `4f98835` consultat, sense modificar.
 - HTTP real amb `POST /users/{id}/unfriend`, compte i bearer fixats amb `ProfileApi.own`, sense interpretar text lliure.
@@ -117,7 +136,7 @@
 
 ## Pendents / següents passos
 
-1. Revisió de l’usuari dels canvis #195, commit i PR cap a develop. CI, aprovació humana i prova amb dos comptes reals en Android pendents.
+1. Revisió dels canvis #199, commit i PR cap a develop. CI, aprovació humana i prova amb dos comptes reals en Android pendents. Comunicar l’autorització pendent de DP-078 al backend.
 2. Backend/equip: discriminador estructurat d’acceptació a la bústia (DP-070); després integrar el JSON real i comprovar el recorregut amb dos comptes al desplegament i Android.
 3. Backend/equip: avís automàtic en enviar sol·licitud i política de zona de `request-date` (DP-066).
    Si cal historial resolt o lectura de sol·licituds després de reiniciar, falten aquests contractes.
