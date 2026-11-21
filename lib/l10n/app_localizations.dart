@@ -3735,6 +3735,54 @@ abstract class AppLocalizations {
   /// In ca, this message translates to:
   /// **'La cerca pot tenir com a màxim {limit} caràcters.'**
   String userSearchTooLong(int limit);
+
+  /// No description provided for @friendRemove.
+  ///
+  /// In ca, this message translates to:
+  /// **'Eliminar amistat'**
+  String get friendRemove;
+
+  /// No description provided for @friendRemoveTitle.
+  ///
+  /// In ca, this message translates to:
+  /// **'Eliminar aquesta amistat?'**
+  String get friendRemoveTitle;
+
+  /// No description provided for @friendRemoveMessage.
+  ///
+  /// In ca, this message translates to:
+  /// **'Vols eliminar l’amistat amb {name}?'**
+  String friendRemoveMessage(String name);
+
+  /// No description provided for @friendRemoveSuccess.
+  ///
+  /// In ca, this message translates to:
+  /// **'Has eliminat l’amistat amb {name}.'**
+  String friendRemoveSuccess(String name);
+
+  /// No description provided for @friendRemoveError.
+  ///
+  /// In ca, this message translates to:
+  /// **'No hem pogut eliminar l’amistat. Torna-ho a provar.'**
+  String get friendRemoveError;
+
+  /// No description provided for @friendRemoving.
+  ///
+  /// In ca, this message translates to:
+  /// **'Eliminant l’amistat'**
+  String get friendRemoving;
+
+  /// No description provided for @friendRemoveFrom.
+  ///
+  /// In ca, this message translates to:
+  /// **'Eliminar l’amistat amb {name}'**
+  String friendRemoveFrom(String name);
+
+  /// No description provided for @friendOptions.
+  ///
+  /// In ca, this message translates to:
+  /// **'Opcions d’amistat'**
+  String get friendOptions;
 }
 
 class _AppLocalizationsDelegate

@@ -7,6 +7,7 @@ import '../../repositories/friendship_repository.dart';
 import '../view_models/public_profile_view_model.dart';
 import '../widgets/profile_activity_tile.dart';
 import '../widgets/profile_header.dart';
+import '../widgets/friend_removal_action.dart';
 
 /// Another person's profile (#277). Opened from an activity's creator or a
 /// notice; MainShell pushes it on the current section's navigator.
@@ -39,18 +40,61 @@ class PublicProfileScreen extends StatefulWidget {
 }
 
 class _PublicProfileScreenState extends State<PublicProfileScreen> {
-  late final PublicProfileViewModel _viewModel;
+  late PublicProfileViewModel _viewModel;
   int? _chosenTab;
+  bool _confirmationOpen = false;
+
+  PublicProfileViewModel _createModel() => PublicProfileViewModel(
+    userId: widget.userId,
+    repository: widget.repository,
+    friendshipRepository: widget.friendshipRepository,
+    currentUserId: widget.currentUserId,
+  )..load();
 
   @override
   void initState() {
     super.initState();
-    _viewModel = PublicProfileViewModel(
-      userId: widget.userId,
-      repository: widget.repository,
-      friendshipRepository: widget.friendshipRepository,
-      currentUserId: widget.currentUserId,
-    )..load();
+    _viewModel = _createModel();
+  }
+
+  @override
+  void didUpdateWidget(covariant PublicProfileScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.userId != widget.userId ||
+        oldWidget.repository != widget.repository ||
+        oldWidget.friendshipRepository != widget.friendshipRepository ||
+        oldWidget.currentUserId != widget.currentUserId) {
+      _viewModel.dispose();
+      _viewModel = _createModel();
+      _chosenTab = null;
+      _confirmationOpen = false;
+    }
+  }
+
+  Future<void> _removeFriend() async {
+    final model = _viewModel;
+    final name = model.profile?.profile.displayName;
+    if (_confirmationOpen ||
+        !model.canRemoveFriend ||
+        name == null ||
+        !(ModalRoute.of(context)?.isCurrent ?? true)) {
+      return;
+    }
+    _confirmationOpen = true;
+    final confirmed = await confirmFriendRemoval(context, name);
+    if (!mounted || !identical(model, _viewModel)) return;
+    _confirmationOpen = false;
+    if (!confirmed) return;
+    final removed = await model.removeFriend();
+    if (!mounted ||
+        !identical(model, _viewModel) ||
+        !removed ||
+        !(ModalRoute.of(context)?.isCurrent ?? true)) {
+      return;
+    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(context.l10n.friendRemoveSuccess(name))),
+    );
   }
 
   @override
@@ -84,6 +128,38 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
             style: Theme.of(context).textTheme.titleLarge
                 ?.copyWith(fontWeight: FontWeight.bold),
           ),
+          // TODO(DP-076): friendship management lives in the other person's
+          // profile; the own profile opens its editable friends list.
+          actions: [
+            if (model.isRemovingFriend)
+              Padding(
+                padding: const EdgeInsets.all(12),
+                child: SizedBox.square(
+                  dimension: 24,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    semanticsLabel: context.l10n.friendRemoving,
+                  ),
+                ),
+              )
+            else if (model.canRemoveFriend)
+              PopupMenuButton<String>(
+                key: const ValueKey('public-profile-friend-options'),
+                tooltip: context.l10n.friendOptions,
+                onSelected: (_) => _removeFriend(),
+                itemBuilder: (context) => [
+                  PopupMenuItem(
+                    value: 'remove',
+                    child: Text(
+                      context.l10n.friendRemove,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.error,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+          ],
         ),
         body: RefreshIndicator(
           onRefresh: model.load,

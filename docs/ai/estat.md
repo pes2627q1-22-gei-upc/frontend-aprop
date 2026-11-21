@@ -4,14 +4,15 @@
 
 ## Sprint
 
-- Sprint 2 · només frontend. Tasca activa #170: targeta d’amistat acceptada, navegació al perfil i proves. Classificació HTTP pendent de contracte (DP-070).
+- Sprint 2 · només frontend. Tasca activa #195: eliminar amistats des de la llista pròpia i el perfil aliè, amb confirmació i proves.
 
 ## En curs
 
 | Taiga | Tasca | Branca | Estat |
 |---|---|---|---|
-| #183 | [FE] Targeta d’avís de cancel·lació a `NotificationsScreen` + tests (història #47) | `feature/avis-cancel-lacio` | Implementada (HTTP); DP-071 oberta; pendent revisió humana |
-| #170 | [FE] Targeta d’amistat acceptada a NotificationsScreen amb navegació al perfil + tests | `feature/accepted-friendship-notification-170` | Publicada a `df48032`; merge amb develop `085a03a` verificat: 877 proves, anàlisi, format i APK correctes; pendent commit/push de la resolució; HTTP pendent (DP-070) |
+| #195 | [FE] Eliminar amistat a la llista i perfil amb confirmació + tests (història #53) | `feature/remove-friend-195` | HTTP/Demo verificats: 933 proves, anàlisi, format i APK correctes; revisió tècnica aprovada; DP-076 de presentació; sense commit/push |
+| #183 | [FE] Targeta d’avís de cancel·lació a `NotificationsScreen` + tests (història #47) | `feature/avis-cancel-lacio` | Integrada a develop amb PR #74; DP-071 oberta |
+| #170 | [FE] Targeta d’amistat acceptada a NotificationsScreen amb navegació al perfil + tests | `feature/accepted-friendship-notification-170` | Integrada a develop amb PR #72; classificació HTTP pendent (DP-070) |
 | #181 | [FE] Botó i diàleg de cancel·lació a la fitxa per a qui l’ha creada + reflex visual a l’Agenda i el catàleg + tests (història #46) | `feature/cancel-lar-activitat` | Integrada a develop amb PR #71 (`085a03a`); DP-069 oberta |
 | #168 | [FE] Targeta de sol·licitud amb Acceptar/Rebutjar a NotificationsScreen + tests | `feature/friend-request-notification-card-168` | Integrada a develop amb PR #70 (base `c7f4895`); verificació del merge: 856 proves, anàlisi, format i APK correctes |
 | #193 | [FE] Acció «Rebutjar» a Avisos i perfil + tests | `feature/reject-friend-request-193` | Integrada a develop amb PR #68; DP-067 oberta |
@@ -29,9 +30,34 @@
 | #203 | [FE] Valorar l'organitzador (esdeveniments comunitaris) i actualitzar-ne la fiabilitat | `feature/valorar-organitzador-203` | PR oberta #50 (Demo DP-049); apilada sobre #45; pendent CI i revisió humana |
 | #262 | [FE] Ajustar contrast i color del logotip respecte al fons | `feature/fix-262-logo-contrast` | Implementada; preparació de PR autoritzada; pendent CI i revisió humana |
 | #277 | [FE] Perfil d'un altre usuari amb GET /users/{id} i privacitat dels plans (CA3) + tests | `feature/perfil-altre-usuari` | Implementada (HTTP i Demo); DP-063 oberta; pendent revisió humana |
-| #117 | [FE] Acció i diàleg de confirmació a Configuració + tancament de sessió + tests (història #10) | `feature/eliminar-compte` | Implementada (HTTP i Demo); DP-075 oberta; pendent revisió humana |
+| #117 | [FE] Acció i diàleg de confirmació a Configuració + tancament de sessió + tests (història #10) | `feature/eliminar-compte` | Integrada a develop amb PR #73; DP-075 oberta |
 
-## Base i abast actual (#170)
+## Base i abast actual (#195)
+
+- Branca independent `feature/remove-friend-195` des de `origin/develop@112d2f8`; backend `4f98835` consultat, sense modificar.
+- HTTP real amb `POST /users/{id}/unfriend`, compte i bearer fixats amb `ProfileApi.own`, sense interpretar text lliure.
+- `FriendshipRepository` compartit: eliminacions confirmades, operacions duplicades agrupades i acceptació/eliminació de la mateixa relació serialitzades.
+- Llista pròpia i perfil aliè amb diàleg comú, progrés/error/reintent i ca/es/en. El perfil propi recarrega el recompte; plans antics i amistats eliminades no reapareixen per lectures tardanes.
+- Interfície, models purs, repositoris HTTP/Demo i ViewModels separats; cap paquet ni endpoint nou.
+- Guia `docs/remove-friend.md`. DP-076 documenta la ubicació de les accions i la interpretació de `ProfileScreen` a la tasca. Verificació local i revisió tècnica aprovades; sense commit/push.
+
+## Verificació #195 (2026-11-21)
+
+- **33 proves noves**: contracte HTTP i errors/reintent, bearer fix/compte/UUID, duplicats i serialització,
+  sincronització de llista/perfils, refrescos antics, plans privats, dispose, confirmació/cancel·lació,
+  canvi de compte, accessibilitat ca/es/en a 390 px i 320 px/text ×2 i els dos recorreguts d’app.
+- Quatre regressions de revisió: nova petició rebuda després d’eliminar, petició sortint que es conserva
+  en eliminar una altra persona, amistat restablerta al servidor i negatiu explícit posterior a l’acceptació.
+- Dues fixtures anteriors ara injecten el mateix contracte als repositoris Demo i ViewModels; es conserven
+  les comprovacions d’acceptació, rebuig i concurrència.
+- Conjunt de perfils i recorreguts: 168 proves superades. Suite completa final: **933 proves superades**.
+- `flutter analyze` sense incidències; format de 373 fitxers i `git diff --check` correctes.
+- `flutter build apk --debug` correcte. Revisió tècnica independent aprovada després de les correccions.
+- Captures Flutter amb Roboto i Demo revisades a `PES/output/frontend/task-195-{llista-amics,confirmacio,perfil-amiga,perfil-eliminat,llista-actualitzada,comptador-actualitzat}.png`.
+- Backend intacte a `4f98835`; sense escriptures a Render. Verificació amb comptes reals/Android,
+  CI i revisió humana pendents. Sense commit/push.
+
+## Context anterior (#170)
 
 - Branca `feature/accepted-friendship-notification-170`, commit publicat `df48032`; merge local de `origin/develop@085a03a` sense commit. #181 (cancel·lació, PR #71) preservada.
 - `NotificationCard` afegeix «Veure perfil» només al model tipat `friendRequestAccepted`, amb nom accessible, ca/es/en i mida mínima de 48 px.
@@ -89,7 +115,7 @@
 
 ## Pendents / següents passos
 
-1. Revisió de la resolució dels conflictes #170, commit del merge i push a la mateixa branca per actualitzar la PR existent. CI i aprovació humana obligatòries; abast UI i DP-070 explícits.
+1. Revisió de l’usuari dels canvis #195, commit i PR cap a develop. CI, aprovació humana i prova amb dos comptes reals en Android pendents.
 2. Backend/equip: discriminador estructurat d’acceptació a la bústia (DP-070); després integrar el JSON real i comprovar el recorregut amb dos comptes al desplegament i Android.
 3. Backend/equip: avís automàtic en enviar sol·licitud i política de zona de `request-date` (DP-066).
    Si cal historial resolt o lectura de sol·licituds després de reiniciar, falten aquests contractes.
