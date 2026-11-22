@@ -796,6 +796,48 @@ abstract class AppLocalizations {
   /// **'NOTIFICACIONS'**
   String get settingsGroupNotifications;
 
+  /// No description provided for @settingsNotificationsHint.
+  ///
+  /// In ca, this message translates to:
+  /// **'Tria quins avisos vols rebre. Els avisos que ja has rebut es conserven.'**
+  String get settingsNotificationsHint;
+
+  /// No description provided for @settingsNotificationsLoading.
+  ///
+  /// In ca, this message translates to:
+  /// **'Carregant les preferències d’avisos…'**
+  String get settingsNotificationsLoading;
+
+  /// No description provided for @settingsNotificationsLoadError.
+  ///
+  /// In ca, this message translates to:
+  /// **'No hem pogut carregar les preferències d’avisos. Torna-ho a provar.'**
+  String get settingsNotificationsLoadError;
+
+  /// No description provided for @settingsSocial.
+  ///
+  /// In ca, this message translates to:
+  /// **'Avisos socials'**
+  String get settingsSocial;
+
+  /// No description provided for @settingsSocialHint.
+  ///
+  /// In ca, this message translates to:
+  /// **'Sol·licituds d’amistat i activitat dels amics'**
+  String get settingsSocialHint;
+
+  /// No description provided for @settingsCancellations.
+  ///
+  /// In ca, this message translates to:
+  /// **'Cancel·lacions'**
+  String get settingsCancellations;
+
+  /// No description provided for @settingsCancellationsHint.
+  ///
+  /// In ca, this message translates to:
+  /// **'Quan es cancel·la un pla de la teva agenda'**
+  String get settingsCancellationsHint;
+
   /// No description provided for @settingsReminders.
   ///
   /// In ca, this message translates to:

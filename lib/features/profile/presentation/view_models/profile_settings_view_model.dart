@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 import '../../../../core/l10n/locale_controller.dart';
 import '../../../../core/l10n/pending_language.dart';
 import '../../models/profile_settings.dart';
+import '../../models/notification_preferences.dart';
 import '../../repositories/profile_settings_repository.dart';
 import '../../repositories/user_blocking_repository.dart';
 
@@ -54,6 +55,9 @@ class ProfileSettingsViewModel extends ChangeNotifier {
   /// Esborra el compte i tanca la sessió (#10). Sense, l'opció és pendent.
   final Future<void> Function()? onDeleteAccount;
   ProfileSettings? _settings;
+  NotificationPreferences? _notifications;
+  bool _isLoadingNotifications = false;
+  String? _notificationsError;
   bool _isLoading = false;
   bool _isSigningOut = false;
   bool _isDeletingAccount = false;
@@ -66,8 +70,18 @@ class ProfileSettingsViewModel extends ChangeNotifier {
   ({ProfilePreference preference, bool enabled})? _failedPreferenceChange;
 
   ProfileSettings? get settings => _settings;
+  NotificationPreferences? get notificationPreferences => _notifications;
+  bool get isLoadingNotifications => _isLoadingNotifications;
+  String? get notificationsError => _notificationsError;
   bool supports(ProfilePreference preference) =>
-      repository.supportedPreferences.contains(preference);
+      repository.supportedPreferences.contains(preference) &&
+      (preference == ProfilePreference.showMyPlans ||
+          (_notifications?.supports(preference) ?? false));
+
+  bool preferenceValue(ProfilePreference preference) =>
+      preference == ProfilePreference.showMyPlans
+      ? _settings!.showMyPlans
+      : _notifications!.valueOf(preference);
   bool get persistsPreferences => repository.persistsPreferences;
   bool get hasLocaleController => localeController != null;
   bool get isLoading => _isLoading;
@@ -91,10 +105,44 @@ class ProfileSettingsViewModel extends ChangeNotifier {
 
   bool canUpdatePreference(ProfilePreference preference) =>
       !_isDisposed &&
-      !_isLoading &&
       !isBusy &&
-      _settings != null &&
+      (preference == ProfilePreference.showMyPlans
+          ? !_isLoading && _settings != null
+          : !_isLoadingNotifications && _notifications != null) &&
       supports(preference);
+
+  Future<void> loadNotificationPreferences() async {
+    if (_isDisposed ||
+        _isLoadingNotifications ||
+        isBusy ||
+        !repository.supportedPreferences.any(
+          NotificationPreferences.types.contains,
+        )) {
+      return;
+    }
+    _isLoadingNotifications = true;
+    _notificationsError = null;
+    notifyListeners();
+    try {
+      final result = await repository.getNotificationPreferences(userId);
+      if (_isDisposed) return;
+      _notifications = result;
+      if (_failedPreferenceChange?.preference !=
+          ProfilePreference.showMyPlans) {
+        _preferenceError = null;
+        _failedPreferenceChange = null;
+      }
+    } catch (_) {
+      if (!_isDisposed) {
+        _notificationsError = currentL10n.settingsNotificationsLoadError;
+      }
+    } finally {
+      if (!_isDisposed) {
+        _isLoadingNotifications = false;
+        notifyListeners();
+      }
+    }
+  }
 
   Future<void> load() async {
     if (_isDisposed || _isLoading || isBusy) return;
@@ -102,12 +150,16 @@ class ProfileSettingsViewModel extends ChangeNotifier {
     _errorMessage = null;
     notifyListeners();
     unawaited(_loadBlocks());
+    unawaited(loadNotificationPreferences());
     try {
       final result = await repository.getSettings(userId);
       if (!_isDisposed) {
         _settings = result;
-        _preferenceError = null;
-        _failedPreferenceChange = null;
+        if (_failedPreferenceChange?.preference ==
+            ProfilePreference.showMyPlans) {
+          _preferenceError = null;
+          _failedPreferenceChange = null;
+        }
       }
     } catch (_) {
       if (!_isDisposed) {
@@ -126,7 +178,7 @@ class ProfileSettingsViewModel extends ChangeNotifier {
     bool enabled,
   ) async {
     if (!canUpdatePreference(preference) ||
-        _settings!.valueOf(preference) == enabled) {
+        preferenceValue(preference) == enabled) {
       return;
     }
     _savingPreference = preference;
@@ -135,15 +187,30 @@ class ProfileSettingsViewModel extends ChangeNotifier {
     _failedPreferenceChange = null;
     notifyListeners();
     try {
-      final result = await repository.updatePreference(
-        userId: userId,
-        preference: preference,
-        enabled: enabled,
-      );
-      if (result.valueOf(preference) != enabled) {
-        throw StateError('The requested preference was not confirmed');
+      if (preference == ProfilePreference.showMyPlans) {
+        final result = await repository.updatePreference(
+          userId: userId,
+          preference: preference,
+          enabled: enabled,
+        );
+        if (result.showMyPlans != enabled) {
+          throw StateError('The requested preference was not confirmed');
+        }
+        if (!_isDisposed) _settings = result;
+      } else {
+        final result = await repository.updateNotificationPreference(
+          userId: userId,
+          preference: preference,
+          enabled: enabled,
+        );
+        if (result.valueOf(preference) != enabled) {
+          throw StateError('The requested preference was not confirmed');
+        }
+        if (!_isDisposed) {
+          _notifications = result;
+          _notificationsError = null;
+        }
       }
-      if (!_isDisposed) _settings = result;
     } catch (_) {
       if (!_isDisposed) {
         _preferenceError = currentL10n.settingsSaveError;

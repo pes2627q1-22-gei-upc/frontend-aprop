@@ -200,6 +200,43 @@ void main() {
     );
   });
 
+  test(
+    'Language, privacy and delivery changes preserve each other per account',
+    () async {
+      final repository = DemoProfileSettingsRepository();
+      await repository.updateLanguage(userId: 'a', language: 'es');
+      await repository.updatePreference(
+        userId: 'a',
+        preference: ProfilePreference.showMyPlans,
+        enabled: true,
+      );
+      await repository.updateNotificationPreference(
+        userId: 'a',
+        preference: ProfilePreference.social,
+        enabled: false,
+      );
+      final settings = await repository.getSettings('a');
+      expect(settings.language, 'es');
+      expect(settings.showMyPlans, isTrue);
+
+      await repository.updateLanguage(userId: 'a', language: 'en');
+      expect((await repository.getSettings('a')).showMyPlans, isTrue);
+      expect((await repository.getSettings('a')).language, 'en');
+      expect(
+        (await repository.getNotificationPreferences('a'))
+            .valueOf(ProfilePreference.social),
+        isFalse,
+      );
+      expect((await repository.getSettings('b')).language, isNull);
+      expect((await repository.getSettings('b')).showMyPlans, isFalse);
+      expect(
+        (await repository.getNotificationPreferences('b'))
+            .valueOf(ProfilePreference.social),
+        isTrue,
+      );
+    },
+  );
+
   test('Preferences default to private and patches preserve other fields and accounts', () async {
     final repository = DemoProfileSettingsRepository();
     expect((await repository.getSettings('a')).showMyPlans, isFalse);
@@ -208,16 +245,24 @@ void main() {
       preference: ProfilePreference.showMyPlans,
       enabled: true,
     );
-    final updated = await repository.updatePreference(
+    final updated = await repository.updateNotificationPreference(
       userId: 'a',
       preference: ProfilePreference.reminders,
       enabled: false,
     );
-    expect(updated.showMyPlans, isTrue);
-    expect(updated.reminders, isFalse);
-    expect((await repository.getSettings('a')).reminders, isFalse);
+    expect((await repository.getSettings('a')).showMyPlans, isTrue);
+    expect(updated.valueOf(ProfilePreference.reminders), isFalse);
+    expect(
+      (await repository.getNotificationPreferences('a'))
+          .valueOf(ProfilePreference.reminders),
+      isFalse,
+    );
     expect((await repository.getSettings('b')).showMyPlans, isFalse);
-    expect((await repository.getSettings('b')).reminders, isTrue);
+    expect(
+      (await repository.getNotificationPreferences('b'))
+          .valueOf(ProfilePreference.reminders),
+      isTrue,
+    );
   });
 }
 

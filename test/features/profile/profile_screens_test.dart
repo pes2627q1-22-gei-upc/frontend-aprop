@@ -175,7 +175,7 @@ void main() {
         findsNothing,
       );
       expect(
-        find.byKey(const ValueKey('profile-preference-friendActivity')),
+        find.byKey(const ValueKey('profile-preference-social')),
         findsNothing,
       );
       await scrollTo(tester, find.text('Eliminar compte'));

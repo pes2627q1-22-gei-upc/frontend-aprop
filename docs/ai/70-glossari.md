@@ -39,6 +39,7 @@
 | Nivell | Nivel | `ProfileLevel`, `ProfileProgress` | `TODO` | Curiós/a … Ambaixador/a cultural; llindars pendents (DP-032) |
 | Configuració | Configuración | `ProfileSettings`, `ProfilePreference`, `ProfileSettingsRepository` | `TODO` | Preferències demo per compte (DP-033) |
 | «Mostrar els meus plans» | Mostrar mis planes | `ProfileSettings.showMyPlans` | `show-plans` / `plans-visible` | Valor real de GET/PATCH; Demo inicia fals. Autorització de la consulta d’inscripcions pendent al servidor (DP-078) |
+| Preferències d’avisos | Preferencias de avisos | `NotificationPreferences` | `allowed-notif-types` | Social, Recordatori, Recomanacio i Cancelacio; IDs del catàleg, confirmació per lectura; persistència pendent DP-079 |
 | Descobreix | Descubre | secció 0 de `MainShell` (pestanya «Inici») | — | Des de la #273 (DP-060) |
 | Inici | Inicio | secció 0 de `MainShell` | — | Mostra Descobreix (DP-060) |
 | Mapa | Mapa | secció 2 de `MainShell` (`navMap`) | — | Només mapa des de la #274 (abans era Inici) |
