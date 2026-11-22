@@ -10,6 +10,10 @@ class ContentImage extends StatelessWidget {
     this.placeholderIcon = Icons.image_outlined,
     this.width,
     this.height,
+    this.fit = BoxFit.cover,
+    this.filterQuality = FilterQuality.medium,
+    this.cacheWidth,
+    this.cacheHeight,
     this.semanticLabel,
     this.excludeFromSemantics = false,
   });
@@ -20,12 +24,16 @@ class ContentImage extends StatelessWidget {
   final IconData placeholderIcon;
   final double? width;
   final double? height;
+  final BoxFit fit;
+  final FilterQuality filterQuality;
+  final int? cacheWidth;
+  final int? cacheHeight;
   final String? semanticLabel;
   final bool excludeFromSemantics;
 
   @override
   Widget build(BuildContext context) {
-    final ImageProvider? provider;
+    ImageProvider? provider;
     if (url case final imageUrl? when imageUrl.isNotEmpty) {
       provider = NetworkImage(
         imageUrl,
@@ -35,6 +43,14 @@ class ContentImage extends StatelessWidget {
       provider = AssetImage(asset!);
     } else {
       provider = null;
+    }
+    if (provider != null && (cacheWidth != null || cacheHeight != null)) {
+      provider = ResizeImage(
+        provider,
+        width: cacheWidth,
+        height: cacheHeight,
+        allowUpscaling: false,
+      );
     }
     final placeholder = ColoredBox(
       color: Theme.of(context).colorScheme.surfaceContainerHighest,
@@ -56,7 +72,8 @@ class ContentImage extends StatelessWidget {
                 image: provider,
                 width: width,
                 height: height,
-                fit: BoxFit.cover,
+                fit: fit,
+                filterQuality: filterQuality,
                 excludeFromSemantics: true,
                 frameBuilder: (context, child, frame, synchronous) =>
                     synchronous || frame != null ? child : placeholder,

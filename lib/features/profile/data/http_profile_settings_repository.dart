@@ -16,9 +16,19 @@ class HttpProfileSettingsRepository implements ProfileSettingsRepository {
   @override
   bool get persistsPreferences => true;
 
+  static const _supportedLanguages = {'ca', 'es', 'en'};
+
   ProfileSettings _settings(Map<String, Object?> json) {
     if (json['show-plans'] case final bool visible) {
-      return ProfileSettings(showMyPlans: visible);
+      final rawLanguage = json['language'];
+      final normalized = rawLanguage is String
+          ? rawLanguage.trim().toLowerCase()
+          : null;
+      final language =
+          normalized != null && _supportedLanguages.contains(normalized)
+          ? normalized
+          : null;
+      return ProfileSettings(showMyPlans: visible, language: language);
     }
     throw const FormatException('Expected show-plans setting');
   }

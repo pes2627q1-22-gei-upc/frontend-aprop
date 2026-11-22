@@ -1,8 +1,10 @@
 import '../../../core/network/api_client.dart';
 import '../models/activity.dart';
 import '../models/activity_category.dart';
+import '../models/activity_category_labels.dart';
 import '../models/activity_filters.dart';
 import '../models/activity_page.dart';
+import '../models/activity_start.dart';
 import '../models/new_activity.dart';
 import '../repositories/activity_category_repository.dart';
 import '../repositories/activity_repository.dart';
@@ -12,10 +14,15 @@ import 'activity_json_mapper.dart';
 /// (`/events` i `/categories`).
 class HttpActivityRepository
     implements ActivityRepository, ActivityCategoryRepository {
-  HttpActivityRepository({required this.apiClient, this.defaultPageSize = 50});
+  HttpActivityRepository({
+    required this.apiClient,
+    this.defaultPageSize = 50,
+    DateTime Function()? clock,
+  }) : _clock = clock ?? DateTime.now;
 
   final ApiClient apiClient;
   final int defaultPageSize;
+  final DateTime Function() _clock;
   Future<List<({int id, String name})>>? _categoriesRequest;
 
   @override
@@ -79,8 +86,10 @@ class HttpActivityRepository
     if (selected.categories.isNotEmpty) {
       final categories = await getCategories();
       for (final label in selected.categories) {
+        final targetKey = canonicalActivityCategoryKey(label);
         final matching = categories.where(
-          (category) => activityCategoryLabel(category.name) == label,
+          (category) =>
+              canonicalActivityCategoryKey(category.name) == targetKey,
         );
         if (matching.isEmpty) {
           throw StateError('Selected category is not in the server catalogue');
@@ -109,9 +118,13 @@ class HttpActivityRepository
         ]),
       );
     }
+    // Finished events are hidden after the fact (DP-082); `hasMore` below uses
+    // the server's row count so filtering never stops pagination early.
+    final now = _clock();
     final items = <String, Activity>{
       for (final batch in batches)
-        for (final activity in batch) activity.id: activity,
+        for (final activity in batch)
+          if (!activityHasEnded(activity, now)) activity.id: activity,
     }.values;
     // TODO(DP-037): GET /events has no total/next-page metadata. A full page
     // may be followed by an empty last request; preserve the server's order.
@@ -273,7 +286,7 @@ class HttpActivityRepository
     final labels = {
       for (final category in await getCategories())
         activityCategoryLabel(category.name),
-    }.toList()..sort();
+    }.toList()..sort(compareActivityCategoryLabels);
     return List.unmodifiable(labels);
   }
 
@@ -290,10 +303,12 @@ class HttpActivityRepository
       for (final item in decoded)
         if (item is Map<String, Object?>)
           if (item['name'] case final String name
-              when name.startsWith(_categoryPrefix))
+              when name.startsWith(_categoryPrefix) &&
+                  activityCategoryLabel(name).isNotEmpty)
             ActivityCategory(value: name, label: activityCategoryLabel(name)),
     ];
-    return categories..sort((a, b) => a.label.compareTo(b.label));
+    return categories
+      ..sort((a, b) => compareActivityCategoryLabels(a.label, b.label));
   }
 }
 

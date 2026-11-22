@@ -15,22 +15,24 @@ import 'package:aprop/features/activities/presentation/screens/activities_screen
 import 'package:aprop/features/activities/presentation/view_models/activities_map_view_model.dart';
 import 'package:aprop/features/activities/presentation/view_models/activities_view_model.dart';
 import 'package:aprop/features/activities/presentation/view_models/enrollment_view_model.dart';
-import 'package:aprop/features/activities/presentation/widgets/map_filter_bar.dart';
 import 'package:aprop/features/activities/presentation/widgets/activity_categories_filter_sheet.dart';
 import 'package:aprop/features/activities/presentation/widgets/activity_date_filter_sheet.dart';
 import 'package:aprop/features/activities/presentation/widgets/activity_filter_calendar.dart';
 import 'package:aprop/features/activities/presentation/widgets/activity_filter_feedback.dart';
+import 'package:aprop/features/activities/presentation/widgets/map_filter_bar.dart';
+import 'package:aprop/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 
+import 'activity_filter_test_data.dart';
+import 'backend_event_fixture.dart';
 import 'fake_activity_map_repository.dart';
 import 'fake_activity_repository.dart';
 import 'fake_enrollment_repository.dart';
-import 'activity_filter_test_data.dart';
-import 'backend_event_fixture.dart';
 
 void main() {
   late ActivitiesViewModel model;
@@ -293,10 +295,16 @@ void main() {
       );
       model.dispose();
       model = ActivitiesViewModel(
-        repository: HttpActivityRepository(apiClient: client),
+        repository: HttpActivityRepository(
+          apiClient: client,
+          clock: () => DateTime(2026, 9, 26, 9),
+        ),
       );
       final areaModel = ActivitiesMapViewModel(
-        repository: HttpActivityMapRepository(apiClient: client),
+        repository: HttpActivityMapRepository(
+          apiClient: client,
+          clock: () => DateTime(2026, 9, 26, 9),
+        ),
       );
       addTearDown(areaModel.dispose);
       await areaModel.loadArea(
@@ -314,12 +322,23 @@ void main() {
           .singleWhere((marker) => marker.markerId.value == '1')
           .onTap!();
       await tester.pumpAndSettle();
-      expect(find.text('Musica'), findsOneWidget);
+      expect(find.text('Música'), findsOneWidget);
 
       await open(tester, 'categories');
       await tester.tap(category('Concerts'));
       await apply(tester);
       expect(map(tester).markers.single.markerId.value, '1');
+      // With the Concerts filter active, the map card surfaces Concerts first.
+      map(tester).markers.single.onTap!();
+      await tester.pumpAndSettle();
+      expect(
+        find.descendant(of: find.byType(Card), matching: find.text('Concerts')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: find.byType(Card), matching: find.text('+1')),
+        findsOneWidget,
+      );
       expect(find.byType(MapFilterFeedback), findsNothing);
       expect(model.filters.categories, {'Concerts'});
       expect(filterIds, [null, '4']);
@@ -719,4 +738,45 @@ void main() {
     expect(model.filters.isActive, isFalse);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets(
+    'Category filter sheet localizes and sorts labels cleanly in es and en',
+    (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.light,
+          locale: const Locale('en'),
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          home: const Scaffold(
+            body: ActivityCategoriesFilterSheet(
+              initialCategories: {'Espectacles'},
+              categories: [
+                'agenda:ambits/zz-altres-ambits',
+                'agenda:ambits/espectacles',
+                'agenda:categories/any-gaudi',
+                'agenda:categories/musica',
+              ],
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Gaudí Year'), findsOneWidget);
+      expect(find.text('Music'), findsOneWidget);
+      expect(find.text('Other fields'), findsOneWidget);
+      expect(find.text('Performing arts'), findsOneWidget);
+      expect(find.textContaining('Zz'), findsNothing);
+      final performingArtsTile = tester.widget<CheckboxListTile>(
+        find.byKey(const ValueKey('activity-filter-category-Performing arts')),
+      );
+      expect(performingArtsTile.value, isTrue);
+    },
+  );
 }

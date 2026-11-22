@@ -17,5 +17,10 @@ String formatAgendaDay(DateTime day) => currentL10n.weekdayDay(
   monthOf(day.month),
 );
 
+/// Date header for grouped agenda lists and day sheets: includes the year when
+/// [day] is in a different year from [today].
+String formatAgendaDayHeader(DateTime day, {required DateTime today}) =>
+    day.year == today.year ? formatAgendaDay(day) : longDate(day);
+
 /// «19.00 h», without changing the time zone of the supplied date.
 String formatAgendaTime(DateTime date) => timeOfDay(date);

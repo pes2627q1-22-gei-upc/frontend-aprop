@@ -5,18 +5,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
+import '../../../../core/l10n/locale_controller.dart';
 import '../../models/activity.dart';
 import '../../models/geo_bounds.dart';
 import '../../models/geo_point.dart';
 import '../formatters/activity_date_formatter.dart';
 import '../view_models/user_location_view_model.dart';
 import 'activity_badges.dart';
-import 'activity_information_row.dart';
 import 'activity_image.dart';
+import 'activity_information_row.dart';
 import 'activity_map_groups.dart';
 import 'map_group_icon.dart';
 import 'user_location_marker.dart';
-import '../../../../core/l10n/locale_controller.dart';
 
 /// Durada de les transicions de la targeta i dels botons que s'hi aparten.
 const mapOverlayAnimationDuration = Duration(milliseconds: 280);
@@ -117,9 +117,13 @@ class ActivitiesMap extends StatefulWidget {
     this.interactive = true,
     this.participationActionBuilder,
     this.userLocation,
+    this.preferredCategories = const [],
   });
 
   final List<Activity> activities;
+
+  /// Active category filter values, if any, prioritized first on the map card.
+  final Iterable<String> preferredCategories;
 
   /// On és la persona. Sense, el mapa no mostra el punt ni el botó.
   final UserLocationViewModel? userLocation;
@@ -778,6 +782,7 @@ class _ActivitiesMapState extends State<ActivitiesMap> {
                     onChanged: _onCardSize,
                     child: _MapActivityCard(
                       activity: selected,
+                      preferredCategories: widget.preferredCategories,
                       participationAction: widget.participationActionBuilder
                           ?.call(selected),
                       onClose: _clearSelection,
@@ -1016,12 +1021,14 @@ class _MapActivityCard extends StatelessWidget {
     required this.onClose,
     required this.onOpen,
     this.participationAction,
+    this.preferredCategories = const [],
   });
 
   final Activity activity;
 
   /// Per apuntar-s'hi des del mapa. Sense, la targeta porta «Veure activitat».
   final Widget? participationAction;
+  final Iterable<String> preferredCategories;
   final VoidCallback onClose;
   final VoidCallback onOpen;
 
@@ -1092,6 +1099,7 @@ class _MapActivityCard extends StatelessWidget {
                       children: [
                         ActivityCategoriesSummary(
                           categories: activity.categories,
+                          preferredCategories: preferredCategories,
                         ),
                         InkWell(
                           onTap: onOpen,

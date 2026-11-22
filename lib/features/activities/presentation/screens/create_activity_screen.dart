@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/locale_controller.dart';
 import '../../models/activity.dart';
 import '../../models/activity_category.dart';
+import '../../models/activity_category_labels.dart';
 import '../../models/activity_options.dart';
 import '../../repositories/activity_category_repository.dart';
 import '../../repositories/activity_repository.dart';
 import '../../repositories/location_repository.dart';
 import '../formatters/activity_date_formatter.dart';
+import '../view_models/create_activity_view_model.dart';
 import '../widgets/activity_badges.dart';
 import '../widgets/location_picker_map.dart';
-import '../view_models/create_activity_view_model.dart';
 import '../widgets/start_date_time_sheet.dart';
-import '../../../../core/l10n/locale_controller.dart';
 
 /// Formulari per publicar una activitat no oficial (Taiga #31).
 // TODO(DP-021): disseny sense mockup aprovat, pendent de validar.
@@ -507,13 +508,14 @@ class _CreateActivityScreenState extends State<CreateActivityScreen> {
 }
 
 const _categoryIcons = {
-  'Música': Icons.music_note_outlined,
-  'Teatre': Icons.theater_comedy_outlined,
-  'Exposicions': Icons.palette_outlined,
+  'musica': Icons.music_note_outlined,
+  'teatre': Icons.theater_comedy_outlined,
+  'exposicions': Icons.palette_outlined,
 };
 
 IconData _categoryIcon(String category) =>
-    _categoryIcons[category] ?? Icons.local_activity_outlined;
+    _categoryIcons[canonicalActivityCategoryKey(category)] ??
+    Icons.local_activity_outlined;
 
 /// Fila horitzontal de categories que es pot desplaçar. Cada una té els
 /// colors de la seva insígnia; se'n poden triar fins a [maxActivityCategories].
@@ -533,6 +535,7 @@ class _CategorySelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
+    final languageCode = context.l10n.localeName;
 
     return SizedBox(
       height: 48,
@@ -542,8 +545,12 @@ class _CategorySelector extends StatelessWidget {
         separatorBuilder: (context, index) => const SizedBox(width: 8),
         itemBuilder: (context, index) {
           final category = categories[index];
+          final label = localizeActivityCategory(
+            category.label,
+            languageCode: languageCode,
+          );
           return _CategoryPill(
-            label: category.label,
+            label: label,
             icon: _categoryIcon(category.label),
             colors: ActivityCategoryBadge.colorsFor(category.label, colors),
             isSelected: selected.contains(category.value),

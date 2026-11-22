@@ -6,6 +6,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/l10n/locale_controller.dart';
+import '../../../core/l10n/pending_language.dart';
 import '../models/app_user.dart';
 import '../models/auth_failure.dart';
 import '../models/user_profile.dart';
@@ -119,7 +120,13 @@ class FirebaseAuthRepository implements AuthRepository {
     await _ignoreFailure(() => user.updateDisplayName('$firstName $lastName'));
     await _ignoreFailure(() async {
       try {
-        await _syncUsername(user.uid, username);
+        final profile = await _syncUsername(user.uid, username);
+        if (profile.created) {
+          // TODO(DP-079): new accounts default to 'ca' on the backend; push
+          // the locally selected language immediately after creation. If it
+          // fails, it stays pending and is retried on the next sign-in.
+          await _ignoreFailure(() => _pushInitialLanguage(user.uid));
+        }
         await _saveName(user.uid, '$firstName $lastName');
       } on AuthFailure catch (failure) {
         if (failure != AuthFailure.usernameAlreadyInUse) rethrow;
@@ -178,6 +185,9 @@ class FirebaseAuthRepository implements AuthRepository {
   Future<void> chooseUsername(String username) async {
     final user = _requireCurrentUser();
     final profile = await _syncUsername(user.uid, username);
+    if (profile.created) {
+      await _ignoreFailure(() => _pushInitialLanguage(user.uid));
+    }
     // Primer accés amb Google (o nom rebutjat en registrar-se): el backend
     // encara no té el nom, i el de Firebase és el bo.
     if (profile.name.isEmpty) {
@@ -325,6 +335,15 @@ class FirebaseAuthRepository implements AuthRepository {
       throw StateError('El backend no ha retornat cap usuari.');
     }
     return _remember(uid, profile);
+  }
+
+  /// Conserva la tria per compte fins que el servidor accepti el canvi.
+  Future<void> _pushInitialLanguage(String uid) async {
+    final language = _emailLanguage;
+    final pending = PendingLanguage();
+    await pending.save(uid, language);
+    await _userSync.updateLanguage(language);
+    await pending.clearIfMatches(uid, language);
   }
 
   /// Desa el nom i cognoms al backend (`PATCH /users/me`).

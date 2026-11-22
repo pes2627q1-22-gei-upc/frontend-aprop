@@ -14,6 +14,7 @@ class ProfileSettings {
     this.friendActivity = true,
     this.recommendations = false,
     this.friendRequests = true,
+    this.language,
   });
 
   final bool showMyPlans;
@@ -21,6 +22,9 @@ class ProfileSettings {
   final bool friendActivity;
   final bool recommendations;
   final bool friendRequests;
+
+  /// Stored account UI language (`ca`, `es` or `en`), or `null` when absent.
+  final String? language;
 
   bool valueOf(ProfilePreference preference) => switch (preference) {
     ProfilePreference.showMyPlans => showMyPlans,
@@ -39,6 +43,16 @@ class ProfileSettings {
       friendActivity: value(ProfilePreference.friendActivity),
       recommendations: value(ProfilePreference.recommendations),
       friendRequests: value(ProfilePreference.friendRequests),
+      language: language,
     );
   }
+
+  ProfileSettings withLanguage(String? language) => ProfileSettings(
+    showMyPlans: showMyPlans,
+    reminders: reminders,
+    friendActivity: friendActivity,
+    recommendations: recommendations,
+    friendRequests: friendRequests,
+    language: language,
+  );
 }

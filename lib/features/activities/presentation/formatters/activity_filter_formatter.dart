@@ -1,5 +1,6 @@
 import '../../../../core/l10n/date_labels.dart';
 import '../../../../core/l10n/locale_controller.dart';
+import '../../models/activity_category_labels.dart';
 import '../../models/activity_filters.dart';
 
 String formatFilterMonth(DateTime month) =>
@@ -36,6 +37,9 @@ String formatFilterDateRange(ActivityDateRange? range, {required int year}) {
 String formatCategorySelection(Set<String> categories) =>
     switch (categories.length) {
       0 => currentL10n.categoriesAll,
-      1 => categories.single,
+      1 => localizeActivityCategory(
+        categories.single,
+        languageCode: currentL10n.localeName,
+      ),
       final count => currentL10n.categoriesSelected(count),
     };

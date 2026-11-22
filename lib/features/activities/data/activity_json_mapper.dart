@@ -1,4 +1,5 @@
 import '../models/activity.dart';
+import '../models/activity_category_labels.dart';
 import '../models/geo_point.dart';
 import '../models/new_activity.dart';
 
@@ -248,8 +249,8 @@ List<String> parseActivityCategories(Object? rawCategories) {
   );
 }
 
-String activityCategoryLabel(String tag) =>
-    _capitalize(tag.trim().split('/').last.replaceAll('-', ' '));
+String activityCategoryLabel(String tag, {String languageCode = 'ca'}) =>
+    localizeActivityCategory(tag, languageCode: languageCode);
 
 const _lowercaseWords = {'de', 'del', 'dels', 'la', 'les', 'el', 'els', 'i'};
 
