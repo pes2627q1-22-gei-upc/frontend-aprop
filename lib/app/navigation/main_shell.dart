@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../features/profile/presentation/screens/blocked_users_screen.dart';
-
 import '../../core/l10n/locale_controller.dart';
 import '../../core/widgets/aprop_logo.dart';
 import '../../features/activities/data/demo_location_repository.dart';
@@ -12,47 +10,48 @@ import '../../features/activities/presentation/screens/activities_screen.dart';
 import '../../features/activities/presentation/screens/activity_search_screen.dart';
 import '../../features/activities/presentation/screens/create_activity_screen.dart';
 import '../../features/activities/presentation/screens/discover_screen.dart';
-import '../../features/activities/presentation/widgets/activities_map.dart';
 import '../../features/activities/presentation/view_models/activities_map_view_model.dart';
 import '../../features/activities/presentation/view_models/activities_view_model.dart';
 import '../../features/activities/presentation/view_models/enrollment_view_model.dart';
+import '../../features/activities/presentation/view_models/user_location_view_model.dart';
+import '../../features/activities/presentation/widgets/activities_map.dart';
 import '../../features/activities/presentation/widgets/enrollment_action.dart';
 import '../../features/activities/repositories/activity_category_repository.dart';
 import '../../features/activities/repositories/activity_details_repository.dart';
 import '../../features/activities/repositories/activity_map_repository.dart';
-import '../../features/activities/repositories/user_location_repository.dart';
-import '../../features/activities/presentation/view_models/user_location_view_model.dart';
 import '../../features/activities/repositories/activity_repository.dart';
 import '../../features/activities/repositories/discovery_repository.dart';
 import '../../features/activities/repositories/enrollment_repository.dart';
+import '../../features/activities/repositories/user_location_repository.dart';
 import '../../features/activity_chat/data/demo_activity_chat_repository.dart';
 import '../../features/activity_chat/presentation/screens/activity_chat_screen.dart';
 import '../../features/activity_chat/repositories/activity_chat_repository.dart';
 import '../../features/agenda/presentation/screens/agenda_screen.dart';
-import '../../features/attendance/data/demo_attendance_repository.dart';
-import '../../features/attendance/presentation/view_models/attendance_view_model.dart';
-import '../../features/attendance/repositories/attendance_repository.dart';
 import '../../features/assistant/models/assistant_message.dart';
 import '../../features/assistant/presentation/screens/assistant_screen.dart';
 import '../../features/assistant/presentation/view_models/assistant_view_model.dart';
 import '../../features/assistant/repositories/assistant_repository.dart';
+import '../../features/attendance/data/demo_attendance_repository.dart';
+import '../../features/attendance/presentation/view_models/attendance_view_model.dart';
+import '../../features/attendance/repositories/attendance_repository.dart';
 import '../../features/auth/models/app_user.dart';
 import '../../features/interest_test/presentation/screens/interest_test_screen.dart';
 import '../../features/interest_test/repositories/interest_test_repository.dart';
 import '../../features/notifications/presentation/screens/notifications_screen.dart';
 import '../../features/notifications/repositories/notification_repository.dart';
+import '../../features/profile/data/gallery_profile_image_picker.dart';
+import '../../features/profile/presentation/screens/blocked_users_screen.dart';
+import '../../features/profile/presentation/screens/friends_list_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
 import '../../features/profile/presentation/screens/profile_settings_screen.dart';
-import '../../features/profile/presentation/view_models/profile_view_model.dart';
-import '../../features/profile/data/gallery_profile_image_picker.dart';
 import '../../features/profile/presentation/screens/public_profile_screen.dart';
-import '../../features/profile/repositories/profile_repository.dart';
-import '../../features/profile/repositories/public_profile_repository.dart';
-import '../../features/profile/repositories/friendship_repository.dart';
-import '../../features/profile/presentation/screens/friends_list_screen.dart';
+import '../../features/profile/presentation/view_models/profile_view_model.dart';
 import '../../features/profile/repositories/friends_repository.dart';
-import '../../features/profile/repositories/user_search_repository.dart';
+import '../../features/profile/repositories/friendship_repository.dart';
+import '../../features/profile/repositories/profile_repository.dart';
 import '../../features/profile/repositories/profile_settings_repository.dart';
+import '../../features/profile/repositories/public_profile_repository.dart';
+import '../../features/profile/repositories/user_search_repository.dart';
 import '../../features/ratings/presentation/view_models/rating_view_model.dart';
 import '../../features/ratings/presentation/widgets/activity_rating.dart';
 import '../../features/ratings/repositories/rating_repository.dart';
@@ -65,6 +64,7 @@ class MainShell extends StatefulWidget {
     required this.onSignOut,
     this.onDeleteAccount,
     required this.activityRepository,
+    this.activityClock = DateTime.now,
     required this.enrollmentRepository,
     required this.assistantRepository,
     required this.ratingRepository,
@@ -97,6 +97,7 @@ class MainShell extends StatefulWidget {
   /// Esborra el compte i tanca la sessió (#10).
   final Future<void> Function()? onDeleteAccount;
   final ActivityRepository activityRepository;
+  final DateTime Function() activityClock;
   final EnrollmentRepository enrollmentRepository;
   final AssistantRepository assistantRepository;
   final RatingRepository ratingRepository;
@@ -294,6 +295,7 @@ class _MainShellState extends State<MainShell> {
     navigator.push<void>(
       activityDetailsRoute(
         activityId: activityId,
+        clock: widget.activityClock,
         repository: repository ?? _activityRepository,
         enrollmentViewModel: _enrollmentViewModel,
         ratingBuilder: _buildRating,
@@ -455,6 +457,7 @@ class _MainShellState extends State<MainShell> {
               Navigator.of(context).push<void>(
                 activityDetailsRoute(
                   activityId: activityId,
+                  clock: widget.activityClock,
                   repository: _activityRepository,
                   enrollmentViewModel: _enrollmentViewModel,
                   ratingBuilder: _buildRating,
@@ -514,6 +517,7 @@ class _MainShellState extends State<MainShell> {
             Navigator.of(context).push<void>(
               activityDetailsRoute(
                 activityId: activityId,
+                clock: widget.activityClock,
                 repository: _activityRepository,
                 enrollmentViewModel: _enrollmentViewModel,
                 ratingBuilder: _buildRating,
@@ -720,6 +724,7 @@ class _MainShellState extends State<MainShell> {
             Navigator.of(context).push<void>(
               activityDetailsRoute(
                 activityId: activityId,
+                clock: widget.activityClock,
                 repository: _activityRepository,
                 enrollmentViewModel: _enrollmentViewModel,
                 ratingBuilder: _buildRating,
@@ -844,6 +849,7 @@ class _MainShellState extends State<MainShell> {
     navigator.pushReplacement<void, void>(
       activityDetailsRoute(
         activityId: activity.id,
+        clock: widget.activityClock,
         repository: _activityRepository,
         enrollmentViewModel: _enrollmentViewModel,
         ratingBuilder: _buildRating,

@@ -54,6 +54,7 @@ void main() {
           activityId: id,
           repository: repository ?? DemoActivityRepository(),
           enrollmentViewModel: enrollmentViewModel,
+          clock: () => DateTime(2026, 9, 26, 9),
           openLink: openLink ?? (uri) async => true,
           onOpenChat: onOpenChat,
         ),
@@ -449,11 +450,7 @@ void main() {
     expect(find.text('Obrir des de l’agenda').hitTestable(), findsOneWidget);
   });
 
-  testWidgets('Limits detail category chips to 3 with a +N badge', (
-    tester,
-  ) async {
-    final semantics = tester.ensureSemantics();
-    // disposed at the end of the test body
+  testWidgets('Shows all detail categories without a +N badge', (tester) async {
     final repository = FakeActivityRepository()
       ..findActivity = (id) async => Activity(
         id: id,
@@ -480,14 +477,13 @@ void main() {
     await pumpDetails(tester, id: '500', repository: repository);
     await tester.pumpAndSettle();
 
-    expect(find.byType(ActivityCategoryBadge), findsNWidgets(3));
+    expect(find.byType(ActivityCategoryBadge), findsNWidgets(10));
     expect(find.text('Llibres i lletres'), findsOneWidget);
     expect(find.text('Espectacles'), findsOneWidget);
     expect(find.text('Any Gaudí'), findsOneWidget);
-    expect(find.text('Altres àmbits'), findsNothing);
-    expect(find.text('+7'), findsOneWidget);
-    expect(find.bySemanticsLabel(RegExp('7 categories més')), findsOneWidget);
-    semantics.dispose();
+    expect(find.text('Altres àmbits'), findsOneWidget);
+    expect(find.text('Màgia'), findsOneWidget);
+    expect(find.byType(ActivityCategoryOverflowBadge), findsNothing);
     expect(tester.takeException(), isNull);
   });
 

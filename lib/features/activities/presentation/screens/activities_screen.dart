@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/locale_controller.dart';
 import '../../models/activity.dart';
 import '../../models/activity_filters.dart';
 import '../formatters/activity_filter_formatter.dart';
@@ -13,10 +14,9 @@ import '../widgets/activity_categories_filter_sheet.dart';
 import '../widgets/activity_date_filter_sheet.dart';
 import '../widgets/activity_filter_feedback.dart';
 import '../widgets/activity_list_pagination.dart';
+import '../widgets/enrollment_action.dart';
 import '../widgets/google_maps_availability.dart';
 import '../widgets/map_filter_bar.dart';
-import '../widgets/enrollment_action.dart';
-import '../../../../core/l10n/locale_controller.dart';
 
 class ActivitiesScreen extends StatefulWidget {
   const ActivitiesScreen({

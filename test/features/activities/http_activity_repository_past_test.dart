@@ -13,6 +13,7 @@ void main() {
     'Finished events are hidden without stopping pagination (DP-082)',
     () async {
       final repository = HttpActivityRepository(
+        clock: () => DateTime(2026, 9, 26, 9),
         apiClient: ApiClient(
           client: MockClient((request) async {
             // A full server page where one event is already over (clock: 2026-09-26).

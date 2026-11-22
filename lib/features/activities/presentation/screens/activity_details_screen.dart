@@ -3,23 +3,23 @@ import 'package:flutter/services.dart';
 
 import '../../../../core/formatters/reliability_formatter.dart';
 import '../../../../core/l10n/date_labels.dart';
+import '../../../../core/l10n/locale_controller.dart';
 import '../../../../core/links/open_external_link.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../models/activity.dart';
 import '../../models/activity_category_labels.dart';
+import '../../models/activity_start.dart';
 import '../../repositories/activity_details_repository.dart';
 import '../formatters/activity_date_formatter.dart';
 import '../formatters/activity_modality_formatter.dart';
 import '../formatters/activity_price_formatter.dart';
 import '../view_models/activity_details_view_model.dart';
-import '../../models/activity_start.dart';
 import '../view_models/enrollment_view_model.dart';
 import '../widgets/activity_badges.dart';
-import '../widgets/activity_information_row.dart';
 import '../widgets/activity_image.dart';
+import '../widgets/activity_information_row.dart';
 import '../widgets/enrollment_action.dart';
 import '../widgets/enrollment_badge.dart';
-import '../../../../core/l10n/locale_controller.dart';
-import '../../../../l10n/app_localizations.dart';
 
 class ActivityDetailsScreen extends StatefulWidget {
   const ActivityDetailsScreen({
@@ -34,6 +34,7 @@ class ActivityDetailsScreen extends StatefulWidget {
     this.onOpenChat,
     this.onCreatorSelected,
     this.openLink = openExternalLink,
+    this.clock = DateTime.now,
   });
 
   final String activityId;
@@ -64,6 +65,7 @@ class ActivityDetailsScreen extends StatefulWidget {
 
   /// Obre un enllaç de l'activitat fora de l'app; `false` si no ha pogut.
   final Future<bool> Function(Uri uri) openLink;
+  final DateTime Function() clock;
 
   @override
   State<ActivityDetailsScreen> createState() => _ActivityDetailsScreenState();
@@ -223,6 +225,7 @@ class _ActivityDetailsScreenState extends State<ActivityDetailsScreen> {
                 _ParticipationAction(
                   activity: activity,
                   viewModel: widget.enrollmentViewModel,
+                  clock: widget.clock,
                 ),
               ],
             );
@@ -264,8 +267,6 @@ class _ActivityDetailsContent extends StatelessWidget {
     final description = activity.description?.trim();
 
     final categories = orderActivityCategoriesForFilter(activity.categories);
-    final visibleCategories = categories.take(maxDetailActivityCategories);
-    final extraCategories = categories.length - maxDetailActivityCategories;
 
     return ListView(
       key: PageStorageKey<String>('activity-details-${activity.id}'),
@@ -286,11 +287,8 @@ class _ActivityDetailsContent extends StatelessWidget {
           runSpacing: 8,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
-            for (final category in visibleCategories)
+            for (final category in categories)
               ActivityCategoryBadge(category: category),
-            // TODO(DP-083): Cap detail chips at 3 with a compact `+N` badge.
-            if (extraCategories > 0)
-              ActivityCategoryOverflowBadge(count: extraCategories),
             EnrollmentStatusBadge(
               viewModel: enrollmentViewModel,
               activityId: activity.id,
@@ -704,10 +702,15 @@ class _CreatorSection extends StatelessWidget {
 }
 
 class _ParticipationAction extends StatelessWidget {
-  const _ParticipationAction({required this.activity, required this.viewModel});
+  const _ParticipationAction({
+    required this.activity,
+    required this.viewModel,
+    required this.clock,
+  });
 
   final Activity activity;
   final EnrollmentViewModel viewModel;
+  final DateTime Function() clock;
 
   @override
   Widget build(BuildContext context) {
@@ -719,20 +722,25 @@ class _ParticipationAction extends StatelessWidget {
       ),
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: activityHasEnded(activity, activityClock())
-            ? Text(
-                context.l10n.actPastEvent,
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodyMedium
-                    ?.copyWith(color: colors.onSurfaceVariant),
-              )
-            : EnrollmentAction(
-                viewModel: viewModel,
-                activityId: activity.id,
-                activityTitle: activity.title,
-                primary: true,
-                showHelper: true,
-              ),
+        child: ListenableBuilder(
+          listenable: viewModel,
+          builder: (context, _) =>
+              activityHasEnded(activity, clock()) &&
+                  !viewModel.isCancelled(activity.id)
+              ? Text(
+                  context.l10n.actPastEvent,
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodyMedium
+                      ?.copyWith(color: colors.onSurfaceVariant),
+                )
+              : EnrollmentAction(
+                  viewModel: viewModel,
+                  activityId: activity.id,
+                  activityTitle: activity.title,
+                  primary: true,
+                  showHelper: true,
+                ),
+        ),
       ),
     );
   }

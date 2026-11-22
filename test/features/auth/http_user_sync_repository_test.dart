@@ -1,11 +1,10 @@
 import 'dart:convert';
 
+import 'package:aprop/features/auth/data/http_user_sync_repository.dart';
+import 'package:aprop/features/auth/models/auth_failure.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
-
-import 'package:aprop/features/auth/data/http_user_sync_repository.dart';
-import 'package:aprop/features/auth/models/auth_failure.dart';
 
 void main() {
   late http.Request lastRequest;

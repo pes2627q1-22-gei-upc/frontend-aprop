@@ -924,7 +924,7 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Dubte / deduït (sense confirmar):**
   - **Disseny sense mockup:** `LanguageSelectionScreen` reutilitza el disseny i el logotip de `LoginScreen` amb targetes seleccionables (Català / Castellano / English), previsualització en directe en tocar una opció (`previewLocale`) i botó «Continua» que confirma i desa la tria (`setLocale`). Alternativa: confirmar directament en tocar una opció sense botó «Continua».
   - **Comptes nous vs existents amb `Settings.Language NOT NULL DEFAULT 'ca'`:** al backend (#28, migració 000022), `Settings.Language` és `NOT NULL DEFAULT 'ca'`. Per evitar que un compte acabat de crear (on l’usuari acaba de triar `en` o `es` al selector inicial) es reverteixi a `ca` en sincronitzar després del login, `FirebaseAuthRepository` envia `PATCH /users/me {"language": ...}` immediatament quan `POST /auth/sync` crea el compte (`201 Created`). Per a comptes previs existents on `GET /users/me` retorna `ca` (per defecte de BD), la sincronització post-login interpreta `ca` com l’idioma del perfil i l’aplica; si `language` és absent o nul al perfil, hi envia l’idioma local.
-  - **Timeout de sincronització:** `_LanguageSyncGate` espera com a màxim 3 s abans d’entrar al test d’interessos / `MainShell` i no bloqueja mai l’accés si hi ha error de xarxa.
+  - **Timeout de sincronització:** `_LanguageSyncGate` espera com a màxim 3 s abans d’entrar al test d’interessos / `MainShell` i no bloqueja mai l’accés si hi ha error de xarxa. La tria no confirmada es conserva localment per compte i es reintenta en entrar. Un timeout no cancel·la la petició HTTP: un `PATCH` tardà pot competir amb un canvi posterior des de Configuració (`TODO(DP-079)`); l’ordenació al servidor continua pendent. La tria pendent no es transfereix a altres dispositius.
 - **Opcions:** A) mantenir previsualització + «Continua» i `Settings.Language` reutilitzat tal com està · B) confirmar en un sol toc sense «Continua» i/o fer `Settings.Language` nul·lable al backend (requereix migració i regenerar `sqlc`).
 - **Provisionalment:** A (`TODO(DP-079)` a `language_selection_screen.dart` i `firebase_auth_repository.dart`).
 - **Qui decideix:** equip (disseny + backend/frontend)
@@ -959,15 +959,15 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Opcions:** A) filtre al frontend (actual) · B) filtrar al backend (`events.sql`: `enddate is null and startdate < now()`), que requereix tocar sqlc.
 - **Provisionalment:** A.
 
-### DP-083 · Diccionari localitzat de categories (ca/es/en), priorització per filtre i límit de 3 xips a la fitxa
+### DP-083 · Diccionari localitzat de categories (ca/es/en) i priorització per filtre
 - **Estat:** oberta · 2026-11-21 · Antigravity (Gemini 4 Neon) · branca `fix/app-improvements` (incidència A4)
 - **Context:** `lib/features/activities/models/activity_category_labels.dart`, `activity_json_mapper.dart`, `activity_filters.dart`, `http_activity_repository.dart`, `activity_badges.dart`, `activity_card.dart`, `activities_map.dart`, `activities_screen.dart`, `activity_details_screen.dart`, `activity_categories_filter_sheet.dart`, `create_activity_screen.dart`, `interest_test_screen.dart`.
 - **Dubte / supòsits:**
   1. **Diccionari estàtic al frontend (`ca`/`es`/`en`):** `GET /categories` retorna només etiquetes brutes de Gencat (`agenda:categories/*`, `agenda:ambits/*`, p. ex. `agenda:ambits/zz-altres-ambits`, `agenda:ambits/za-any-europeu-patrimoni`, `agenda:categories/any-gaudi`, `agenda:ambits/espectacles`) sense traduccions ni accents. S’ha creat un diccionari per idioma (`ca`/`es`/`en`) amb totes les 34 claus reals del conjunt de dades de l’Agenda Cultural de la Generalitat (24 `tags_categor_es` + 10 `tags_mbits`) més `cultura-popular` (Demo) i el valor de reserva `activitat`. Les claus desconegudes s’embelleixen automàticament (s’eliminen prefixos de namespace i claus d’ordenació `z[a-z]-`/`zz ` i s’aplica Title Case respectant connectors).
   2. **Matching canònic entre idiomes:** les comparacions de filtres (`ActivityFilters`, `HttpActivityRepository.getActivitiesPage`, `ActivityCategoriesFilterSheet`, `CreateActivityViewModel`) i els colors/icones de categories es fan per clau canònica independent d’idioma, de manera que canviar d’idioma no trenca filtres actius ni perd colors.
   3. **Targetes amb filtre actiu:** quan hi ha un filtre de categories actiu, `ActivityCard` i la targeta del mapa (`ActivitiesMap`) mostren primer la categoria de l’activitat que coincideix amb el filtre i mantenen el comptador `+N` per a la resta; sense filtre mantenen l’ordre original.
-  4. **Límit de 3 xips a la fitxa (`ActivityDetailsScreen`):** les activitats oficials poden portar ~10 categories; sense mockup dedicat per al límit, la fitxa mostra els 3 primers xips i un xip `+N` no desplegable (amb semàntica `actMoreCategories`) per a la resta.
-- **Opcions:** A) mantenir el diccionari estàtic al frontend i el xip `+N` compacte a la fitxa · B) servir noms localitzats des de `GET /categories` al backend i/o fer desplegable el `+N` a la fitxa.
-- **Provisionalment:** A (`TODO(DP-083)` a `activity_category_labels.dart`, `activity_badges.dart` i `activity_details_screen.dart`).
+  4. **Categories a la fitxa (`ActivityDetailsScreen`):** arran de la revisió de la PR #80, la fitxa mostra totes les categories. Les targetes mantenen el resum compacte amb `+N`.
+- **Opcions:** A) mantenir el diccionari estàtic al frontend · B) servir noms localitzats des de `GET /categories` al backend.
+- **Provisionalment:** A (`TODO(DP-083)` a `activity_category_labels.dart`); la fitxa mostra totes les categories.
 - **Qui decideix:** equip (frontend + backend + disseny)
 - **Resolució:**

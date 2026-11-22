@@ -5,18 +5,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
+import '../../../../core/l10n/locale_controller.dart';
 import '../../models/activity.dart';
 import '../../models/geo_bounds.dart';
 import '../../models/geo_point.dart';
 import '../formatters/activity_date_formatter.dart';
 import '../view_models/user_location_view_model.dart';
 import 'activity_badges.dart';
-import 'activity_information_row.dart';
 import 'activity_image.dart';
+import 'activity_information_row.dart';
 import 'activity_map_groups.dart';
 import 'map_group_icon.dart';
 import 'user_location_marker.dart';
-import '../../../../core/l10n/locale_controller.dart';
 
 /// Durada de les transicions de la targeta i dels botons que s'hi aparten.
 const mapOverlayAnimationDuration = Duration(milliseconds: 280);

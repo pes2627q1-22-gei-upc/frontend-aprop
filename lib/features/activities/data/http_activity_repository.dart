@@ -1,10 +1,10 @@
-import '../models/activity_start.dart';
 import '../../../core/network/api_client.dart';
 import '../models/activity.dart';
 import '../models/activity_category.dart';
 import '../models/activity_category_labels.dart';
 import '../models/activity_filters.dart';
 import '../models/activity_page.dart';
+import '../models/activity_start.dart';
 import '../models/new_activity.dart';
 import '../repositories/activity_category_repository.dart';
 import '../repositories/activity_repository.dart';
@@ -14,10 +14,15 @@ import 'activity_json_mapper.dart';
 /// (`/events` i `/categories`).
 class HttpActivityRepository
     implements ActivityRepository, ActivityCategoryRepository {
-  HttpActivityRepository({required this.apiClient, this.defaultPageSize = 50});
+  HttpActivityRepository({
+    required this.apiClient,
+    this.defaultPageSize = 50,
+    DateTime Function()? clock,
+  }) : _clock = clock ?? DateTime.now;
 
   final ApiClient apiClient;
   final int defaultPageSize;
+  final DateTime Function() _clock;
   Future<List<({int id, String name})>>? _categoriesRequest;
 
   @override
@@ -115,7 +120,7 @@ class HttpActivityRepository
     }
     // Finished events are hidden after the fact (DP-082); `hasMore` below uses
     // the server's row count so filtering never stops pagination early.
-    final now = activityClock();
+    final now = _clock();
     final items = <String, Activity>{
       for (final batch in batches)
         for (final activity in batch)

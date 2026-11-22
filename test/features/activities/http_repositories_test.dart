@@ -494,7 +494,10 @@ void main() {
         }),
       );
 
-      final discovery = HttpDiscoveryRepository(apiClient: apiClient);
+      final discovery = HttpDiscoveryRepository(
+        apiClient: apiClient,
+        clock: () => DateTime(2026, 9, 26, 9),
+      );
       final searchResults = (await discovery.searchActivitiesPage('Girona'))
           .activities;
       expect(searchResults, hasLength(1));

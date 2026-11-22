@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 
+import '../../../../core/l10n/date_labels.dart';
+import '../../../../core/l10n/locale_controller.dart';
 import '../../models/activity.dart';
 import '../../models/activity_category.dart';
 import '../../models/activity_category_labels.dart';
@@ -9,8 +11,6 @@ import '../../models/new_activity.dart';
 import '../../repositories/activity_category_repository.dart';
 import '../../repositories/activity_repository.dart';
 import '../../repositories/location_repository.dart';
-import '../../../../core/l10n/date_labels.dart';
-import '../../../../core/l10n/locale_controller.dart';
 
 enum CreateActivityField {
   title,

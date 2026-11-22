@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/locale_controller.dart';
 import '../../../activities/models/activity.dart';
 import '../../models/assistant_message.dart';
 import 'assistant_activity_tile.dart';
 import 'assistant_markdown_text.dart';
-import '../../../../core/l10n/locale_controller.dart';
 
 class AssistantMessageBubble extends StatelessWidget {
   const AssistantMessageBubble({

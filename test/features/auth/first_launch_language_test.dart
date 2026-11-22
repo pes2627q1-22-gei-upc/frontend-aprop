@@ -257,6 +257,59 @@ void main() {
       },
     );
 
+    testWidgets('pending initial language survives failure and retries', (
+      tester,
+    ) async {
+      usePhoneSize(tester);
+      SharedPreferences.setMockInitialValues({
+        'ui-language': 'en',
+        'auth.pendingLanguage.demo-laiasoler': 'en',
+      });
+      final controller = LocaleController();
+      await controller.load();
+      final auth = await signedInAuth();
+      final settingsRepo = FakeProfileSettingsRepository()
+        ..settings = const ProfileSettings(language: 'ca')
+        ..languageError = Exception('offline');
+
+      await tester.pumpWidget(
+        APropApp(
+          authRepository: auth,
+          localeController: controller,
+          profileSettingsRepository: settingsRepo,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(controller.locale, const Locale('en'));
+      expect(find.byType(NavigationBar), findsOneWidget);
+      expect(settingsRepo.languages, ['en']);
+      final preferences = await SharedPreferences.getInstance();
+      expect(
+        preferences.getString('auth.pendingLanguage.demo-laiasoler'),
+        'en',
+      );
+
+      settingsRepo.languageError = null;
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pumpAndSettle();
+      await tester.pumpWidget(
+        APropApp(
+          authRepository: auth,
+          localeController: controller,
+          profileSettingsRepository: settingsRepo,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(controller.locale, const Locale('en'));
+      expect(settingsRepo.languages, ['en', 'en']);
+      expect(
+        preferences.getString('auth.pendingLanguage.demo-laiasoler'),
+        isNull,
+      );
+    });
+
     testWidgets(
       'pushes local language to backend when profile has no language stored',
       (tester) async {

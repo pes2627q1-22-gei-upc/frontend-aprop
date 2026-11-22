@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/locale_controller.dart';
 import '../../models/activity_category_labels.dart';
 import 'activity_filter_sheet.dart';
-import '../../../../core/l10n/locale_controller.dart';
 
 class ActivityCategoriesFilterSheet extends StatefulWidget {
   const ActivityCategoriesFilterSheet({

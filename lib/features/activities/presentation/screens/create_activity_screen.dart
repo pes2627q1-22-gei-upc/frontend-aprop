@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/locale_controller.dart';
 import '../../models/activity.dart';
 import '../../models/activity_category.dart';
 import '../../models/activity_category_labels.dart';
@@ -8,11 +9,10 @@ import '../../repositories/activity_category_repository.dart';
 import '../../repositories/activity_repository.dart';
 import '../../repositories/location_repository.dart';
 import '../formatters/activity_date_formatter.dart';
+import '../view_models/create_activity_view_model.dart';
 import '../widgets/activity_badges.dart';
 import '../widgets/location_picker_map.dart';
-import '../view_models/create_activity_view_model.dart';
 import '../widgets/start_date_time_sheet.dart';
-import '../../../../core/l10n/locale_controller.dart';
 
 /// Formulari per publicar una activitat no oficial (Taiga #31).
 // TODO(DP-021): disseny sense mockup aprovat, pendent de validar.

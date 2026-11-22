@@ -15,11 +15,11 @@ import 'package:aprop/features/activities/presentation/screens/activities_screen
 import 'package:aprop/features/activities/presentation/view_models/activities_map_view_model.dart';
 import 'package:aprop/features/activities/presentation/view_models/activities_view_model.dart';
 import 'package:aprop/features/activities/presentation/view_models/enrollment_view_model.dart';
-import 'package:aprop/features/activities/presentation/widgets/map_filter_bar.dart';
 import 'package:aprop/features/activities/presentation/widgets/activity_categories_filter_sheet.dart';
 import 'package:aprop/features/activities/presentation/widgets/activity_date_filter_sheet.dart';
 import 'package:aprop/features/activities/presentation/widgets/activity_filter_calendar.dart';
 import 'package:aprop/features/activities/presentation/widgets/activity_filter_feedback.dart';
+import 'package:aprop/features/activities/presentation/widgets/map_filter_bar.dart';
 import 'package:aprop/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -28,11 +28,11 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 
+import 'activity_filter_test_data.dart';
+import 'backend_event_fixture.dart';
 import 'fake_activity_map_repository.dart';
 import 'fake_activity_repository.dart';
 import 'fake_enrollment_repository.dart';
-import 'activity_filter_test_data.dart';
-import 'backend_event_fixture.dart';
 
 void main() {
   late ActivitiesViewModel model;
@@ -295,10 +295,16 @@ void main() {
       );
       model.dispose();
       model = ActivitiesViewModel(
-        repository: HttpActivityRepository(apiClient: client),
+        repository: HttpActivityRepository(
+          apiClient: client,
+          clock: () => DateTime(2026, 9, 26, 9),
+        ),
       );
       final areaModel = ActivitiesMapViewModel(
-        repository: HttpActivityMapRepository(apiClient: client),
+        repository: HttpActivityMapRepository(
+          apiClient: client,
+          clock: () => DateTime(2026, 9, 26, 9),
+        ),
       );
       addTearDown(areaModel.dispose);
       await areaModel.loadArea(

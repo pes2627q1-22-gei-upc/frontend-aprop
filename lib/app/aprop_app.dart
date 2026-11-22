@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 import '../core/l10n/locale_controller.dart';
-import '../l10n/app_localizations.dart';
 import '../features/activities/repositories/activity_category_repository.dart';
 import '../features/activities/repositories/activity_map_repository.dart';
 import '../features/activities/repositories/activity_repository.dart';
@@ -10,20 +9,21 @@ import '../features/activities/repositories/discovery_repository.dart';
 import '../features/activities/repositories/enrollment_repository.dart';
 import '../features/activities/repositories/user_location_repository.dart';
 import '../features/activity_chat/repositories/activity_chat_repository.dart';
-import '../features/ratings/repositories/rating_repository.dart';
 import '../features/assistant/repositories/assistant_repository.dart';
+import '../features/attendance/repositories/attendance_repository.dart';
 import '../features/auth/presentation/screens/language_selection_screen.dart';
 import '../features/auth/repositories/auth_repository.dart';
 import '../features/interest_test/repositories/interest_test_onboarding_memory.dart';
 import '../features/interest_test/repositories/interest_test_repository.dart';
 import '../features/notifications/repositories/notification_repository.dart';
+import '../features/profile/repositories/friends_repository.dart';
+import '../features/profile/repositories/friendship_repository.dart';
 import '../features/profile/repositories/profile_repository.dart';
 import '../features/profile/repositories/profile_settings_repository.dart';
 import '../features/profile/repositories/public_profile_repository.dart';
-import '../features/profile/repositories/friendship_repository.dart';
-import '../features/attendance/repositories/attendance_repository.dart';
-import '../features/profile/repositories/friends_repository.dart';
 import '../features/profile/repositories/user_search_repository.dart';
+import '../features/ratings/repositories/rating_repository.dart';
+import '../l10n/app_localizations.dart';
 import 'navigation/auth_gate.dart';
 import 'theme/app_theme.dart';
 
@@ -32,6 +32,7 @@ class APropApp extends StatelessWidget {
     super.key,
     required this.authRepository,
     this.activityRepository,
+    this.activityClock = DateTime.now,
     this.activityMapRepository,
     this.enrollmentRepository,
     this.assistantRepository,
@@ -64,6 +65,7 @@ class APropApp extends StatelessWidget {
   /// Xat de les activitats. Sense, se'n fa servir un de demostració.
   final ActivityChatRepository? activityChatRepository;
   final ActivityRepository? activityRepository;
+  final DateTime Function() activityClock;
   final ActivityMapRepository? activityMapRepository;
   final EnrollmentRepository? enrollmentRepository;
   final AssistantRepository? assistantRepository;
@@ -90,6 +92,7 @@ class APropApp extends StatelessWidget {
       key: ValueKey((
         authRepository,
         activityRepository,
+        activityClock,
         activityMapRepository,
         enrollmentRepository,
         assistantRepository,
@@ -113,6 +116,7 @@ class APropApp extends StatelessWidget {
       authRepository: authRepository,
       localeController: localeController,
       activityRepository: activityRepository,
+      activityClock: activityClock,
       activityMapRepository: activityMapRepository,
       enrollmentRepository: enrollmentRepository,
       assistantRepository: assistantRepository,

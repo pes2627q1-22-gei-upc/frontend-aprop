@@ -150,7 +150,12 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
     final auth = DemoAuthRepository();
     await auth.signIn(usernameOrEmail: 'laiasoler', password: 'Aprop2026!');
-    await tester.pumpWidget(APropApp(authRepository: auth));
+    await tester.pumpWidget(
+      APropApp(
+        authRepository: auth,
+        activityClock: () => DateTime(2026, 9, 26, 9),
+      ),
+    );
     await tester.pumpAndSettle();
     await openMapTab(tester);
     await tapMarker(tester, 'demo-jazz');

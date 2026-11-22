@@ -58,6 +58,7 @@ void main() {
     () async {
       final pages = <String?>[];
       final repo = HttpActivityRepository(
+        clock: () => DateTime(2026, 9, 26, 9),
         apiClient: ApiClient(
           baseUrl: Uri.parse('https://api.example.test'),
           idToken: () async => 'test-token',

@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:aprop/core/l10n/locale_controller.dart';
 import 'package:aprop/features/profile/models/profile_settings.dart';
-import 'package:flutter/widgets.dart' show Locale;
 import 'package:aprop/features/profile/presentation/view_models/profile_settings_view_model.dart';
+import 'package:flutter/widgets.dart' show Locale;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -35,12 +35,20 @@ void main() {
     );
     addTearDown(localised.dispose);
     final first = Completer<void>();
-    repository.onUpdateLanguage = (language) =>
-        language == 'es' ? first.future : null;
+    final started = Completer<void>();
+    repository.onUpdateLanguage = (language) {
+      if (language != 'es') return null;
+      started.complete();
+      return first.future;
+    };
     final older = localised.changeLanguage(const Locale('es'));
-    await localised.changeLanguage(const Locale('en'));
+    await started.future;
+    final newer = localised.changeLanguage(const Locale('en'));
+    expect(controller.locale, const Locale('en'));
+    expect(repository.languages, ['es']);
     first.completeError(Exception('late failure'));
-    await older;
+    await Future.wait([older, newer]);
+    expect(repository.languages, ['es', 'en']);
     expect(localised.actionError, isNull);
   });
 

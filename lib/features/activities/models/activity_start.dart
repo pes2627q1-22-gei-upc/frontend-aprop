@@ -22,9 +22,6 @@ bool activityHasStarted(Activity activity, DateTime now) {
   return !DateTime(day.year, day.month, day.day + 1).isAfter(now);
 }
 
-/// Clock used to hide finished activities; tests replace it.
-DateTime Function() activityClock = DateTime.now;
-
 /// Whether [activity] is over at [now]: its last day (the end day, or the
 /// start day for one-day plans) has finished. Permanent activities never end.
 /// The API still lists one-day events whose date passed when they have no end

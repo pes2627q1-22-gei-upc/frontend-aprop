@@ -2,11 +2,11 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 
+import '../../../../core/l10n/locale_controller.dart';
 import '../../../activities/models/activity.dart';
 import '../../../activities/models/activity_start.dart';
 import '../../../activities/repositories/activity_repository.dart';
 import '../../../activities/repositories/enrollment_repository.dart';
-import '../../../../core/l10n/locale_controller.dart';
 
 /// Signed-up plans happening on a single calendar [day], ordered by start time.
 class AgendaDayGroup {

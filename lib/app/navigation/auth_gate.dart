@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../core/l10n/locale_controller.dart';
+import '../../core/l10n/pending_language.dart';
 import '../../features/activities/data/combined_activity_repository.dart';
 import '../../features/activities/data/demo_activity_repository.dart';
 import '../../features/activities/data/demo_discovery_repository.dart';
@@ -16,6 +17,8 @@ import '../../features/activities/repositories/user_location_repository.dart';
 import '../../features/activity_chat/repositories/activity_chat_repository.dart';
 import '../../features/assistant/data/demo_assistant_repository.dart';
 import '../../features/assistant/repositories/assistant_repository.dart';
+import '../../features/attendance/data/demo_attendance_repository.dart';
+import '../../features/attendance/repositories/attendance_repository.dart';
 import '../../features/auth/models/app_user.dart';
 import '../../features/auth/presentation/screens/choose_username_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
@@ -27,19 +30,17 @@ import '../../features/interest_test/repositories/interest_test_onboarding_memor
 import '../../features/interest_test/repositories/interest_test_repository.dart';
 import '../../features/notifications/data/demo_notification_repository.dart';
 import '../../features/notifications/repositories/notification_repository.dart';
-import '../../features/profile/data/demo_profile_repository.dart';
+import '../../features/profile/data/demo_friends_repository.dart';
 import '../../features/profile/data/demo_friendship_repository.dart';
+import '../../features/profile/data/demo_profile_repository.dart';
 import '../../features/profile/data/demo_profile_settings_repository.dart';
 import '../../features/profile/data/demo_public_profile_repository.dart';
-import '../../features/profile/data/demo_friends_repository.dart';
 import '../../features/profile/data/demo_user_search_repository.dart';
+import '../../features/profile/repositories/friends_repository.dart';
+import '../../features/profile/repositories/friendship_repository.dart';
 import '../../features/profile/repositories/profile_repository.dart';
 import '../../features/profile/repositories/profile_settings_repository.dart';
 import '../../features/profile/repositories/public_profile_repository.dart';
-import '../../features/profile/repositories/friendship_repository.dart';
-import '../../features/attendance/data/demo_attendance_repository.dart';
-import '../../features/attendance/repositories/attendance_repository.dart';
-import '../../features/profile/repositories/friends_repository.dart';
 import '../../features/profile/repositories/user_search_repository.dart';
 import '../../features/ratings/data/demo_rating_repository.dart';
 import '../../features/ratings/repositories/rating_repository.dart';
@@ -53,6 +54,7 @@ class AuthGate extends StatefulWidget {
     super.key,
     required this.authRepository,
     this.activityRepository,
+    this.activityClock = DateTime.now,
     this.enrollmentRepository,
     this.assistantRepository,
     this.ratingRepository,
@@ -83,6 +85,7 @@ class AuthGate extends StatefulWidget {
   /// Xat de les activitats. Sense, MainShell en fa servir un de demostració.
   final ActivityChatRepository? activityChatRepository;
   final ActivityRepository? activityRepository;
+  final DateTime Function() activityClock;
   final EnrollmentRepository? enrollmentRepository;
   final AssistantRepository? assistantRepository;
   final RatingRepository? ratingRepository;
@@ -290,6 +293,7 @@ class _AuthGateState extends State<AuthGate> {
           onSignOut: widget.authRepository.signOut,
           onDeleteAccount: widget.authRepository.deleteAccount,
           activityRepository: _activityRepository,
+          activityClock: widget.activityClock,
           enrollmentRepository: _enrollmentRepository,
           assistantRepository: _assistantRepository,
           ratingRepository: _ratingRepository,
@@ -459,6 +463,24 @@ class _LanguageSyncGateState extends State<_LanguageSyncGate> {
   Future<void> _sync() async {
     final generation = ++_syncGeneration;
     try {
+      final pending = PendingLanguage();
+      final language = await pending.read(widget.userId);
+      if (!mounted || generation != _syncGeneration) return;
+      final pendingLocale = LocaleController.supportedLocaleFor(language);
+      if (pendingLocale != null) {
+        await widget.localeController.setLocale(pendingLocale);
+        if (!mounted || generation != _syncGeneration) return;
+        // TODO(DP-079): el timeout no cancel·la el PATCH; una resposta tardana
+        // pot competir amb un canvi posterior de Configuració.
+        await widget.repository
+            .updateLanguage(userId: widget.userId, language: language!)
+            .timeout(const Duration(seconds: 3));
+        if (!mounted || generation != _syncGeneration) return;
+        await pending.clearIfMatches(widget.userId, language);
+        if (!mounted || generation != _syncGeneration) return;
+        widget.onDone();
+        return;
+      }
       final settings = await widget.repository
           .getSettings(widget.userId)
           .timeout(const Duration(seconds: 3));

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/locale_controller.dart';
 import '../../models/activity.dart';
 import '../formatters/activity_date_formatter.dart';
 import 'activity_badges.dart';
-import 'activity_information_row.dart';
 import 'activity_image.dart';
-import '../../../../core/l10n/locale_controller.dart';
+import 'activity_information_row.dart';
 
 class ActivityCard extends StatelessWidget {
   const ActivityCard({

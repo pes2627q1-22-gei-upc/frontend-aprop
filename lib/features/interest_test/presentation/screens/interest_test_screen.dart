@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/locale_controller.dart';
 import '../../../../core/widgets/content_image.dart';
 import '../../../activities/models/activity_category_labels.dart';
 import '../../models/interest_question.dart';
 import '../../repositories/interest_test_repository.dart';
 import '../view_models/interest_test_view_model.dart';
-import '../../../../core/l10n/locale_controller.dart';
 
 /// Shows the test activities one by one: swipe right if it interests the
 /// user, left if it does not. Buttons offer the same choice without swiping.

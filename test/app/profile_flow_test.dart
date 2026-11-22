@@ -39,7 +39,11 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
     await tester.pumpWidget(
-      APropApp(authRepository: auth, profileRepository: profiles),
+      APropApp(
+        authRepository: auth,
+        profileRepository: profiles,
+        activityClock: () => DateTime(2026, 9, 26, 9),
+      ),
     );
     await tester.pumpAndSettle();
     await tester.tap(destination('Perfil'));

@@ -1,8 +1,8 @@
 import 'package:flutter/foundation.dart';
 
+import '../../../../core/l10n/locale_controller.dart';
 import '../../models/interest_question.dart';
 import '../../repositories/interest_test_repository.dart';
-import '../../../../core/l10n/locale_controller.dart';
 
 class InterestTestViewModel extends ChangeNotifier {
   InterestTestViewModel({required this.repository, this.initialAnsweredCount});
