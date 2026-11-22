@@ -7,7 +7,7 @@ Aplicació mòbil per descobrir i planificar activitats culturals a Catalunya. P
 Preferències d’avisos (**Taiga #132**): Configuració mostra Recordatoris, Avisos socials,
 Recomanacions i Cancel·lacions segons els tipus reals del servidor. Càrrega independent, confirmació
 per lectura, progrés i reintent al mateix control; els avisos rebuts es conserven. La persistència
-real necessita corregir el retorn anticipat de `UpdateSettings` al backend (DP-079).
+real necessita corregir el retorn anticipat de `UpdateSettings` al backend (DP-084).
 [Contracte, proves i missatge per al backend](docs/notification-settings.md).
 
 Visibilitat dels plans (**Taiga #199**): Configuració conserva el valor confirmat de «Mostrar els meus

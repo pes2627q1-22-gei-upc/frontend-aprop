@@ -121,6 +121,22 @@ void main() {
     expect(writes.single, {'language': 'es'});
   });
 
+  test('getSettings reads the account language when valid and ignores invalid/missing values', () async {
+    Future<String?> readLang(Map<String, Object?> extra) async {
+      final repo = HttpProfileSettingsRepository(
+        apiClient: api(
+          (_) async => profileJson({...backendProfile(), ...extra}),
+        ),
+      );
+      return (await repo.getSettings(profileUser.id)).language;
+    }
+
+    expect(await readLang({'language': 'en'}), 'en');
+    expect(await readLang({'language': ' ES '}), 'es');
+    expect(await readLang({'language': 'fr'}), isNull);
+    expect(await readLang({}), isNull);
+  });
+
   test('Created activities are requested with the current language', () async {
     String? lang;
     final repo = HttpProfileRepository(

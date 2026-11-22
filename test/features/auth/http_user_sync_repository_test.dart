@@ -1,11 +1,10 @@
 import 'dart:convert';
 
+import 'package:aprop/features/auth/data/http_user_sync_repository.dart';
+import 'package:aprop/features/auth/models/auth_failure.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
-
-import 'package:aprop/features/auth/data/http_user_sync_repository.dart';
-import 'package:aprop/features/auth/models/auth_failure.dart';
 
 void main() {
   late http.Request lastRequest;
@@ -49,6 +48,7 @@ void main() {
     expect(profile?.id, '12');
     expect(profile?.username, 'polvidal');
     expect(profile?.email, 'pol@aprop.cat');
+    expect(profile?.created, isTrue);
   });
 
   test("Sense nom d'usuari no envia cos i retorna l'usuari existent", () async {
@@ -56,6 +56,7 @@ void main() {
 
     expect(lastRequest.body, isEmpty);
     expect(profile?.username, 'polvidal');
+    expect(profile?.created, isFalse);
   });
 
   test('Accepta la URL base amb barra final', () async {
@@ -220,6 +221,33 @@ void main() {
       );
 
       expect(repository.deleteAccount(), throwsA(AuthFailure.network));
+    });
+  });
+
+  group('Idioma inicial (PATCH /users/me)', () {
+    test('Envia PATCH /users/me amb language i token', () async {
+      await repositoryAnswering(200, body: {'id': '12'}).updateLanguage('en');
+
+      expect(lastRequest.method, 'PATCH');
+      expect(lastRequest.url.path, '/users/me');
+      expect(lastRequest.headers['Authorization'], 'Bearer firebase-token');
+      expect(jsonDecode(lastRequest.body), {'language': 'en'});
+    });
+
+    test('Propaga errors HTTP i de xarxa', () async {
+      await expectLater(
+        repositoryAnswering(400, body: {'error': 'bad'}).updateLanguage('xx'),
+        throwsStateError,
+      );
+      final offline = HttpUserSyncRepository(
+        baseUrl: Uri.parse('http://10.0.2.2:8080'),
+        idToken: () async => 'firebase-token',
+        client: MockClient((_) => throw http.ClientException('offline')),
+      );
+      await expectLater(
+        offline.updateLanguage('en'),
+        throwsA(AuthFailure.network),
+      );
     });
   });
 }

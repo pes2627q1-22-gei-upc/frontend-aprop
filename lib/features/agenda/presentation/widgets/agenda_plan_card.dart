@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/locale_controller.dart';
 import '../../../activities/models/activity.dart';
 import '../../../activities/presentation/formatters/activity_categories_formatter.dart';
 import '../../../activities/presentation/formatters/activity_date_formatter.dart';
+import '../../../activities/presentation/widgets/activity_image.dart';
 import '../../../activities/presentation/widgets/enrollment_badge.dart';
-import '../../../../core/l10n/locale_controller.dart';
 
 /// Compact plan of the selected day. The image and the title open the event.
 class AgendaPlanCard extends StatelessWidget {
@@ -14,6 +15,7 @@ class AgendaPlanCard extends StatelessWidget {
     required this.onTap,
     this.participationAction,
     this.rating,
+    this.dayPosition,
   });
 
   final Activity activity;
@@ -25,6 +27,9 @@ class AgendaPlanCard extends StatelessWidget {
 
   /// Rating block, shown only for plans the app lets the user rate.
   final Widget? rating;
+
+  /// «Dia X de N» of a short multi-day plan on the day shown.
+  final ({int day, int of})? dayPosition;
 
   @override
   Widget build(BuildContext context) {
@@ -58,24 +63,13 @@ class AgendaPlanCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
                 child: InkWell(
                   onTap: onTap,
-                  child: Image.asset(
-                    activity.imageAsset,
+                  child: ActivityImage(
+                    activity: activity,
                     width: 72,
                     height: 72,
-                    fit: BoxFit.cover,
                     semanticLabel: context.l10n.assistantViewActivity(
                       activity.title,
                     ),
-                    errorBuilder: (context, error, stackTrace) {
-                      return ColoredBox(
-                        color: colors.surfaceContainerHighest,
-                        child: const SizedBox(
-                          width: 72,
-                          height: 72,
-                          child: Icon(Icons.image_outlined),
-                        ),
-                      );
-                    },
                   ),
                 ),
               ),
@@ -110,6 +104,17 @@ class AgendaPlanCard extends StatelessWidget {
                         ),
                       ),
                     ),
+                    if (dayPosition case final position?)
+                      Text(
+                        context.l10n.agendaDayOfTotal(
+                          position.day,
+                          position.of,
+                        ),
+                        style: secondaryStyle?.copyWith(
+                          color: colors.primary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                     if (activity.municipality.isNotEmpty)
                       Row(
                         children: [

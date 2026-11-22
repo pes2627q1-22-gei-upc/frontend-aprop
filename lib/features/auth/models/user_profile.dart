@@ -6,6 +6,7 @@ class UserProfile {
     required this.username,
     required this.email,
     this.name = '',
+    this.created = false,
   });
 
   final String id;
@@ -14,4 +15,7 @@ class UserProfile {
 
   /// Nom i cognoms, en un sol camp. Buit si encara no s'ha desat.
   final String name;
+
+  /// Cert quan `POST /auth/sync` acaba de crear el compte (`201 Created`).
+  final bool created;
 }

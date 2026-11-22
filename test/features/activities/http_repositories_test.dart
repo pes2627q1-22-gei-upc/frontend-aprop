@@ -77,7 +77,7 @@ void main() {
       expect(list, hasLength(1));
       expect(list.single.id, '101');
       expect(list.single.title, 'Concert de Jazz a Girona');
-      expect(list.single.category, 'Musica');
+      expect(list.single.category, 'Música');
       expect(list.single.municipality, 'Girona');
 
       final detail = await repo.getActivityById('101');
@@ -494,7 +494,10 @@ void main() {
         }),
       );
 
-      final discovery = HttpDiscoveryRepository(apiClient: apiClient);
+      final discovery = HttpDiscoveryRepository(
+        apiClient: apiClient,
+        clock: () => DateTime(2026, 9, 26, 9),
+      );
       final searchResults = (await discovery.searchActivitiesPage('Girona'))
           .activities;
       expect(searchResults, hasLength(1));

@@ -19,9 +19,19 @@ class HttpProfileSettingsRepository implements ProfileSettingsRepository {
   @override
   bool get persistsPreferences => true;
 
+  static const _supportedLanguages = {'ca', 'es', 'en'};
+
   ProfileSettings _settings(Map<String, Object?> json) {
     if (json['show-plans'] case final bool visible) {
-      return ProfileSettings(showMyPlans: visible);
+      final rawLanguage = json['language'];
+      final normalized = rawLanguage is String
+          ? rawLanguage.trim().toLowerCase()
+          : null;
+      final language =
+          normalized != null && _supportedLanguages.contains(normalized)
+          ? normalized
+          : null;
+      return ProfileSettings(showMyPlans: visible, language: language);
     }
     throw const FormatException('Expected show-plans setting');
   }
@@ -90,7 +100,7 @@ class HttpProfileSettingsRepository implements ProfileSettingsRepository {
     }
     // PATCH returns UserProfile, which has no allowed-notif-types. Only the
     // authenticated Settings read-back can confirm that the change was saved.
-    // TODO(DP-079): backend 4f98835 can skip this write when Language is set.
+    // TODO(DP-084): backend 4f98835 can skip this write when Language is set.
     // Keep read-back confirmation; never turn a 200 into a fictitious success.
     final confirmed = NotificationPreferencesPayload.fromJson(
       await apiClient.getJson('users/me/settings', headers: session.headers),

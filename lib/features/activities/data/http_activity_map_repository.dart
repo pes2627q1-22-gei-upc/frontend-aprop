@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import '../../../core/config/api_config.dart';
 import '../../../core/network/api_client.dart';
 import '../models/activity.dart';
+import '../models/activity_start.dart';
 import '../models/geo_bounds.dart';
 import '../repositories/activity_map_repository.dart';
 import 'activity_json_mapper.dart';
@@ -18,7 +19,9 @@ class HttpActivityMapRepository implements ActivityMapRepository {
     http.Client? client,
     Duration timeout = ApiConfig.connectTimeout,
     ApiClient? apiClient,
-  }) : _apiClient =
+    DateTime Function()? clock,
+  }) : _clock = clock ?? DateTime.now,
+       _apiClient =
            apiClient ??
            ApiClient(
              baseUrl: baseUrl,
@@ -28,6 +31,7 @@ class HttpActivityMapRepository implements ActivityMapRepository {
            );
 
   final ApiClient _apiClient;
+  final DateTime Function() _clock;
 
   @override
   Future<List<Activity>> getActivitiesInArea(GeoBounds area) async {
@@ -41,9 +45,13 @@ class HttpActivityMapRepository implements ActivityMapRepository {
       },
     );
     final events = decoded as List<Object?>? ?? const [];
+    final now = _clock();
     return [
       for (final event in events)
-        if (event is Map<String, Object?>) activityFromJson(event),
+        if (event is Map<String, Object?>)
+          if (activityFromJson(event) case final a
+              when !activityHasEnded(a, now))
+            a,
     ];
   }
 

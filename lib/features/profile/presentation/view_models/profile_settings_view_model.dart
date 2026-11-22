@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 
 import '../../../../core/l10n/locale_controller.dart';
+import '../../../../core/l10n/pending_language.dart';
 import '../../models/profile_settings.dart';
 import '../../models/notification_preferences.dart';
 import '../../repositories/profile_settings_repository.dart';
@@ -233,6 +234,7 @@ class ProfileSettingsViewModel extends ChangeNotifier {
   /// Applies the language to the whole app at once (and stores it locally),
   /// then tells the account. A failed sync keeps the new language.
   int _languageRequest = 0;
+  Future<void> _languageQueue = Future.value();
 
   Future<void> changeLanguage(Locale locale) async {
     final controller = localeController;
@@ -244,6 +246,9 @@ class ProfileSettingsViewModel extends ChangeNotifier {
       return;
     }
     final request = ++_languageRequest;
+    final previousWrite = _languageQueue;
+    final completed = Completer<void>();
+    _languageQueue = completed.future;
     _languageWrites++;
     _actionError = null;
     notifyListeners();
@@ -251,16 +256,25 @@ class ProfileSettingsViewModel extends ChangeNotifier {
       await controller.setLocale(locale);
       String? error;
       try {
+        await previousWrite;
+        if (request != _languageRequest || _isDisposed) return;
+        final pending = PendingLanguage();
+        await pending.save(userId, locale.languageCode);
+        if (request != _languageRequest || _isDisposed) return;
         await repository.updateLanguage(
           userId: userId,
           language: locale.languageCode,
         );
+        if (request == _languageRequest) {
+          await pending.clearIfMatches(userId, locale.languageCode);
+        }
       } catch (_) {
         error = currentL10n.settingsLanguageSyncError;
       }
       // A newer change owns the result; an older one must not overwrite it.
       if (!_isDisposed && request == _languageRequest) _actionError = error;
     } finally {
+      completed.complete();
       _languageWrites--;
       if (!_isDisposed) notifyListeners();
     }

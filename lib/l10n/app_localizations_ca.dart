@@ -1248,10 +1248,19 @@ class AppLocalizationsCa extends AppLocalizations {
       'No hem pogut desar les respostes. Torna-ho a provar.';
 
   @override
-  String get interestTestSkip => 'Ara no';
+  String get interestTestSkip => 'Més tard';
 
   @override
   String get interestTestContinue => 'Continua';
+
+  @override
+  String get interestTestReadMore => 'Llegir més';
+
+  @override
+  String get interestTestReadLess => 'Llegir menys';
+
+  @override
+  String get interestTestLeaveWithoutSaving => 'Sortir sense desar';
 
   @override
   String get ratingDeleteTitle => 'Eliminar la valoració?';
@@ -1340,8 +1349,33 @@ class AppLocalizationsCa extends AppLocalizations {
   String get agendaEmptyDay => 'No tens cap pla per a aquest dia.';
 
   @override
+  String get agendaEmptyAll => 'Encara no t’has apuntat a cap pla.';
+
+  @override
+  String get agendaEmptyUpcoming => 'No tens cap pla proper.';
+
+  @override
   String get agendaEmptyHint =>
       'Apunta’t a activitats des d’Inici i les veuràs aquí.';
+
+  @override
+  String agendaDayOfTotal(int day, int total) {
+    return 'Dia $day de $total';
+  }
+
+  @override
+  String get actPastEvent => 'Aquesta activitat ja ha passat';
+
+  @override
+  String get agendaUpcomingTitle => 'Propers plans';
+
+  @override
+  String agendaPastSection(int count) {
+    return 'Plans passats ($count)';
+  }
+
+  @override
+  String get agendaCloseDaySheet => 'Tancar els plans del dia';
 
   @override
   String get agendaLoadError =>
@@ -2315,6 +2349,19 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get friendOptions => 'Opcions d’amistat';
+
+  @override
+  String get languagePickerTitle => 'Tria el teu idioma';
+
+  @override
+  String get languagePickerSubtitle =>
+      'Pots canviar-lo quan vulguis des de la configuració.';
+
+  @override
+  String get languagePickerContinue => 'Continua';
+
+  @override
+  String get languagePickerSelectedSemantics => 'Idioma seleccionat';
 
   @override
   String get blockedLoading => 'Carregant usuaris bloquejats';

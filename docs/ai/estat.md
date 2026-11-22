@@ -10,7 +10,7 @@
 
 | Taiga | Tasca | Branca | Estat |
 |---|---|---|---|
-| #132 | [FE] Interruptors de notificacions a Configuració + ViewModel + tests (història #19) | `feature/notification-settings-132` | Frontend verificat: 1041 proves, anàlisi, format i APK correctes; revisió independent aprovada; persistència real pendent del fix backend DP-079; sense commit/push |
+| #132 | [FE] Interruptors de notificacions a Configuració + ViewModel + tests (història #19) | `feature/notification-settings-132` | Commit funcional `d318f59` publicat; conflicte amb `origin/develop@bfff322` resolt; 1101 proves, anàlisi, format i APK correctes; revisió tècnica independent aprovada; persistència real a DP-084; sense commit/push del merge |
 | #199 | [FE] Switch «Mostrar els meus plans» + ViewModel + tests (història #55) | `feature/show-my-plans-199` | Integrada a develop amb PR #78 (`dcecb75`); DP-078 oberta |
 | #179 | [FE] Bloqueig al perfil + BlockedUsersScreen a Configuració + tests (història #45) | `feature/block-users-179` | Integrada a develop amb PR #77 (`d11d342`); DP-077 oberta |
 | #212 i #266 | Arreglos generals de la prova a l’emulador: «Com va anar?» no pregunta abans d’hora i en mostra tres; zoom del mapa amb GPS lent; «00.00 h» als avisos; ajuda del diàleg d’eliminar; icona «Cerca persones» al Perfil | `fix/com-va-anar` (inclou `feature/mapa-zoom-ubicacio`) | Integrada a develop amb PR #76 (`ee9e34f`); DP-068 i DP-074 actualitzades |
@@ -44,8 +44,24 @@
 - `NotificationPreferences` independent de privacitat i bústia; mateix ViewModel i tile de #199, sense booleans de negoci a widgets.
 - GET Settings/catàleg, PATCH parcial, preservació d’IDs desconeguts i confirmació per lectura amb bearer/identitat fixats.
 - 32 proves noves i 43 de regressió superades; suite completa de 1041 proves, anàlisi, format i APK correctes; revisió independent aprovada.
-- **Backend necessari:** `UpdateSettings` retorna abans de guardar `AllowedNotifications` si `Language` és no buit. L’error es detecta al frontend, no es simula persistència. DP-079 i missatge a `docs/notification-settings.md`.
+- **Backend necessari:** `UpdateSettings` retorna abans de guardar `AllowedNotifications` si `Language` és no buit. L’error es detecta al frontend, no es simula persistència. DP-084 i missatge a `docs/notification-settings.md`.
 - Sense nous paquets, endpoints, commits, push, migracions ni escriptures a Render.
+
+## Resolució de conflictes de #132 (2026-11-22)
+
+- `origin/develop@bfff322` incorpora PR #80: idioma inicial, test d'interessos, Agenda,
+  assistent i categories. Es conserven els canvis entrants i els interruptors de #132.
+- `ProfileSettings` conserva idioma i privacitat; les còpies preserven tots dos camps.
+  Les preferències de lliurament continuen al snapshot independent `NotificationPreferences`.
+- Es mantenen la cua de sincronització d'idioma, la tria pendent per compte i els guards
+  d'escriptura amb privacitat/avisos. Prova de regressió de canvis successius i comptes diferents.
+- DP-079..DP-083 pertanyen a PR #80. La decisió de #132 es renumera a DP-084 amb totes
+  les referències de codi, prova i documentació, sense reutilitzar identificadors.
+- Traduccions ca/es/en regenerades amb totes les claus de les dues branques.
+- **1101 proves superades**, anàlisi sense incidències, format de 408 fitxers sense canvis,
+  `git diff --cached --check` i APK debug correctes. Revisió tècnica independent aprovada.
+- Sense commit ni push del merge; l'usuari actualitza la mateixa PR després de revisar.
+  Backend intacte; CI, prova real de persistència i revisió humana pendents.
 
 ## Verificació #132 (2026-11-21)
 
@@ -58,7 +74,7 @@
 - APK debug compilada. Captures Flutter amb Roboto i dades simulades revisades a
   `PES/output/frontend/task-132-{configuracio,desactivats}.png`.
 - Backend net a `4f98835`; cap canvi ni escriptura a Render. No es dona per resolta la persistència:
-  cal el fix de `UpdateSettings` de DP-079 i la prova amb comptes reals. CI i revisió humana pendents.
+  cal el fix de `UpdateSettings` de DP-084 i la prova amb comptes reals. CI i revisió humana pendents.
 - Sense commit ni push. Guia i missatge concret per al backend: `docs/notification-settings.md`.
 
 ## Context anterior (#199)
@@ -210,7 +226,7 @@
 
 ## Pendents / següents passos
 
-1. L’usuari revisa #132 i fa commit/PR. CI i revisió humana pendents. Comunicar el fix de persistència DP-079 abans de validar el lliurament real d’avisos.
+1. L’usuari revisa #132 i fa commit/PR. CI i revisió humana pendents. Comunicar el fix de persistència DP-084 abans de validar el lliurament real d’avisos.
 2. Backend/equip: autorització de consulta directa de plans aliens (DP-078), ja comunicada en #199.
 3. Backend/equip: discriminador estructurat d’acceptació a la bústia (DP-070); després integrar el JSON real i comprovar el recorregut amb dos comptes al desplegament i Android.
 4. Backend/equip: avís automàtic en enviar sol·licitud i política de zona de `request-date` (DP-066).

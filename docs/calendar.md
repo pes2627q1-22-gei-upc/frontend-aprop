@@ -10,8 +10,10 @@ Agenda (section 1 of `MainShell`) shows a Monday-first month calendar (`Dl`–`D
 | Day with plans | Dot under the number (forest; cream on the selected day) |
 | Today | Forest outline |
 | Selected day | Forest (`AppTheme.forest`) background |
-| Day list | Plans of the selected day ordered by start time; updates as soon as a day is tapped |
-| Empty day | «No tens cap pla per a aquest dia.» |
+| Day modal sheet | Tapping any day opens a modal bottom sheet (`AgendaDaySheet`) listing only that day's plans (or «No tens cap pla per a aquest dia.»); tapping a plan closes the sheet and opens details |
+| Upcoming list | Below the calendar, all upcoming signed-up plans (from today onwards) grouped by date headers in chronological order |
+| Past plans | Strictly past plans (before today) appear in a secondary collapsible «Plans passats (N)» section below upcoming plans, collapsed by default and ordered most-recent day first (DP-077) |
+| Empty states | «Encara no t’has apuntat a cap pla.» when there are no plans at all, or «No tens cap pla proper.» when only past plans exist |
 | Loading / error | Spinner, or Catalan error with «Tornar-ho a provar»; the calendar stays usable |
 
 Tapping a plan's image or title calls `onActivitySelected(activity.id)`. `MainShell` pushes the shared detail route onto Agenda's own navigator, so the bottom bar stays visible and returning restores the month and selected day. New enrollments made from Inici or the detail appear without reloading.
@@ -28,16 +30,17 @@ features/agenda/presentation/view_models/agenda_view_model.dart
 features/agenda/presentation/screens/agenda_screen.dart
 features/agenda/presentation/widgets/month_calendar.dart
 features/agenda/presentation/widgets/agenda_plan_card.dart
+features/agenda/presentation/widgets/agenda_day_sheet.dart
 ```
 
-`AgendaViewModel` receives the shared `EnrollmentRepository` and `ActivityRepository` contracts and the user ID, as agreed in the [enrollment handoff](event-enrollment.md#calendar-handoff). It subscribes to `watchEnrolledActivityIds(userId)`, resolves each new ID once with `getActivityById` (cached; missing activities are skipped) and groups the plans by day. Late snapshots, lookups after `dispose` and duplicate `load()` calls are ignored. It does not import `EnrollmentViewModel`: both read the same repository instance, injected by `MainShell`. An optional `now` clock makes «today» testable.
+`AgendaViewModel` receives the shared `EnrollmentRepository` and `ActivityRepository` contracts and the user ID, as agreed in the [enrollment handoff](event-enrollment.md#calendar-handoff). It subscribes to `watchEnrolledActivityIds(userId)`, resolves each new ID once with `getActivityById` (cached; missing activities are skipped) and groups the plans by day, exposing `plansOn(day)`, `upcomingPlanGroups` (from today onwards, ascending) and `pastPlanGroups` (before today, newest day first). Late snapshots, lookups after `dispose` and duplicate `load()` calls are ignored. It does not import `EnrollmentViewModel`: both read the same repository instance, injected by `MainShell`. An optional `now` clock makes «today» testable.
 
 ```text
 EnrollmentRepository.watchEnrolledActivityIds(userId)
   -> AgendaViewModel resolves IDs via ActivityRepository.getActivityById
-  -> plans grouped by day + notifyListeners
-  -> MonthCalendar (dots) + selected day list
-  -> plan image/title -> onActivitySelected(id) -> MainShell._openActivityDetails
+  -> plans grouped by day + upcomingPlanGroups / pastPlanGroups + notifyListeners
+  -> MonthCalendar (dots; tap day -> AgendaDaySheet modal) + upcoming list + collapsible past list
+  -> plan tap -> onActivitySelected(id) -> MainShell._openActivityDetails
 ```
 
 ## Backend

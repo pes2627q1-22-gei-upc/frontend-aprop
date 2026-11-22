@@ -321,7 +321,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
             context.l10n.settingsReminders,
             context.l10n.settingsRemindersHint,
           ),
-          // TODO(DP-079): Social is one server type; it cannot be split into
+          // TODO(DP-084): Social is one server type; it cannot be split into
           // friend activity and friend requests without a backend contract.
           _preference(
             ProfilePreference.social,

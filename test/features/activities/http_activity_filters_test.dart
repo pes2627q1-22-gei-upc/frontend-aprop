@@ -3,8 +3,8 @@ import 'dart:convert';
 
 import 'package:aprop/core/network/api_client.dart';
 import 'package:aprop/features/activities/data/http_activity_repository.dart';
-import 'package:aprop/features/activities/models/activity_filters.dart';
 import 'package:aprop/features/activities/models/activity.dart';
+import 'package:aprop/features/activities/models/activity_filters.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
@@ -78,6 +78,7 @@ void main() {
       var categoryRequests = 0;
       final requestedIds = <String?>[];
       final repository = HttpActivityRepository(
+        clock: () => DateTime(2026, 9, 26, 9),
         apiClient: ApiClient(
           client: MockClient((request) async {
             if (request.url.path == '/categories') {
@@ -92,10 +93,10 @@ void main() {
           }),
         ),
       );
-      expect(await repository.getFilterCategories(), ['Concerts', 'Musica']);
+      expect(await repository.getFilterCategories(), ['Concerts', 'Música']);
       final filters = ActivityFilters(categories: ['Concerts']);
       final page = await repository.getActivitiesPage(filters: filters);
-      expect(page.items.single.categories, ['Musica', 'Concerts']);
+      expect(page.items.single.categories, ['Música', 'Concerts']);
       expect(filters.applyTo(page.items), hasLength(1));
       await repository.getActivitiesPage(page: 1, filters: filters);
       expect(requestedIds, ['73', '73']);
@@ -165,6 +166,7 @@ void main() {
     () async {
       final requests = <Map<String, String>>[];
       final repository = HttpActivityRepository(
+        clock: () => DateTime(2026, 9, 26, 9),
         apiClient: ApiClient(
           client: MockClient((request) async {
             if (request.url.path == '/categories') {
@@ -243,6 +245,7 @@ void main() {
       var fail = true;
       final requests = <String?>[];
       final repository = HttpActivityRepository(
+        clock: () => DateTime(2026, 9, 26, 9),
         apiClient: ApiClient(
           client: MockClient((request) async {
             if (request.url.path == '/categories') {
@@ -375,4 +378,36 @@ void main() {
     await loading;
     expect(maximum, 4);
   });
+
+  test(
+    'Localized filter labels and Zz sort keys resolve to real server IDs',
+    () async {
+      final requestedIds = <String?>[];
+      final repository = HttpActivityRepository(
+        apiClient: ApiClient(
+          client: MockClient((request) async {
+            if (request.url.path == '/categories') {
+              return json([
+                {'id': 11, 'name': 'agenda:ambits/zz-altres-ambits'},
+                {'id': 22, 'name': 'agenda:ambits/espectacles'},
+              ]);
+            }
+            requestedIds.add(request.url.queryParameters['filterCategory']);
+            return json([]);
+          }),
+        ),
+      );
+
+      expect(await repository.getFilterCategories(), [
+        'Altres àmbits',
+        'Espectacles',
+      ]);
+      await repository.getActivitiesPage(
+        filters: ActivityFilters(
+          categories: ['Other fields', 'Performing arts'],
+        ),
+      );
+      expect(requestedIds, ['11', '22']);
+    },
+  );
 }

@@ -807,8 +807,11 @@
   "interestTestDislike": "No m’interessa",
   "interestTestLoadError": "No hem pogut carregar el test. Torna-ho a provar.",
   "interestTestSaveError": "No hem pogut desar les respostes. Torna-ho a provar.",
-  "interestTestSkip": "Ara no",
+  "interestTestSkip": "Més tard",
   "interestTestContinue": "Continua",
+  "interestTestReadMore": "Llegir més",
+  "interestTestReadLess": "Llegir menys",
+  "interestTestLeaveWithoutSaving": "Sortir sense desar",
   "ratingDeleteTitle": "Eliminar la valoració?",
   "ratingDeleteBody": "La teva valoració s’eliminarà i podràs tornar a valorar l’activitat.",
   "cancel": "Cancel·la",
@@ -866,7 +869,22 @@
   "ratingGone": "La valoració ja no existeix.",
   "agendaLoading": "Carregant la teva agenda",
   "agendaEmptyDay": "No tens cap pla per a aquest dia.",
+  "agendaEmptyAll": "Encara no t’has apuntat a cap pla.",
+  "agendaEmptyUpcoming": "No tens cap pla proper.",
   "agendaEmptyHint": "Apunta’t a activitats des d’Inici i les veuràs aquí.",
+  "agendaDayOfTotal": "Dia {day} de {total}",
+  "@agendaDayOfTotal": {"placeholders": {"day": {"type": "int"}, "total": {"type": "int"}}},
+  "actPastEvent": "Aquesta activitat ja ha passat",
+  "agendaUpcomingTitle": "Propers plans",
+  "agendaPastSection": "Plans passats ({count})",
+  "@agendaPastSection": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "agendaCloseDaySheet": "Tancar els plans del dia",
   "agendaLoadError": "No hem pogut carregar la teva agenda. Torna-ho a provar.",
   "attendanceQuestion": "Com va anar?",
   "attendanceHint": "Digues-nos si hi vas anar. Només qui hi va anar pot valorar l’activitat.",
@@ -1341,6 +1359,10 @@
     }
   },
   "friendOptions": "Opcions d’amistat",
+  "languagePickerTitle": "Tria el teu idioma",
+  "languagePickerSubtitle": "Pots canviar-lo quan vulguis des de la configuració.",
+  "languagePickerContinue": "Continua",
+  "languagePickerSelectedSemantics": "Idioma seleccionat",
   "blockedLoading": "Carregant usuaris bloquejats",
   "blockedLoadError": "No hem pogut carregar els usuaris bloquejats. Torna-ho a provar.",
   "blockedEmptyTitle": "No tens usuaris bloquejats",

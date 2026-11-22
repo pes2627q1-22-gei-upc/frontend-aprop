@@ -304,7 +304,7 @@ void main() {
     expect(requests, ['GET /users/me']);
   });
 
-  test('A successful PATCH that did not persist is rejected by read-back (backend DP-079)', () async {
+  test('A successful PATCH that did not persist is rejected by read-back (backend DP-084)', () async {
     final client = _client(
       (request) async => _json(switch (request.url.path) {
         '/users/me' => backendProfile(),

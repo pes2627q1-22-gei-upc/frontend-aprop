@@ -2113,7 +2113,7 @@ abstract class AppLocalizations {
   /// No description provided for @interestTestSkip.
   ///
   /// In ca, this message translates to:
-  /// **'Ara no'**
+  /// **'Més tard'**
   String get interestTestSkip;
 
   /// No description provided for @interestTestContinue.
@@ -2121,6 +2121,24 @@ abstract class AppLocalizations {
   /// In ca, this message translates to:
   /// **'Continua'**
   String get interestTestContinue;
+
+  /// No description provided for @interestTestReadMore.
+  ///
+  /// In ca, this message translates to:
+  /// **'Llegir més'**
+  String get interestTestReadMore;
+
+  /// No description provided for @interestTestReadLess.
+  ///
+  /// In ca, this message translates to:
+  /// **'Llegir menys'**
+  String get interestTestReadLess;
+
+  /// No description provided for @interestTestLeaveWithoutSaving.
+  ///
+  /// In ca, this message translates to:
+  /// **'Sortir sense desar'**
+  String get interestTestLeaveWithoutSaving;
 
   /// No description provided for @ratingDeleteTitle.
   ///
@@ -2254,11 +2272,53 @@ abstract class AppLocalizations {
   /// **'No tens cap pla per a aquest dia.'**
   String get agendaEmptyDay;
 
+  /// No description provided for @agendaEmptyAll.
+  ///
+  /// In ca, this message translates to:
+  /// **'Encara no t’has apuntat a cap pla.'**
+  String get agendaEmptyAll;
+
+  /// No description provided for @agendaEmptyUpcoming.
+  ///
+  /// In ca, this message translates to:
+  /// **'No tens cap pla proper.'**
+  String get agendaEmptyUpcoming;
+
   /// No description provided for @agendaEmptyHint.
   ///
   /// In ca, this message translates to:
   /// **'Apunta’t a activitats des d’Inici i les veuràs aquí.'**
   String get agendaEmptyHint;
+
+  /// No description provided for @agendaDayOfTotal.
+  ///
+  /// In ca, this message translates to:
+  /// **'Dia {day} de {total}'**
+  String agendaDayOfTotal(int day, int total);
+
+  /// No description provided for @actPastEvent.
+  ///
+  /// In ca, this message translates to:
+  /// **'Aquesta activitat ja ha passat'**
+  String get actPastEvent;
+
+  /// No description provided for @agendaUpcomingTitle.
+  ///
+  /// In ca, this message translates to:
+  /// **'Propers plans'**
+  String get agendaUpcomingTitle;
+
+  /// No description provided for @agendaPastSection.
+  ///
+  /// In ca, this message translates to:
+  /// **'Plans passats ({count})'**
+  String agendaPastSection(int count);
+
+  /// No description provided for @agendaCloseDaySheet.
+  ///
+  /// In ca, this message translates to:
+  /// **'Tancar els plans del dia'**
+  String get agendaCloseDaySheet;
 
   /// No description provided for @agendaLoadError.
   ///
@@ -3885,6 +3945,30 @@ abstract class AppLocalizations {
   /// In ca, this message translates to:
   /// **'Opcions d’amistat'**
   String get friendOptions;
+
+  /// No description provided for @languagePickerTitle.
+  ///
+  /// In ca, this message translates to:
+  /// **'Tria el teu idioma'**
+  String get languagePickerTitle;
+
+  /// No description provided for @languagePickerSubtitle.
+  ///
+  /// In ca, this message translates to:
+  /// **'Pots canviar-lo quan vulguis des de la configuració.'**
+  String get languagePickerSubtitle;
+
+  /// No description provided for @languagePickerContinue.
+  ///
+  /// In ca, this message translates to:
+  /// **'Continua'**
+  String get languagePickerContinue;
+
+  /// No description provided for @languagePickerSelectedSemantics.
+  ///
+  /// In ca, this message translates to:
+  /// **'Idioma seleccionat'**
+  String get languagePickerSelectedSemantics;
 
   /// No description provided for @blockedLoading.
   ///

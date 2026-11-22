@@ -202,7 +202,7 @@ La presentació es manté al cercador existent de `features/activities/`: `Activ
 de #199; la UI no manté booleans de negoci. Un error dels avisos no impedeix editar la privacitat,
 ni a l’inrevés. L’adaptador mapeja IDs de `/notificationtypes` pels noms del protocol, conserva IDs
 desconeguts i valida la lectura de `/users/me/settings` posterior al PATCH parcial. No es confon
-un 200 de `UserProfile` amb la confirmació d’`allowed-notif-types`. Vegeu [la guia](notification-settings.md), DP-079.
+un 200 de `UserProfile` amb la confirmació d’`allowed-notif-types`. Vegeu [la guia](notification-settings.md), DP-084.
 
 **Visibilitat dels plans (#199):** es reutilitzen `ProfileSettingsScreen` i `ProfileSettingsViewModel`
 (els noms de Configuració al projecte), sense afegir pantalles paral·leles. `SettingsPreferenceTile`

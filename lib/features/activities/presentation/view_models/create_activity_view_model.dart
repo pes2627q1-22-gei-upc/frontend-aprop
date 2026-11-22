@@ -1,15 +1,16 @@
 import 'package:flutter/foundation.dart';
 
+import '../../../../core/l10n/date_labels.dart';
+import '../../../../core/l10n/locale_controller.dart';
 import '../../models/activity.dart';
 import '../../models/activity_category.dart';
+import '../../models/activity_category_labels.dart';
 import '../../models/activity_options.dart';
 import '../../models/geo_point.dart';
 import '../../models/new_activity.dart';
 import '../../repositories/activity_category_repository.dart';
 import '../../repositories/activity_repository.dart';
 import '../../repositories/location_repository.dart';
-import '../../../../core/l10n/date_labels.dart';
-import '../../../../core/l10n/locale_controller.dart';
 
 enum CreateActivityField {
   title,
@@ -190,7 +191,8 @@ class CreateActivityViewModel extends ChangeNotifier {
             .where(
               (c) =>
                   c.value == name ||
-                  c.label.toLowerCase() == name.toLowerCase(),
+                  canonicalActivityCategoryKey(c.label) ==
+                      canonicalActivityCategoryKey(name),
             )
             .firstOrNull
             ?.value,

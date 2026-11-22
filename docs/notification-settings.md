@@ -18,7 +18,7 @@ s’inventa. Les preferències afecten la recepció; **els avisos ja rebuts no e
 
 ## Arquitectura i flux
 
-- `ProfileSettings`: privacitat de plans. `NotificationPreferences`: snapshot immutable dels tipus
+- `ProfileSettings`: privacitat de plans i idioma. `NotificationPreferences`: snapshot immutable dels tipus
   configurables i valors confirmats, sense IDs HTTP ni widgets. No hi ha booleans duplicats a la UI.
 - `ProfileSettingsRepository`: contracte de totes dues consultes i escriptures explícites.
 - `ProfileSettingsViewModel`: snapshots, càrregues i errors separats; guard d’escriptura compartit
@@ -41,7 +41,7 @@ refrescar pot reconciliar una escriptura aplicada amb resposta perduda.
 Demo conserva snapshots en memòria per compte. Ni Demo ni les proves HTTP simulen push,
 permisos del dispositiu o la generació real de noves notificacions.
 
-## Pendent concret del backend · DP-079
+## Pendent concret del backend · DP-084
 
 No s’ha modificat el backend. En `api-aprop@4f98835`, `UserRepository.UpdateSettings` retorna
 abans d’actualitzar `AllowedNotifications` quan `settings.Language != ""`. Això impedeix
@@ -77,4 +77,13 @@ Resultat local (2026-11-21): **1041 proves superades**, amb 32 de noves per a #1
 incidències, format de 396 fitxers correcte i APK debug compilada. Revisió independent aprovada
 després de corregir l’error de càrrega residual en un guardat posterior confirmat. Captures de Flutter
 amb Roboto i fixtures revisades a `PES/output/frontend/task-132-{configuracio,desactivats}.png`.
-No s’han fet commit ni push. La correcció del backend i la prova real continuen pendents (DP-079).
+No s’han fet commit ni push. La correcció del backend i la prova real continuen pendents (DP-084).
+
+Resolució de conflictes amb `origin/develop@bfff322` (2026-11-22): es conserven l'idioma inicial,
+la sincronització pendent per compte, les millores d'Agenda, categories, assistent i test d'interessos,
+juntament amb les preferències independents d'avisos. Les còpies de `ProfileSettings` mantenen
+idioma i privacitat; una regressió comprova que els canvis de les tres preferències no se sobreescriuen
+ni afecten altres comptes. La decisió d'aquesta tasca passa de DP-079 a DP-084 per preservar les
+DP-079..083 incorporades per PR #80. **1101 proves superades**, anàlisi sense incidències, format
+de 408 fitxers i APK debug correctes; revisió tècnica independent aprovada. Sense commit ni push
+del merge. CI, revisió humana i prova amb comptes reals pendents.
