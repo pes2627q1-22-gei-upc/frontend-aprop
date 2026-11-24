@@ -26,8 +26,20 @@ class PushViewModel extends ChangeNotifier {
   /// A push arrived with the app open: the system does not show it.
   final ValueChanged<PushMessage> onForeground;
 
+  /// How long signing out may wait for the backend: it can be asleep or
+  /// unreachable, and that must not keep the person signed in.
+  static const signOutWait = Duration(seconds: 5);
+
   final _subscriptions = <StreamSubscription<Object?>>[];
   String? _deviceId;
+
+  /// The last ID of this device, to register it again if signing out fails.
+  String? _lastId;
+
+  /// Calls to the backend, one after the other: a registration still on its
+  /// way must not arrive after the sign out that cancels it.
+  Future<void> _calls = Future.value();
+  bool _signedOut = false;
   bool _started = false;
   bool _permissionDenied = false;
   bool _isDisposed = false;
@@ -42,7 +54,7 @@ class PushViewModel extends ChangeNotifier {
     if (_started || _isDisposed) return;
     _started = true;
     _subscriptions
-      ..add(messaging.onRegistered.listen(_registerDevice))
+      ..add(messaging.onRegistered.listen(_onRegistered))
       ..add(messaging.onForegroundMessage.listen(_whenOpen(onForeground)))
       ..add(messaging.onMessageOpened.listen(_whenOpen(onOpened)));
     try {
@@ -67,9 +79,16 @@ class PushViewModel extends ChangeNotifier {
         if (!_isDisposed) callback(message);
       };
 
-  Future<void> _registerDevice(String id) async {
+  void _onRegistered(String id) {
     if (_isDisposed || id.trim().isEmpty) return;
+    _lastId = id;
+    if (_signedOut) return;
     _deviceId = id;
+    _calls = _calls.then((_) => _registerDevice(id));
+  }
+
+  Future<void> _registerDevice(String id) async {
+    if (_signedOut || _isDisposed) return;
     try {
       await devices.registerDevice(token: id, platform: messaging.platform);
     } catch (error) {
@@ -81,15 +100,34 @@ class PushViewModel extends ChangeNotifier {
   /// Before signing out, while the session can still call the backend, so
   /// the next person to use this phone does not get these pushes.
   Future<void> unregister() async {
+    if (_signedOut) return;
+    _signedOut = true;
     final id = _deviceId;
     _deviceId = null;
     if (id == null) return;
+    _calls = _calls.then((_) => _unregisterDevice(id));
+    try {
+      await _calls.timeout(signOutWait);
+    } on TimeoutException {
+      // The request goes on by itself; if it never arrives, the device moves
+      // to the next account that signs in on it.
+      debugPrint('Signing out without waiting for the push backend.');
+    }
+  }
+
+  Future<void> _unregisterDevice(String id) async {
     try {
       await devices.unregisterDevice(id);
     } catch (error) {
-      // The backend drops the device when FCM rejects it later.
       debugPrint('Could not unregister the device: $error');
     }
+  }
+
+  /// Signing out failed: the person is still here and wants the pushes.
+  void resume() {
+    if (!_signedOut || _isDisposed) return;
+    _signedOut = false;
+    if (_lastId case final id?) _onRegistered(id);
   }
 
   @override

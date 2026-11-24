@@ -327,6 +327,7 @@ class _MainShellState extends State<MainShell> {
 
   /// Inicia les notificacions push (#265) si l'app les té configurades.
   void _startPush() {
+    if (!mounted) return;
     final messaging = widget.pushMessaging;
     final devices = widget.pushDeviceRepository;
     if (messaging == null || devices == null) return;
@@ -358,6 +359,7 @@ class _MainShellState extends State<MainShell> {
       ..showSnackBar(
         SnackBar(
           content: Text(text),
+          persist: false,
           action: SnackBarAction(
             label: currentL10n.pushView,
             onPressed: () => _openPush(message),
@@ -369,8 +371,14 @@ class _MainShellState extends State<MainShell> {
   /// Abans de tancar la sessió (encara amb el token), el mòbil deixa de
   /// rebre els pushes d'aquest compte.
   Future<void> _signOut() async {
-    await _pushViewModel?.unregister();
-    await widget.onSignOut();
+    final push = _pushViewModel;
+    await push?.unregister();
+    try {
+      await widget.onSignOut();
+    } catch (_) {
+      push?.resume();
+      rethrow;
+    }
   }
 
   /// Rating stars for plans the user said they went to («Com va anar?»,

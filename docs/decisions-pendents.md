@@ -875,9 +875,10 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
   - Només Android, on Firebase ja està configurat per al login. iOS no té configuració de Firebase (DP-026) i la web només serveix per desenvolupar (caldria un *service worker* i una clau VAPID).
   - El permís de notificacions es demana en entrar a l’app; si es denega, l’app funciona igual i els avisos continuen a Avisos.
   - Amb l’app tancada o en segon pla, el sistema mostra el push; en tocar-lo s’obre Avisos i, si parla d’una activitat, la seva fitxa. Amb l’app oberta, el sistema no el mostra: surt un avís a baix amb «Veure» i Avisos es torna a carregar.
-  - En tancar la sessió (abans de perdre el token), el mòbil es dona de baixa perquè la propera persona no rebi els pushes del compte anterior.
-  - No hi ha interruptor de push a Configuració: és la zona de la #19 (Adam). El backend ja té `push-enabled` al perfil.
-- **Pendent:** prova de punta a punta en un dispositiu amb el backend desplegat i les credencials de Firebase del servidor (les té configurades Arnau).
+  - En tancar la sessió (abans de perdre el token), el mòbil es dona de baixa perquè la propera persona no rebi els pushes del compte anterior. L’espera màxima és de 5 s (Render pot estar adormit): passat el temps, la sessió es tanca igualment i la petició continua. Si no arriba mai, el backend passa el mòbil al compte següent que hi entri.
+  - No hi ha un interruptor general de push a Configuració (el backend té `push-enabled`). Els tipus d’avís que es reben es trien amb la #132 (DP-084).
+- **Comprovat (2026-11-24):** a l’emulador d’Android amb el backend local i FCM real: registre, push amb l’app oberta, en segon pla i tancada, i obertura de la fitxa en tocar-lo. `register()` necessita `firebase_messaging_installation_id_enabled` a l’`AndroidManifest.xml`; sense això falla i el mòbil no es registra.
+- **Pendent:** prova amb el backend desplegat i en un mòbil real; tancar la sessió i tornar a entrar sense tancar l’app; icona pròpia de la notificació (ara és la de Flutter). Si Android agrupa diversos avisos i es toca el grup, l’app s’obre a Inici: el sistema no diu quin avís era.
 - **Codi:** `TODO(DP-072)` a `firebase_push_messaging.dart` i `main.dart`.
 - **Qui decideix:** equip (paquet, plataformes)
 

@@ -53,7 +53,14 @@ class FakePushMessaging implements PushMessaging {
 class FakePushDevices implements PushDeviceRepository {
   final registered = <String>[];
   final unregistered = <String>[];
+
+  /// Every call in the order the backend finishes it.
+  final log = <String>[];
   Object? registerError;
+
+  /// If set, the backend does not answer until they complete.
+  Completer<void>? registerGate;
+  Completer<void>? unregisterGate;
 
   @override
   Future<void> registerDevice({
@@ -61,9 +68,15 @@ class FakePushDevices implements PushDeviceRepository {
     required String platform,
   }) async {
     if (registerError case final error?) throw error;
+    await registerGate?.future;
     registered.add('$platform:$token');
+    log.add('PUT $token');
   }
 
   @override
-  Future<void> unregisterDevice(String token) async => unregistered.add(token);
+  Future<void> unregisterDevice(String token) async {
+    unregistered.add(token);
+    await unregisterGate?.future;
+    log.add('DELETE $token');
+  }
 }

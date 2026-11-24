@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:aprop/core/network/api_client.dart';
@@ -144,6 +145,41 @@ void main() {
       await model.unregister();
 
       expect(devices.unregistered, ['device-1']);
+    });
+
+    test('A registration on its way does not outlive the sign out', () async {
+      devices.registerGate = Completer<void>();
+      await model.start();
+      await pumpEventQueue();
+
+      final signOut = model.unregister();
+      devices.registerGate!.complete();
+      await signOut;
+
+      expect(devices.log, ['PUT device-1', 'DELETE device-1']);
+    });
+
+    test('An ID that arrives after signing out is not registered', () async {
+      await model.start();
+      await pumpEventQueue();
+      await model.unregister();
+
+      messaging.refresh('device-2');
+      await pumpEventQueue();
+
+      expect(devices.registered, ['android:device-1']);
+    });
+
+    test('If signing out fails, the device is registered again', () async {
+      await model.start();
+      await pumpEventQueue();
+      await model.unregister();
+
+      model.resume();
+      await pumpEventQueue();
+
+      expect(devices.log, ['PUT device-1', 'DELETE device-1', 'PUT device-1']);
+      expect(model.deviceId, 'device-1');
     });
   });
 }

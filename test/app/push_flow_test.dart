@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:aprop/app/aprop_app.dart';
 import 'package:aprop/features/auth/data/demo_auth_repository.dart';
 import 'package:aprop/features/push/models/push_message.dart';
@@ -84,10 +86,37 @@ void main() {
     expect(find.text('Jazz al parc'), findsWidgets);
   });
 
-  testWidgets('En tancar la sessió, el mòbil deixa de rebre pushes', (
+  testWidgets('Un altre push canvia la fitxa que hi havia oberta a Avisos', (
     tester,
   ) async {
     await pumpApp(tester);
+    messaging.open(const PushMessage(activityId: 'demo-jazz'));
+    await tester.pumpAndSettle();
+
+    messaging.open(const PushMessage(type: 'Social'));
+    await tester.pumpAndSettle();
+    expect(find.widgetWithText(AppBar, 'Activitat'), findsNothing);
+
+    messaging.open(const PushMessage(activityId: 'demo-jazz'));
+    await tester.pumpAndSettle();
+    messaging.open(const PushMessage(activityId: 'demo-jazz'));
+    await tester.pumpAndSettle();
+    expect(find.widgetWithText(AppBar, 'Activitat'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('L’avís d’un push amb l’app oberta marxa sol', (tester) async {
+    await pumpApp(tester);
+    messaging.receive(const PushMessage(body: 'Tens un avís.'));
+    await tester.pumpAndSettle();
+    expect(find.text('Tens un avís.'), findsOneWidget);
+
+    await tester.pump(const Duration(seconds: 5));
+    await tester.pumpAndSettle();
+    expect(find.text('Tens un avís.'), findsNothing);
+  });
+
+  Future<void> tapSignOut(WidgetTester tester) async {
     await tester.tap(find.widgetWithText(NavigationDestination, 'Perfil'));
     await tester.pumpAndSettle();
     await tester.tap(find.byTooltip('Configuració'));
@@ -103,9 +132,28 @@ void main() {
     );
     await tester.pumpAndSettle();
     await tester.tap(signOut);
+  }
+
+  testWidgets('En tancar la sessió, el mòbil deixa de rebre pushes', (
+    tester,
+  ) async {
+    await pumpApp(tester);
+    await tapSignOut(tester);
     await tester.pumpAndSettle();
 
     expect(devices.unregistered, ['device-1']);
+    expect(find.text('Inicia sessió'), findsOneWidget);
+  });
+
+  testWidgets('Si el backend no respon, la sessió es tanca igualment', (
+    tester,
+  ) async {
+    devices.unregisterGate = Completer<void>();
+    await pumpApp(tester);
+    await tapSignOut(tester);
+    await tester.pump(const Duration(seconds: 6));
+    await tester.pumpAndSettle();
+
     expect(find.text('Inicia sessió'), findsOneWidget);
   });
 }
