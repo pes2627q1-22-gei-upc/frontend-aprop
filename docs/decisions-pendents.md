@@ -878,7 +878,7 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
   - En tancar la sessió (abans de perdre el token), el mòbil es dona de baixa perquè la propera persona no rebi els pushes del compte anterior. L’espera màxima és de 5 s (Render pot estar adormit): passat el temps, la sessió es tanca igualment i la petició continua. Si no arriba mai, el backend passa el mòbil al compte següent que hi entri.
   - No hi ha un interruptor general de push a Configuració (el backend té `push-enabled`). Els tipus d’avís que es reben es trien amb la #132 (DP-084).
 - **Comprovat (2026-11-24):** a l’emulador d’Android amb el backend local i FCM real: registre, push amb l’app oberta, en segon pla i tancada, i obertura de la fitxa en tocar-lo. `register()` necessita `firebase_messaging_installation_id_enabled` a l’`AndroidManifest.xml`; sense això falla i el mòbil no es registra.
-- **Pendent:** prova amb el backend desplegat i en un mòbil real; tancar la sessió i tornar a entrar sense tancar l’app; icona pròpia de la notificació (ara és la de Flutter). Si Android agrupa diversos avisos i es toca el grup, l’app s’obre a Inici: el sistema no diu quin avís era.
+- **Pendent:** prova amb el backend desplegat i en un mòbil real; tancar la sessió i tornar a entrar sense tancar l’app. Si Android agrupa diversos avisos i es toca el grup, l’app s’obre a Inici: el sistema no diu quin avís era.
 - **Codi:** `TODO(DP-072)` a `firebase_push_messaging.dart` i `main.dart`.
 - **Qui decideix:** equip (paquet, plataformes)
 

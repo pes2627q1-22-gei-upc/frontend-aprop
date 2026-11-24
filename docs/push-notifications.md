@@ -17,7 +17,7 @@ La història no en té a Taiga. Proposta:
 - `PushMessaging` és el servei del mòbil (`FirebasePushMessaging`, amb `firebase_messaging`); `PushDeviceRepository` és el backend (`HttpPushDeviceRepository`).
 - `MainShell` crea `PushViewModel` després del primer frame si l'app té tots dos (només Android i amb backend). El ViewModel registra el mòbil a cada `onRegistered`, informa dels pushes rebuts (`onForeground`) i tocats (`onOpened`) i el dona de baixa abans de tancar la sessió.
 - Amb l'app oberta, `MainShell` mostra el text del push en un avís a baix i fa que Avisos torni a llegir la safata (`NotificationsScreen.reload`).
-- `AndroidManifest.xml` activa `firebase_messaging_installation_id_enabled`: sense això `register()` falla.
+- `AndroidManifest.xml` activa `firebase_messaging_installation_id_enabled`: sense això `register()` falla. També hi ha la icona de la notificació (`ic_notification`, la silueta blanca del mapa) i el seu color. Al panell, Android 16 hi posa la icona de l'app.
 - Les crides de registre i baixa van una darrere l'altra, i tancar la sessió espera la baixa 5 s com a màxim. Si tancar la sessió falla, el mòbil es torna a registrar.
 
 ## Proves
@@ -27,4 +27,4 @@ La història no en té a Taiga. Proposta:
 
 ## Pendent
 
-Comprovat a l'emulador d'Android amb el backend local i FCM (2026-11-24). Falta el backend desplegat, un mòbil real i la icona pròpia de la notificació; iOS i web (DP-072).
+Comprovat a l'emulador d'Android amb el backend local i FCM (2026-11-24). Falta el backend desplegat i un mòbil real; iOS i web (DP-072).
