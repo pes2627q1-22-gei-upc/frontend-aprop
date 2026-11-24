@@ -92,7 +92,10 @@ void main() {
       );
       await saving;
       expect(model.settings!.showMyPlans, isTrue);
-      expect(model.settings!.reminders, isTrue);
+      expect(
+        model.notificationPreferences!.valueOf(ProfilePreference.reminders),
+        isTrue,
+      );
     },
   );
 

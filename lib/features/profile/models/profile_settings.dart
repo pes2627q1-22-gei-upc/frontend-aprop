@@ -1,58 +1,32 @@
 enum ProfilePreference {
   showMyPlans,
   reminders,
-  friendActivity,
+  social,
   recommendations,
-  friendRequests,
+  cancellations,
 }
 
-/// Preferences only: received notifications and enrollments are separate data.
+/// Plan-sharing and language settings; delivery preferences have their own snapshot.
 class ProfileSettings {
-  const ProfileSettings({
-    this.showMyPlans = false,
-    this.reminders = true,
-    this.friendActivity = true,
-    this.recommendations = false,
-    this.friendRequests = true,
-    this.language,
-  });
+  const ProfileSettings({this.showMyPlans = false, this.language});
 
   final bool showMyPlans;
-  final bool reminders;
-  final bool friendActivity;
-  final bool recommendations;
-  final bool friendRequests;
 
   /// Stored account UI language (`ca`, `es` or `en`), or `null` when absent.
   final String? language;
 
   bool valueOf(ProfilePreference preference) => switch (preference) {
     ProfilePreference.showMyPlans => showMyPlans,
-    ProfilePreference.reminders => reminders,
-    ProfilePreference.friendActivity => friendActivity,
-    ProfilePreference.recommendations => recommendations,
-    ProfilePreference.friendRequests => friendRequests,
+    _ => throw ArgumentError('Use the notification preferences snapshot'),
   };
 
   ProfileSettings withPreference(ProfilePreference preference, bool enabled) {
-    bool value(ProfilePreference field) =>
-        field == preference ? enabled : valueOf(field);
-    return ProfileSettings(
-      showMyPlans: value(ProfilePreference.showMyPlans),
-      reminders: value(ProfilePreference.reminders),
-      friendActivity: value(ProfilePreference.friendActivity),
-      recommendations: value(ProfilePreference.recommendations),
-      friendRequests: value(ProfilePreference.friendRequests),
-      language: language,
-    );
+    if (preference != ProfilePreference.showMyPlans) {
+      throw ArgumentError('Use the notification preferences snapshot');
+    }
+    return ProfileSettings(showMyPlans: enabled, language: language);
   }
 
-  ProfileSettings withLanguage(String? language) => ProfileSettings(
-    showMyPlans: showMyPlans,
-    reminders: reminders,
-    friendActivity: friendActivity,
-    recommendations: recommendations,
-    friendRequests: friendRequests,
-    language: language,
-  );
+  ProfileSettings withLanguage(String? language) =>
+      ProfileSettings(showMyPlans: showMyPlans, language: language);
 }

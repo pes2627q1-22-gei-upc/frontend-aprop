@@ -196,6 +196,15 @@ La presentació es manté al cercador existent de `features/activities/`: `Activ
 
 ## Perfil propi i Configuració
 
+**Preferències d’avisos (#132):** `ProfileSettings` representa la privacitat; `NotificationPreferences`
+és un snapshot immutable independent dels avisos rebuts i dels filtres d’Avisos. El mateix contracte
+`ProfileSettingsRepository` consulta i modifica tots dos recursos amb mètodes explícits.
+`ProfileSettingsViewModel` manté càrrega/error separats i reutilitza el guard d’escriptura i el reintent
+de #199; la UI no manté booleans de negoci. Un error dels avisos no impedeix editar la privacitat,
+ni a l’inrevés. L’adaptador mapeja IDs de `/notificationtypes` pels noms del protocol, conserva IDs
+desconeguts i valida la lectura de `/users/me/settings` posterior al PATCH parcial. No es confon
+un 200 de `UserProfile` amb la confirmació d’`allowed-notif-types`. Vegeu [la guia](notification-settings.md), DP-084.
+
 **Visibilitat dels plans (#199):** es reutilitzen `ProfileSettingsScreen` i `ProfileSettingsViewModel`
 (els noms de Configuració al projecte), sense afegir pantalles paral·leles. `SettingsPreferenceTile`
 representa el valor confirmat, progrés textual i error amb reintent. La intenció fallida es guarda al

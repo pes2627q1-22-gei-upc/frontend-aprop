@@ -406,6 +406,30 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsGroupNotifications => 'NOTIFICATIONS';
 
   @override
+  String get settingsNotificationsHint =>
+      'Choose which alerts to receive. Alerts already received stay in your inbox.';
+
+  @override
+  String get settingsNotificationsLoading => 'Loading alert preferences…';
+
+  @override
+  String get settingsNotificationsLoadError =>
+      'We couldn’t load your alert preferences. Try again.';
+
+  @override
+  String get settingsSocial => 'Social alerts';
+
+  @override
+  String get settingsSocialHint => 'Friend requests and your friends’ activity';
+
+  @override
+  String get settingsCancellations => 'Cancellations';
+
+  @override
+  String get settingsCancellationsHint =>
+      'When a plan in your agenda is cancelled';
+
+  @override
   String get settingsReminders => 'Reminders';
 
   @override
