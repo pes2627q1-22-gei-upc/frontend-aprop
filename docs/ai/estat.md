@@ -14,6 +14,7 @@
 | #199 | [FE] Switch «Mostrar els meus plans» + ViewModel + tests (història #55) | `feature/show-my-plans-199` | Integrada a develop amb PR #78 (`dcecb75`); DP-078 oberta |
 | #179 | [FE] Bloqueig al perfil + BlockedUsersScreen a Configuració + tests (història #45) | `feature/block-users-179` | Integrada a develop amb PR #77 (`d11d342`); DP-077 oberta |
 | #212 i #266 | Arreglos generals de la prova a l’emulador: «Com va anar?» no pregunta abans d’hora i en mostra tres; zoom del mapa amb GPS lent; «00.00 h» als avisos; ajuda del diàleg d’eliminar; icona «Cerca persones» al Perfil | `fix/com-va-anar` (inclou `feature/mapa-zoom-ubicacio`) | Integrada a develop amb PR #76 (`ee9e34f`); DP-068 i DP-074 actualitzades |
+| #282 | [FE] Icona de l’app, pantalla de càrrega i icona de les notificacions amb el logotip d’AProp! (història #281) | `feature/icona-app` (la de les notificacions, a `feature/notificacions-push`) | Implementada; provada a Android; iOS sense provar; pendent revisió humana |
 | #266 | Mapa: zoom de 5 km a la persona en obrir-lo i límit d’allunyament | `feature/mapa-zoom-ubicacio` | Commit `d2357d1`; integrada a develop amb PR #76 |
 | #195 | [FE] Eliminar amistat a la llista i perfil amb confirmació + tests (història #53) | `feature/remove-friend-195` | Integrada a develop amb PR #75 (`a5ed55f`); DP-076 oberta |
 | #183 | [FE] Targeta d’avís de cancel·lació a `NotificationsScreen` + tests (història #47) | `feature/avis-cancel-lacio` | Integrada a develop amb PR #74; DP-071 oberta |
