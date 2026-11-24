@@ -83,9 +83,13 @@ class AttendanceViewModel extends ChangeNotifier {
       if (_isDisposed) return false;
       _answers[activityId] = attended;
       return true;
-    } catch (_) {
+    } catch (error) {
       if (_isDisposed) return false;
-      _errors[activityId] = currentL10n.attendanceSaveError;
+      _errors[activityId] = switch (error) {
+        AttendanceFailure.notStarted => currentL10n.attendanceNotStarted,
+        AttendanceFailure.notEnrolled => currentL10n.attendanceNotEnrolled,
+        _ => currentL10n.attendanceSaveError,
+      };
       return false;
     } finally {
       if (!_isDisposed) {

@@ -7,6 +7,8 @@ import '../../repositories/friendship_repository.dart';
 import '../view_models/public_profile_view_model.dart';
 import '../widgets/profile_activity_tile.dart';
 import '../widgets/profile_header.dart';
+import '../widgets/friend_removal_action.dart';
+import '../widgets/user_block_confirmation.dart';
 
 /// Another person's profile (#277). Opened from an activity's creator or a
 /// notice; MainShell pushes it on the current section's navigator.
@@ -39,18 +41,93 @@ class PublicProfileScreen extends StatefulWidget {
 }
 
 class _PublicProfileScreenState extends State<PublicProfileScreen> {
-  late final PublicProfileViewModel _viewModel;
+  late PublicProfileViewModel _viewModel;
   int? _chosenTab;
+  bool _confirmationOpen = false;
+
+  Future<void> _setBlocked(bool block) async {
+    final model = _viewModel;
+    final name = model.profile?.profile.displayName;
+    if (_confirmationOpen ||
+        !model.canManageBlocks ||
+        name == null ||
+        !(ModalRoute.of(context)?.isCurrent ?? true)) {
+      return;
+    }
+    _confirmationOpen = true;
+    final confirm = await confirmUserBlock(context, name: name, block: block);
+    if (!mounted || !identical(model, _viewModel)) return;
+    _confirmationOpen = false;
+    if (!confirm) return;
+    final success = await model.setBlocked(block);
+    if (!mounted ||
+        !identical(model, _viewModel) ||
+        !success ||
+        !(ModalRoute.of(context)?.isCurrent ?? true)) {
+      return;
+    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          block
+              ? context.l10n.userBlockSuccess(name)
+              : context.l10n.userUnblockSuccess(name),
+        ),
+      ),
+    );
+  }
+
+  PublicProfileViewModel _createModel() => PublicProfileViewModel(
+    userId: widget.userId,
+    repository: widget.repository,
+    friendshipRepository: widget.friendshipRepository,
+    currentUserId: widget.currentUserId,
+  )..load();
 
   @override
   void initState() {
     super.initState();
-    _viewModel = PublicProfileViewModel(
-      userId: widget.userId,
-      repository: widget.repository,
-      friendshipRepository: widget.friendshipRepository,
-      currentUserId: widget.currentUserId,
-    )..load();
+    _viewModel = _createModel();
+  }
+
+  @override
+  void didUpdateWidget(covariant PublicProfileScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.userId != widget.userId ||
+        oldWidget.repository != widget.repository ||
+        oldWidget.friendshipRepository != widget.friendshipRepository ||
+        oldWidget.currentUserId != widget.currentUserId) {
+      _viewModel.dispose();
+      _viewModel = _createModel();
+      _chosenTab = null;
+      _confirmationOpen = false;
+    }
+  }
+
+  Future<void> _removeFriend() async {
+    final model = _viewModel;
+    final name = model.profile?.profile.displayName;
+    if (_confirmationOpen ||
+        !model.canRemoveFriend ||
+        name == null ||
+        !(ModalRoute.of(context)?.isCurrent ?? true)) {
+      return;
+    }
+    _confirmationOpen = true;
+    final confirmed = await confirmFriendRemoval(context, name);
+    if (!mounted || !identical(model, _viewModel)) return;
+    _confirmationOpen = false;
+    if (!confirmed) return;
+    final removed = await model.removeFriend();
+    if (!mounted ||
+        !identical(model, _viewModel) ||
+        !removed ||
+        !(ModalRoute.of(context)?.isCurrent ?? true)) {
+      return;
+    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(context.l10n.friendRemoveSuccess(name))),
+    );
   }
 
   @override
@@ -84,6 +161,64 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
             style: Theme.of(context).textTheme.titleLarge
                 ?.copyWith(fontWeight: FontWeight.bold),
           ),
+          // TODO(DP-076): friendship management lives in the other person's
+          // profile; the own profile opens its editable friends list.
+          // TODO(DP-077): block and unblock share this relationship menu.
+          actions: [
+            if (model.isRemovingFriend || model.isManagingBlock)
+              Padding(
+                padding: const EdgeInsets.all(12),
+                child: SizedBox.square(
+                  dimension: 24,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    semanticsLabel: model.isManagingBlock
+                        ? (model.isBlocking
+                              ? context.l10n.userBlocking
+                              : context.l10n.userUnblocking)
+                        : context.l10n.friendRemoving,
+                  ),
+                ),
+              )
+            else if (model.canRemoveFriend || model.canManageBlocks)
+              PopupMenuButton<String>(
+                key: const ValueKey('public-profile-friend-options'),
+                tooltip: context.l10n.friendOptions,
+                onSelected: (action) {
+                  if (action == 'remove') {
+                    _removeFriend();
+                  } else {
+                    _setBlocked(action == 'block');
+                  }
+                },
+                itemBuilder: (context) => [
+                  if (model.canRemoveFriend)
+                    PopupMenuItem(
+                      value: 'remove',
+                      child: Text(
+                        context.l10n.friendRemove,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.error,
+                        ),
+                      ),
+                    ),
+                  if (model.canManageBlocks)
+                    PopupMenuItem(
+                      value: model.isUserBlocked ? 'unblock' : 'block',
+                      child: Text(
+                        model.isUserBlocked
+                            ? context.l10n.userUnblock
+                            : context.l10n.userBlock,
+                        style: model.isUserBlocked
+                            ? null
+                            : TextStyle(
+                                color: Theme.of(context).colorScheme.error,
+                              ),
+                      ),
+                    ),
+                ],
+              ),
+          ],
         ),
         body: RefreshIndicator(
           onRefresh: model.load,
@@ -137,7 +272,7 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
                         null || FriendshipAction.unavailable => null,
                         final action => _FriendButton(
                           action: action,
-                          enabled: !model.isLoading,
+                          enabled: !model.isLoading && !model.isManagingBlock,
                           onPressed: model.performFriendAction,
                         ),
                       },
@@ -163,6 +298,37 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
                     ),
                   ),
                 ),
+                if (model.isUserBlocked || model.blockError != null)
+                  SliverPadding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                    sliver: SliverToBoxAdapter(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Semantics(
+                            liveRegion: true,
+                            child: Text(
+                              model.blockError ?? context.l10n.userBlockedState,
+                              style: model.blockError == null
+                                  ? null
+                                  : TextStyle(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .error,
+                                    ),
+                            ),
+                          ),
+                          if (model.blockError != null)
+                            TextButton(
+                              onPressed: model.isManagingBlock
+                                  ? null
+                                  : model.load,
+                              child: Text(context.l10n.retry),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
                 if (model.friendRequestFeedback case final message?)
                   SliverPadding(
                     padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
@@ -171,7 +337,8 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
                     ),
                   ),
                 if (model.friendRequestError ??
-                        (model.friendship == FriendshipAction.unavailable
+                        (model.friendship == FriendshipAction.unavailable &&
+                                !model.isUserBlocked
                             ? context.l10n.friendRequestBlocked
                             : null)
                     case final message?)

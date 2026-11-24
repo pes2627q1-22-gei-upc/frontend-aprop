@@ -2,6 +2,7 @@
   "@@locale": "es",
   "appTitle": "AProp!",
   "profileTitleFallback": "Perfil",
+  "profileFindPeople": "Buscar personas",
   "profilePeopleSearchSoon": "Búsqueda de personas disponible próximamente",
   "settingsTooltip": "Configuración",
   "profileLoading": "Cargando el perfil",
@@ -110,6 +111,8 @@
   "settingsDarkThemeSoon": "Tema oscuro disponible próximamente",
   "settingsGroupPrivacy": "PRIVACIDAD",
   "settingsShowMyPlans": "Mostrar mis planes",
+  "settingsPlansShared": "Compartir con amigos activado",
+  "settingsPlansPrivate": "Compartir con amigos desactivado",
   "settingsShowMyPlansHint": "Tus amigos ven a qué te apuntas",
   "settingsBlockedUsers": "Usuarios bloqueados",
   "settingsGroupNotifications": "NOTIFICACIONES",
@@ -129,6 +132,14 @@
   "settingsSigningOut": "Cerrando sesión…",
   "settingsSignOut": "Cerrar sesión",
   "settingsDeleteAccount": "Eliminar cuenta",
+  "settingsDeleteAccountHint": "Escríbelo aquí",
+  "settingsDeletingAccount": "Eliminando la cuenta…",
+  "settingsDeleteAccountTitle": "¿Quieres eliminar la cuenta?",
+  "settingsDeleteAccountBody": "Se borrarán tu perfil, la foto, los planes, las actividades que has creado, las valoraciones, los amigos y los avisos, y también la cuenta para iniciar sesión. No se puede deshacer.",
+  "settingsDeleteAccountTypeWord": "Para confirmarlo, escribe {word}:",
+  "settingsDeleteAccountWord": "ELIMINAR",
+  "settingsDeleteAccountConfirm": "Eliminar la cuenta",
+  "settingsDeleteAccountError": "No hemos podido eliminar la cuenta. Vuelve a intentarlo.",
   "settingsLoadError": "No hemos podido cargar la configuración. Vuelve a intentarlo.",
   "settingsSaveError": "No hemos podido guardar el cambio. Vuelve a intentarlo.",
   "settingsSignOutError": "No hemos podido cerrar la sesión. Vuelve a intentarlo.",
@@ -266,6 +277,8 @@
   "notifMessageSocialPerson": "Tienes un aviso social relacionado con {name}.",
   "notifMessageSocial": "Tienes un nuevo aviso social.",
   "notifMessageOther": "Tienes un nuevo aviso.",
+  "notifMessageCancelledFor": "Se ha cancelado «{title}».",
+  "notifMessageCancelled": "Se ha cancelado una actividad a la que te habías apuntado.",
   "pushView": "Ver",
   "notifMessagePublished": "{name} ha publicado “{title}”.",
   "notifMessageEnrolled": "{name} se ha apuntado a “{title}”.",
@@ -311,6 +324,14 @@
       }
     }
   },
+  "notifViewFriendProfile": "Ver el perfil de {name}",
+  "@notifViewFriendProfile": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "notifAccept": "Aceptar",
   "notifDecline": "Rechazar",
   "notifRequestAccepted": "Solicitud aceptada",
@@ -329,6 +350,11 @@
   "interestTestDislike": "No me interesa",
   "interestTestLoadError": "No hemos podido cargar el test. Vuelve a intentarlo.",
   "interestTestSaveError": "No hemos podido guardar las respuestas. Vuelve a intentarlo.",
+  "interestTestSkip": "Más tarde",
+  "interestTestContinue": "Continuar",
+  "interestTestReadMore": "Leer más",
+  "interestTestReadLess": "Leer menos",
+  "interestTestLeaveWithoutSaving": "Salir sin guardar",
   "ratingDeleteTitle": "¿Eliminar la valoración?",
   "ratingDeleteBody": "Tu valoración se eliminará y podrás volver a valorar la actividad.",
   "cancel": "Cancelar",
@@ -351,7 +377,14 @@
   "ratingGone": "La valoración ya no existe.",
   "agendaLoading": "Cargando tu agenda",
   "agendaEmptyDay": "No tienes ningún plan para este día.",
+  "agendaEmptyAll": "Todavía no te has apuntado a ningún plan.",
+  "agendaEmptyUpcoming": "No tienes ningún plan próximo.",
   "agendaEmptyHint": "Apúntate a actividades desde Inicio y las verás aquí.",
+  "agendaDayOfTotal": "Día {day} de {total}",
+  "actPastEvent": "Esta actividad ya ha pasado",
+  "agendaUpcomingTitle": "Próximos planes",
+  "agendaPastSection": "Planes pasados ({count})",
+  "agendaCloseDaySheet": "Cerrar los planes del día",
   "agendaLoadError": "No hemos podido cargar tu agenda. Vuelve a intentarlo.",
   "attendanceQuestion": "¿Qué tal fue?",
   "attendanceHint": "Dinos si fuiste. Solo quien fue puede valorar la actividad.",
@@ -359,6 +392,12 @@
   "attendanceNo": "No fui",
   "attendanceLater": "Más tarde",
   "attendanceSaveError": "No hemos podido guardar la respuesta. Vuelve a intentarlo.",
+  "attendanceShowMore": "Ver {count} más",
+  "attendanceShowLess": "Ver menos",
+  "attendanceThanksYes": "¡Gracias! Ya puedes valorar «{title}».",
+  "attendanceThanksNo": "De acuerdo, no te lo volveremos a preguntar.",
+  "attendanceNotStarted": "Esta actividad todavía no ha empezado.",
+  "attendanceNotEnrolled": "Ya no estás apuntado.",
   "agendaPublishedBy": "Publicado por {name}",
   "agendaSourceOfficial": "Fuente: Agenda Cultural · Generalitat",
   "agendaPreviousMonth": "Mes anterior",
@@ -608,5 +647,91 @@
   "userSearchLoaded": "{count, plural, =1{1 persona cargada} other{{count} personas cargadas}}",
   "userSearchLoadMore": "Cargar más personas",
   "userSearchMoreError": "No hemos podido cargar más personas. Vuelve a intentarlo.",
-  "userSearchTooLong": "La búsqueda puede tener como máximo {limit} caracteres."
+  "userSearchTooLong": "La búsqueda puede tener como máximo {limit} caracteres.",
+  "friendRemove": "Eliminar amistad",
+  "friendRemoveTitle": "¿Eliminar esta amistad?",
+  "friendRemoveMessage": "¿Quieres eliminar la amistad con {name}?",
+  "@friendRemoveMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "friendRemoveSuccess": "Has eliminado la amistad con {name}.",
+  "@friendRemoveSuccess": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "friendRemoveError": "No hemos podido eliminar la amistad. Vuelve a intentarlo.",
+  "friendRemoving": "Eliminando la amistad",
+  "friendRemoveFrom": "Eliminar la amistad con {name}",
+  "@friendRemoveFrom": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "friendOptions": "Opciones de amistad",
+  "languagePickerTitle": "Elige tu idioma",
+  "languagePickerSubtitle": "Puedes cambiarlo cuando quieras desde la configuración.",
+  "languagePickerContinue": "Continuar",
+  "languagePickerSelectedSemantics": "Idioma seleccionado",
+  "blockedLoading": "Cargando usuarios bloqueados",
+  "blockedLoadError": "No hemos podido cargar los usuarios bloqueados. Vuelve a intentarlo.",
+  "blockedEmptyTitle": "No tienes usuarios bloqueados",
+  "blockedEmptyMessage": "Los usuarios que bloquees aparecerán aquí.",
+  "userBlock": "Bloquear",
+  "userUnblock": "Desbloquear",
+  "userBlocking": "Bloqueando al usuario",
+  "userUnblocking": "Desbloqueando al usuario",
+  "userBlockTitle": "¿Bloquear a {name}?",
+  "@userBlockTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "userUnblockTitle": "¿Desbloquear a {name}?",
+  "@userUnblockTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "userBlockMessage": "No podréis enviaros solicitudes de amistad. Si ya sois amigos, se eliminará la amistad.",
+  "userUnblockMessage": "Desbloquear no recupera la amistad anterior.",
+  "userBlockError": "No hemos podido bloquear al usuario. Vuelve a intentarlo.",
+  "userUnblockError": "No hemos podido desbloquear al usuario. Vuelve a intentarlo.",
+  "userBlockSuccess": "Has bloqueado a {name}.",
+  "@userBlockSuccess": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "userUnblockSuccess": "Has desbloqueado a {name}.",
+  "@userUnblockSuccess": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "userUnblockFrom": "Desbloquear a {name}",
+  "@userUnblockFrom": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "userBlockedState": "Has bloqueado a este usuario."
 }

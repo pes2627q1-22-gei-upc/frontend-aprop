@@ -9,11 +9,14 @@ import 'core/l10n/locale_controller.dart';
 import 'core/network/api_client.dart';
 import 'features/activities/data/geolocator_user_location_repository.dart';
 import 'features/activities/data/http_activity_map_repository.dart';
-import 'features/activity_chat/data/http_activity_chat_repository.dart';
 import 'features/activities/data/http_activity_repository.dart';
 import 'features/activities/data/http_discovery_repository.dart';
 import 'features/activities/data/http_enrollment_repository.dart';
+import 'features/activity_chat/data/http_activity_chat_repository.dart';
 import 'features/assistant/data/http_assistant_repository.dart';
+import 'features/attendance/data/http_attendance_repository.dart';
+import 'features/attendance/data/remembered_attendance_repository.dart';
+import 'features/attendance/data/shared_preferences_attendance_memory.dart';
 import 'features/auth/data/demo_auth_repository.dart';
 import 'features/auth/data/demo_user_sync_repository.dart';
 import 'features/auth/data/firebase_auth_repository.dart';
@@ -21,18 +24,16 @@ import 'features/auth/data/http_user_sync_repository.dart';
 import 'features/auth/repositories/auth_repository.dart';
 import 'features/auth/repositories/user_sync_repository.dart';
 import 'features/interest_test/data/http_interest_test_repository.dart';
+import 'features/interest_test/data/shared_preferences_interest_test_onboarding_memory.dart';
 import 'features/notifications/data/http_notification_repository.dart';
-import 'features/profile/data/http_profile_repository.dart';
-import 'features/profile/data/http_friendship_repository.dart';
-import 'features/attendance/data/http_attendance_repository.dart';
-import 'features/attendance/data/remembered_attendance_repository.dart';
-import 'features/attendance/data/shared_preferences_attendance_memory.dart';
 import 'features/profile/data/http_friends_repository.dart';
-import 'features/push/data/firebase_push_messaging.dart';
-import 'features/push/data/http_push_device_repository.dart';
-import 'features/profile/data/http_user_search_repository.dart';
+import 'features/profile/data/http_friendship_repository.dart';
+import 'features/profile/data/http_profile_repository.dart';
 import 'features/profile/data/http_profile_settings_repository.dart';
 import 'features/profile/data/http_public_profile_repository.dart';
+import 'features/profile/data/http_user_search_repository.dart';
+import 'features/push/data/firebase_push_messaging.dart';
+import 'features/push/data/http_push_device_repository.dart';
 import 'features/ratings/data/http_rating_repository.dart';
 import 'firebase_options.dart';
 
@@ -49,6 +50,10 @@ Future<APropApp> createConfiguredApp() async {
   const userLocationRepository = GeolocatorUserLocationRepository();
   final localeController = LocaleController();
   await localeController.load();
+  // Existing installs have no stored language: don't ask a signed-in user.
+  if (Firebase.apps.isNotEmpty && FirebaseAuth.instance.currentUser != null) {
+    localeController.skipInitialSelection();
+  }
 
   if (!ApiConfig.isConfigured) {
     return APropApp(
@@ -100,6 +105,8 @@ Future<APropApp> createConfiguredApp() async {
       apiClient: apiClient,
     ),
     interestTestRepository: HttpInterestTestRepository(apiClient: apiClient),
+    interestTestOnboardingMemory:
+        const SharedPreferencesInterestTestOnboardingMemory(),
     userLocationRepository: userLocationRepository,
     ratingRepository: HttpRatingRepository(apiClient: apiClient),
     activityChatRepository: HttpActivityChatRepository(apiClient: apiClient),

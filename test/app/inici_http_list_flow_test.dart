@@ -34,6 +34,7 @@ void main() {
       addTearDown(tester.view.resetDevicePixelRatio);
       final queries = <Map<String, String>>[];
       final repository = HttpActivityRepository(
+        clock: () => DateTime(2026, 9, 26, 9),
         apiClient: ApiClient(
           client: MockClient((request) async {
             Object body;
@@ -120,6 +121,7 @@ void main() {
       final pages = <String?>[];
       final model = ActivitiesViewModel(
         repository: HttpActivityRepository(
+          clock: () => DateTime(2026, 9, 26, 9),
           apiClient: ApiClient(
             client: MockClient((request) async {
               final page = request.url.queryParameters['pageNum'];

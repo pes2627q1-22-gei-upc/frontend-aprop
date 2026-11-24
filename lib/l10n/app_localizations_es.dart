@@ -16,6 +16,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get profileTitleFallback => 'Perfil';
 
   @override
+  String get profileFindPeople => 'Buscar personas';
+
+  @override
   String get profilePeopleSearchSoon =>
       'Búsqueda de personas disponible próximamente';
 
@@ -398,6 +401,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String get settingsShowMyPlansHint => 'Tus amigos ven a qué te apuntas';
 
   @override
+  String get settingsPlansShared => 'Compartir con amigos activado';
+
+  @override
+  String get settingsPlansPrivate => 'Compartir con amigos desactivado';
+
+  @override
   String get settingsBlockedUsers => 'Usuarios bloqueados';
 
   @override
@@ -455,6 +464,34 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get settingsDeleteAccount => 'Eliminar cuenta';
+
+  @override
+  String get settingsDeleteAccountHint => 'Escríbelo aquí';
+
+  @override
+  String get settingsDeletingAccount => 'Eliminando la cuenta…';
+
+  @override
+  String get settingsDeleteAccountTitle => '¿Quieres eliminar la cuenta?';
+
+  @override
+  String get settingsDeleteAccountBody =>
+      'Se borrarán tu perfil, la foto, los planes, las actividades que has creado, las valoraciones, los amigos y los avisos, y también la cuenta para iniciar sesión. No se puede deshacer.';
+
+  @override
+  String settingsDeleteAccountTypeWord(String word) {
+    return 'Para confirmarlo, escribe $word:';
+  }
+
+  @override
+  String get settingsDeleteAccountWord => 'ELIMINAR';
+
+  @override
+  String get settingsDeleteAccountConfirm => 'Eliminar la cuenta';
+
+  @override
+  String get settingsDeleteAccountError =>
+      'No hemos podido eliminar la cuenta. Vuelve a intentarlo.';
 
   @override
   String get settingsLoadError =>
@@ -1003,6 +1040,15 @@ class AppLocalizationsEs extends AppLocalizations {
   String get notifMessageOther => 'Tienes un nuevo aviso.';
 
   @override
+  String notifMessageCancelledFor(String title) {
+    return 'Se ha cancelado «$title».';
+  }
+
+  @override
+  String get notifMessageCancelled =>
+      'Se ha cancelado una actividad a la que te habías apuntado.';
+
+  @override
   String get pushView => 'Ver';
 
   @override
@@ -1119,6 +1165,11 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String notifViewFriendProfile(String name) {
+    return 'Ver el perfil de $name';
+  }
+
+  @override
   String get notifAccept => 'Aceptar';
 
   @override
@@ -1178,6 +1229,21 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get interestTestSaveError =>
       'No hemos podido guardar las respuestas. Vuelve a intentarlo.';
+
+  @override
+  String get interestTestSkip => 'Más tarde';
+
+  @override
+  String get interestTestContinue => 'Continuar';
+
+  @override
+  String get interestTestReadMore => 'Leer más';
+
+  @override
+  String get interestTestReadLess => 'Leer menos';
+
+  @override
+  String get interestTestLeaveWithoutSaving => 'Salir sin guardar';
 
   @override
   String get ratingDeleteTitle => '¿Eliminar la valoración?';
@@ -1266,8 +1332,33 @@ class AppLocalizationsEs extends AppLocalizations {
   String get agendaEmptyDay => 'No tienes ningún plan para este día.';
 
   @override
+  String get agendaEmptyAll => 'Todavía no te has apuntado a ningún plan.';
+
+  @override
+  String get agendaEmptyUpcoming => 'No tienes ningún plan próximo.';
+
+  @override
   String get agendaEmptyHint =>
       'Apúntate a actividades desde Inicio y las verás aquí.';
+
+  @override
+  String agendaDayOfTotal(int day, int total) {
+    return 'Día $day de $total';
+  }
+
+  @override
+  String get actPastEvent => 'Esta actividad ya ha pasado';
+
+  @override
+  String get agendaUpcomingTitle => 'Próximos planes';
+
+  @override
+  String agendaPastSection(int count) {
+    return 'Planes pasados ($count)';
+  }
+
+  @override
+  String get agendaCloseDaySheet => 'Cerrar los planes del día';
 
   @override
   String get agendaLoadError =>
@@ -1292,6 +1383,29 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get attendanceSaveError =>
       'No hemos podido guardar la respuesta. Vuelve a intentarlo.';
+
+  @override
+  String attendanceShowMore(int count) {
+    return 'Ver $count más';
+  }
+
+  @override
+  String get attendanceShowLess => 'Ver menos';
+
+  @override
+  String attendanceThanksYes(String title) {
+    return '¡Gracias! Ya puedes valorar «$title».';
+  }
+
+  @override
+  String get attendanceThanksNo =>
+      'De acuerdo, no te lo volveremos a preguntar.';
+
+  @override
+  String get attendanceNotStarted => 'Esta actividad todavía no ha empezado.';
+
+  @override
+  String get attendanceNotEnrolled => 'Ya no estás apuntado.';
 
   @override
   String agendaPublishedBy(String name) {
@@ -2191,4 +2305,118 @@ class AppLocalizationsEs extends AppLocalizations {
   String userSearchTooLong(int limit) {
     return 'La búsqueda puede tener como máximo $limit caracteres.';
   }
+
+  @override
+  String get friendRemove => 'Eliminar amistad';
+
+  @override
+  String get friendRemoveTitle => '¿Eliminar esta amistad?';
+
+  @override
+  String friendRemoveMessage(String name) {
+    return '¿Quieres eliminar la amistad con $name?';
+  }
+
+  @override
+  String friendRemoveSuccess(String name) {
+    return 'Has eliminado la amistad con $name.';
+  }
+
+  @override
+  String get friendRemoveError =>
+      'No hemos podido eliminar la amistad. Vuelve a intentarlo.';
+
+  @override
+  String get friendRemoving => 'Eliminando la amistad';
+
+  @override
+  String friendRemoveFrom(String name) {
+    return 'Eliminar la amistad con $name';
+  }
+
+  @override
+  String get friendOptions => 'Opciones de amistad';
+
+  @override
+  String get languagePickerTitle => 'Elige tu idioma';
+
+  @override
+  String get languagePickerSubtitle =>
+      'Puedes cambiarlo cuando quieras desde la configuración.';
+
+  @override
+  String get languagePickerContinue => 'Continuar';
+
+  @override
+  String get languagePickerSelectedSemantics => 'Idioma seleccionado';
+
+  @override
+  String get blockedLoading => 'Cargando usuarios bloqueados';
+
+  @override
+  String get blockedLoadError =>
+      'No hemos podido cargar los usuarios bloqueados. Vuelve a intentarlo.';
+
+  @override
+  String get blockedEmptyTitle => 'No tienes usuarios bloqueados';
+
+  @override
+  String get blockedEmptyMessage =>
+      'Los usuarios que bloquees aparecerán aquí.';
+
+  @override
+  String get userBlock => 'Bloquear';
+
+  @override
+  String get userUnblock => 'Desbloquear';
+
+  @override
+  String get userBlocking => 'Bloqueando al usuario';
+
+  @override
+  String get userUnblocking => 'Desbloqueando al usuario';
+
+  @override
+  String userBlockTitle(String name) {
+    return '¿Bloquear a $name?';
+  }
+
+  @override
+  String userUnblockTitle(String name) {
+    return '¿Desbloquear a $name?';
+  }
+
+  @override
+  String get userBlockMessage =>
+      'No podréis enviaros solicitudes de amistad. Si ya sois amigos, se eliminará la amistad.';
+
+  @override
+  String get userUnblockMessage =>
+      'Desbloquear no recupera la amistad anterior.';
+
+  @override
+  String get userBlockError =>
+      'No hemos podido bloquear al usuario. Vuelve a intentarlo.';
+
+  @override
+  String get userUnblockError =>
+      'No hemos podido desbloquear al usuario. Vuelve a intentarlo.';
+
+  @override
+  String userBlockSuccess(String name) {
+    return 'Has bloqueado a $name.';
+  }
+
+  @override
+  String userUnblockSuccess(String name) {
+    return 'Has desbloqueado a $name.';
+  }
+
+  @override
+  String userUnblockFrom(String name) {
+    return 'Desbloquear a $name';
+  }
+
+  @override
+  String get userBlockedState => 'Has bloqueado a este usuario.';
 }

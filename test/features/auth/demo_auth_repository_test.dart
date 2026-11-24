@@ -134,4 +134,22 @@ void main() {
       throwsA(AuthFailure.usernameAlreadyInUse),
     );
   });
+
+  test(
+    'Eliminar el compte tanca la sessió i no s’hi pot tornar a entrar',
+    () async {
+      await repository.signIn(
+        usernameOrEmail: 'laiasoler',
+        password: 'Aprop2026!',
+      );
+
+      await repository.deleteAccount();
+
+      expect(await repository.authStateChanges().first, isNull);
+      expect(
+        repository.signIn(usernameOrEmail: 'laiasoler', password: 'Aprop2026!'),
+        throwsA(AuthFailure.invalidCredentials),
+      );
+    },
+  );
 }

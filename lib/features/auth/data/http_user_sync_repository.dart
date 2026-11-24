@@ -55,7 +55,10 @@ class HttpUserSyncRepository implements UserSyncRepository {
     }
 
     return switch (response.statusCode) {
-      200 || 201 => _userFrom((_decode(response) as Map)['user'] as Map),
+      200 || 201 => _userFrom(
+        (_decode(response) as Map)['user'] as Map,
+        created: response.statusCode == 201,
+      ),
       409 => throw AuthFailure.usernameAlreadyInUse,
       // Sense nom d'usuari, el backend no pot crear l'usuari: encara no
       // existeix i cal que en triï un.
@@ -105,12 +108,76 @@ class HttpUserSyncRepository implements UserSyncRepository {
     return _userFrom(_decode(response) as Map);
   }
 
-  UserProfile _userFrom(Map user) {
+  /// `PATCH /users/me` amb l'idioma inicial (`ca`, `es` o `en`).
+  @override
+  Future<void> updateLanguage(String language) async {
+    final token = await _idToken();
+    if (token == null) throw StateError('No hi ha cap sessió iniciada.');
+
+    final http.Response response;
+    try {
+      response = await _client
+          .patch(
+            _endpoint('users/me'),
+            headers: {
+              'Accept': 'application/json',
+              'Authorization': 'Bearer $token',
+              'Content-Type': 'application/json',
+            },
+            body: jsonEncode({'language': language}),
+          )
+          .timeout(timeout);
+    } on http.ClientException {
+      throw AuthFailure.network;
+    } on TimeoutException {
+      throw AuthFailure.network;
+    }
+
+    if (response.statusCode != 200) {
+      throw StateError(
+        'PATCH /users/me ha respost ${response.statusCode}: ${response.body}',
+      );
+    }
+  }
+
+  /// `DELETE /users/me` (#116): el backend esborra les dades de la base de
+  /// dades, la foto de S3 i el compte de Firebase. Respon 204.
+  @override
+  Future<bool> deleteAccount() async {
+    final token = await _idToken();
+    if (token == null) throw StateError('No hi ha cap sessió iniciada.');
+
+    final http.Response response;
+    try {
+      response = await _client
+          .delete(
+            _endpoint('users/me'),
+            headers: {
+              'Accept': 'application/json',
+              'Authorization': 'Bearer $token',
+            },
+          )
+          .timeout(timeout);
+    } on http.ClientException {
+      throw AuthFailure.network;
+    } on TimeoutException {
+      throw AuthFailure.network;
+    }
+
+    // Ja no existia: el resultat és el mateix.
+    if (response.statusCode == 204 || response.statusCode == 404) return true;
+    throw StateError(
+      'DELETE /users/me ha respost ${response.statusCode}: ${response.body}',
+    );
+  }
+
+  UserProfile _userFrom(Map user, {bool created = false}) {
     return UserProfile(
       id: '${user['id']}',
       username: user['username'] as String,
       email: user['email'] as String? ?? '',
       name: user['name'] as String? ?? '',
+      created: created,
     );
   }
 

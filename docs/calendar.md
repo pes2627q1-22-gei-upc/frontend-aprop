@@ -10,13 +10,15 @@ Agenda (section 1 of `MainShell`) shows a Monday-first month calendar (`Dl`–`D
 | Day with plans | Dot under the number (forest; cream on the selected day) |
 | Today | Forest outline |
 | Selected day | Forest (`AppTheme.forest`) background |
-| Day list | Plans of the selected day ordered by start time; updates as soon as a day is tapped |
-| Empty day | «No tens cap pla per a aquest dia.» |
+| Day modal sheet | Tapping any day opens a modal bottom sheet (`AgendaDaySheet`) listing only that day's plans (or «No tens cap pla per a aquest dia.»); tapping a plan closes the sheet and opens details |
+| Upcoming list | Below the calendar, all upcoming signed-up plans (from today onwards) grouped by date headers in chronological order |
+| Past plans | Strictly past plans (before today) appear in a secondary collapsible «Plans passats (N)» section below upcoming plans, collapsed by default and ordered most-recent day first (DP-077) |
+| Empty states | «Encara no t’has apuntat a cap pla.» when there are no plans at all, or «No tens cap pla proper.» when only past plans exist |
 | Loading / error | Spinner, or Catalan error with «Tornar-ho a provar»; the calendar stays usable |
 
 Tapping a plan's image or title calls `onActivitySelected(activity.id)`. `MainShell` pushes the shared detail route onto Agenda's own navigator, so the bottom bar stays visible and returning restores the month and selected day. New enrollments made from Inici or the detail appear without reloading.
 
-«Com va anar?» (fig. 13, #64): above the calendar, whatever day is selected, a card asks about every plan that already started and has no answer: «Sí, hi vaig anar», «No hi vaig anar» (same visual weight) and «Més tard» (hidden until the Agenda tab is opened again). Answers go through `AttendanceViewModel` (`features/attendance/`), shared with the ratings: the stars appear only after «Sí» (R10). The API cannot read back «No», so the device remembers it (DP-068).
+«Com va anar?» (fig. 13, #64): above the calendar, whatever day is selected, a card asks about every plan that already started and has no answer: «Sí, hi vaig anar», «No hi vaig anar» (same visual weight) and «Més tard» (hidden until the Agenda tab is opened again). Answers go through `AttendanceViewModel` (`features/attendance/`), shared with the ratings: the stars appear only after «Sí» (R10). The API cannot read back «No», so the device remembers it (DP-068). «Sí» and «No» sit side by side with the same width and a visible background (one under the other on narrow screens or with large text), and «Més tard» goes centred below. After answering, a message says so («Gràcies! Ja pots valorar «…»» or «D’acord, no t’ho tornarem a preguntar»), because the stars may be on another day of the calendar. If the server refuses, the card says why: the activity has not started yet (409) or you are no longer signed up (404). The backend keeps only the day of the start (00:00, DP-029), so «already started» uses the first hour of the «Horari» («20 h», «19.30 h») when the start is at midnight, and a plan with no hour at all counts once its day is over (`activity_start.dart`); the same rule decides when the stars appear. With more than three plans to answer, the card shows three and «Veure’n N més».
 
 Out of scope: the reminder row and sheet (fig. 12, removed until the reminders story), unenrollment and multi-day events (the dot uses `Activity.startsAt` only, because the model has no end date).
 
@@ -28,16 +30,17 @@ features/agenda/presentation/view_models/agenda_view_model.dart
 features/agenda/presentation/screens/agenda_screen.dart
 features/agenda/presentation/widgets/month_calendar.dart
 features/agenda/presentation/widgets/agenda_plan_card.dart
+features/agenda/presentation/widgets/agenda_day_sheet.dart
 ```
 
-`AgendaViewModel` receives the shared `EnrollmentRepository` and `ActivityRepository` contracts and the user ID, as agreed in the [enrollment handoff](event-enrollment.md#calendar-handoff). It subscribes to `watchEnrolledActivityIds(userId)`, resolves each new ID once with `getActivityById` (cached; missing activities are skipped) and groups the plans by day. Late snapshots, lookups after `dispose` and duplicate `load()` calls are ignored. It does not import `EnrollmentViewModel`: both read the same repository instance, injected by `MainShell`. An optional `now` clock makes «today» testable.
+`AgendaViewModel` receives the shared `EnrollmentRepository` and `ActivityRepository` contracts and the user ID, as agreed in the [enrollment handoff](event-enrollment.md#calendar-handoff). It subscribes to `watchEnrolledActivityIds(userId)`, resolves each new ID once with `getActivityById` (cached; missing activities are skipped) and groups the plans by day, exposing `plansOn(day)`, `upcomingPlanGroups` (from today onwards, ascending) and `pastPlanGroups` (before today, newest day first). Late snapshots, lookups after `dispose` and duplicate `load()` calls are ignored. It does not import `EnrollmentViewModel`: both read the same repository instance, injected by `MainShell`. An optional `now` clock makes «today» testable.
 
 ```text
 EnrollmentRepository.watchEnrolledActivityIds(userId)
   -> AgendaViewModel resolves IDs via ActivityRepository.getActivityById
-  -> plans grouped by day + notifyListeners
-  -> MonthCalendar (dots) + selected day list
-  -> plan image/title -> onActivitySelected(id) -> MainShell._openActivityDetails
+  -> plans grouped by day + upcomingPlanGroups / pastPlanGroups + notifyListeners
+  -> MonthCalendar (dots; tap day -> AgendaDaySheet modal) + upcoming list + collapsible past list
+  -> plan tap -> onActivitySelected(id) -> MainShell._openActivityDetails
 ```
 
 ## Backend

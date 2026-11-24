@@ -45,9 +45,13 @@ void main() {
           await tester.tap(reject);
           await tester.pumpAndSettle();
           expect(find.text('Sol·licitud rebutjada'), findsOneWidget);
-          await tester.tap(
-            find.textContaining('Marc Vidal', findRichText: true).first,
-          );
+          final message = find
+              .textContaining('Marc Vidal', findRichText: true)
+              .first;
+          // The resolved card shrinks; scroll its body back below the filters.
+          await tester.ensureVisible(message);
+          await tester.pumpAndSettle();
+          await tester.tap(message);
           await tester.pumpAndSettle();
         }
         expect(find.widgetWithText(AppBar, 'marcvidal'), findsOneWidget);

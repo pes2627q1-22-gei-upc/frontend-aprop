@@ -598,6 +598,33 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Qui decideix:** equip (disseny)
 - **Resolució:**
 
+### DP-066 · Onboarding del test d’interessos (#30): «Ara no» en memòria, `/preferences/test/status` i Demo
+- **Estat:** oberta · 2026-11-21 · agent (Antigravity, Gemini) · Taiga #30
+- **Context:** `AuthGate` (`_InterestTestOnboardingGate`), `InterestTestRepository.hasCompletedTest`, `HttpInterestTestRepository`, `DemoInterestTestRepository`, `InterestTestScreen`.
+- **Dubte:**
+  - `GET /preferences/test/status` (`{"completed": bool, "date-taken": RFC3339|null}`) s’implementa en paral·lel al backend i pot no estar desplegat encara.
+  - Si l’usuari prem «Ara no» durant l’onboarding, no està decidit si l’omissió ha de durar només l’execució actual o persistir al dispositiu entre reinicis.
+  - En mode Demo, mostrar l’onboarding automàticament a tots els comptes interrompria els fluxos de demostració i les proves existents d’`AuthGate`.
+- **Opcions:** persistència de «Ara no»: A) només en memòria durant l’execució actual (com ara) · B) persistir per compte a `shared_preferences`. Mode Demo: A) `completed = true` per defecte i configurable al constructor (com ara) · B) `completed = false` per defecte.
+- **Provisionalment:** A en tots dos casos. Si `hasCompletedTest()` falla (error HTTP, xarxa o format), l’onboarding s’omet i mai no bloqueja l’entrada a `MainShell`. L’omissió es guarda a `_onboardingHandledUsers` dins d’`AuthGate` durant l’execució actual (`TODO(DP-066)`). `DemoInterestTestRepository` parteix de `completed = true` (passa a `true` en enviar respostes i accepta `completed: false` per provar l’onboarding). Les categories del test reutilitzen `parseActivityCategories` (`agenda:categories/*` i `agenda:ambits/*` netejades i deduplicades, coherent amb `activityFromJson`) i la descripció a la targeta es trunca a 3 línies amb el·lipsi.
+- **Qui decideix:** equip + backend (contracte `/preferences/test/status` i UX d’omissió)
+- **Resolució:**
+
+### DP-075 · Eliminar compte (#10): confirmació i comportament sense backend
+- **Estat:** oberta · 2026-11-21 · Claude Code (Opus 5.5) amb confirmació de l’usuari · Taiga #117 (història #10)
+- **Identificador:** les DP-071 a DP-074 són a altres branques o PR; es fa servir la DP-075.
+- **Context:** `AuthRepository.deleteAccount`, `UserSyncRepository.deleteAccount`, `ProfileSettingsViewModel.deleteAccount`, `_DeleteAccountDialog` a `profile_settings_screen.dart`. Backend consultat a `api-aprop@develop` sense modificar-lo (#116, tancada): `DELETE /users/me` esborra les dades de PostgreSQL, la foto de S3 i el compte de Firebase, i respon 204 (502 si Firebase falla).
+- **Decisions de l’usuari:**
+  - El diàleg explica què s’esborra i que és irreversible, i el botó coral només s’activa en escriure «ELIMINAR» («DELETE» en anglès).
+  - En mode Demo, el compte s’esborra durant l’execució: no s’hi pot tornar a entrar fins a reiniciar l’app.
+- **Deduït (sense confirmar):**
+  - El mockup (fig. 19) només mostra l’opció en coral; el text del diàleg i dels errors no té mockup.
+  - Un 404 es tracta com a esborrat (el compte ja no existia).
+  - Si falla, el compte es conserva, la sessió continua oberta i surt un avís a baix (l’error de dalt de Configuració quedaria fora de la pantalla).
+  - Amb Firebase però sense backend, l’app esborra el compte de Firebase ella mateixa; Firebase pot demanar haver iniciat sessió fa poc i aleshores surt l’error.
+- **Codi:** sense `TODO`; vegeu `docs/profile.md`.
+- **Qui decideix:** equip/PO (textos i confirmació)
+
 ## Resoltes
 
 ### DP-058 · Enllaços de la fitxa: obrir-los amb `url_launcher`
@@ -793,7 +820,9 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Decisió de l’usuari:** l’app recorda al dispositiu (`shared_preferences`, per compte) les activitats contestades «No», i es demana al backend que torni el valor (per exemple, `attendance` a `GET /events/{id}/enrollment`). Quan hi sigui, només canvia `HttpAttendanceRepository` i sobra `RememberedAttendanceRepository`.
 - **Limitació:** en un altre dispositiu o després de reinstal·lar, a qui va contestar «No» se li torna a preguntar.
 - **Deduït (sense confirmar):**
-  - «Com va anar?» surt a dalt de l’Agenda, sigui quin sigui el dia, per als plans que ja han començat (`startsAt` anterior a ara; el model no té data de fi) i sense resposta.
+  - «Com va anar?» surt a dalt de l’Agenda, sigui quin sigui el dia, per als plans que ja han començat i sense resposta (el model no té data de fi).
+  - **Actualització (2026-11-21, prova a l’emulador):** el backend desa l’inici a les 00:00 (DP-029), i amb `startsAt` l’app preguntava pel concert del vespre al matí. Ara l’hora d’inici és la de `startsAt` si no és mitjanit; si no, la primera hora de l’«Horari» («20 h», «19.30 h», «19:00 – 21:00»); i, sense cap hora, el pla compta com a començat quan s’ha acabat el dia (`activity_start.dart`). La mateixa regla decideix si surten les estrelles.
+  - Amb més de tres plans per contestar, el quadre en mostra tres i «Veure’n N més»: si no, empeny el calendari molt avall.
   - «Més tard» l’amaga fins a la propera vegada que s’obre la pestanya Agenda.
   - Si no es pot llegir l’assistència, no es pregunta (millor no preguntar que preguntar per error).
   - Les estrelles de valoració (fitxa i Agenda) surten només si s’ha contestat «Sí, hi vaig anar» (R10): substitueix el criteri provisional de DP-053.
@@ -815,11 +844,32 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
 - **Qui decideix:** backend (`state` a l’activitat i bloqueig d’inscripcions)
 - **Resolució:**
 
-### DP-072 · Notificacions push (#265): paquet, plataformes i backend sense fusionar
+### DP-070 · Avís d’amistat acceptada sense subtipus al backend (#170)
+- **Estat:** oberta · 2026-11-21 · Taiga #170, història #38 · només frontend.
+- **Identificador:** renumerada de DP-069 a DP-070 en integrar `origin/develop@085a03a`, per conservar la DP-069 de cancel·lació d’activitats #181.
+- **Context:** backend `fb266a7`: acceptar crea un avís amb tipus Social, `friend-id`, `request-date` i text lliure. El DTO de notificacions no conté un subtipus/estat d’acceptació. `/users/me/friend-requests` només retorna rebudes Pending; no és historial d’acceptacions sortints. L’usuari confirma que no hi ha una altra branca.
+- **Presentació:** reutilitzar `AppNotification.friendRequestAccepted`, el missatge i la navegació ja existents; afegir l’accés explícit «Veure perfil» amb nom accessible. Cap Acceptar/Rebutjar. Mateix flux de lectura confirmada, errors i protecció de respostes tardanes de la bústia.
+- **Límit:** es completa la interfície amb el model tipat/Demo i proves. La classificació HTTP d’acceptacions queda pendent: un Social genèric continua genèric, encara que el text digui «ha acceptat». Ni el text ni ser amics ara demostren l’esdeveniment concret. No es crea cap historial ni avís fictici.
+- **Pendent backend/equip:** acordar un discriminador estructurat d’acceptació i publicar-ne l’esquema, amb destinatari, persona que accepta, data i referència de sol·licitud. Els noms del nou camp/subtipus s’han d’acordar; no es pressuposa un endpoint o camp nou. Després, adaptar `notification_json_mapper.dart`/`HttpNotificationRepository` i afegir una prova del JSON real.
+- **Codi:** `TODO(DP-070)` a `http_notification_repository.dart`. Flux i missatge de traspàs a `docs/accepted-friendship-notification.md`. Backend intacte; segueixen obertes DP-039/DP-066.
+- **Qui decideix:** equip frontend/backend (contracte de l’avís).
+
+### DP-071 · Avís de cancel·lació (#47): filtre i estat de l’activitat
+- **Estat:** oberta · 2026-11-21 · Claude Code (Opus 5.5) a petició de l’usuari · Taiga #183 (història #47)
+- **Identificador:** la DP-070 és de la #170 (Adam); es fa servir la DP-071 per no col·lidir-hi.
+- **Context:** `NotificationType.activityCancelled`, `notificationTypesFromJson`, `notificationMessage`, `NotificationsScreen.onActivitiesCancelled`, `MainShell`. Backend consultat a `api-aprop@develop` sense modificar-lo: en cancel·lar una activitat (#46) es crea un avís de tipus «Cancelacio» (amb l’activitat) per a cada persona apuntada, excepte qui l’ha creada.
+- **Deduït (sense confirmar):**
+  - El mockup (fig. 17) només té els filtres Tots / Social / Recordatoris / Recomanacions. La cancel·lació va a «Recordatoris» perquè parla dels plans de la persona; el distintiu de la targeta diu «Recordatori» i el text diu «S’ha cancel·lat «…»».
+  - Com que l’API no diu si una activitat està cancel·lada (DP-069), l’avís és l’única manera que en té qui s’hi havia apuntat: en carregar els avisos, l’app marca l’activitat «Cancel·lada» a tota l’app i ja no s’hi pot apuntar.
+  - Demo: no hi ha cap avís de cancel·lació d’exemple, perquè marcaria com a cancel·lada una activitat del catàleg de demostració.
+- **Codi:** `TODO(DP-071)` a `app_notification.dart`; `TODO(DP-069)` a `notifications_screen.dart`.
+- **Qui decideix:** equip/PO (filtre i distintiu de les cancel·lacions)
+
+### DP-072 · Notificacions push (#265): paquet i plataformes
 - **Estat:** oberta · 2026-11-21 · Claude Code (Opus 5.5) a petició de l’usuari · Taiga #276 (història #265)
 - **Identificador:** la DP-070 és de la #170 (Adam) i la DP-071 de la #47 (sense fusionar); es fa servir la DP-072.
-- **Context:** `features/push/` (`PushViewModel`, `FirebasePushMessaging`, `HttpPushDeviceRepository`), `MainShell` i `main.dart`. Backend: PR de la #275 (Arnau, branca `feature/push-notifications`), **encara no fusionada a `develop`**: `PUT /users/me/devices` (`{"token", "platform": "android|ios|web"}`, 204), `DELETE /users/me/devices/{token}` (204) i, a cada push, títol, text i les dades `notification-id`, `type`, `event-id` i `friend-id`.
-- **Decisions de l’usuari:** es fa contra el contracte de la PR d’Arnau, encara que no estigui a `develop`. La història no té criteris a Taiga: els proposa l’agent (vegeu `docs/push-notifications.md`) i l’usuari els hi posarà.
+- **Context:** `features/push/` (`PushViewModel`, `FirebasePushMessaging`, `HttpPushDeviceRepository`), `MainShell` i `main.dart`. Backend: #275 (Arnau), fusionada a `develop` d’`api-aprop` amb la PR #77 (2026-11-22) i comprovada de nou: `PUT /users/me/devices` (`{"token", "platform": "android|ios|web"}`, 204), `DELETE /users/me/devices/{token}` (204) i, a cada push, títol, text i les dades `notification-id`, `type`, `event-id` i `friend-id`.
+- **Decisions de l’usuari:** es va fer contra el contracte de la PR d’Arnau abans que es fusionés; el contracte final és el mateix. La història no té criteris a Taiga: els proposa l’agent (vegeu `docs/push-notifications.md`) i l’usuari els hi posarà.
 - **Paquet nou:** `firebase_messaging` (de la mateixa família que `firebase_core` i `firebase_auth`). Fa servir l’API nova (`register()` i `onRegistered`, que dona el Firebase Installation ID); el backend accepta tant aquests ID com els tokens antics.
 - **Deduït (sense confirmar):**
   - Només Android, on Firebase ja està configurat per al login. iOS no té configuració de Firebase (DP-026) i la web només serveix per desenvolupar (caldria un *service worker* i una clau VAPID).
@@ -827,7 +877,113 @@ resolució és d'arquitectura, crea un ADR; si és una convenció, afegeix-la a 
   - Amb l’app tancada o en segon pla, el sistema mostra el push; en tocar-lo s’obre Avisos i, si parla d’una activitat, la seva fitxa. Amb l’app oberta, el sistema no el mostra: surt un avís a baix amb «Veure» i Avisos es torna a carregar.
   - En tancar la sessió (abans de perdre el token), el mòbil es dona de baixa perquè la propera persona no rebi els pushes del compte anterior.
   - No hi ha interruptor de push a Configuració: és la zona de la #19 (Adam). El backend ja té `push-enabled` al perfil.
-- **Pendent:** prova de punta a punta en un dispositiu amb el backend de la #275 i les credencials de Firebase del servidor (les té configurades Arnau).
+- **Pendent:** prova de punta a punta en un dispositiu amb el backend desplegat i les credencials de Firebase del servidor (les té configurades Arnau).
 - **Codi:** `TODO(DP-072)` a `firebase_push_messaging.dart` i `main.dart`.
-- **Qui decideix:** equip (paquet, plataformes) + backend (fusió de la #275)
+- **Qui decideix:** equip (paquet, plataformes)
+
+### DP-074 · Mapa: zoom a la persona en obrir-lo i límit d’allunyament
+- **Estat:** oberta · 2026-11-21 · Claude Code (Opus 5.5) a petició de l’usuari · Taiga pendent (millora de la geolocalització, #266)
+- **Identificador:** la DP-070 és de la #170, la DP-071 de la #47, la DP-072 de la #265 (sense fusionar) i la DP-073 es va proposar a la #30 (PR #67); es fa servir la DP-074.
+- **Context:** `ActivitiesMap` (`_locateOnOpen`, `minimumZoomFor`, `boundsAround`).
+- **Decisions de l’usuari:**
+  - En obrir la pestanya Mapa per primer cop es demana el permís d’ubicació (si cal) i, si es dona, el mapa mostra uns 5 km al voltant de la persona. Si no, es queda a Catalunya com abans, sense cap avís (el botó «La meva ubicació» explica el motiu).
+  - Es pot allunyar fins a veure el món sencer, però no més: abans, a la web, el món es repetia de costat i quedaven franges grises.
+- **Deduït (sense confirmar):**
+  - El zoom mínim depèn de la mida del mapa: el món (256 px a zoom 0) ha d’omplir l’amplada i l’alçada. En un mòbil vertical és ≈ 1,7; en una finestra ampla, ≈ 2,9.
+  - El permís es demana en veure la pestanya i no en obrir l’app, perquè `MainShell` construeix totes les pestanyes alhora.
+  - No es limita l’apropament (el màxim és el de Google).
+  - **Actualització (2026-11-21, prova a l’emulador):** si el GPS tarda més que l’espera del primer intent, el mapa no feia el zoom. Ara, si la ubicació arriba durant els 30 s següents, s’hi apropa igualment; si mentrestant la persona prem «La meva ubicació», mana el botó.
+- **Codi:** `TODO(DP-074)` a `activities_map.dart`.
+- **Qui decideix:** equip/PO (radi inicial i moment de demanar el permís)
+- **Resolució:**
+
+### DP-076 · Ubicació de l’acció d’eliminar amistat (#195)
+- **Estat:** oberta · 2026-11-21 · Taiga #195, història #53 · només frontend.
+- **Context:** la tasca diu `FriendsListScreen` i `ProfileScreen`; `ProfileScreen` és el perfil propi i no representa una relació amb una altra persona. Els mockups no concreten el diàleg ni la ubicació d’eliminar.
+- **Deduït:** acció visible a cada fila de la llista pròpia i al menú superior de `PublicProfileScreen` quan consta amistat. El perfil propi dona accés a la seva llista amb el comptador Amics; no hi ha autoeliminació ni gestió de relacions alienes. Mateix diàleg per a totes dues entrades, amb nom, Cancel·lar i Eliminar amistat; tornar/cancel·lar no escriu res.
+- **Comportament:** només una confirmació correcta de `POST /users/{id}/unfriend` retira la relació i provoca la recàrrega de comptadors. No es bloqueja la persona, no s’esborren activitats ni es tanquen perfils. Un error conserva l’amistat i permet reintentar. El frontend no interpreta el text dels errors 400 ni promet la possibilitat de tornar a enviar una petició (això depèn del contracte de sol·licituds del servidor).
+- **Demo:** conserva els recomptes i persones sembrats dels mockups, amb acceptacions/eliminacions confirmades per compte durant l’execució. No s’inventa un graf complet per justificar els recomptes d’exemple. HTTP recarrega els recomptes reals i el servidor determina la privacitat dels plans; una eliminació confirmada amaga qualsevol còpia local anterior.
+- **Codi:** `TODO(DP-076)` a `public_profile_screen.dart`. Guia `docs/remove-friend.md`.
+- **Qui decideix:** equip frontend/PO (presentació i interpretació del nom de pantalla de la tasca).
+- **Resolució:**
+
+### DP-077 · Bloqueig personal: confirmació, abast i dependència (#179)
+- **Estat:** oberta · 2026-11-21 · Taiga #179, història #45 · només frontend.
+- **Context:** backend `4f98835`: `GET /users/me/blocked`, `POST /users/{id}/block` (201 amb persona/data) i `DELETE /users/{id}/block` (204). Bloquejar elimina l’amistat i rebutja peticions Pending/Accepted en transacció; desbloquejar no recupera l’amistat. La cerca del servidor exclou bloquejos, però el backend no oculta activitats, xats ni avisos per aquest motiu (DP-042 backend).
+- **Deduït:** al menú del perfil aliè hi ha Bloquejar o Desbloquejar segons els bloquejos propis coneguts. Confirmació amb nom i efecte exacte, sense prometre amagar contingut. Configuració → Usuaris bloquejats mostra recompte carregat, llista, buit, càrrega, error/reintent i acció de desbloqueig amb confirmació. La navegació al perfil conserva Configuració i la llista.
+- **Estat compartit:** contracte `UserBlockingRepository` implementat per la mateixa font d’amistat, amb snapshots per compte. Una llista desconeguda no es presenta com a zero; 409/404 només es reconcilien consultant la llista pròpia autenticada. Les peticions antigues queden resoltes i no es recupera l’amistat en desbloquejar.
+- **Límits:** només es poden gestionar els bloquejos fets pel compte actual; no es dedueix que l’altra persona t’hagi bloquejat. No es creen controls de moderació ni un filtre general de contingut. Demo conserva els canvis en memòria durant l’execució.
+- **Dependència:** branca #179 sobre `fd95352` de #195, encara pendent de merge en començar. Per revisar només #179: comparar amb `feature/remove-friend-195`. Abans de fusionar #179 cap a develop, #195 ha d’estar integrada.
+- **Actualització (2026-11-21):** #195 integrada a develop amb PR #75 (`a5ed55f`); dependència de branca satisfeta. El merge local amb `ee9e34f` conserva #179 i els ajustos de PR #76.
+- **Codi:** `TODO(DP-077)` a `public_profile_screen.dart` i `blocked_users_screen.dart`. Guia `docs/user-blocking.md`.
+- **Qui decideix:** equip/PO (presentació i abast del bloqueig).
+- **Resolució:**
+
+### DP-078 · Compartició de plans: confirmació, reintent i autorització (#199)
+- **Estat:** oberta · 2026-11-21 · Taiga #199, història #55 · només frontend. DP-077 correspon a #179, integrada a develop amb PR #77.
+- **Context:** fig. 19 i `api-aprop@4f98835`: `GET /users/me` i `PATCH /users/me` amb `show-plans`; el perfil propi té `plans-visible=true` fins i tot quan no comparteix. En un perfil aliè el servei calcula `plans-visible = amistat && show-plans`.
+- **Deduït:** es conserven els noms reals `ProfileSettingsScreen`/`ProfileSettingsViewModel`; no es creen duplicats anomenats `SettingsScreen`. Estat textual de compartició sota el switch, progrés i error amb reintent al mateix control. El switch manté el valor anterior fins que el repositori confirma el canvi; no hi ha un botó Desar separat.
+- **Identitat i dades:** la resposta ha de conservar el UUID real capturat i confirmar el booleà demanat; JSON invàlid o una resposta que ignora el canvi són errors. La lectura usa `show-plans`, mai `plans-visible` del perfil propi. No se sobreescriu un valor inicial real del servidor (la migració 000007 té default true) amb el default false del model Demo.
+- **Concurrència:** preferències i idioma no s’escriuen simultàniament des de Configuració; cap reintent duplicat ni resposta d’un compte anterior modifica la pantalla actual.
+- **Abast:** compartir només afecta els plans personals per a amistats; no es retiren activitats publicades, inscripcions de l’Agenda ni avisos. Demo conserva preferències per compte en memòria i perfils públics sembrats; no prova privacitat entre comptes reals.
+- **Pendent backend (mateixa carència que DP-011):** `SignUpHandler.ListUserEvents` / `SignUpService.ListUserEvents` encara no comproven el sol·licitant, l’amistat ni `show-plans` a `GET /users/{userId}/events`. Cal autoritzar el propietari o una amistat amb compartició activada, i rebutjar la resta, també quan es crida l’endpoint directament. Ocultar la llista al client no substitueix aquest control. No s’ha modificat el backend.
+- **Codi:** `TODO(DP-078)` a `profile_settings_screen.dart`; guia `docs/plan-visibility.md` amb missatge per al backend i prova manual de dos comptes.
+- **Qui decideix:** frontend/PO per a la presentació; backend per a l’autorització i proves reals.
+
+### DP-079 · Selector d’idioma en el primer arrencament i sincronització en iniciar sessió
+- **Estat:** oberta · 2026-11-21 · agent (Antigravity, Gemini 4 Neon) · branca `fix/app-improvements-lang`
+- **Context:** `LanguageSelectionScreen`, `LocaleController.needsInitialSelection` / `previewLocale`, `APropApp`, `AuthGate` (`_LanguageSyncGate`), `HttpProfileSettingsRepository`, `HttpUserSyncRepository.updateLanguage`, `FirebaseAuthRepository`, `ApiClient._translatedPaths` (`preferences/test`). Relacionada amb DP-054.
+- **Decisions de l’usuari:**
+  - En el primer arrencament (sense preferència desada a `shared_preferences`, abans del login/registre) es mostra una pantalla per triar idioma (`ca`/`es`/`en`), s’aplica a l’instant a tota l’app i no es torna a mostrar mai més un cop confirmada; el selector de Configuració continua funcionant i sincronitzat.
+  - En iniciar sessió, si el perfil del backend té un idioma definit s’aplica localment; si no en té, s’hi envia l’idioma local.
+  - El test d’interessos (`GET /preferences/test`) rep l’idioma actiu (`?lang=`) per mostrar títol i descripció traduïts.
+- **Dubte / deduït (sense confirmar):**
+  - **Disseny sense mockup:** `LanguageSelectionScreen` reutilitza el disseny i el logotip de `LoginScreen` amb targetes seleccionables (Català / Castellano / English), previsualització en directe en tocar una opció (`previewLocale`) i botó «Continua» que confirma i desa la tria (`setLocale`). Alternativa: confirmar directament en tocar una opció sense botó «Continua».
+  - **Comptes nous vs existents amb `Settings.Language NOT NULL DEFAULT 'ca'`:** al backend (#28, migració 000022), `Settings.Language` és `NOT NULL DEFAULT 'ca'`. Per evitar que un compte acabat de crear (on l’usuari acaba de triar `en` o `es` al selector inicial) es reverteixi a `ca` en sincronitzar després del login, `FirebaseAuthRepository` envia `PATCH /users/me {"language": ...}` immediatament quan `POST /auth/sync` crea el compte (`201 Created`). Per a comptes previs existents on `GET /users/me` retorna `ca` (per defecte de BD), la sincronització post-login interpreta `ca` com l’idioma del perfil i l’aplica; si `language` és absent o nul al perfil, hi envia l’idioma local.
+  - **Timeout de sincronització:** `_LanguageSyncGate` espera com a màxim 3 s abans d’entrar al test d’interessos / `MainShell` i no bloqueja mai l’accés si hi ha error de xarxa. La tria no confirmada es conserva localment per compte i es reintenta en entrar. Un timeout no cancel·la la petició HTTP: un `PATCH` tardà pot competir amb un canvi posterior des de Configuració (`TODO(DP-079)`); l’ordenació al servidor continua pendent. La tria pendent no es transfereix a altres dispositius.
+- **Opcions:** A) mantenir previsualització + «Continua» i `Settings.Language` reutilitzat tal com està · B) confirmar en un sol toc sense «Continua» i/o fer `Settings.Language` nul·lable al backend (requereix migració i regenerar `sqlc`).
+- **Provisionalment:** A (`TODO(DP-079)` a `language_selection_screen.dart` i `firebase_auth_repository.dart`).
+- **Qui decideix:** equip (disseny + backend/frontend)
+### DP-080 · Test d’interessos: onboarding només al registre, targeta i progrés parcial («Més tard»)
+- **Estat:** oberta
+- **Obert per:** 2026-11-21 · Antigravity (Gemini 4 Neon) · branca `fix/app-improvements-interest`
+- **Context:** `auth_gate.dart` (`_InterestTestOnboardingGate`), `main_shell.dart`, `main.dart`, `content_image.dart`, `features/interest_test/` (`InterestTestStatus`, `InterestTestOnboardingMemory`, `SharedPreferencesInterestTestOnboardingMemory`, `HttpInterestTestRepository`, `DemoInterestTestRepository`, `InterestTestViewModel`, `InterestTestScreen`), `lib/l10n/app_{ca,es,en}.arb`. Relacionada amb `api-aprop` DP-045.
+- **Dubte / supòsits:**
+  1. **Onboarding només després del primer registre:** es consulta `GET /preferences/test/status` (`prompted`, `completed`, `in-progress`, `answered-count`, compatible amb respostes antigues sense aquests camps). Quan s’obre l’onboarding per a un compte nou (`shouldPromptOnboarding`), es marca de seguida com a `prompted` tant al servidor (`POST /preferences/test/prompted`) com localment per UID (`SharedPreferencesInterestTestOnboardingMemory`), de manera que ometre’l o tancar l’app sense acabar-lo no el torna a obrir en inicis de sessió posteriors; només es reobre des de Configuració › Compte (o des de l’Assistent).
+  2. **Imatge i descripció de la targeta:** l’API de Gencat només exposa un camp `imatges` sense versió d’alta resolució. La imatge passa a una franja 16:9 limitada (`96..196 px` i ≤ 38 % de l’alçada de la targeta) amb `BoxFit.cover`, `FilterQuality.high` i `ResizeImage(..., allowUpscaling: false)` (evita escalar cap amunt ni pixelar portades petites). La descripció guanya espai i es trunca a 5 línies amb botó «Llegir més» / «Llegir menys» (ca/es/en, 48 px) només quan supera les 5 línies.
+  3. **«Més tard», desat parcial i represa:** el botó «Ara no» passa a dir-se «Més tard» (`Más tarde` / `Later`) i també es mostra en obrir el test des de Configuració o l’Assistent (la fletxa enrere també desa les respostes pendents). En prémer-lo amb respostes noves s’envia `POST /preferences/test` amb `partial: true`; si falla el desat, es mostra un avís amb «Sortir sense desar» per no bloquejar la sortida. En reobrir el test, es reprenen les preguntes pendents (`answeredCount + 1` de `totalCount`) sense repetir les ja contestades; completar una repetició continua substituint el test anterior (R1).
+- **Opcions:** A) mantenir estat `prompted` al servidor + fallback local per UID i desat parcial amb represa · B) guardar el progrés parcial només al dispositiu.
+- **Provisionalment:** A (`TODO(DP-080)` a `auth_gate.dart`, `http_interest_test_repository.dart`, `shared_preferences_interest_test_onboarding_memory.dart` i `interest_test_screen.dart`).
+- **Qui decideix:** equip (frontend + backend)
+### DP-081 · Agenda: llista completa de propers plans, secció «Passats» plegable i modal de dia
+- **Estat:** oberta · 2026-11-21 · implementació de millora del calendari · només frontend.
+- **Context:** `AgendaScreen`, `AgendaViewModel`, `AgendaDaySheet`, `agenda_date_formatter.dart`, `docs/ai/50-ui-mockups.md` (fig. 11).
+- **Dubte:** el mockup (fig. 11) mostrava sota el calendari només els plans del dia seleccionat, de manera que si l’usuari oblidava la data d’un pla no el trobava. L’usuari ha aprovat mostrar a sota del calendari tots els plans propers ordenats per data i obrir un panell inferior (modal) en tocar un dia del calendari. Falta validar amb l’equip els detalls no especificats al mockup:
+  - el criteri de separació entre «Propers plans» i «Plans passats»;
+  - l’ordre dels plans passats i si la secció ha de començar plegada;
+  - les accions dins la targeta del modal de dia (sense «Desapunta’m» en línia perquè el SnackBar «Desfer» quedaria darrere la barrera modal);
+  - els textos nous (ca/es/en) de capçaleres, estats buits i tancament del modal.
+- **Opcions:** A) incloure el dia d’avui sencer a «Propers plans», mostrar els dies estrictament anteriors a «Plans passats (N)» plegats per defecte (més recent primer) i deixar «Desapunta’m» a la llista principal i a la fitxa · B) ometre els plans passats o separar per hora exacta d’inici.
+- **Provisionalment:** opció A. El dia d’avui es manté a «Propers plans» (compatible amb esdeveniments del backend a 00:00 de DP-029 i amb les valoracions del mateix dia); els dies anteriors surten a «Plans passats (N)» plegats per defecte i ordenats del més recent al més antic. En tocar un dia al calendari s’obre `AgendaDaySheet` amb només els plans d’aquell dia (targeta `AgendaPlanCard` amb distintiu «Apuntat» i valoració si escau; tocar-ne un tanca el modal i obre la fitxa). Sense canvis al backend (`GET /users/{userId}/events` sense `from`/`to` ja retorna totes les inscripcions). `TODO(DP-081)` a `agenda_view_model.dart`, `agenda_screen.dart` i `agenda_day_sheet.dart`.
+- **Qui decideix:** equip frontend / disseny (validació de detalls del redisseny aprovat).
+- **Resolució:**
+
+### DP-082 · Activitats passades: ocultar-les d'Inici i del mapa i bloquejar «M'hi apunto»
+
+- **Context:** l'API encara llista esdeveniments d'un sol dia amb data passada quan no tenen data de fi (p. ex. «Activitat rural», 19 de novembre).
+- **Decisió provisional:** `activityHasEnded` (dia de fi, o d'inici si no n'hi ha; mai per a permanents) filtra les llistes HTTP d'Inici, mapa i cerca de descobriment, i la fitxa mostra «Aquesta activitat ja ha passat» en lloc del botó. Les fitxes obertes per ID (agenda) no es filtren. Un esdeveniment sense data de fi però de diversos dies es consideraria passat el dia d'inici (`TODO(DP-082)`).
+- **Opcions:** A) filtre al frontend (actual) · B) filtrar al backend (`events.sql`: `enddate is null and startdate < now()`), que requereix tocar sqlc.
+- **Provisionalment:** A.
+
+### DP-083 · Diccionari localitzat de categories (ca/es/en) i priorització per filtre
+- **Estat:** oberta · 2026-11-21 · Antigravity (Gemini 4 Neon) · branca `fix/app-improvements` (incidència A4)
+- **Context:** `lib/features/activities/models/activity_category_labels.dart`, `activity_json_mapper.dart`, `activity_filters.dart`, `http_activity_repository.dart`, `activity_badges.dart`, `activity_card.dart`, `activities_map.dart`, `activities_screen.dart`, `activity_details_screen.dart`, `activity_categories_filter_sheet.dart`, `create_activity_screen.dart`, `interest_test_screen.dart`.
+- **Dubte / supòsits:**
+  1. **Diccionari estàtic al frontend (`ca`/`es`/`en`):** `GET /categories` retorna només etiquetes brutes de Gencat (`agenda:categories/*`, `agenda:ambits/*`, p. ex. `agenda:ambits/zz-altres-ambits`, `agenda:ambits/za-any-europeu-patrimoni`, `agenda:categories/any-gaudi`, `agenda:ambits/espectacles`) sense traduccions ni accents. S’ha creat un diccionari per idioma (`ca`/`es`/`en`) amb totes les 34 claus reals del conjunt de dades de l’Agenda Cultural de la Generalitat (24 `tags_categor_es` + 10 `tags_mbits`) més `cultura-popular` (Demo) i el valor de reserva `activitat`. Les claus desconegudes s’embelleixen automàticament (s’eliminen prefixos de namespace i claus d’ordenació `z[a-z]-`/`zz ` i s’aplica Title Case respectant connectors).
+  2. **Matching canònic entre idiomes:** les comparacions de filtres (`ActivityFilters`, `HttpActivityRepository.getActivitiesPage`, `ActivityCategoriesFilterSheet`, `CreateActivityViewModel`) i els colors/icones de categories es fan per clau canònica independent d’idioma, de manera que canviar d’idioma no trenca filtres actius ni perd colors.
+  3. **Targetes amb filtre actiu:** quan hi ha un filtre de categories actiu, `ActivityCard` i la targeta del mapa (`ActivitiesMap`) mostren primer la categoria de l’activitat que coincideix amb el filtre i mantenen el comptador `+N` per a la resta; sense filtre mantenen l’ordre original.
+  4. **Categories a la fitxa (`ActivityDetailsScreen`):** arran de la revisió de la PR #80, la fitxa mostra totes les categories. Les targetes mantenen el resum compacte amb `+N`.
+- **Opcions:** A) mantenir el diccionari estàtic al frontend · B) servir noms localitzats des de `GET /categories` al backend.
+- **Provisionalment:** A (`TODO(DP-083)` a `activity_category_labels.dart`); la fitxa mostra totes les categories.
+- **Qui decideix:** equip (frontend + backend + disseny)
 - **Resolució:**

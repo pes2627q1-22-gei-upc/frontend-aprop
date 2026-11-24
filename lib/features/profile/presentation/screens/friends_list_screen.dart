@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../../../core/l10n/locale_controller.dart';
 import '../../repositories/friends_repository.dart';
+import '../../repositories/friendship_repository.dart';
+import '../../models/user_summary.dart';
 import '../view_models/friends_list_view_model.dart';
 import '../widgets/user_row.dart';
+import '../widgets/friend_removal_action.dart';
 
 /// «Amics» (#54): opened from the friends counter of a profile.
 class FriendsListScreen extends StatefulWidget {
@@ -14,6 +18,8 @@ class FriendsListScreen extends StatefulWidget {
     this.userId,
     this.ownerName,
     this.hiddenIds = const {},
+    this.friendshipRepository,
+    this.currentUserId,
   });
 
   final FriendsRepository repository;
@@ -25,22 +31,70 @@ class FriendsListScreen extends StatefulWidget {
   /// The person's name, for the empty message of another profile.
   final String? ownerName;
   final Set<String> hiddenIds;
+  final FriendshipRepository? friendshipRepository;
+  final String? currentUserId;
 
   @override
   State<FriendsListScreen> createState() => _FriendsListScreenState();
 }
 
 class _FriendsListScreenState extends State<FriendsListScreen> {
-  late final FriendsListViewModel _viewModel;
+  late FriendsListViewModel _viewModel;
+  bool _confirmationOpen = false;
+
+  FriendsListViewModel _createModel() => FriendsListViewModel(
+    repository: widget.repository,
+    userId: widget.userId,
+    hiddenIds: widget.hiddenIds,
+    friendshipRepository: widget.friendshipRepository,
+    currentUserId: widget.currentUserId,
+  )..load();
 
   @override
   void initState() {
     super.initState();
-    _viewModel = FriendsListViewModel(
-      repository: widget.repository,
-      userId: widget.userId,
-      hiddenIds: widget.hiddenIds,
-    )..load();
+    _viewModel = _createModel();
+  }
+
+  @override
+  void didUpdateWidget(covariant FriendsListScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.repository != widget.repository ||
+        oldWidget.userId != widget.userId ||
+        oldWidget.friendshipRepository != widget.friendshipRepository ||
+        oldWidget.currentUserId != widget.currentUserId ||
+        !setEquals(oldWidget.hiddenIds, widget.hiddenIds)) {
+      _viewModel.dispose();
+      _viewModel = _createModel();
+      _confirmationOpen = false;
+    }
+  }
+
+  Future<void> _removeFriend(UserSummary friend) async {
+    if (_confirmationOpen ||
+        !_viewModel.canRemoveFriends ||
+        _viewModel.isRemoving(friend.id)) {
+      return;
+    }
+    if (!(ModalRoute.of(context)?.isCurrent ?? true)) return;
+    final model = _viewModel;
+    _confirmationOpen = true;
+    final confirmed = await confirmFriendRemoval(context, friend.displayName);
+    if (!mounted || !identical(model, _viewModel)) return;
+    _confirmationOpen = false;
+    if (!confirmed) return;
+    final removed = await model.removeFriend(friend.id);
+    if (!mounted ||
+        !identical(model, _viewModel) ||
+        !removed ||
+        !(ModalRoute.of(context)?.isCurrent ?? true)) {
+      return;
+    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(context.l10n.friendRemoveSuccess(friend.displayName)),
+      ),
+    );
   }
 
   @override
@@ -109,14 +163,42 @@ class _FriendsListScreenState extends State<FriendsListScreen> {
                     separatorBuilder: (_, _) => const SizedBox(height: 8),
                     itemBuilder: (context, index) {
                       final friend = friends[index];
-                      return UserRow(
-                        key: ValueKey('friend-${friend.id}'),
-                        user: friend,
-                        onTap: () {
-                          if (ModalRoute.of(context)?.isCurrent ?? true) {
-                            widget.onUserSelected(friend.id);
-                          }
-                        },
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          UserRow(
+                            key: ValueKey('friend-${friend.id}'),
+                            user: friend,
+                            trailing: model.canRemoveFriends
+                                ? FriendRemovalAction(
+                                    key: ValueKey('remove-friend-${friend.id}'),
+                                    name: friend.displayName,
+                                    removing: model.isRemoving(friend.id),
+                                    onPressed: model.isLoading
+                                        ? null
+                                        : () => _removeFriend(friend),
+                                  )
+                                : null,
+                            onTap: () {
+                              if (ModalRoute.of(context)?.isCurrent ?? true) {
+                                widget.onUserSelected(friend.id);
+                              }
+                            },
+                          ),
+                          if (model.removalError(friend.id) case final error?)
+                            Padding(
+                              padding: const EdgeInsets.all(12),
+                              child: Semantics(
+                                liveRegion: true,
+                                child: Text(
+                                  error,
+                                  style: TextStyle(
+                                    color: Theme.of(context).colorScheme.error,
+                                  ),
+                                ),
+                              ),
+                            ),
+                        ],
                       );
                     },
                   ),

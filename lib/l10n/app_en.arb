@@ -2,6 +2,7 @@
   "@@locale": "en",
   "appTitle": "AProp!",
   "profileTitleFallback": "Profile",
+  "profileFindPeople": "Find people",
   "profilePeopleSearchSoon": "People search coming soon",
   "settingsTooltip": "Settings",
   "profileLoading": "Loading profile",
@@ -110,6 +111,8 @@
   "settingsDarkThemeSoon": "Dark theme coming soon",
   "settingsGroupPrivacy": "PRIVACY",
   "settingsShowMyPlans": "Show my plans",
+  "settingsPlansShared": "Sharing with friends is on",
+  "settingsPlansPrivate": "Sharing with friends is off",
   "settingsShowMyPlansHint": "Friends can see what you sign up for",
   "settingsBlockedUsers": "Blocked users",
   "settingsGroupNotifications": "NOTIFICATIONS",
@@ -129,6 +132,14 @@
   "settingsSigningOut": "Signing out…",
   "settingsSignOut": "Sign out",
   "settingsDeleteAccount": "Delete account",
+  "settingsDeleteAccountHint": "Type it here",
+  "settingsDeletingAccount": "Deleting the account…",
+  "settingsDeleteAccountTitle": "Delete your account?",
+  "settingsDeleteAccountBody": "Your profile, photo, plans, the activities you created, ratings, friends and notices will be erased, and so will your sign-in account. This can’t be undone.",
+  "settingsDeleteAccountTypeWord": "To confirm, type {word}:",
+  "settingsDeleteAccountWord": "DELETE",
+  "settingsDeleteAccountConfirm": "Delete the account",
+  "settingsDeleteAccountError": "We couldn’t delete the account. Please try again.",
   "settingsLoadError": "We couldn’t load your settings. Please try again.",
   "settingsSaveError": "We couldn’t save the change. Please try again.",
   "settingsSignOutError": "We couldn’t sign you out. Please try again.",
@@ -266,6 +277,8 @@
   "notifMessageSocialPerson": "You have a social alert related to {name}.",
   "notifMessageSocial": "You have a new social alert.",
   "notifMessageOther": "You have a new alert.",
+  "notifMessageCancelledFor": "«{title}» has been cancelled.",
+  "notifMessageCancelled": "An activity you signed up for has been cancelled.",
   "pushView": "View",
   "notifMessagePublished": "{name} published “{title}”.",
   "notifMessageEnrolled": "{name} signed up for “{title}”.",
@@ -311,6 +324,14 @@
       }
     }
   },
+  "notifViewFriendProfile": "View the profile of {name}",
+  "@notifViewFriendProfile": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "notifAccept": "Accept",
   "notifDecline": "Decline",
   "notifRequestAccepted": "Request accepted",
@@ -329,6 +350,11 @@
   "interestTestDislike": "Not interested",
   "interestTestLoadError": "We couldn’t load the test. Please try again.",
   "interestTestSaveError": "We couldn’t save your answers. Please try again.",
+  "interestTestSkip": "Later",
+  "interestTestContinue": "Continue",
+  "interestTestReadMore": "Read more",
+  "interestTestReadLess": "Read less",
+  "interestTestLeaveWithoutSaving": "Leave without saving",
   "ratingDeleteTitle": "Delete your rating?",
   "ratingDeleteBody": "Your rating will be deleted and you’ll be able to rate the activity again.",
   "cancel": "Cancel",
@@ -351,7 +377,14 @@
   "ratingGone": "This rating no longer exists.",
   "agendaLoading": "Loading your agenda",
   "agendaEmptyDay": "You have no plans for this day.",
+  "agendaEmptyAll": "You haven’t signed up for any plans yet.",
+  "agendaEmptyUpcoming": "You have no upcoming plans.",
   "agendaEmptyHint": "Sign up for activities from Home and you’ll see them here.",
+  "agendaDayOfTotal": "Day {day} of {total}",
+  "actPastEvent": "This activity has already taken place",
+  "agendaUpcomingTitle": "Upcoming plans",
+  "agendaPastSection": "Past plans ({count})",
+  "agendaCloseDaySheet": "Close day plans",
   "agendaLoadError": "We couldn’t load your agenda. Please try again.",
   "attendanceQuestion": "How did it go?",
   "attendanceHint": "Tell us whether you went. Only people who went can rate the activity.",
@@ -359,6 +392,12 @@
   "attendanceNo": "I didn’t go",
   "attendanceLater": "Later",
   "attendanceSaveError": "We couldn’t save your answer. Please try again.",
+  "attendanceShowMore": "Show {count} more",
+  "attendanceShowLess": "Show less",
+  "attendanceThanksYes": "Thanks! You can now rate «{title}».",
+  "attendanceThanksNo": "OK, we won’t ask you again.",
+  "attendanceNotStarted": "This activity hasn’t started yet.",
+  "attendanceNotEnrolled": "You are no longer signed up.",
   "agendaPublishedBy": "Published by {name}",
   "agendaSourceOfficial": "Source: Agenda Cultural · Generalitat",
   "agendaPreviousMonth": "Previous month",
@@ -608,5 +647,91 @@
   "userSearchLoaded": "{count, plural, =1{1 person loaded} other{{count} people loaded}}",
   "userSearchLoadMore": "Load more people",
   "userSearchMoreError": "We couldn’t load more people. Try again.",
-  "userSearchTooLong": "Search can contain up to {limit} characters."
+  "userSearchTooLong": "Search can contain up to {limit} characters.",
+  "friendRemove": "Remove friend",
+  "friendRemoveTitle": "Remove this friend?",
+  "friendRemoveMessage": "Do you want to remove {name} from your friends?",
+  "@friendRemoveMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "friendRemoveSuccess": "You removed {name} from your friends.",
+  "@friendRemoveSuccess": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "friendRemoveError": "We couldn’t remove this friend. Try again.",
+  "friendRemoving": "Removing friend",
+  "friendRemoveFrom": "Remove {name} from your friends",
+  "@friendRemoveFrom": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "friendOptions": "Friendship options",
+  "languagePickerTitle": "Choose your language",
+  "languagePickerSubtitle": "You can change it anytime from settings.",
+  "languagePickerContinue": "Continue",
+  "languagePickerSelectedSemantics": "Selected language",
+  "blockedLoading": "Loading blocked users",
+  "blockedLoadError": "We couldn’t load blocked users. Try again.",
+  "blockedEmptyTitle": "You have no blocked users",
+  "blockedEmptyMessage": "People you block will appear here.",
+  "userBlock": "Block",
+  "userUnblock": "Unblock",
+  "userBlocking": "Blocking user",
+  "userUnblocking": "Unblocking user",
+  "userBlockTitle": "Block {name}?",
+  "@userBlockTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "userUnblockTitle": "Unblock {name}?",
+  "@userUnblockTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "userBlockMessage": "You won’t be able to send each other friend requests. If you are friends, the friendship will be removed.",
+  "userUnblockMessage": "Unblocking does not restore the previous friendship.",
+  "userBlockError": "We couldn’t block this user. Try again.",
+  "userUnblockError": "We couldn’t unblock this user. Try again.",
+  "userBlockSuccess": "You blocked {name}.",
+  "@userBlockSuccess": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "userUnblockSuccess": "You unblocked {name}.",
+  "@userUnblockSuccess": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "userUnblockFrom": "Unblock {name}",
+  "@userUnblockFrom": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "userBlockedState": "You have blocked this user."
 }

@@ -4,9 +4,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../l10n/app_localizations.dart';
 
 /// Holds the UI language. Changing it rebuilds the app at once and is stored
-/// locally; syncing with the account is the settings screen's job.
+/// locally; syncing with the account is handled on login and in Settings.
 class LocaleController extends ChangeNotifier {
-  LocaleController({Locale? initial}) : _locale = initial ?? defaultLocale;
+  LocaleController({Locale? initial, bool needsInitialSelection = false})
+    : _locale = initial ?? defaultLocale,
+      _needsSelection = needsInitialSelection;
 
   static const defaultLocale = Locale('ca');
   static const _key = 'ui-language';
@@ -15,24 +17,57 @@ class LocaleController extends ChangeNotifier {
   // shortcut: global, mirrors the last controller created; fine for one app.
   static Locale active = defaultLocale;
 
+  /// Returns the matching supported [Locale] for an ISO 639-1 [code], or
+  /// `null` when absent or unsupported.
+  static Locale? supportedLocaleFor(String? code) {
+    if (code == null) return null;
+    final normalized = code.trim().toLowerCase();
+    return AppLocalizations.supportedLocales
+        .where((l) => l.languageCode == normalized)
+        .firstOrNull;
+  }
+
   Locale _locale;
   Locale get locale => _locale;
 
+  bool _needsSelection;
+
+  /// True on the very first launch (after [load] finds no valid stored choice)
+  /// until the user confirms a language via [setLocale].
+  bool get needsInitialSelection => _needsSelection;
+
   /// Reads the stored language; falls back to Catalan if absent or unknown.
+  /// Marks [needsInitialSelection] when no valid preference is stored yet.
   Future<void> load() async {
     try {
       final code = (await SharedPreferences.getInstance()).getString(_key);
-      final stored = AppLocalizations.supportedLocales
-          .where((l) => l.languageCode == code)
-          .firstOrNull;
+      final stored = supportedLocaleFor(code);
+      _needsSelection = stored == null;
       _apply(stored ?? defaultLocale);
     } catch (_) {
+      _needsSelection = false;
       _apply(_locale);
     }
   }
 
+  /// Skips the first-launch picker (e.g. an already signed-in user updating the
+  /// app); the language is then taken from the profile sync.
+  void skipInitialSelection() {
+    if (!_needsSelection) return;
+    _needsSelection = false;
+    notifyListeners();
+  }
+
+  /// Applies [locale] immediately without persisting or closing the initial
+  /// language picker (used for live preview while choosing on first launch).
+  void previewLocale(Locale locale) {
+    if (!AppLocalizations.supportedLocales.contains(locale)) return;
+    _apply(locale);
+  }
+
   Future<void> setLocale(Locale locale) async {
     if (!AppLocalizations.supportedLocales.contains(locale)) return;
+    _needsSelection = false;
     _apply(locale);
     try {
       await (await SharedPreferences.getInstance()).setString(

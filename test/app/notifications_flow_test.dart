@@ -49,6 +49,7 @@ void main() {
     await tester.pumpWidget(
       APropApp(
         authRepository: auth,
+        activityClock: () => DateTime(2026, 9, 26, 9),
         enrollmentRepository: enrollments,
         notificationRepository: useDemo ? null : notices,
       ),

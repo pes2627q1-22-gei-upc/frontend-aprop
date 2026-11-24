@@ -16,6 +16,9 @@ class AppLocalizationsCa extends AppLocalizations {
   String get profileTitleFallback => 'Perfil';
 
   @override
+  String get profileFindPeople => 'Cerca persones';
+
+  @override
   String get profilePeopleSearchSoon =>
       'Cerca de persones disponible properament';
 
@@ -397,6 +400,12 @@ class AppLocalizationsCa extends AppLocalizations {
   String get settingsShowMyPlansHint => 'Els amics veuen a què t’apuntes';
 
   @override
+  String get settingsPlansShared => 'Compartició amb amics activada';
+
+  @override
+  String get settingsPlansPrivate => 'Compartició amb amics desactivada';
+
+  @override
   String get settingsBlockedUsers => 'Usuaris bloquejats';
 
   @override
@@ -451,6 +460,34 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get settingsDeleteAccount => 'Eliminar compte';
+
+  @override
+  String get settingsDeleteAccountHint => 'Escriu-ho aquí';
+
+  @override
+  String get settingsDeletingAccount => 'Eliminant el compte…';
+
+  @override
+  String get settingsDeleteAccountTitle => 'Vols eliminar el compte?';
+
+  @override
+  String get settingsDeleteAccountBody =>
+      'S’esborraran el teu perfil, la foto, els plans, les activitats que has creat, les valoracions, els amics i els avisos, i també el compte per iniciar sessió. No es pot desfer.';
+
+  @override
+  String settingsDeleteAccountTypeWord(String word) {
+    return 'Per confirmar-ho, escriu $word:';
+  }
+
+  @override
+  String get settingsDeleteAccountWord => 'ELIMINAR';
+
+  @override
+  String get settingsDeleteAccountConfirm => 'Eliminar el compte';
+
+  @override
+  String get settingsDeleteAccountError =>
+      'No hem pogut eliminar el compte. Torna-ho a provar.';
 
   @override
   String get settingsLoadError =>
@@ -998,6 +1035,15 @@ class AppLocalizationsCa extends AppLocalizations {
   String get notifMessageOther => 'Tens un nou avís.';
 
   @override
+  String notifMessageCancelledFor(String title) {
+    return 'S’ha cancel·lat «$title».';
+  }
+
+  @override
+  String get notifMessageCancelled =>
+      'S’ha cancel·lat una activitat on t’havies apuntat.';
+
+  @override
   String get pushView => 'Veure';
 
   @override
@@ -1114,6 +1160,11 @@ class AppLocalizationsCa extends AppLocalizations {
   }
 
   @override
+  String notifViewFriendProfile(String name) {
+    return 'Veure el perfil de $name';
+  }
+
+  @override
   String get notifAccept => 'Acceptar';
 
   @override
@@ -1172,6 +1223,21 @@ class AppLocalizationsCa extends AppLocalizations {
   @override
   String get interestTestSaveError =>
       'No hem pogut desar les respostes. Torna-ho a provar.';
+
+  @override
+  String get interestTestSkip => 'Més tard';
+
+  @override
+  String get interestTestContinue => 'Continua';
+
+  @override
+  String get interestTestReadMore => 'Llegir més';
+
+  @override
+  String get interestTestReadLess => 'Llegir menys';
+
+  @override
+  String get interestTestLeaveWithoutSaving => 'Sortir sense desar';
 
   @override
   String get ratingDeleteTitle => 'Eliminar la valoració?';
@@ -1260,8 +1326,33 @@ class AppLocalizationsCa extends AppLocalizations {
   String get agendaEmptyDay => 'No tens cap pla per a aquest dia.';
 
   @override
+  String get agendaEmptyAll => 'Encara no t’has apuntat a cap pla.';
+
+  @override
+  String get agendaEmptyUpcoming => 'No tens cap pla proper.';
+
+  @override
   String get agendaEmptyHint =>
       'Apunta’t a activitats des d’Inici i les veuràs aquí.';
+
+  @override
+  String agendaDayOfTotal(int day, int total) {
+    return 'Dia $day de $total';
+  }
+
+  @override
+  String get actPastEvent => 'Aquesta activitat ja ha passat';
+
+  @override
+  String get agendaUpcomingTitle => 'Propers plans';
+
+  @override
+  String agendaPastSection(int count) {
+    return 'Plans passats ($count)';
+  }
+
+  @override
+  String get agendaCloseDaySheet => 'Tancar els plans del dia';
 
   @override
   String get agendaLoadError =>
@@ -1286,6 +1377,28 @@ class AppLocalizationsCa extends AppLocalizations {
   @override
   String get attendanceSaveError =>
       'No hem pogut desar la resposta. Torna-ho a provar.';
+
+  @override
+  String attendanceShowMore(int count) {
+    return 'Veure’n $count més';
+  }
+
+  @override
+  String get attendanceShowLess => 'Veure’n menys';
+
+  @override
+  String attendanceThanksYes(String title) {
+    return 'Gràcies! Ja pots valorar «$title».';
+  }
+
+  @override
+  String get attendanceThanksNo => 'D’acord, no t’ho tornarem a preguntar.';
+
+  @override
+  String get attendanceNotStarted => 'Aquesta activitat encara no ha començat.';
+
+  @override
+  String get attendanceNotEnrolled => 'Ja no hi estàs apuntat.';
 
   @override
   String agendaPublishedBy(String name) {
@@ -2182,4 +2295,118 @@ class AppLocalizationsCa extends AppLocalizations {
   String userSearchTooLong(int limit) {
     return 'La cerca pot tenir com a màxim $limit caràcters.';
   }
+
+  @override
+  String get friendRemove => 'Eliminar amistat';
+
+  @override
+  String get friendRemoveTitle => 'Eliminar aquesta amistat?';
+
+  @override
+  String friendRemoveMessage(String name) {
+    return 'Vols eliminar l’amistat amb $name?';
+  }
+
+  @override
+  String friendRemoveSuccess(String name) {
+    return 'Has eliminat l’amistat amb $name.';
+  }
+
+  @override
+  String get friendRemoveError =>
+      'No hem pogut eliminar l’amistat. Torna-ho a provar.';
+
+  @override
+  String get friendRemoving => 'Eliminant l’amistat';
+
+  @override
+  String friendRemoveFrom(String name) {
+    return 'Eliminar l’amistat amb $name';
+  }
+
+  @override
+  String get friendOptions => 'Opcions d’amistat';
+
+  @override
+  String get languagePickerTitle => 'Tria el teu idioma';
+
+  @override
+  String get languagePickerSubtitle =>
+      'Pots canviar-lo quan vulguis des de la configuració.';
+
+  @override
+  String get languagePickerContinue => 'Continua';
+
+  @override
+  String get languagePickerSelectedSemantics => 'Idioma seleccionat';
+
+  @override
+  String get blockedLoading => 'Carregant usuaris bloquejats';
+
+  @override
+  String get blockedLoadError =>
+      'No hem pogut carregar els usuaris bloquejats. Torna-ho a provar.';
+
+  @override
+  String get blockedEmptyTitle => 'No tens usuaris bloquejats';
+
+  @override
+  String get blockedEmptyMessage =>
+      'Els usuaris que bloquegis apareixeran aquí.';
+
+  @override
+  String get userBlock => 'Bloquejar';
+
+  @override
+  String get userUnblock => 'Desbloquejar';
+
+  @override
+  String get userBlocking => 'Bloquejant l’usuari';
+
+  @override
+  String get userUnblocking => 'Desbloquejant l’usuari';
+
+  @override
+  String userBlockTitle(String name) {
+    return 'Bloquejar $name?';
+  }
+
+  @override
+  String userUnblockTitle(String name) {
+    return 'Desbloquejar $name?';
+  }
+
+  @override
+  String get userBlockMessage =>
+      'No us podreu enviar sol·licituds d’amistat. Si ja sou amics, l’amistat s’eliminarà.';
+
+  @override
+  String get userUnblockMessage =>
+      'Desbloquejar no recupera l’amistat anterior.';
+
+  @override
+  String get userBlockError =>
+      'No hem pogut bloquejar l’usuari. Torna-ho a provar.';
+
+  @override
+  String get userUnblockError =>
+      'No hem pogut desbloquejar l’usuari. Torna-ho a provar.';
+
+  @override
+  String userBlockSuccess(String name) {
+    return 'Has bloquejat $name.';
+  }
+
+  @override
+  String userUnblockSuccess(String name) {
+    return 'Has desbloquejat $name.';
+  }
+
+  @override
+  String userUnblockFrom(String name) {
+    return 'Desbloquejar $name';
+  }
+
+  @override
+  String get userBlockedState => 'Has bloquejat aquest usuari.';
 }

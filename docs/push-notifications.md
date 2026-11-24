@@ -1,6 +1,6 @@
 # Notificacions push (#265)
 
-> Tasca #276 (front). Backend: #275 (Arnau, `feature/push-notifications`), encara no fusionat. Decisions a DP-072.
+> Tasca #276 (front). Backend: #275 (Arnau), fusionat a `develop` d’`api-aprop` (PR #77). Decisions a DP-072.
 
 ## Criteris d'acceptació proposats
 

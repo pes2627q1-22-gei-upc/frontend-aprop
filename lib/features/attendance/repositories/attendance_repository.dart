@@ -15,6 +15,15 @@ abstract interface class AttendanceRepository {
   });
 }
 
+/// Why the server refused an answer.
+enum AttendanceFailure implements Exception {
+  /// The activity has not started yet (R8, 409).
+  notStarted,
+
+  /// The person is no longer signed up (404).
+  notEnrolled,
+}
+
 /// Where the answers «No hi vaig anar» are kept on this device.
 abstract interface class AttendanceMemory {
   Future<bool> saidNo({required String userId, required String activityId});

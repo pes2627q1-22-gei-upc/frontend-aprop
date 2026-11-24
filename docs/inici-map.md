@@ -30,8 +30,10 @@
   web Google no ho fa, i així es veu igual a la web i al mòbil. La llegenda l'explica («On ets tu»).
 - **Botó «La meva ubicació»**, rodó, a baix a la dreta, per sobre d'«Assistent» (també puja amb la targeta).
   En prémer-lo, el mapa va on és la persona amb zoom 14 com a mínim, i es carreguen les activitats d'aquella zona.
-- **Permís**: només es demana en prémer el botó, mai en obrir el mapa. Si ja s'havia donat, el punt surt sol.
-  Si no es pot, un avís diu per què:
+- **En obrir el Mapa** (#266, DP-074): el primer cop que es veu la pestanya es demana el permís i, si es dona, el
+  mapa mostra uns 5 km al voltant de la persona. Si el GPS tarda, s'hi apropa quan arriba la posició (durant 30 s);
+  si mentrestant es prem «La meva ubicació», mana el botó. Sense permís es queda a Catalunya, sense cap avís.
+- **Permís**: si ja s'havia donat, el punt surt sol. En prémer el botó, si no es pot, un avís diu per què:
   - permís denegat: cal permetre-ho;
   - denegat per sempre: botó «Configuració» al mòbil; a la web, s'explica que es fa des de la icona del costat de
     l'adreça;
@@ -100,3 +102,7 @@ On ets: `user_location_view_model_test.dart` (sense preguntar si ja hi ha permí
 motiu de no poder, temps esgotat, error i deixar d'escoltar) i el grup «La meva ubicació» de
 `activities_map_test.dart` (punt i cercle, llegenda, permís i avisos amb «Configuració» o «Activar»).
 A les proves, `test/flutter_test_config.dart` substitueix el mapa per un espai buit.
+
+## Zoom en obrir el mapa (DP-074)
+
+En obrir la pestanya Mapa per primer cop, `ActivitiesMap` demana el permís d'ubicació (si cal) i, si es dona, mostra uns 5 km al voltant de la persona (`boundsAround`). El zoom mínim (`minimumZoomFor`) fa que el món ompli el mapa: es pot veure sencer, però no es repeteix ni queden franges grises. Proves a `activities_map_test.dart` (zoom mínim i requadre) i `test/app/map_open_location_test.dart` (permís en obrir la pestanya, una sola vegada).

@@ -32,12 +32,17 @@ void main() {
       expect(q('events?x=1'), {'x': '1', 'lang': 'es'});
       expect(q('users/u1/events'), {'lang': 'es'});
       expect(q('users/me/created-events'), {'lang': 'es'});
+      expect(q('preferences/test'), {'lang': 'es'});
+      expect(q('/preferences/test'), {'lang': 'es'});
+      expect(q('preferences/test/status'), isEmpty);
       expect(q('users/me/events/extra'), isEmpty);
       language = 'en';
       expect(q('events/12'), {'lang': 'en'});
+      expect(q('preferences/test'), {'lang': 'en'});
       expect(q('users/me'), isEmpty);
       // Només les lectures (GET) en porten.
       expect(client.resolveUri('events').queryParameters, isEmpty);
+      expect(client.resolveUri('preferences/test').queryParameters, isEmpty);
       expect(
         ApiClient(baseUrl: Uri.parse('https://x.test/'))
             .resolveUri('events', null, true)

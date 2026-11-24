@@ -1,6 +1,7 @@
 import '../../../core/network/api_client.dart';
 import '../models/activity.dart';
 import '../models/activity_search_page.dart';
+import '../models/activity_start.dart';
 import '../models/discovery_feed.dart';
 import '../repositories/discovery_repository.dart';
 import 'activity_json_mapper.dart';
@@ -11,12 +12,15 @@ class HttpDiscoveryRepository implements DiscoveryRepository {
     required this.apiClient,
     this.searchPageSize = 20,
     this.feedPageSize = 5,
-  }) : assert(searchPageSize > 0),
+    DateTime Function()? clock,
+  }) : _clock = clock ?? DateTime.now,
+       assert(searchPageSize > 0),
        assert(feedPageSize > 0);
 
   final ApiClient apiClient;
   final int searchPageSize;
   final int feedPageSize;
+  final DateTime Function() _clock;
 
   Future<Map<String, String>> _headers() async {
     final headers = Map<String, String>.unmodifiable(
@@ -135,11 +139,13 @@ class HttpDiscoveryRepository implements DiscoveryRepository {
       throw const FormatException('Expected activities');
     }
     final activities = <String, Activity>{};
+    final now = _clock();
     for (final row in decoded) {
       if (row is! Map<String, Object?>) {
         throw const FormatException('Expected an activity');
       }
       final activity = activityFromJson(row);
+      if (activityHasEnded(activity, now)) continue;
       activities.putIfAbsent(activity.id, () => activity);
     }
     return List.unmodifiable(activities.values);

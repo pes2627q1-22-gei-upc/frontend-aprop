@@ -154,6 +154,15 @@ class DemoAuthRepository implements AuthRepository {
     _setCurrentUser(null);
   }
 
+  /// Esborra el compte d'aquesta execució: ja no s'hi pot tornar a entrar. Els
+  /// comptes d'exemple tornen en reiniciar l'app.
+  @override
+  Future<void> deleteAccount() async {
+    final user = _requireCurrentUser();
+    _accounts.removeWhere((_, account) => account.user.id == user.id);
+    _setCurrentUser(null);
+  }
+
   AppUser _requireCurrentUser() {
     return _currentUser ?? (throw StateError('No hi ha cap sessió iniciada.'));
   }

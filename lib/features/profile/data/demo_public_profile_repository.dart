@@ -4,7 +4,7 @@ import '../models/public_profile.dart';
 import '../models/user_profile.dart';
 import '../models/user_summary.dart';
 import '../repositories/public_profile_repository.dart';
-import 'demo_friendship_repository.dart';
+import '../repositories/friendship_repository.dart';
 
 /// Example people of the demo data: the creator of the catalogue's community
 /// activity and the people in the example notices.
@@ -15,13 +15,17 @@ class DemoPublicProfileRepository implements PublicProfileRepository {
     this.friendshipRepository,
     this.currentUserId,
   });
-  final DemoFriendshipRepository? friendshipRepository;
+  final FriendshipRepository? friendshipRepository;
   final String? Function()? currentUserId;
 
   bool _accepted(String peer) {
     final viewer = currentUserId?.call();
+    if (viewer != null &&
+        friendshipRepository?.isBlocked(viewer, peer) == true) {
+      _sentRequests.remove('$viewer/$peer');
+    }
     return viewer != null &&
-        (friendshipRepository?.hasAccepted(viewer, peer) ?? false);
+        friendshipRepository?.confirmedFriendship(viewer, peer) == true;
   }
 
   final ActivityRepository activityRepository;
@@ -107,21 +111,28 @@ class DemoPublicProfileRepository implements PublicProfileRepository {
     final id = _id(userId);
     final person = _people[id];
     if (person == null) throw const PublicProfileNotFound();
+    final viewer = currentUserId?.call();
+    final removed =
+        viewer != null &&
+        friendshipRepository?.confirmedFriendship(viewer, id) == false;
     final plans = id == 'demo-laiasoler' ? _laiaPlans.length : 0;
     return PublicProfile(
       profile: UserProfile(
-        userId: userId,
+        userId: id,
         displayName: person.name,
         username: person.username,
         biography: person.biography,
         avatarAsset: person.avatar,
         planCount: plans,
-        friendCount: person.friends + (_accepted(id) ? 1 : 0),
+        friendCount:
+            person.friends +
+            (_accepted(id) ? 1 : 0) -
+            (removed && person.isFriend ? 1 : 0),
         organizerRating: person.rating,
         progress: const ProfileProgress(level: null, experience: 0),
       ),
-      isFriend: person.isFriend || _accepted(id),
-      plansVisible: person.plansVisible,
+      isFriend: !removed && (person.isFriend || _accepted(id)),
+      plansVisible: !removed && person.plansVisible,
     );
   }
 
@@ -141,7 +152,15 @@ class DemoPublicProfileRepository implements PublicProfileRepository {
     final id = _id(userId);
     final person = _people[id];
     if (person == null) throw const PublicProfileNotFound();
-    if (person.isFriend || _accepted(id)) {
+    final viewer = currentUserId?.call();
+    if (viewer != null && friendshipRepository?.isBlocked(viewer, id) == true) {
+      _sentRequests.remove('$viewer/$id');
+      return FriendRequestResult.blocked;
+    }
+    final removed =
+        viewer != null &&
+        friendshipRepository?.confirmedFriendship(viewer, id) == false;
+    if (!removed && (person.isFriend || _accepted(id))) {
       return FriendRequestResult.alreadyFriends;
     }
     return _sentRequests.add('${currentUserId?.call() ?? ''}/$id')
@@ -152,7 +171,10 @@ class DemoPublicProfileRepository implements PublicProfileRepository {
   @override
   Future<List<Activity>> getPastPlans(String userId) async {
     final id = _id(userId);
-    if (!(_people[id]?.plansVisible ?? false)) {
+    final viewer = currentUserId?.call();
+    if (!(_people[id]?.plansVisible ?? false) ||
+        (viewer != null &&
+            friendshipRepository?.confirmedFriendship(viewer, id) == false)) {
       throw StateError('These plans are private');
     }
     if (id != 'demo-laiasoler') return const [];

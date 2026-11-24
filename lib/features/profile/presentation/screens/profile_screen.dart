@@ -15,11 +15,15 @@ class ProfileScreen extends StatefulWidget {
     required this.onSettingsPressed,
     required this.onActivitySelected,
     this.onSharePressed,
+    this.onFindPeople,
     this.onFriendsPressed,
   });
   final ProfileViewModel viewModel;
   final VoidCallback onSettingsPressed;
   final VoidCallback? onSharePressed;
+
+  /// Opens the people search (#162). Without it the icon stays disabled.
+  final VoidCallback? onFindPeople;
   final ValueChanged<String> onActivitySelected;
 
   /// Opens your friends list (#54).
@@ -62,13 +66,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
       ),
       actions: [
-        Tooltip(
-          message: context.l10n.profilePeopleSearchSoon,
-          child: const IconButton(
-            onPressed: null,
-            icon: Icon(Icons.person_add_alt_1_outlined),
+        if (widget.onFindPeople case final find?)
+          IconButton(
+            key: const ValueKey('profile-find-people'),
+            tooltip: context.l10n.profileFindPeople,
+            onPressed: find,
+            icon: const Icon(Icons.person_add_alt_1_outlined),
+          )
+        else
+          Tooltip(
+            message: context.l10n.profilePeopleSearchSoon,
+            child: const IconButton(
+              onPressed: null,
+              icon: Icon(Icons.person_add_alt_1_outlined),
+            ),
           ),
-        ),
         IconButton(
           tooltip: context.l10n.settingsTooltip,
           onPressed: widget.onSettingsPressed,

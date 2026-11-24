@@ -2,6 +2,7 @@
   "@@locale": "ca",
   "appTitle": "AProp!",
   "profileTitleFallback": "Perfil",
+  "profileFindPeople": "Cerca persones",
   "profilePeopleSearchSoon": "Cerca de persones disponible properament",
   "settingsTooltip": "Configuració",
   "profileLoading": "Carregant el perfil",
@@ -232,6 +233,8 @@
   "settingsGroupPrivacy": "PRIVACITAT",
   "settingsShowMyPlans": "Mostrar els meus plans",
   "settingsShowMyPlansHint": "Els amics veuen a què t’apuntes",
+  "settingsPlansShared": "Compartició amb amics activada",
+  "settingsPlansPrivate": "Compartició amb amics desactivada",
   "settingsBlockedUsers": "Usuaris bloquejats",
   "settingsGroupNotifications": "NOTIFICACIONS",
   "settingsReminders": "Recordatoris",
@@ -250,6 +253,21 @@
   "settingsSigningOut": "Tancant sessió…",
   "settingsSignOut": "Tancar sessió",
   "settingsDeleteAccount": "Eliminar compte",
+  "settingsDeleteAccountHint": "Escriu-ho aquí",
+  "settingsDeletingAccount": "Eliminant el compte…",
+  "settingsDeleteAccountTitle": "Vols eliminar el compte?",
+  "settingsDeleteAccountBody": "S’esborraran el teu perfil, la foto, els plans, les activitats que has creat, les valoracions, els amics i els avisos, i també el compte per iniciar sessió. No es pot desfer.",
+  "settingsDeleteAccountTypeWord": "Per confirmar-ho, escriu {word}:",
+  "@settingsDeleteAccountTypeWord": {
+    "placeholders": {
+      "word": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsDeleteAccountWord": "ELIMINAR",
+  "settingsDeleteAccountConfirm": "Eliminar el compte",
+  "settingsDeleteAccountError": "No hem pogut eliminar el compte. Torna-ho a provar.",
   "settingsLoadError": "No hem pogut carregar la configuració. Torna-ho a provar.",
   "settingsSaveError": "No hem pogut desar el canvi. Torna-ho a provar.",
   "settingsSignOutError": "No hem pogut tancar la sessió. Torna-ho a provar.",
@@ -652,6 +670,15 @@
   },
   "notifMessageSocial": "Tens un nou avís social.",
   "notifMessageOther": "Tens un nou avís.",
+  "notifMessageCancelledFor": "S’ha cancel·lat «{title}».",
+  "@notifMessageCancelledFor": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "notifMessageCancelled": "S’ha cancel·lat una activitat on t’havies apuntat.",
   "pushView": "Veure",
   "notifMessagePublished": "{name} ha publicat “{title}”.",
   "@notifMessagePublished": {
@@ -738,6 +765,14 @@
       }
     }
   },
+  "notifViewFriendProfile": "Veure el perfil de {name}",
+  "@notifViewFriendProfile": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "notifAccept": "Acceptar",
   "notifDecline": "Rebutjar",
   "notifRequestAccepted": "Sol·licitud acceptada",
@@ -766,6 +801,11 @@
   "interestTestDislike": "No m’interessa",
   "interestTestLoadError": "No hem pogut carregar el test. Torna-ho a provar.",
   "interestTestSaveError": "No hem pogut desar les respostes. Torna-ho a provar.",
+  "interestTestSkip": "Més tard",
+  "interestTestContinue": "Continua",
+  "interestTestReadMore": "Llegir més",
+  "interestTestReadLess": "Llegir menys",
+  "interestTestLeaveWithoutSaving": "Sortir sense desar",
   "ratingDeleteTitle": "Eliminar la valoració?",
   "ratingDeleteBody": "La teva valoració s’eliminarà i podràs tornar a valorar l’activitat.",
   "cancel": "Cancel·la",
@@ -823,7 +863,22 @@
   "ratingGone": "La valoració ja no existeix.",
   "agendaLoading": "Carregant la teva agenda",
   "agendaEmptyDay": "No tens cap pla per a aquest dia.",
+  "agendaEmptyAll": "Encara no t’has apuntat a cap pla.",
+  "agendaEmptyUpcoming": "No tens cap pla proper.",
   "agendaEmptyHint": "Apunta’t a activitats des d’Inici i les veuràs aquí.",
+  "agendaDayOfTotal": "Dia {day} de {total}",
+  "@agendaDayOfTotal": {"placeholders": {"day": {"type": "int"}, "total": {"type": "int"}}},
+  "actPastEvent": "Aquesta activitat ja ha passat",
+  "agendaUpcomingTitle": "Propers plans",
+  "agendaPastSection": "Plans passats ({count})",
+  "@agendaPastSection": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "agendaCloseDaySheet": "Tancar els plans del dia",
   "agendaLoadError": "No hem pogut carregar la teva agenda. Torna-ho a provar.",
   "attendanceQuestion": "Com va anar?",
   "attendanceHint": "Digues-nos si hi vas anar. Només qui hi va anar pot valorar l’activitat.",
@@ -831,6 +886,26 @@
   "attendanceNo": "No hi vaig anar",
   "attendanceLater": "Més tard",
   "attendanceSaveError": "No hem pogut desar la resposta. Torna-ho a provar.",
+  "attendanceShowMore": "Veure’n {count} més",
+  "@attendanceShowMore": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "attendanceShowLess": "Veure’n menys",
+  "attendanceThanksYes": "Gràcies! Ja pots valorar «{title}».",
+  "@attendanceThanksYes": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "attendanceThanksNo": "D’acord, no t’ho tornarem a preguntar.",
+  "attendanceNotStarted": "Aquesta activitat encara no ha començat.",
+  "attendanceNotEnrolled": "Ja no hi estàs apuntat.",
   "agendaPublishedBy": "Publicat per {name}",
   "@agendaPublishedBy": {
     "placeholders": {
@@ -1248,5 +1323,91 @@
         "type": "int"
       }
     }
-  }
+  },
+  "friendRemove": "Eliminar amistat",
+  "friendRemoveTitle": "Eliminar aquesta amistat?",
+  "friendRemoveMessage": "Vols eliminar l’amistat amb {name}?",
+  "@friendRemoveMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "friendRemoveSuccess": "Has eliminat l’amistat amb {name}.",
+  "@friendRemoveSuccess": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "friendRemoveError": "No hem pogut eliminar l’amistat. Torna-ho a provar.",
+  "friendRemoving": "Eliminant l’amistat",
+  "friendRemoveFrom": "Eliminar l’amistat amb {name}",
+  "@friendRemoveFrom": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "friendOptions": "Opcions d’amistat",
+  "languagePickerTitle": "Tria el teu idioma",
+  "languagePickerSubtitle": "Pots canviar-lo quan vulguis des de la configuració.",
+  "languagePickerContinue": "Continua",
+  "languagePickerSelectedSemantics": "Idioma seleccionat",
+  "blockedLoading": "Carregant usuaris bloquejats",
+  "blockedLoadError": "No hem pogut carregar els usuaris bloquejats. Torna-ho a provar.",
+  "blockedEmptyTitle": "No tens usuaris bloquejats",
+  "blockedEmptyMessage": "Els usuaris que bloquegis apareixeran aquí.",
+  "userBlock": "Bloquejar",
+  "userUnblock": "Desbloquejar",
+  "userBlocking": "Bloquejant l’usuari",
+  "userUnblocking": "Desbloquejant l’usuari",
+  "userBlockTitle": "Bloquejar {name}?",
+  "@userBlockTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "userUnblockTitle": "Desbloquejar {name}?",
+  "@userUnblockTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "userBlockMessage": "No us podreu enviar sol·licituds d’amistat. Si ja sou amics, l’amistat s’eliminarà.",
+  "userUnblockMessage": "Desbloquejar no recupera l’amistat anterior.",
+  "userBlockError": "No hem pogut bloquejar l’usuari. Torna-ho a provar.",
+  "userUnblockError": "No hem pogut desbloquejar l’usuari. Torna-ho a provar.",
+  "userBlockSuccess": "Has bloquejat {name}.",
+  "@userBlockSuccess": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "userUnblockSuccess": "Has desbloquejat {name}.",
+  "@userUnblockSuccess": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "userUnblockFrom": "Desbloquejar {name}",
+  "@userUnblockFrom": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "userBlockedState": "Has bloquejat aquest usuari."
 }

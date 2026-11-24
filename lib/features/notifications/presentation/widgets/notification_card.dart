@@ -17,6 +17,7 @@ class NotificationCard extends StatelessWidget {
     this.responding = false,
     this.error,
     this.enabled = true,
+    this.personBlocked = false,
   });
 
   final AppNotification notification;
@@ -27,6 +28,7 @@ class NotificationCard extends StatelessWidget {
   final bool responding;
   final String? error;
   final bool enabled;
+  final bool personBlocked;
 
   @override
   Widget build(BuildContext context) {
@@ -135,9 +137,7 @@ class NotificationCard extends StatelessWidget {
                                 const SizedBox(width: 6),
                                 Expanded(
                                   child: Text(
-                                    notificationActivitySchedule(
-                                      activity.startsAt,
-                                    ),
+                                    notificationActivitySchedule(activity),
                                     style: theme.textTheme.bodySmall?.copyWith(
                                       color: colors.onSurface,
                                     ),
@@ -180,7 +180,12 @@ class NotificationCard extends StatelessWidget {
               ),
             ),
           ),
-          if (notice.type == NotificationType.friendRequest)
+          if (notice.type == NotificationType.friendRequest && personBlocked)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+              child: Text(context.l10n.userBlockedState),
+            )
+          else if (notice.type == NotificationType.friendRequest)
             FriendRequestNotificationActions(
               notificationId: notice.id,
               senderName: notice.person!.name,
@@ -188,6 +193,27 @@ class NotificationCard extends StatelessWidget {
               enabled: !busy,
               responding: responding,
               onRespond: onRespond,
+            ),
+          if (notice.type == NotificationType.friendRequestAccepted &&
+              profileAvailable)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton.icon(
+                  key: ValueKey('notification-friend-profile-${notice.id}'),
+                  onPressed: busy ? null : onOpen,
+                  style: TextButton.styleFrom(minimumSize: const Size(0, 48)),
+                  icon: const Icon(Icons.person_outline),
+                  label: Text(
+                    context.l10n.actViewProfile,
+                    semanticsLabel: context.l10n.notifViewFriendProfile(
+                      notice.person!.name,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
             ),
           if (error != null)
             Padding(

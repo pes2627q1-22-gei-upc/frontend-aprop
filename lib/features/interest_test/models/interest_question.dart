@@ -24,3 +24,23 @@ class InterestAnswer {
   final int eventId;
   final bool likes;
 }
+
+/// Completion, onboarding prompt, and partial-progress state of the test.
+class InterestTestStatus {
+  const InterestTestStatus({
+    required this.completed,
+    required this.prompted,
+    this.inProgress = false,
+    this.answeredCount = 0,
+    this.dateTaken,
+  });
+
+  final bool completed;
+  final bool prompted;
+  final bool inProgress;
+  final int answeredCount;
+  final DateTime? dateTaken;
+
+  /// Whether onboarding should auto-open the test for this account.
+  bool get shouldPromptOnboarding => !completed && !prompted && !inProgress;
+}

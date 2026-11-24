@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import '../../activities/repositories/activity_repository.dart';
 import '../../ratings/data/demo_rating_repository.dart';
 import '../../auth/models/app_user.dart';
@@ -7,6 +9,7 @@ import '../models/profile_avatar.dart';
 import '../../activities/models/activity.dart';
 import '../repositories/profile_repository.dart';
 import 'demo_friendship_repository.dart';
+import 'demo_public_profile_repository.dart';
 
 // TODO(DP-032): Replace mockup statistics/attendance with the authenticated API.
 class DemoProfileRepository implements ProfileRepository {
@@ -43,6 +46,13 @@ class DemoProfileRepository implements ProfileRepository {
   Future<UserProfile> getProfile(AppUser user) async {
     final catalogue = await activityRepository.getActivities();
     final isExampleAccount = user.id == 'demo-laiasoler';
+    final removedSeedFriends = DemoPublicProfileRepository.friendsOf(null)
+        .where(
+          (f) =>
+              f.id != user.id &&
+              friendshipRepository?.confirmedFriendship(user.id, f.id) == false,
+        )
+        .length;
     final details = _details[user.id];
     const ratings = {'demo-jazz': 5, 'demo-theatre': 5, 'demo-exhibition': 4};
     final completed = isExampleAccount
@@ -61,9 +71,12 @@ class DemoProfileRepository implements ProfileRepository {
               : ''),
       municipality: details?.municipality ?? (isExampleAccount ? 'Girona' : ''),
       avatarAsset: isExampleAccount ? 'assets/images/laia_soler.jpg' : null,
-      friendCount:
-          (isExampleAccount ? 14 : 0) +
-          (friendshipRepository?.acceptedCount(user.id) ?? 0),
+      friendCount: math.max(
+        0,
+        (isExampleAccount ? 14 : 0) +
+            (friendshipRepository?.acceptedCount(user.id) ?? 0) -
+            removedSeedFriends,
+      ),
       organizerRating:
           _organizerRating(user.id, catalogue) ??
           (isExampleAccount ? 4.7 : null),

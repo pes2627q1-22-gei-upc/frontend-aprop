@@ -1,28 +1,69 @@
+import 'dart:async';
+
 import 'package:flutter/widgets.dart';
 
 import '../../../../core/l10n/locale_controller.dart';
+import '../../../../core/l10n/pending_language.dart';
 import '../../models/profile_settings.dart';
 import '../../repositories/profile_settings_repository.dart';
+import '../../repositories/user_blocking_repository.dart';
 
 class ProfileSettingsViewModel extends ChangeNotifier {
   ProfileSettingsViewModel({
     required this.userId,
     required this.repository,
     required this.onSignOut,
+    this.onDeleteAccount,
     this.localeController,
-  });
+    this.blockingRepository,
+  }) {
+    _blockChanges = blockingRepository?.watchBlocks(userId).listen((_) {
+      if (!_isDisposed) notifyListeners();
+    });
+  }
+
+  final UserBlockingRepository? blockingRepository;
+  StreamSubscription<void>? _blockChanges;
+  bool _loadingBlocks = false;
+  String? _blocksError;
+  int? get blockedUserCount =>
+      blockingRepository?.cachedBlockedUsers(userId)?.length;
+  String? get blocksError => _blocksError;
+
+  Future<void> _loadBlocks() async {
+    if (_isDisposed || _loadingBlocks || blockingRepository == null) return;
+    _loadingBlocks = true;
+    _blocksError = null;
+    try {
+      await blockingRepository!.getBlockedUsers(userId);
+    } catch (_) {
+      if (!_isDisposed) _blocksError = currentL10n.blockedLoadError;
+    } finally {
+      if (!_isDisposed) {
+        _loadingBlocks = false;
+        notifyListeners();
+      }
+    }
+  }
 
   final LocaleController? localeController;
   final String userId;
   final ProfileSettingsRepository repository;
   final Future<void> Function() onSignOut;
+
+  /// Esborra el compte i tanca la sessió (#10). Sense, l'opció és pendent.
+  final Future<void> Function()? onDeleteAccount;
   ProfileSettings? _settings;
   bool _isLoading = false;
   bool _isSigningOut = false;
+  bool _isDeletingAccount = false;
   bool _isDisposed = false;
+  int _languageWrites = 0;
   ProfilePreference? _savingPreference;
   String? _errorMessage;
   String? _actionError;
+  String? _preferenceError;
+  ({ProfilePreference preference, bool enabled})? _failedPreferenceChange;
 
   ProfileSettings? get settings => _settings;
   bool supports(ProfilePreference preference) =>
@@ -31,19 +72,43 @@ class ProfileSettingsViewModel extends ChangeNotifier {
   bool get hasLocaleController => localeController != null;
   bool get isLoading => _isLoading;
   bool get isSigningOut => _isSigningOut;
-  bool get isBusy => _savingPreference != null || _isSigningOut;
+  bool get canDeleteAccount => onDeleteAccount != null;
+  bool get isDeletingAccount => _isDeletingAccount;
+  bool get isBusy =>
+      _savingPreference != null ||
+      _isSigningOut ||
+      _isDeletingAccount ||
+      _languageWrites > 0;
   ProfilePreference? get savingPreference => _savingPreference;
   String? get errorMessage => _errorMessage;
   String? get actionError => _actionError;
+  String? get preferenceError => _preferenceError;
+  ProfilePreference? get failedPreference =>
+      _failedPreferenceChange?.preference;
+  bool get canRetryPreference =>
+      _failedPreferenceChange != null &&
+      canUpdatePreference(_failedPreferenceChange!.preference);
+
+  bool canUpdatePreference(ProfilePreference preference) =>
+      !_isDisposed &&
+      !_isLoading &&
+      !isBusy &&
+      _settings != null &&
+      supports(preference);
 
   Future<void> load() async {
     if (_isDisposed || _isLoading || isBusy) return;
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
+    unawaited(_loadBlocks());
     try {
       final result = await repository.getSettings(userId);
-      if (!_isDisposed) _settings = result;
+      if (!_isDisposed) {
+        _settings = result;
+        _preferenceError = null;
+        _failedPreferenceChange = null;
+      }
     } catch (_) {
       if (!_isDisposed) {
         _errorMessage = currentL10n.settingsLoadError;
@@ -60,16 +125,14 @@ class ProfileSettingsViewModel extends ChangeNotifier {
     ProfilePreference preference,
     bool enabled,
   ) async {
-    if (_isDisposed ||
-        _isLoading ||
-        isBusy ||
-        _settings == null ||
-        !supports(preference) ||
+    if (!canUpdatePreference(preference) ||
         _settings!.valueOf(preference) == enabled) {
       return;
     }
     _savingPreference = preference;
     _actionError = null;
+    _preferenceError = null;
+    _failedPreferenceChange = null;
     notifyListeners();
     try {
       final result = await repository.updatePreference(
@@ -77,10 +140,14 @@ class ProfileSettingsViewModel extends ChangeNotifier {
         preference: preference,
         enabled: enabled,
       );
+      if (result.valueOf(preference) != enabled) {
+        throw StateError('The requested preference was not confirmed');
+      }
       if (!_isDisposed) _settings = result;
     } catch (_) {
       if (!_isDisposed) {
-        _actionError = currentL10n.settingsSaveError;
+        _preferenceError = currentL10n.settingsSaveError;
+        _failedPreferenceChange = (preference: preference, enabled: enabled);
       }
     } finally {
       if (!_isDisposed) {
@@ -90,29 +157,60 @@ class ProfileSettingsViewModel extends ChangeNotifier {
     }
   }
 
+  /// Repeats the failed intent, without inverting the last confirmed value.
+  Future<void> retryPreference() async {
+    final change = _failedPreferenceChange;
+    if (change == null || !canRetryPreference) return;
+    await updatePreference(change.preference, change.enabled);
+  }
+
   /// Applies the language to the whole app at once (and stores it locally),
   /// then tells the account. A failed sync keeps the new language.
   int _languageRequest = 0;
+  Future<void> _languageQueue = Future.value();
 
   Future<void> changeLanguage(Locale locale) async {
     final controller = localeController;
-    if (_isDisposed || controller == null) return;
-    final request = ++_languageRequest;
-    _actionError = null;
-    await controller.setLocale(locale);
-    String? error;
-    try {
-      await repository.updateLanguage(
-        userId: userId,
-        language: locale.languageCode,
-      );
-    } catch (_) {
-      error = currentL10n.settingsLanguageSyncError;
+    if (_isDisposed ||
+        controller == null ||
+        _savingPreference != null ||
+        _isSigningOut ||
+        _isDeletingAccount) {
+      return;
     }
-    // A newer change owns the result; an older one must not overwrite it.
-    if (_isDisposed || request != _languageRequest) return;
-    _actionError = error;
+    final request = ++_languageRequest;
+    final previousWrite = _languageQueue;
+    final completed = Completer<void>();
+    _languageQueue = completed.future;
+    _languageWrites++;
+    _actionError = null;
     notifyListeners();
+    try {
+      await controller.setLocale(locale);
+      String? error;
+      try {
+        await previousWrite;
+        if (request != _languageRequest || _isDisposed) return;
+        final pending = PendingLanguage();
+        await pending.save(userId, locale.languageCode);
+        if (request != _languageRequest || _isDisposed) return;
+        await repository.updateLanguage(
+          userId: userId,
+          language: locale.languageCode,
+        );
+        if (request == _languageRequest) {
+          await pending.clearIfMatches(userId, locale.languageCode);
+        }
+      } catch (_) {
+        error = currentL10n.settingsLanguageSyncError;
+      }
+      // A newer change owns the result; an older one must not overwrite it.
+      if (!_isDisposed && request == _languageRequest) _actionError = error;
+    } finally {
+      completed.complete();
+      _languageWrites--;
+      if (!_isDisposed) notifyListeners();
+    }
   }
 
   Future<void> signOut() async {
@@ -134,9 +232,33 @@ class ProfileSettingsViewModel extends ChangeNotifier {
     }
   }
 
+  /// Només es crida després de la confirmació del diàleg. Si va bé, la
+  /// sessió es tanca i AuthGate mostra l'inici de sessió; si falla, el compte
+  /// es conserva i es pot tornar a provar.
+  Future<void> deleteAccount() async {
+    final delete = onDeleteAccount;
+    if (_isDisposed || isBusy || delete == null) return;
+    _isDeletingAccount = true;
+    _actionError = null;
+    notifyListeners();
+    try {
+      await delete();
+    } catch (_) {
+      if (!_isDisposed) {
+        _actionError = currentL10n.settingsDeleteAccountError;
+      }
+    } finally {
+      if (!_isDisposed) {
+        _isDeletingAccount = false;
+        notifyListeners();
+      }
+    }
+  }
+
   @override
   void dispose() {
     _isDisposed = true;
+    unawaited(_blockChanges?.cancel());
     super.dispose();
   }
 }

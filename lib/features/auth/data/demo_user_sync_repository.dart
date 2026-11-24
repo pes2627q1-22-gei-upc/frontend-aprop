@@ -22,6 +22,15 @@ class DemoUserSyncRepository implements UserSyncRepository {
   final String? Function() _currentEmail;
   final SharedPreferencesAsync _preferences;
 
+  /// Sense backend: s'esborra el nom desat i el compte de Firebase l'esborra
+  /// l'app.
+  @override
+  Future<bool> deleteAccount() async {
+    final uid = _currentUid();
+    if (uid != null) await _preferences.remove('auth.username.$uid');
+    return false;
+  }
+
   @override
   Future<UserProfile?> sync({String? username}) async {
     final uid = _currentUid();
@@ -44,6 +53,7 @@ class DemoUserSyncRepository implements UserSyncRepository {
       username: saved ?? username!,
       email: _currentEmail() ?? '',
       name: await _preferences.getString('auth.name.$uid') ?? '',
+      created: saved == null,
     );
   }
 
@@ -59,5 +69,12 @@ class DemoUserSyncRepository implements UserSyncRepository {
       email: _currentEmail() ?? '',
       name: name,
     );
+  }
+
+  @override
+  Future<void> updateLanguage(String language) async {
+    final uid = _currentUid();
+    if (uid == null) return;
+    await _preferences.setString('auth.language.$uid', language);
   }
 }

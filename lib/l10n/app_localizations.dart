@@ -112,6 +112,12 @@ abstract class AppLocalizations {
   /// **'Perfil'**
   String get profileTitleFallback;
 
+  /// No description provided for @profileFindPeople.
+  ///
+  /// In ca, this message translates to:
+  /// **'Cerca persones'**
+  String get profileFindPeople;
+
   /// No description provided for @profilePeopleSearchSoon.
   ///
   /// In ca, this message translates to:
@@ -766,6 +772,18 @@ abstract class AppLocalizations {
   /// **'Els amics veuen a què t’apuntes'**
   String get settingsShowMyPlansHint;
 
+  /// No description provided for @settingsPlansShared.
+  ///
+  /// In ca, this message translates to:
+  /// **'Compartició amb amics activada'**
+  String get settingsPlansShared;
+
+  /// No description provided for @settingsPlansPrivate.
+  ///
+  /// In ca, this message translates to:
+  /// **'Compartició amb amics desactivada'**
+  String get settingsPlansPrivate;
+
   /// No description provided for @settingsBlockedUsers.
   ///
   /// In ca, this message translates to:
@@ -873,6 +891,54 @@ abstract class AppLocalizations {
   /// In ca, this message translates to:
   /// **'Eliminar compte'**
   String get settingsDeleteAccount;
+
+  /// No description provided for @settingsDeleteAccountHint.
+  ///
+  /// In ca, this message translates to:
+  /// **'Escriu-ho aquí'**
+  String get settingsDeleteAccountHint;
+
+  /// No description provided for @settingsDeletingAccount.
+  ///
+  /// In ca, this message translates to:
+  /// **'Eliminant el compte…'**
+  String get settingsDeletingAccount;
+
+  /// No description provided for @settingsDeleteAccountTitle.
+  ///
+  /// In ca, this message translates to:
+  /// **'Vols eliminar el compte?'**
+  String get settingsDeleteAccountTitle;
+
+  /// No description provided for @settingsDeleteAccountBody.
+  ///
+  /// In ca, this message translates to:
+  /// **'S’esborraran el teu perfil, la foto, els plans, les activitats que has creat, les valoracions, els amics i els avisos, i també el compte per iniciar sessió. No es pot desfer.'**
+  String get settingsDeleteAccountBody;
+
+  /// No description provided for @settingsDeleteAccountTypeWord.
+  ///
+  /// In ca, this message translates to:
+  /// **'Per confirmar-ho, escriu {word}:'**
+  String settingsDeleteAccountTypeWord(String word);
+
+  /// No description provided for @settingsDeleteAccountWord.
+  ///
+  /// In ca, this message translates to:
+  /// **'ELIMINAR'**
+  String get settingsDeleteAccountWord;
+
+  /// No description provided for @settingsDeleteAccountConfirm.
+  ///
+  /// In ca, this message translates to:
+  /// **'Eliminar el compte'**
+  String get settingsDeleteAccountConfirm;
+
+  /// No description provided for @settingsDeleteAccountError.
+  ///
+  /// In ca, this message translates to:
+  /// **'No hem pogut eliminar el compte. Torna-ho a provar.'**
+  String get settingsDeleteAccountError;
 
   /// No description provided for @settingsLoadError.
   ///
@@ -1696,6 +1762,18 @@ abstract class AppLocalizations {
   /// **'Tens un nou avís.'**
   String get notifMessageOther;
 
+  /// No description provided for @notifMessageCancelledFor.
+  ///
+  /// In ca, this message translates to:
+  /// **'S’ha cancel·lat «{title}».'**
+  String notifMessageCancelledFor(String title);
+
+  /// No description provided for @notifMessageCancelled.
+  ///
+  /// In ca, this message translates to:
+  /// **'S’ha cancel·lat una activitat on t’havies apuntat.'**
+  String get notifMessageCancelled;
+
   /// No description provided for @pushView.
   ///
   /// In ca, this message translates to:
@@ -1882,6 +1960,12 @@ abstract class AppLocalizations {
   /// **'Rebutjar la sol·licitud d’amistat de {name}'**
   String notifDeclineRequestFrom(String name);
 
+  /// No description provided for @notifViewFriendProfile.
+  ///
+  /// In ca, this message translates to:
+  /// **'Veure el perfil de {name}'**
+  String notifViewFriendProfile(String name);
+
   /// No description provided for @notifAccept.
   ///
   /// In ca, this message translates to:
@@ -1989,6 +2073,36 @@ abstract class AppLocalizations {
   /// In ca, this message translates to:
   /// **'No hem pogut desar les respostes. Torna-ho a provar.'**
   String get interestTestSaveError;
+
+  /// No description provided for @interestTestSkip.
+  ///
+  /// In ca, this message translates to:
+  /// **'Més tard'**
+  String get interestTestSkip;
+
+  /// No description provided for @interestTestContinue.
+  ///
+  /// In ca, this message translates to:
+  /// **'Continua'**
+  String get interestTestContinue;
+
+  /// No description provided for @interestTestReadMore.
+  ///
+  /// In ca, this message translates to:
+  /// **'Llegir més'**
+  String get interestTestReadMore;
+
+  /// No description provided for @interestTestReadLess.
+  ///
+  /// In ca, this message translates to:
+  /// **'Llegir menys'**
+  String get interestTestReadLess;
+
+  /// No description provided for @interestTestLeaveWithoutSaving.
+  ///
+  /// In ca, this message translates to:
+  /// **'Sortir sense desar'**
+  String get interestTestLeaveWithoutSaving;
 
   /// No description provided for @ratingDeleteTitle.
   ///
@@ -2122,11 +2236,53 @@ abstract class AppLocalizations {
   /// **'No tens cap pla per a aquest dia.'**
   String get agendaEmptyDay;
 
+  /// No description provided for @agendaEmptyAll.
+  ///
+  /// In ca, this message translates to:
+  /// **'Encara no t’has apuntat a cap pla.'**
+  String get agendaEmptyAll;
+
+  /// No description provided for @agendaEmptyUpcoming.
+  ///
+  /// In ca, this message translates to:
+  /// **'No tens cap pla proper.'**
+  String get agendaEmptyUpcoming;
+
   /// No description provided for @agendaEmptyHint.
   ///
   /// In ca, this message translates to:
   /// **'Apunta’t a activitats des d’Inici i les veuràs aquí.'**
   String get agendaEmptyHint;
+
+  /// No description provided for @agendaDayOfTotal.
+  ///
+  /// In ca, this message translates to:
+  /// **'Dia {day} de {total}'**
+  String agendaDayOfTotal(int day, int total);
+
+  /// No description provided for @actPastEvent.
+  ///
+  /// In ca, this message translates to:
+  /// **'Aquesta activitat ja ha passat'**
+  String get actPastEvent;
+
+  /// No description provided for @agendaUpcomingTitle.
+  ///
+  /// In ca, this message translates to:
+  /// **'Propers plans'**
+  String get agendaUpcomingTitle;
+
+  /// No description provided for @agendaPastSection.
+  ///
+  /// In ca, this message translates to:
+  /// **'Plans passats ({count})'**
+  String agendaPastSection(int count);
+
+  /// No description provided for @agendaCloseDaySheet.
+  ///
+  /// In ca, this message translates to:
+  /// **'Tancar els plans del dia'**
+  String get agendaCloseDaySheet;
 
   /// No description provided for @agendaLoadError.
   ///
@@ -2169,6 +2325,42 @@ abstract class AppLocalizations {
   /// In ca, this message translates to:
   /// **'No hem pogut desar la resposta. Torna-ho a provar.'**
   String get attendanceSaveError;
+
+  /// No description provided for @attendanceShowMore.
+  ///
+  /// In ca, this message translates to:
+  /// **'Veure’n {count} més'**
+  String attendanceShowMore(int count);
+
+  /// No description provided for @attendanceShowLess.
+  ///
+  /// In ca, this message translates to:
+  /// **'Veure’n menys'**
+  String get attendanceShowLess;
+
+  /// No description provided for @attendanceThanksYes.
+  ///
+  /// In ca, this message translates to:
+  /// **'Gràcies! Ja pots valorar «{title}».'**
+  String attendanceThanksYes(String title);
+
+  /// No description provided for @attendanceThanksNo.
+  ///
+  /// In ca, this message translates to:
+  /// **'D’acord, no t’ho tornarem a preguntar.'**
+  String get attendanceThanksNo;
+
+  /// No description provided for @attendanceNotStarted.
+  ///
+  /// In ca, this message translates to:
+  /// **'Aquesta activitat encara no ha començat.'**
+  String get attendanceNotStarted;
+
+  /// No description provided for @attendanceNotEnrolled.
+  ///
+  /// In ca, this message translates to:
+  /// **'Ja no hi estàs apuntat.'**
+  String get attendanceNotEnrolled;
 
   /// No description provided for @agendaPublishedBy.
   ///
@@ -3669,6 +3861,186 @@ abstract class AppLocalizations {
   /// In ca, this message translates to:
   /// **'La cerca pot tenir com a màxim {limit} caràcters.'**
   String userSearchTooLong(int limit);
+
+  /// No description provided for @friendRemove.
+  ///
+  /// In ca, this message translates to:
+  /// **'Eliminar amistat'**
+  String get friendRemove;
+
+  /// No description provided for @friendRemoveTitle.
+  ///
+  /// In ca, this message translates to:
+  /// **'Eliminar aquesta amistat?'**
+  String get friendRemoveTitle;
+
+  /// No description provided for @friendRemoveMessage.
+  ///
+  /// In ca, this message translates to:
+  /// **'Vols eliminar l’amistat amb {name}?'**
+  String friendRemoveMessage(String name);
+
+  /// No description provided for @friendRemoveSuccess.
+  ///
+  /// In ca, this message translates to:
+  /// **'Has eliminat l’amistat amb {name}.'**
+  String friendRemoveSuccess(String name);
+
+  /// No description provided for @friendRemoveError.
+  ///
+  /// In ca, this message translates to:
+  /// **'No hem pogut eliminar l’amistat. Torna-ho a provar.'**
+  String get friendRemoveError;
+
+  /// No description provided for @friendRemoving.
+  ///
+  /// In ca, this message translates to:
+  /// **'Eliminant l’amistat'**
+  String get friendRemoving;
+
+  /// No description provided for @friendRemoveFrom.
+  ///
+  /// In ca, this message translates to:
+  /// **'Eliminar l’amistat amb {name}'**
+  String friendRemoveFrom(String name);
+
+  /// No description provided for @friendOptions.
+  ///
+  /// In ca, this message translates to:
+  /// **'Opcions d’amistat'**
+  String get friendOptions;
+
+  /// No description provided for @languagePickerTitle.
+  ///
+  /// In ca, this message translates to:
+  /// **'Tria el teu idioma'**
+  String get languagePickerTitle;
+
+  /// No description provided for @languagePickerSubtitle.
+  ///
+  /// In ca, this message translates to:
+  /// **'Pots canviar-lo quan vulguis des de la configuració.'**
+  String get languagePickerSubtitle;
+
+  /// No description provided for @languagePickerContinue.
+  ///
+  /// In ca, this message translates to:
+  /// **'Continua'**
+  String get languagePickerContinue;
+
+  /// No description provided for @languagePickerSelectedSemantics.
+  ///
+  /// In ca, this message translates to:
+  /// **'Idioma seleccionat'**
+  String get languagePickerSelectedSemantics;
+
+  /// No description provided for @blockedLoading.
+  ///
+  /// In ca, this message translates to:
+  /// **'Carregant usuaris bloquejats'**
+  String get blockedLoading;
+
+  /// No description provided for @blockedLoadError.
+  ///
+  /// In ca, this message translates to:
+  /// **'No hem pogut carregar els usuaris bloquejats. Torna-ho a provar.'**
+  String get blockedLoadError;
+
+  /// No description provided for @blockedEmptyTitle.
+  ///
+  /// In ca, this message translates to:
+  /// **'No tens usuaris bloquejats'**
+  String get blockedEmptyTitle;
+
+  /// No description provided for @blockedEmptyMessage.
+  ///
+  /// In ca, this message translates to:
+  /// **'Els usuaris que bloquegis apareixeran aquí.'**
+  String get blockedEmptyMessage;
+
+  /// No description provided for @userBlock.
+  ///
+  /// In ca, this message translates to:
+  /// **'Bloquejar'**
+  String get userBlock;
+
+  /// No description provided for @userUnblock.
+  ///
+  /// In ca, this message translates to:
+  /// **'Desbloquejar'**
+  String get userUnblock;
+
+  /// No description provided for @userBlocking.
+  ///
+  /// In ca, this message translates to:
+  /// **'Bloquejant l’usuari'**
+  String get userBlocking;
+
+  /// No description provided for @userUnblocking.
+  ///
+  /// In ca, this message translates to:
+  /// **'Desbloquejant l’usuari'**
+  String get userUnblocking;
+
+  /// No description provided for @userBlockTitle.
+  ///
+  /// In ca, this message translates to:
+  /// **'Bloquejar {name}?'**
+  String userBlockTitle(String name);
+
+  /// No description provided for @userUnblockTitle.
+  ///
+  /// In ca, this message translates to:
+  /// **'Desbloquejar {name}?'**
+  String userUnblockTitle(String name);
+
+  /// No description provided for @userBlockMessage.
+  ///
+  /// In ca, this message translates to:
+  /// **'No us podreu enviar sol·licituds d’amistat. Si ja sou amics, l’amistat s’eliminarà.'**
+  String get userBlockMessage;
+
+  /// No description provided for @userUnblockMessage.
+  ///
+  /// In ca, this message translates to:
+  /// **'Desbloquejar no recupera l’amistat anterior.'**
+  String get userUnblockMessage;
+
+  /// No description provided for @userBlockError.
+  ///
+  /// In ca, this message translates to:
+  /// **'No hem pogut bloquejar l’usuari. Torna-ho a provar.'**
+  String get userBlockError;
+
+  /// No description provided for @userUnblockError.
+  ///
+  /// In ca, this message translates to:
+  /// **'No hem pogut desbloquejar l’usuari. Torna-ho a provar.'**
+  String get userUnblockError;
+
+  /// No description provided for @userBlockSuccess.
+  ///
+  /// In ca, this message translates to:
+  /// **'Has bloquejat {name}.'**
+  String userBlockSuccess(String name);
+
+  /// No description provided for @userUnblockSuccess.
+  ///
+  /// In ca, this message translates to:
+  /// **'Has desbloquejat {name}.'**
+  String userUnblockSuccess(String name);
+
+  /// No description provided for @userUnblockFrom.
+  ///
+  /// In ca, this message translates to:
+  /// **'Desbloquejar {name}'**
+  String userUnblockFrom(String name);
+
+  /// No description provided for @userBlockedState.
+  ///
+  /// In ca, this message translates to:
+  /// **'Has bloquejat aquest usuari.'**
+  String get userBlockedState;
 }
 
 class _AppLocalizationsDelegate

@@ -5,54 +5,56 @@ import '../../core/l10n/locale_controller.dart';
 import '../../core/widgets/aprop_logo.dart';
 import '../../features/activities/data/demo_location_repository.dart';
 import '../../features/activities/models/activity.dart';
+import '../../features/activities/models/activity_start.dart';
 import '../../features/activities/presentation/screens/activities_screen.dart';
 import '../../features/activities/presentation/screens/activity_search_screen.dart';
 import '../../features/activities/presentation/screens/create_activity_screen.dart';
 import '../../features/activities/presentation/screens/discover_screen.dart';
-import '../../features/activities/presentation/widgets/activities_map.dart';
 import '../../features/activities/presentation/view_models/activities_map_view_model.dart';
 import '../../features/activities/presentation/view_models/activities_view_model.dart';
 import '../../features/activities/presentation/view_models/enrollment_view_model.dart';
+import '../../features/activities/presentation/view_models/user_location_view_model.dart';
+import '../../features/activities/presentation/widgets/activities_map.dart';
 import '../../features/activities/presentation/widgets/enrollment_action.dart';
 import '../../features/activities/repositories/activity_category_repository.dart';
 import '../../features/activities/repositories/activity_details_repository.dart';
 import '../../features/activities/repositories/activity_map_repository.dart';
-import '../../features/activities/repositories/user_location_repository.dart';
-import '../../features/activities/presentation/view_models/user_location_view_model.dart';
 import '../../features/activities/repositories/activity_repository.dart';
 import '../../features/activities/repositories/discovery_repository.dart';
 import '../../features/activities/repositories/enrollment_repository.dart';
+import '../../features/activities/repositories/user_location_repository.dart';
 import '../../features/activity_chat/data/demo_activity_chat_repository.dart';
 import '../../features/activity_chat/presentation/screens/activity_chat_screen.dart';
 import '../../features/activity_chat/repositories/activity_chat_repository.dart';
 import '../../features/agenda/presentation/screens/agenda_screen.dart';
-import '../../features/attendance/data/demo_attendance_repository.dart';
-import '../../features/attendance/presentation/view_models/attendance_view_model.dart';
-import '../../features/attendance/repositories/attendance_repository.dart';
 import '../../features/assistant/models/assistant_message.dart';
 import '../../features/assistant/presentation/screens/assistant_screen.dart';
 import '../../features/assistant/presentation/view_models/assistant_view_model.dart';
 import '../../features/assistant/repositories/assistant_repository.dart';
+import '../../features/attendance/data/demo_attendance_repository.dart';
+import '../../features/attendance/presentation/view_models/attendance_view_model.dart';
+import '../../features/attendance/repositories/attendance_repository.dart';
 import '../../features/auth/models/app_user.dart';
 import '../../features/interest_test/presentation/screens/interest_test_screen.dart';
 import '../../features/interest_test/repositories/interest_test_repository.dart';
 import '../../features/notifications/presentation/screens/notifications_screen.dart';
 import '../../features/notifications/repositories/notification_repository.dart';
+import '../../features/profile/data/gallery_profile_image_picker.dart';
+import '../../features/profile/presentation/screens/blocked_users_screen.dart';
+import '../../features/profile/presentation/screens/friends_list_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
 import '../../features/profile/presentation/screens/profile_settings_screen.dart';
-import '../../features/profile/presentation/view_models/profile_view_model.dart';
-import '../../features/profile/data/gallery_profile_image_picker.dart';
 import '../../features/profile/presentation/screens/public_profile_screen.dart';
-import '../../features/profile/repositories/profile_repository.dart';
-import '../../features/profile/repositories/public_profile_repository.dart';
-import '../../features/profile/repositories/friendship_repository.dart';
-import '../../features/profile/presentation/screens/friends_list_screen.dart';
+import '../../features/profile/presentation/view_models/profile_view_model.dart';
 import '../../features/profile/repositories/friends_repository.dart';
+import '../../features/profile/repositories/friendship_repository.dart';
+import '../../features/profile/repositories/profile_repository.dart';
+import '../../features/profile/repositories/profile_settings_repository.dart';
+import '../../features/profile/repositories/public_profile_repository.dart';
+import '../../features/profile/repositories/user_search_repository.dart';
 import '../../features/push/models/push_message.dart';
 import '../../features/push/presentation/view_models/push_view_model.dart';
 import '../../features/push/repositories/push_repository.dart';
-import '../../features/profile/repositories/user_search_repository.dart';
-import '../../features/profile/repositories/profile_settings_repository.dart';
 import '../../features/ratings/presentation/view_models/rating_view_model.dart';
 import '../../features/ratings/presentation/widgets/activity_rating.dart';
 import '../../features/ratings/repositories/rating_repository.dart';
@@ -63,7 +65,9 @@ class MainShell extends StatefulWidget {
     super.key,
     required this.user,
     required this.onSignOut,
+    this.onDeleteAccount,
     required this.activityRepository,
+    this.activityClock = DateTime.now,
     required this.enrollmentRepository,
     required this.assistantRepository,
     required this.ratingRepository,
@@ -94,7 +98,11 @@ class MainShell extends StatefulWidget {
   /// On és la persona, per al mapa. Sense, el mapa no la mostra.
   final UserLocationRepository? userLocationRepository;
   final Future<void> Function() onSignOut;
+
+  /// Esborra el compte i tanca la sessió (#10).
+  final Future<void> Function()? onDeleteAccount;
   final ActivityRepository activityRepository;
+  final DateTime Function() activityClock;
   final EnrollmentRepository enrollmentRepository;
   final AssistantRepository assistantRepository;
   final RatingRepository ratingRepository;
@@ -176,6 +184,7 @@ class _MainShellState extends State<MainShell> {
   /// (Descobreix) i el mapa, amb la llista, té la seva pestanya (#273).
   static const _homeTab = 0;
   static const _mapTab = 2;
+  static const _profileTab = 4;
 
   static String _title(BuildContext context, int index) => [
     context.l10n.appTitle,
@@ -303,6 +312,7 @@ class _MainShellState extends State<MainShell> {
     navigator.push<void>(
       activityDetailsRoute(
         activityId: activityId,
+        clock: widget.activityClock,
         repository: repository ?? _activityRepository,
         enrollmentViewModel: _enrollmentViewModel,
         ratingBuilder: _buildRating,
@@ -381,7 +391,7 @@ class _MainShellState extends State<MainShell> {
             (creatorId == widget.user.id || creatorId == widget.user.serverId);
         if (isOwn ||
             !_enrollmentViewModel.isEnrolled(activity.id) ||
-            activity.startsAt.isAfter((widget.now ?? DateTime.now)()) ||
+            !activityHasStarted(activity, (widget.now ?? DateTime.now)()) ||
             !_attendanceViewModel.attended(activity.id)) {
           return const SizedBox.shrink();
         }
@@ -449,6 +459,11 @@ class _MainShellState extends State<MainShell> {
     }
   }
 
+  void _onInterestTestCompleted() {
+    if (!mounted) return;
+    setState(() => _discoverGeneration++);
+  }
+
   void _openInterestTest() {
     final repository = widget.interestTestRepository;
     final navigator = _sectionNavigatorKeys[4].currentState;
@@ -459,6 +474,8 @@ class _MainShellState extends State<MainShell> {
         builder: (context) => InterestTestScreen(
           repository: repository,
           onBack: () => Navigator.of(context).pop(),
+          onSkip: () => Navigator.of(context).pop(),
+          onCompleted: _onInterestTestCompleted,
         ),
       ),
     );
@@ -505,6 +522,7 @@ class _MainShellState extends State<MainShell> {
               Navigator.of(context).push<void>(
                 activityDetailsRoute(
                   activityId: activityId,
+                  clock: widget.activityClock,
                   repository: _activityRepository,
                   enrollmentViewModel: _enrollmentViewModel,
                   ratingBuilder: _buildRating,
@@ -529,10 +547,13 @@ class _MainShellState extends State<MainShell> {
     }
   }
 
-  void _openDiscoverySearch() {
-    // Des de la capçalera d'Inici o de la barra del mapa (#274).
+  void _openDiscoverySearch({bool people = false}) {
+    // Des de la capçalera d'Inici, de la barra del mapa (#274) o, per cercar
+    // persones, del Perfil.
     final tab = _selectedIndex;
-    if (tab != _homeTab && tab != _mapTab) return;
+    if (tab != _homeTab && tab != _mapTab && tab != _profileTab) {
+      return;
+    }
     final navigator = _sectionNavigatorKeys[tab].currentState!;
     if (navigator.canPop()) return;
     navigator.push<void>(
@@ -541,6 +562,7 @@ class _MainShellState extends State<MainShell> {
         builder: (context) => ActivitySearchScreen(
           repository: widget.discoveryRepository,
           userSearchRepository: widget.userSearchRepository,
+          startWithPeople: people,
           onUserSelected: widget.publicProfileRepository == null
               ? null
               : (id) {
@@ -560,6 +582,7 @@ class _MainShellState extends State<MainShell> {
             Navigator.of(context).push<void>(
               activityDetailsRoute(
                 activityId: activityId,
+                clock: widget.activityClock,
                 repository: _activityRepository,
                 enrollmentViewModel: _enrollmentViewModel,
                 ratingBuilder: _buildRating,
@@ -681,18 +704,46 @@ class _MainShellState extends State<MainShell> {
         builder: (context) => ProfileSettingsScreen(
           user: widget.user,
           repository: widget.profileSettingsRepository,
+          blockingRepository: widget.friendshipRepository,
+          onOpenBlockedUsers: widget.friendshipRepository == null
+              ? null
+              : () {
+                  if (!(ModalRoute.of(context)?.isCurrent ?? true)) return;
+                  Navigator.of(context).push<void>(
+                    MaterialPageRoute<void>(
+                      settings: const RouteSettings(
+                        name: '/profile/blocked-users',
+                      ),
+                      builder: (context) => BlockedUsersScreen(
+                        userId: widget.user.id,
+                        repository: widget.friendshipRepository!,
+                        onUserSelected: (id) {
+                          if (ModalRoute.of(context)?.isCurrent ?? true) {
+                            _openUserProfile(id);
+                          }
+                        },
+                      ),
+                    ),
+                  );
+                },
           onSignOut: _signOut,
+          onDeleteAccount: widget.onDeleteAccount,
           onBack: () => Navigator.of(context).pop(),
           onOpenInterestTest: switch (widget.interestTestRepository) {
-            final repository? => () => Navigator.of(context).push<void>(
-              MaterialPageRoute<void>(
-                settings: const RouteSettings(name: '/profile/interest-test'),
-                builder: (context) => InterestTestScreen(
-                  repository: repository,
-                  onBack: () => Navigator.of(context).pop(),
+            final repository? => () {
+              if (!(ModalRoute.of(context)?.isCurrent ?? true)) return;
+              Navigator.of(context).push<void>(
+                MaterialPageRoute<void>(
+                  settings: const RouteSettings(name: '/profile/interest-test'),
+                  builder: (context) => InterestTestScreen(
+                    repository: repository,
+                    onBack: () => Navigator.of(context).pop(),
+                    onSkip: () => Navigator.of(context).pop(),
+                    onCompleted: _onInterestTestCompleted,
+                  ),
                 ),
-              ),
-            ),
+              );
+            },
             null => null,
           },
         ),
@@ -738,6 +789,7 @@ class _MainShellState extends State<MainShell> {
             Navigator.of(context).push<void>(
               activityDetailsRoute(
                 activityId: activityId,
+                clock: widget.activityClock,
                 repository: _activityRepository,
                 enrollmentViewModel: _enrollmentViewModel,
                 ratingBuilder: _buildRating,
@@ -768,6 +820,8 @@ class _MainShellState extends State<MainShell> {
         ),
         builder: (context) => FriendsListScreen(
           repository: repository,
+          friendshipRepository: widget.friendshipRepository,
+          currentUserId: widget.user.id,
           userId: userId,
           ownerName: ownerName,
           // A la pròpia llista no hi surt qui mira; a la d'una altra persona
@@ -860,6 +914,7 @@ class _MainShellState extends State<MainShell> {
     navigator.pushReplacement<void, void>(
       activityDetailsRoute(
         activityId: activity.id,
+        clock: widget.activityClock,
         repository: _activityRepository,
         enrollmentViewModel: _enrollmentViewModel,
         ratingBuilder: _buildRating,
@@ -1018,6 +1073,13 @@ class _MainShellState extends State<MainShell> {
                   repository: widget.notificationRepository,
                   friendshipRepository: widget.friendshipRepository,
                   reload: _noticesChanged,
+                  // Qui s'hi havia apuntat sap per l'avís que s'ha cancel·lat
+                  // (#47): ja no s'hi pot tornar a apuntar.
+                  onActivitiesCancelled: (ids) {
+                    for (final id in ids) {
+                      _enrollmentViewModel.markCancelled(id);
+                    }
+                  },
                   onActivitySelected: (id) {
                     // A late read confirmation must not open another tab's route.
                     if (_selectedIndex == 3) _openActivityDetails(id);
@@ -1034,6 +1096,11 @@ class _MainShellState extends State<MainShell> {
               4,
               (context) => ProfileScreen(
                 viewModel: _profileViewModel,
+                onFindPeople:
+                    widget.userSearchRepository == null ||
+                        widget.publicProfileRepository == null
+                    ? null
+                    : () => _openDiscoverySearch(people: true),
                 onSettingsPressed: _openProfileSettings,
                 onSharePressed: widget.user.username?.isNotEmpty == true
                     ? _shareOwnProfile

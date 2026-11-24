@@ -1,5 +1,7 @@
 import '../../../../core/l10n/date_labels.dart';
 import '../../../../core/l10n/locale_controller.dart';
+import '../../../activities/models/activity.dart';
+import '../../../activities/presentation/formatters/activity_date_formatter.dart';
 import '../../models/app_notification.dart';
 
 String notificationCategoryLabel(NotificationCategory? category) =>
@@ -35,6 +37,10 @@ String notificationMessage(AppNotification notice) {
           : notice.person != null
           ? l10n.notifMessageSocialPerson(notice.person!.name)
           : l10n.notifMessageSocial,
+    NotificationType.activityCancelled =>
+      notice.activity == null
+          ? l10n.notifMessageCancelled
+          : l10n.notifMessageCancelledFor(notice.activity!.title),
     NotificationType.other => l10n.notifMessageOther,
     NotificationType.activityPublished => l10n.notifMessagePublished(
       notice.person!.name,
@@ -68,7 +74,14 @@ String notificationDayLabel(DateTime date, DateTime today) {
 
 String notificationDate(DateTime date) => dateWithYear(date.toLocal());
 
-String notificationActivitySchedule(DateTime date) =>
-    date.year == 1 && date.month == 1 && date.day == 1
-    ? currentL10n.dateUnknown
-    : currentL10n.scheduleJoin(notificationDate(date), notificationTime(date));
+/// «26 de setembre de 2026 · 19.00 h». The hour follows the activity's
+/// schedule, as in its card and detail; never «00.00 h» when it is unknown.
+String notificationActivitySchedule(Activity activity) {
+  final date = activity.startsAt;
+  if (date.year == 1 && date.month == 1 && date.day == 1) {
+    return currentL10n.dateUnknown;
+  }
+  final day = notificationDate(date);
+  final time = activityTimeLabel(activity, short: true);
+  return time == null ? day : currentL10n.scheduleJoin(day, time);
+}

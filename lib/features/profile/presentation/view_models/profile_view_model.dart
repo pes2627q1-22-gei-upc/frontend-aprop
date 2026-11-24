@@ -11,6 +11,7 @@ import '../../repositories/profile_image_picker.dart';
 import '../../repositories/profile_repository.dart';
 import '../../repositories/friendship_repository.dart';
 import '../../models/received_friend_request.dart';
+import '../../models/friendship_removal.dart';
 import '../../models/profile_failure.dart';
 import '../../../../core/l10n/locale_controller.dart';
 
@@ -29,8 +30,15 @@ class ProfileViewModel extends ChangeNotifier {
       _refreshPending = true;
       _flushFriendRefresh();
     });
+    _friendRemovals = friendshipRepository?.watchRemovals(user.id).listen((_) {
+      if (_isDisposed) return;
+      _friendRevision++;
+      _refreshPending = true;
+      _flushFriendRefresh();
+    });
   }
   StreamSubscription<FriendRequestResolution>? _friendChanges;
+  StreamSubscription<FriendshipRemoval>? _friendRemovals;
   bool _refreshPending = false;
   int _friendRevision = 0;
 
@@ -273,6 +281,7 @@ class ProfileViewModel extends ChangeNotifier {
   void dispose() {
     _isDisposed = true;
     unawaited(_friendChanges?.cancel());
+    unawaited(_friendRemovals?.cancel());
     super.dispose();
   }
 }

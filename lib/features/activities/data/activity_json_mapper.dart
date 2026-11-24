@@ -1,4 +1,5 @@
 import '../models/activity.dart';
+import '../models/activity_category_labels.dart';
 import '../models/geo_point.dart';
 import '../models/new_activity.dart';
 
@@ -35,17 +36,11 @@ Activity activityFromJson(Map<String, Object?> json) {
           rawEnd.hour,
           rawEnd.minute,
         );
-  final image = _cover(json['image-url']) ?? _cover(json['images']);
-  final rawCategories = json['categories'] ?? json['category'];
-  final tags = rawCategories is List
-      ? rawCategories.whereType<String>()
-      : [if (rawCategories is String) rawCategories];
-  // TODO(DP-046): Choose the badge only after removing labels without a name.
-  final categories = List<String>.unmodifiable(
-    tags
-        .map(activityCategoryLabel)
-        .where((label) => label.trim().isNotEmpty)
-        .toSet(),
+  final image =
+      parseActivityCover(json['image-url']) ??
+      parseActivityCover(json['images']);
+  final categories = parseActivityCategories(
+    json['categories'] ?? json['category'],
   );
   final isOfficial =
       json['is-official'] as bool? ?? (json['code'] as num? ?? 0) != 0;
@@ -214,7 +209,9 @@ String? _text(Object? value) {
   return text.isEmpty ? null : text;
 }
 
-({String asset, String? url})? _cover(Object? value) {
+/// Parses an event cover value (`image-url` or comma-separated `images`),
+/// resolving relative `/content/dam/` Gencat paths against the official host.
+({String asset, String? url})? parseActivityCover(Object? value) {
   final raw = _text(value);
   if (raw == null) return null;
   if (raw.startsWith('assets/')) return (asset: raw, url: null);
@@ -237,8 +234,23 @@ String? _text(Object? value) {
   return null;
 }
 
-String activityCategoryLabel(String tag) =>
-    _capitalize(tag.trim().split('/').last.replaceAll('-', ' '));
+/// Parses raw backend category tags (`agenda:categories/*`, `agenda:ambits/*`,
+/// or plain names) into unique, readable, non-empty labels.
+List<String> parseActivityCategories(Object? rawCategories) {
+  final tags = rawCategories is List
+      ? rawCategories.whereType<String>()
+      : [if (rawCategories is String) rawCategories];
+  // TODO(DP-046): Choose the badge only after removing labels without a name.
+  return List<String>.unmodifiable(
+    tags
+        .map(activityCategoryLabel)
+        .where((label) => label.trim().isNotEmpty)
+        .toSet(),
+  );
+}
+
+String activityCategoryLabel(String tag, {String languageCode = 'ca'}) =>
+    localizeActivityCategory(tag, languageCode: languageCode);
 
 const _lowercaseWords = {'de', 'del', 'dels', 'la', 'les', 'el', 'els', 'i'};
 

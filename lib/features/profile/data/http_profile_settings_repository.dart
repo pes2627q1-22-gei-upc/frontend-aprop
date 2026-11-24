@@ -16,9 +16,19 @@ class HttpProfileSettingsRepository implements ProfileSettingsRepository {
   @override
   bool get persistsPreferences => true;
 
+  static const _supportedLanguages = {'ca', 'es', 'en'};
+
   ProfileSettings _settings(Map<String, Object?> json) {
     if (json['show-plans'] case final bool visible) {
-      return ProfileSettings(showMyPlans: visible);
+      final rawLanguage = json['language'];
+      final normalized = rawLanguage is String
+          ? rawLanguage.trim().toLowerCase()
+          : null;
+      final language =
+          normalized != null && _supportedLanguages.contains(normalized)
+          ? normalized
+          : null;
+      return ProfileSettings(showMyPlans: visible, language: language);
     }
     throw const FormatException('Expected show-plans setting');
   }
@@ -59,6 +69,19 @@ class HttpProfileSettingsRepository implements ProfileSettingsRepository {
       headers: session.headers,
       body: {'show-plans': enabled},
     );
-    return _settings(validateOwnProfile(decoded, userId));
+    final profile = validateOwnProfile(decoded, userId);
+    if ((profile['id'] as String).toLowerCase() !=
+        (session.profile['id'] as String).toLowerCase()) {
+      throw const FormatException(
+        'The updated profile belongs to another account',
+      );
+    }
+    final confirmed = _settings(profile);
+    if (confirmed.showMyPlans != enabled) {
+      throw const FormatException(
+        'The requested privacy setting was not saved',
+      );
+    }
+    return confirmed;
   }
 }

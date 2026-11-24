@@ -49,7 +49,11 @@ void main() {
       idToken: token ?? () async => 'test-token',
     );
     addTearDown(client.close);
-    return HttpDiscoveryRepository(apiClient: client, searchPageSize: 2);
+    return HttpDiscoveryRepository(
+      apiClient: client,
+      searchPageSize: 2,
+      clock: () => DateTime(2026, 9, 26, 9),
+    );
   }
 
   test(

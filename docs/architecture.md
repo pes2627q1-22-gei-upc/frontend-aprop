@@ -196,6 +196,15 @@ La presentació es manté al cercador existent de `features/activities/`: `Activ
 
 ## Perfil propi i Configuració
 
+**Visibilitat dels plans (#199):** es reutilitzen `ProfileSettingsScreen` i `ProfileSettingsViewModel`
+(els noms de Configuració al projecte), sense afegir pantalles paral·leles. `SettingsPreferenceTile`
+representa el valor confirmat, progrés textual i error amb reintent. La intenció fallida es guarda al
+ViewModel, no al widget; el reintent repeteix aquell valor. Els errors de preferència són independents
+dels d’idioma/compte, i les escriptures d’idioma no se superposen amb les de preferències.
+`HttpProfileSettingsRepository` comprova identitat i valor retornats pel PATCH. L’accés a plans aliens
+continua depenent de `plans-visible` i de l’autorització del servidor, no del switch local d’un altre
+compte. Vegeu [el flux i els límits](plan-visibility.md), DP-078.
+
 `features/profile/` té models i contractes en Dart pur, adaptadors Demo/HTTP, ViewModels i presentació. Comparteix models i contractes d’Auth/activitats; no importa els seus widgets ni ViewModels. L’adaptador HTTP reutilitza el mapper d’activitats de la capa de dades. `ProfileRepository` separa metadades, activitats creades, edició i avatar; les inscripcions no s’interpreten com assistència. `ProfileCapabilities` indica els camps i col·leccions disponibles. `ProfileSettingsRepository` declara les preferències suportades i si són persistents.
 
 `AuthGate` crea/injecta els dos repositoris i els conserva durant l’execució. `MainShell`, identificat pel compte, crea i allibera `ProfileViewModel`, com ja fa amb el catàleg i les inscripcions; el refresca en entrar a Perfil perquè reflecteixi activitats creades des d’Inici. `ProfileScreen` conserva només la pestanya local i observa aquest ViewModel. El panell d’edició comparteix el mateix estat; cap perfil no es duplica dins d’un widget.
@@ -301,3 +310,64 @@ a una columna quan cal i afegeix etiquetes accessibles amb la persona remitent. 
 visual i semàntica és la mateixa: mentre s’envia no es pot repetir l’acció. Només `friendRequest`
 mostra els controls; els avisos socials genèrics no s’interpreten com a peticions. Guia i proves a
 [Targeta de sol·licitud rebuda](notification-request-card.md).
+
+### Avís d’amistat acceptada — Taiga #170
+
+`AppNotification.friendRequestAccepted` representa l’avís que rep qui va enviar una sol·licitud,
+quan l’altra persona l’accepta. És diferent de la petició rebuda que l’usuari acaba de resoldre.
+`NotificationCard` reutilitza el missatge localitzat existent i afegeix «Veure perfil», amb etiqueta
+accessible que identifica la persona. No té Acceptar/Rebutjar ni modifica l’amistat o comptadors.
+
+Tant el cos com el botó passen per `NotificationsScreen._open`: lectura confirmada pel ViewModel,
+comprovació de cicle de vida/compte/ruta i callback `onPersonSelected`. `MainShell` obre el perfil
+al navegador d’Avisos; tornar conserva filtre, desplaçament i lectura. No s’afegeix cap repositori,
+ViewModel o ruta duplicats. Si no s’injecta una destinació, no hi ha botó i el cos permet llegir.
+
+El model tipat i Demo ja existien. L’adaptador HTTP manté Social genèric perquè el DTO no distingeix
+l’acceptació. No s’interpreta el text ni s’infereix l’esdeveniment de l’amistat actual (DP-070).
+Vegeu [contracte pendent i proves](accepted-friendship-notification.md).
+
+### Eliminar una amistat — Taiga #195
+
+`FriendshipRepository.removeFriend` i `watchRemovals` amplien la font compartida existent. Les
+resolucions de sol·licituds es conserven com a historial de sessió; `confirmedFriendship` reflecteix
+la relació actual i impedeix que una acceptació històrica restitueixi una amistat eliminada.
+`CachedFriendshipRepository` comparteix eliminacions concurrents per compte/persona i serialitza
+acceptació i eliminació de la mateixa relació. Només publica `FriendshipRemoval` després de confirmar.
+Una lectura nova del servidor pot reconèixer una amistat restablerta (`reconcileFriends`);
+es descarten abans les lectures anteriors al darrer canvi. Una nova petició rebuda després
+d’eliminar continua sent consultable i una eliminació aliena no esborra una petició sortint.
+
+`HttpFriendshipRepository` fixa compte i bearer amb `ProfileApi.own`, valida UUID/destinació i crida
+`POST /users/{id}/unfriend`. `DemoFriendshipRepository` manté les confirmacions en memòria i els
+adaptadors Demo de llista/perfils projecten aquests canvis sobre les dades d’exemple.
+
+`FriendsListViewModel` permet eliminar només des de la llista pròpia. `PublicProfileViewModel`
+permet gestionar la relació amb aquella persona. Tots dos exposen progrés i errors, filtren
+respostes antigues i escolten les confirmacions; el perfil propi recarrega el recompte del repositori.
+En eliminar, el perfil aliè amaga immediatament els plans i ignora lectures anteriors. Els comptadors
+HTTP no es calculen restant una unitat al client: es tornen a consultar.
+
+El diàleg i els botons són presentació reutilitzable (`friend_removal_action.dart`). La pantalla
+comprova compte/instància/ruta després de confirmar; el ViewModel torna a validar la disponibilitat.
+`MainShell` injecta la mateixa instància a llista i perfils, sense imports de navegació a la feature.
+Ubicació de l’acció i abast de `ProfileScreen` a DP-076; guia a [Eliminar una amistat](remove-friend.md).
+
+### Bloqueig personal — Taiga #179
+
+`UserBlockingRepository` és el contracte de lectura i gestió dels bloquejos propis. La mateixa font
+`FriendshipRepository` l’implementa per coordinar la transacció de bloqueig amb l’amistat i les peticions.
+No es fa un segon POST per eliminar l’amistat: el backend ja ho garanteix en bloquejar.
+
+`CachedFriendshipRepository` separa llista desconeguda, snapshots carregats i mutacions confirmades,
+amb cache per compte, single-flight i serialització per persona. Les revisions reconcilien lectures
+antigues de bloquejos i peticions. Desbloquejar només canvia el bloqueig; conserva l’absència d’amistat.
+`HttpFriendshipRepository` valida el compte i la resposta; Demo reutilitza la mateixa política en memòria.
+
+`BlockedUsersViewModel` observa snapshots i gestiona els desbloqueigs; `PublicProfileViewModel` consulta
+l’estat propi i gestiona el menú. `ProfileSettingsViewModel` observa el recompte de la font compartida.
+`MainShell` connecta Configuració, la llista i el perfil conservant-ne la navegació. Els widgets no fan HTTP.
+Les targetes d’Avisos conserven el contingut, sense oferir Acceptar/Rebutjar sobre una persona bloquejada.
+
+El bloqueig no implica ocultar contingut que el servidor encara no restringeix. Guia i límits a
+[Bloquejar usuaris](user-blocking.md), decisions de presentació a DP-077.

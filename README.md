@@ -4,6 +4,11 @@ Aplicació mòbil per descobrir i planificar activitats culturals a Catalunya. P
 
 ## Estat actual
 
+Visibilitat dels plans (**Taiga #199**): Configuració conserva el valor confirmat de «Mostrar els meus
+plans» mentre desa, mostra l’estat de compartició i permet reintentar un error al mateix control.
+Consulta i PATCH autenticats, sense superposar escriptures d’idioma i privacitat. El perfil aliè només
+carrega plans quan `plans-visible` ho permet. [Flux, proves i pendent del backend](docs/plan-visibility.md).
+
 Cerca de persones (**Taiga #162**): el selector «Activitats / Persones» del cercador compartit consulta `GET /users` amb autenticació, paginació, total real, càrrega, buit i error/reintent. Cada fila obre el perfil públic existent; tornar conserva consulta, mode, resultats, pàgines i desplaçament. Accessible des d’Inici i Mapa després de #273/#274. Interfície en ca/es/en, sense paquets nous ni canvis al backend. [Contracte, arquitectura i proves](docs/user-search.md).
 
 Logotip (**Taiga #262**): Inici i l’accés comparteixen `APropLogo`, amb un PNG transparent que s’integra
@@ -28,7 +33,13 @@ Avisos (**Taiga #86**) consumeix la bústia HTTP del UUID real retornat pel perf
 
 Targeta de sol·licitud (**Taiga #168**): `NotificationsScreen` conserva el flux compartit de #164/#193 i reutilitza un component de presentació amb Acceptar/Rebutjar, progrés visible, resultat amb icona/text i errors amb reintent. Controls accessibles amb el nom del remitent i disposició adaptable a text ampliat en ca/es/en. Vegeu [el renderitzat i els estats](docs/notification-request-card.md).
 
+Avís d’amistat acceptada (**Taiga #170**): la targeta del model `friendRequestAccepted` mostra la persona i «Veure perfil», sense accions per respondre. Confirma la lectura abans de navegar i conserva l’estat d’Avisos en tornar. Interfície i proves amb Demo/HTTP simulat; identificar aquestes acceptacions a la bústia HTTP real continua pendent d’un subtipus estructurat del backend (DP-070). Vegeu [abast i traspàs](docs/accepted-friendship-notification.md).
+
 Rebuig d’amistat (**Taiga #193**, sobre la #164): «Rebutjar» a Avisos i al perfil, confirmació HTTP compartida i feedback «Sol·licitud rebutjada». Les dues accions de la petició queden desactivades durant l’enviament; si falla es poden reintentar. Rebutjar no canvia comptadors, no bloqueja la persona ni fa públics els plans. Textos ca/es/en i proves d’estat, HTTP, pantalla i navegació. Vegeu [el flux i la dependència de branca](docs/friend-requests.md), DP-067.
+
+Eliminar una amistat (**Taiga #195**, història #53): acció a la llista pròpia d’amics i al menú del perfil aliè, amb el mateix diàleg de confirmació. `POST /users/{id}/unfriend` confirma l’eliminació; el repositori compartit reconcilia llista, distintiu i recàrrega de comptadors, sense recuperar plans privats des de respostes antigues. Errors amb reintent, controls ca/es/en i cap gestió de les amistats d’altres persones. Vegeu [flux, contracte i proves](docs/remove-friend.md), DP-076.
+
+Bloqueig personal (**Taiga #179**, història #45): menú del perfil amb Bloquejar/Desbloquejar i gestió a Configuració → Usuaris bloquejats, amb recompte carregat, confirmació, progrés, buit i error/reintent. Usa els endpoints existents de bloqueig i la mateixa font d’amistat; bloquejar elimina la relació i invalida peticions, desbloquejar no les restaura. No promet ocultar activitats, xats ni avisos. Vegeu [contracte, abast i dependència de #195](docs/user-blocking.md), DP-077.
 
 Perfil i Configuració (**Taiga #230**) consulten el compte autenticat amb `GET /users/me`, editen nom/nom d’usuari/biografia amb `PATCH /users/me`, pugen l’avatar de la galeria amb `POST /users/me/avatar` i consulten `GET /users/me/created-events`. «Mostrar els meus plans» es desa al servidor; la resta de preferències d’avisos es mostren pendents. Les operacions esperen confirmació i els errors de les activitats creades no amaguen el perfil. El mode HTTP mostra comptadors i XP reals, sense deduir assistència ni nivells/llindars del mockup. Historial confirmat, municipi, llistes d’amistats, Calendar, test, idioma/tema i eliminació continuen pendents. #164 integra l’acceptació d’amistat i l’actualització dels comptadors del perfil. El mode Demo conserva els exemples i l’edició local. Vegeu [la integració de Perfil](docs/profile-backend.md), [els mockups](docs/profile.md) i DP-040.
 
