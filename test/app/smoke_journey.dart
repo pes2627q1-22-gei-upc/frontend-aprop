@@ -15,7 +15,12 @@ Future<void> runAppSmokeJourney(WidgetTester tester) async {
   await localeController.setLocale(LocaleController.defaultLocale);
 
   await tester.pumpWidget(
-    APropApp(authRepository: auth, localeController: localeController),
+    APropApp(
+      authRepository: auth,
+      localeController: localeController,
+      // Les dades de demostració són de setembre del 2026: fixem «ara» perquè no caduquin.
+      activityClock: () => DateTime(2026, 9, 26, 9),
+    ),
   );
   await tester.pumpAndSettle();
 
@@ -53,21 +58,8 @@ Future<void> runAppSmokeJourney(WidgetTester tester) async {
   await tester.pumpAndSettle();
   expect(find.text('Jazz al parc'), findsOneWidget);
 
-  await tester.tap(find.byTooltip('Tornar enrere'));
-  await tester.pumpAndSettle();
-
-  // 3. Pestanya Mapa (vista llista per defecte), fitxa i inscripció.
-  await tester.tap(find.widgetWithText(NavigationDestination, 'Mapa'));
-  await tester.pumpAndSettle();
-  expect(
-    tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex,
-    2,
-  );
-
-  final jazzTitle = find.text('Jazz al parc').first;
-  await tester.ensureVisible(jazzTitle);
-  await tester.pumpAndSettle();
-  await tester.tap(jazzTitle);
+  // 3. Fitxa des dels resultats de la cerca i inscripció.
+  await tester.tap(find.text('Jazz al parc'));
   await tester.pumpAndSettle();
   expect(find.widgetWithText(AppBar, 'Activitat'), findsOneWidget);
 
@@ -81,8 +73,17 @@ Future<void> runAppSmokeJourney(WidgetTester tester) async {
 
   await tester.tap(find.byTooltip('Tornar enrere'));
   await tester.pumpAndSettle();
+  await tester.tap(find.byTooltip('Tornar enrere'));
+  await tester.pumpAndSettle();
 
-  // 4. Pestanyes Agenda i Avisos.
+  // 4. Pestanyes Mapa, Agenda i Avisos.
+  await tester.tap(find.widgetWithText(NavigationDestination, 'Mapa'));
+  await tester.pumpAndSettle();
+  expect(
+    tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex,
+    2,
+  );
+
   await tester.tap(find.widgetWithText(NavigationDestination, 'Agenda'));
   await tester.pumpAndSettle();
   expect(find.widgetWithText(AppBar, 'Agenda'), findsOneWidget);

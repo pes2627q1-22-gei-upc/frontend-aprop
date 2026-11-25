@@ -2,9 +2,9 @@ name: CI
 
 on:
   pull_request:
-    branches: [develop, main]
+    branches: [develop, master]
   push:
-    branches: [develop, main]
+    branches: [develop, master]
   workflow_dispatch:
 
 permissions:
@@ -228,7 +228,7 @@ jobs:
 
       - run: flutter build apk --debug
 
-      # En push a develop/main o execució manual, comprova també el paquet release (#250).
+      # En push a develop/master o execució manual, comprova també el paquet release (#250).
       - name: Build Android APK (release)
         if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
         run: flutter build apk --release
@@ -267,7 +267,7 @@ jobs:
 
   integration-android:
     name: Android Integration Smoke Test
-    # En PR només si porta l'etiqueta `run-e2e`; sempre en push a develop/main o execució manual.
+    # En PR només si porta l'etiqueta `run-e2e`; sempre en push a develop/master o execució manual.
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || contains(github.event.pull_request.labels.*.name, 'run-e2e')
     runs-on: ubuntu-latest
     timeout-minutes: 30
