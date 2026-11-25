@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="notification_channel_id" translatable="false">avisos</string>
+    <!-- El nom que surt a la configuració d'Android (català i castellà). -->
+    <string name="notification_channel_name">Avisos</string>
+</resources>
