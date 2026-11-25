@@ -26,6 +26,7 @@ Les tasques #75 i #82 afegeixen el detall i les inscripcions compartides entre l
 | `features/auth/` | Inici de sessió, registre i sessió, amb les mateixes capes que `activities/`. |
 | `features/assistant/` | Conversa amb l'assistent cultural («Assistent»), interpretació de consultes i recomanació d'activitats. |
 | `features/profile/` | Perfil propi, edició de detalls i preferències de Configuració, amb les mateixes capes i repositoris per compte. |
+| `features/push/` | Notificacions push (#265): registre del mòbil al backend i pushes rebuts o tocats; només Android. Vegeu [Notificacions push](push-notifications.md). |
 | `features/attendance/` | «Com va anar?» (#64): respostes d’assistència compartides per l’Agenda i les valoracions; el «No» es recorda al dispositiu (DP-068). |
 | `features/activity_chat/` | Xat de cada activitat entre les persones apuntades (#148): missatges, enviament i refresc periòdic. Vegeu [Xat de l’activitat](activity-chat.md). |
 | `features/notifications/` | Bústia d’Avisos, filtres, lectura i respostes d’amistat confirmades mitjançant el contracte compartit de Perfil, separats de l’enviament de notificacions. |

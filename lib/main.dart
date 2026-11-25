@@ -32,6 +32,8 @@ import 'features/profile/data/http_profile_repository.dart';
 import 'features/profile/data/http_profile_settings_repository.dart';
 import 'features/profile/data/http_public_profile_repository.dart';
 import 'features/profile/data/http_user_search_repository.dart';
+import 'features/push/data/firebase_push_messaging.dart';
+import 'features/push/data/http_push_device_repository.dart';
 import 'features/ratings/data/http_rating_repository.dart';
 import 'firebase_options.dart';
 
@@ -89,6 +91,11 @@ Future<APropApp> createConfiguredApp() async {
     publicProfileRepository: HttpPublicProfileRepository(apiClient: apiClient),
     userSearchRepository: HttpUserSearchRepository(apiClient: apiClient),
     friendsRepository: HttpFriendsRepository(apiClient: apiClient),
+    // TODO(DP-072): push (#265) només a Android, on Firebase està configurat.
+    pushMessaging: !kIsWeb && defaultTargetPlatform == TargetPlatform.android
+        ? FirebasePushMessaging()
+        : null,
+    pushDeviceRepository: HttpPushDeviceRepository(apiClient: apiClient),
     // TODO(DP-068): the API cannot say «did not go»; the device remembers it.
     attendanceRepository: RememberedAttendanceRepository(
       inner: HttpAttendanceRepository(apiClient: apiClient),

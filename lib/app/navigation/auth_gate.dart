@@ -35,13 +35,14 @@ import '../../features/profile/data/demo_friendship_repository.dart';
 import '../../features/profile/data/demo_profile_repository.dart';
 import '../../features/profile/data/demo_profile_settings_repository.dart';
 import '../../features/profile/data/demo_public_profile_repository.dart';
+import '../../features/profile/repositories/user_search_repository.dart';
+import '../../features/push/repositories/push_repository.dart';
 import '../../features/profile/data/demo_user_search_repository.dart';
 import '../../features/profile/repositories/friends_repository.dart';
 import '../../features/profile/repositories/friendship_repository.dart';
 import '../../features/profile/repositories/profile_repository.dart';
 import '../../features/profile/repositories/profile_settings_repository.dart';
 import '../../features/profile/repositories/public_profile_repository.dart';
-import '../../features/profile/repositories/user_search_repository.dart';
 import '../../features/ratings/data/demo_rating_repository.dart';
 import '../../features/ratings/repositories/rating_repository.dart';
 import 'main_shell.dart';
@@ -68,6 +69,8 @@ class AuthGate extends StatefulWidget {
     this.userSearchRepository,
     this.friendsRepository,
     this.attendanceRepository,
+    this.pushMessaging,
+    this.pushDeviceRepository,
     this.interestTestRepository,
     this.interestTestOnboardingMemory,
     this.activityCategoryRepository,
@@ -98,6 +101,8 @@ class AuthGate extends StatefulWidget {
   final UserSearchRepository? userSearchRepository;
   final FriendsRepository? friendsRepository;
   final AttendanceRepository? attendanceRepository;
+  final PushMessaging? pushMessaging;
+  final PushDeviceRepository? pushDeviceRepository;
   final InterestTestRepository? interestTestRepository;
   final InterestTestOnboardingMemory? interestTestOnboardingMemory;
   final ActivityCategoryRepository? activityCategoryRepository;
@@ -307,6 +312,8 @@ class _AuthGateState extends State<AuthGate> {
           userSearchRepository: _userSearchRepository,
           friendsRepository: _friendsRepository,
           attendanceRepository: _attendanceRepository,
+          pushMessaging: widget.pushMessaging,
+          pushDeviceRepository: widget.pushDeviceRepository,
           interestTestRepository: _interestTestRepository,
           activityCategoryRepository: widget.activityCategoryRepository,
           userLocationRepository: widget.userLocationRepository,

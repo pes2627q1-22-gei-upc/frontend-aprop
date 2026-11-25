@@ -686,6 +686,7 @@
     }
   },
   "notifMessageCancelled": "S’ha cancel·lat una activitat on t’havies apuntat.",
+  "pushView": "Veure",
   "notifMessagePublished": "{name} ha publicat “{title}”.",
   "@notifMessagePublished": {
     "placeholders": {

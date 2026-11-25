@@ -286,6 +286,7 @@
   "notifMessageOther": "Tienes un nuevo aviso.",
   "notifMessageCancelledFor": "Se ha cancelado «{title}».",
   "notifMessageCancelled": "Se ha cancelado una actividad a la que te habías apuntado.",
+  "pushView": "Ver",
   "notifMessagePublished": "{name} ha publicado “{title}”.",
   "notifMessageEnrolled": "{name} se ha apuntado a “{title}”.",
   "notifMessageFriendRequest": "{name} te ha enviado una solicitud de amistad.",

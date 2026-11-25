@@ -10,6 +10,7 @@
 
 | Taiga | Tasca | Branca | Estat |
 |---|---|---|---|
+| #276 | [FE] Notificacions push + configuració de Firebase (història #265) | `feature/notificacions-push` | Implementada; backend #275 fusionat a develop (PR #77 d’`api-aprop`); DP-072 oberta; pendent revisió humana |
 | #132 | [FE] Interruptors de notificacions a Configuració + ViewModel + tests (història #19) | `feature/notification-settings-132` | Commit funcional `d318f59` publicat; conflicte amb `origin/develop@bfff322` resolt; 1101 proves, anàlisi, format i APK correctes; revisió tècnica independent aprovada; persistència real a DP-084; sense commit/push del merge |
 | #199 | [FE] Switch «Mostrar els meus plans» + ViewModel + tests (història #55) | `feature/show-my-plans-199` | Integrada a develop amb PR #78 (`dcecb75`); DP-078 oberta |
 | #179 | [FE] Bloqueig al perfil + BlockedUsersScreen a Configuració + tests (història #45) | `feature/block-users-179` | Integrada a develop amb PR #77 (`d11d342`); DP-077 oberta |

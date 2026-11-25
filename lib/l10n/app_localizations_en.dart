@@ -1061,6 +1061,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'An activity you signed up for has been cancelled.';
 
   @override
+  String get pushView => 'View';
+
+  @override
   String notifMessagePublished(String name, String title) {
     return '$name published “$title”.';
   }

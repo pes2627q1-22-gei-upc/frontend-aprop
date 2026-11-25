@@ -22,6 +22,7 @@ import '../features/profile/repositories/profile_repository.dart';
 import '../features/profile/repositories/profile_settings_repository.dart';
 import '../features/profile/repositories/public_profile_repository.dart';
 import '../features/profile/repositories/user_search_repository.dart';
+import '../features/push/repositories/push_repository.dart';
 import '../features/ratings/repositories/rating_repository.dart';
 import '../l10n/app_localizations.dart';
 import 'navigation/auth_gate.dart';
@@ -46,6 +47,8 @@ class APropApp extends StatelessWidget {
     this.userSearchRepository,
     this.friendsRepository,
     this.attendanceRepository,
+    this.pushMessaging,
+    this.pushDeviceRepository,
     this.interestTestRepository,
     this.interestTestOnboardingMemory,
     this.activityCategoryRepository,
@@ -79,6 +82,10 @@ class APropApp extends StatelessWidget {
   final UserSearchRepository? userSearchRepository;
   final FriendsRepository? friendsRepository;
   final AttendanceRepository? attendanceRepository;
+
+  /// Notificacions push (#265); només amb Firebase i backend.
+  final PushMessaging? pushMessaging;
+  final PushDeviceRepository? pushDeviceRepository;
   final InterestTestRepository? interestTestRepository;
   final InterestTestOnboardingMemory? interestTestOnboardingMemory;
 
@@ -106,6 +113,8 @@ class APropApp extends StatelessWidget {
         userSearchRepository,
         friendsRepository,
         attendanceRepository,
+        pushMessaging,
+        pushDeviceRepository,
         interestTestRepository,
         interestTestOnboardingMemory,
         activityCategoryRepository,
@@ -130,6 +139,8 @@ class APropApp extends StatelessWidget {
       userSearchRepository: userSearchRepository,
       friendsRepository: friendsRepository,
       attendanceRepository: attendanceRepository,
+      pushMessaging: pushMessaging,
+      pushDeviceRepository: pushDeviceRepository,
       interestTestRepository: interestTestRepository,
       interestTestOnboardingMemory: interestTestOnboardingMemory,
       activityCategoryRepository: activityCategoryRepository,

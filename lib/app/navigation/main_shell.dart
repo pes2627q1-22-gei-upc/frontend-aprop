@@ -52,6 +52,9 @@ import '../../features/profile/repositories/profile_repository.dart';
 import '../../features/profile/repositories/profile_settings_repository.dart';
 import '../../features/profile/repositories/public_profile_repository.dart';
 import '../../features/profile/repositories/user_search_repository.dart';
+import '../../features/push/models/push_message.dart';
+import '../../features/push/presentation/view_models/push_view_model.dart';
+import '../../features/push/repositories/push_repository.dart';
 import '../../features/ratings/presentation/view_models/rating_view_model.dart';
 import '../../features/ratings/presentation/widgets/activity_rating.dart';
 import '../../features/ratings/repositories/rating_repository.dart';
@@ -78,6 +81,8 @@ class MainShell extends StatefulWidget {
     this.userSearchRepository,
     this.friendsRepository,
     this.attendanceRepository,
+    this.pushMessaging,
+    this.pushDeviceRepository,
     this.interestTestRepository,
     this.activityCategoryRepository,
     this.userLocationRepository,
@@ -118,6 +123,10 @@ class MainShell extends StatefulWidget {
   /// Respostes a «Com va anar?» (#64). Si no hi és, es fa servir una
   /// memòria de demostració.
   final AttendanceRepository? attendanceRepository;
+
+  /// Notificacions push (#265). Sense totes dues, l'app no en rep.
+  final PushMessaging? pushMessaging;
+  final PushDeviceRepository? pushDeviceRepository;
 
   /// Si no hi és, «Tornar a fer el test d’interessos» queda pendent.
   final InterestTestRepository? interestTestRepository;
@@ -164,6 +173,10 @@ class _MainShellState extends State<MainShell> {
   late final EnrollmentViewModel _enrollmentViewModel;
   late final RatingViewModel _ratingViewModel;
   late final AttendanceViewModel _attendanceViewModel;
+  PushViewModel? _pushViewModel;
+
+  /// Avisa Avisos que torni a llegir la safata (ha arribat un push).
+  final _noticesChanged = ValueNotifier<int>(0);
   late final AssistantViewModel _assistantViewModel;
   late final ProfileViewModel _profileViewModel;
 
@@ -222,6 +235,8 @@ class _MainShellState extends State<MainShell> {
           : null,
     )..load();
     _profileViewModel.checkInterruptedAvatarSelection();
+    // Després del primer frame: els pushes poden obrir pantalles i avisos.
+    WidgetsBinding.instance.addPostFrameCallback((_) => _startPush());
     _enrollmentViewModel.load();
 
     _activitiesViewModel.load(); //mientras espera ésto flutter dibuja un indicador de carga. Cuando termina, el ViewModel notifica a la pantalla y ésta se redibuja con la lista de actividades.
@@ -267,6 +282,8 @@ class _MainShellState extends State<MainShell> {
     _enrollmentViewModel.dispose();
     _ratingViewModel.dispose();
     _attendanceViewModel.dispose();
+    _pushViewModel?.dispose();
+    _noticesChanged.dispose();
     _assistantViewModel.dispose();
     _profileViewModel.dispose();
     super.dispose();
@@ -306,6 +323,62 @@ class _MainShellState extends State<MainShell> {
         onCreatorSelected: _creatorProfileOpener,
       ),
     );
+  }
+
+  /// Inicia les notificacions push (#265) si l'app les té configurades.
+  void _startPush() {
+    if (!mounted) return;
+    final messaging = widget.pushMessaging;
+    final devices = widget.pushDeviceRepository;
+    if (messaging == null || devices == null) return;
+    _pushViewModel = PushViewModel(
+      messaging: messaging,
+      devices: devices,
+      onOpened: _openPush,
+      onForeground: _showPush,
+    )..start();
+  }
+
+  /// En tocar un push: Avisos i, si parla d'una activitat, la seva fitxa.
+  void _openPush(PushMessage message) {
+    if (!mounted) return;
+    _noticesChanged.value++;
+    _sectionNavigatorKeys[3].currentState?.popUntil((r) => r.isFirst);
+    _selectDestination(3);
+    if (message.activityId case final id?) _openActivityDetails(id);
+  }
+
+  /// Amb l'app oberta el sistema no mostra el push: s'avisa a baix.
+  void _showPush(PushMessage message) {
+    if (!mounted) return;
+    _noticesChanged.value++;
+    final text = message.body ?? message.title;
+    if (text == null) return;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(text),
+          persist: false,
+          action: SnackBarAction(
+            label: currentL10n.pushView,
+            onPressed: () => _openPush(message),
+          ),
+        ),
+      );
+  }
+
+  /// Abans de tancar la sessió (encara amb el token), el mòbil deixa de
+  /// rebre els pushes d'aquest compte.
+  Future<void> _signOut() async {
+    final push = _pushViewModel;
+    await push?.unregister();
+    try {
+      await widget.onSignOut();
+    } catch (_) {
+      push?.resume();
+      rethrow;
+    }
   }
 
   /// Rating stars for plans the user said they went to («Com va anar?»,
@@ -661,7 +734,7 @@ class _MainShellState extends State<MainShell> {
                     ),
                   );
                 },
-          onSignOut: widget.onSignOut,
+          onSignOut: _signOut,
           onDeleteAccount: widget.onDeleteAccount,
           onBack: () => Navigator.of(context).pop(),
           onOpenInterestTest: switch (widget.interestTestRepository) {
@@ -1007,6 +1080,7 @@ class _MainShellState extends State<MainShell> {
                   userId: widget.user.id,
                   repository: widget.notificationRepository,
                   friendshipRepository: widget.friendshipRepository,
+                  reload: _noticesChanged,
                   // Qui s'hi havia apuntat sap per l'avís que s'ha cancel·lat
                   // (#47): ja no s'hi pot tornar a apuntar.
                   onActivitiesCancelled: (ids) {

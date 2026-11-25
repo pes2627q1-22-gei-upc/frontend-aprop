@@ -1070,6 +1070,9 @@ class AppLocalizationsCa extends AppLocalizations {
       'S’ha cancel·lat una activitat on t’havies apuntat.';
 
   @override
+  String get pushView => 'Veure';
+
+  @override
   String notifMessagePublished(String name, String title) {
     return '$name ha publicat “$title”.';
   }
