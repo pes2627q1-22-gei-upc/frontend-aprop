@@ -42,12 +42,21 @@ actualització de llibreries *deprecated*. **PATCH:** només correccions de bugs
 
 | Repo | Passos |
 |---|---|
-| Frontend | `dart format --output=none --set-exit-if-changed lib test` · `flutter analyze` · `flutter test` · `flutter build apk --debug` |
+| Frontend | `dart format --output=none --set-exit-if-changed lib test integration_test` · `gen-l10n` i paritat ARB · `flutter analyze` · `flutter test --coverage` · SonarQube Cloud · `flutter build apk --debug` · `flutter build web` · smoke test Android |
 | Backend | `go test ./...` (cobertura) · `golangci-lint run` · `govulncheck ./...` · `docker build` |
 
-Estat: el frontend té `.github/workflows/ci.yml` (PR i push a `develop`/`master`; necessita els secrets
-`FIREBASE_OPTIONS_DART` i `GOOGLE_SERVICES_JSON`, DP-004) i el `go.yml` del backend és incomplet (`TODO`, agent `devops-ci`).
-Desplegament: release a `master` → imatge → GHCR → EC2.
+Estat: el frontend té `.github/workflows/ci.yml` (PR i push a `develop`/`master`, i execució manual) i el `go.yml`
+del backend és incomplet (`TODO`, agent `devops-ci`). Desplegament: release a `master` → imatge → GHCR → EC2.
+
+CI del frontend:
+
+- Els fitxers de Firebase no es versionen (DP-004): la CI n'escriu de mostra, sense claus ni secrets.
+- SonarQube Cloud necessita el secret `SONAR_TOKEN` a GitHub Actions, *Automatic Analysis* desactivada i
+  `develop` dins el patró de branques llargues. No s'executa a les PR de forks.
+- `test/**` i `integration_test/**` no compten per a la cobertura: una PR que només toca proves o CI mostra
+  0,0 % de cobertura en codi nou.
+- El smoke test (`integration_test/app_smoke_test.dart`) corre a les PR amb l'etiqueta `run-e2e` i sempre en
+  push o execució manual. En push i manual també es compila l'APK release.
 
 ## Definition of Done
 

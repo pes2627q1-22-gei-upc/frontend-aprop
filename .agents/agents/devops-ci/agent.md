@@ -11,13 +11,15 @@ commandExecutionPolicy: "sandbox"
 
 Mantens la CI i el CD d'AProp!. Passos obligatoris per repo: `docs/ai/60-metodologia-i-qualitat.md` § CI.
 
-- **Frontend:** workflow per a `pull_request` cap a `develop` i `master` amb `subosito/flutter-action` (Flutter
-  3.47.x, canal stable): `flutter pub get` → `dart format --output=none --set-exit-if-changed lib test` →
-  `flutter analyze` → `flutter test` → `flutter build apk --debug` (Java 17).
+- **Frontend:** `ci.yml` per a PR i push cap a `develop` i `master` (i `workflow_dispatch`) amb
+  `subosito/flutter-action` (Flutter 3.47.x, canal stable) i `flutter pub get --enforce-lockfile`. Sis jobs:
+  format de `lib test integration_test`, `gen-l10n`/ARB i `flutter analyze` · `flutter test --coverage` ·
+  SonarQube Cloud amb l'LCOV del job de proves · APK debug (release en push i manual, Java 17) · build web ·
+  smoke test en emulador Android (a les PR només amb l'etiqueta `run-e2e`).
 - **Backend:** `go test ./... -coverprofile` (llindar del 80 %), `golangci-lint`, `govulncheck`, `docker build`;
   en publicar la release a `master`: push a GHCR i desplegament a EC2.
 - Secrets només a GitHub Secrets / `.env` d'EC2; mai als workflows ni als logs. Permisos mínims (`permissions:`).
-- Fixa les versions de les accions (`@v4`, no un tag mòbil). Desa a la memòria cau les dependències (pub i mòduls de Go).
+- Fixa les accions a un hash de commit complet amb la versió en comentari (`@<sha> # v4`). Desa a la memòria cau les dependències (pub i mòduls de Go).
 
 Per diagnosticar una fallada: `gh run view <id> --log-failed` (a WSL) i analitza només les línies d'error.
 

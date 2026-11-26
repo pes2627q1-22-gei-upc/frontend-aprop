@@ -10,6 +10,7 @@
 
 | Taiga | Tasca | Branca | Estat |
 |---|---|---|---|
+| #280 | CI paral·lela, SonarQube Cloud amb cobertura LCOV i smoke test d’integració | `feature/ci-sonarcloud-280` | PR #60; CI verda (smoke test a l’emulador inclòs); pendent revisió humana |
 | #276 | [FE] Notificacions push + configuració de Firebase (història #265) | `feature/notificacions-push`; avís a dalt de la pantalla a `fix/notificacio-flotant` | Integrada a develop amb PR #81; el canal d’importància alta, implementat i provat a l’emulador, pendent revisió humana; DP-072 oberta |
 | #132 | [FE] Interruptors de notificacions a Configuració + ViewModel + tests (història #19) | `feature/notification-settings-132` | Commit funcional `d318f59` publicat; conflicte amb `origin/develop@bfff322` resolt; 1101 proves, anàlisi, format i APK correctes; revisió tècnica independent aprovada; persistència real a DP-084; sense commit/push del merge |
 | #199 | [FE] Switch «Mostrar els meus plans» + ViewModel + tests (història #55) | `feature/show-my-plans-199` | Integrada a develop amb PR #78 (`dcecb75`); DP-078 oberta |
